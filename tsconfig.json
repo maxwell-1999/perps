@@ -15,7 +15,8 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "@perennial/*": ["./src/*"]
+      "@perennial/*": ["./src/*"],
+      "@ds/*": ["./src/components/design-system/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

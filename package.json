@@ -5,9 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:analyze": "ANALYZE=true npm run build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "gen:theme-typings": "chakra-cli tokens src/components/design-system/theme/index.ts",
+    "postinstall": "npm run gen:theme-typings"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.5.5",
@@ -26,9 +31,20 @@
     "typescript": "5.0.4"
   },
   "devDependencies": {
+    "@chakra-ui/cli": "2.3.0",
+    "@chakra-ui/storybook-addon": "4.0.16",
     "@next/bundle-analyzer": "^13.3.1",
+    "@storybook/addon-essentials": "^7.0.7",
+    "@storybook/addon-interactions": "^7.0.7",
+    "@storybook/addon-links": "^7.0.7",
+    "@storybook/blocks": "^7.0.7",
+    "@storybook/nextjs": "^7.0.7",
+    "@storybook/react": "^7.0.7",
+    "@storybook/testing-library": "^0.0.14-next.2",
     "@types/prettier": "^2.7.2",
     "eslint-config-prettier": "^8.8.0",
-    "prettier": "^2.8.8"
+    "eslint-plugin-storybook": "^0.6.11",
+    "prettier": "^2.8.8",
+    "storybook": "^7.0.7"
   }
 }
