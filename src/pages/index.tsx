@@ -43,7 +43,11 @@ export default function Home() {
         </div>
 
         <div className={styles.center}>
-          <Button label={colorMode === "light" ? "dark" : "light"} onClick={toggleColorMode} />
+          <Button
+            variant="transparent"
+            label={colorMode === "light" ? "dark" : "light"}
+            onClick={toggleColorMode}
+          />
         </div>
 
         <div className={styles.grid}>

@@ -4,10 +4,9 @@ const colors = {
     light: "#FFFFFF",
   },
   brand: {
-    // Custom colors
     green: "#68FAD7",
     purple: {
-      200: "#dc5bea",
+      250: "#dc5bea",
       300: "#E254EF",
     },
     gray: {

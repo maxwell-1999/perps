@@ -9,7 +9,7 @@ const meta: Meta<typeof Button> = {
   tags: ["autodocs"],
   argTypes: {
     variant: {
-      options: ["primary", "secondary"],
+      options: ["primary", "secondary", "ghost", "transparent"],
       control: { type: "radio" },
     },
   },
@@ -32,9 +32,23 @@ export const Secondary: Story = {
   },
 };
 
+export const Transparent: Story = {
+  args: {
+    variant: "transparent",
+    label: "Cancel",
+  },
+};
+
+export const Text: Story = {
+  args: {
+    variant: "ghost",
+    label: "Learn more",
+  },
+};
+
 export const Group: Story = () => (
   <ButtonGroup width="300px">
-    <Button label="Cancel" variant="secondary" onClick={() => {}} />
+    <Button label="Cancel" variant="transparent" onClick={() => {}} />
     <Button flex={1} label="Add collateral" variant="primary" onClick={() => {}} />
   </ButtonGroup>
 );

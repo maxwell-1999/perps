@@ -4,7 +4,7 @@ import { JSXElementConstructor, ReactElement } from "react";
 export interface ButtonProps {
   onClick: () => void;
   label: React.ReactNode;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "ghost" | "transparent";
   isDisabled?: boolean;
   isLoading?: boolean;
   leftIcon?: ReactElement<any, string | JSXElementConstructor<any>>;

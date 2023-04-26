@@ -1,4 +1,5 @@
-import { ComponentStyleConfig } from "@chakra-ui/react";
+import { ComponentStyleConfig, StyleFunctionProps } from "@chakra-ui/react";
+import { mode } from "@chakra-ui/theme-tools";
 import colors from "../colors";
 
 const Button: ComponentStyleConfig = {
@@ -7,7 +8,6 @@ const Button: ComponentStyleConfig = {
     borderRadius: "6px",
   },
   sizes: {
-    // default size
     md: {
       fontSize: "15px",
       py: "12px",
@@ -15,11 +15,11 @@ const Button: ComponentStyleConfig = {
     },
   },
   variants: {
-    primary: (props) => ({
+    primary: (props: StyleFunctionProps) => ({
       bg: `linear-gradient(0deg, ${colors.brand.blackAlpha[15]}, ${colors.brand.blackAlpha[15]}), ${colors.brand.purple[300]}`,
-      color: props.colorMode === "light" ? "white" : "white",
+      color: mode("white", "white")(props),
       _hover: {
-        bg: `linear-gradient(0deg, ${colors.brand.blackAlpha[20]}, ${colors.brand.blackAlpha[20]}), ${colors.brand.purple[200]}`,
+        bg: `linear-gradient(0deg, ${colors.brand.blackAlpha[20]}, ${colors.brand.blackAlpha[20]}), ${colors.brand.purple[250]}`,
       },
       _disabled: {
         "&:hover": {
@@ -27,10 +27,10 @@ const Button: ComponentStyleConfig = {
         },
       },
     }),
-    secondary: (props) => ({
+    secondary: (props: StyleFunctionProps) => ({
       bg: `${colors.brand.gray[200]}`,
       border: `1px solid ${colors.brand.gray[150]}`,
-      color: props.colorMode === "light" ? "white" : "white",
+      color: mode("white", "white")(props),
       _hover: {
         bg: `${colors.brand.gray[150]}`,
       },
@@ -38,6 +38,14 @@ const Button: ComponentStyleConfig = {
         "&:hover": {
           bg: `${colors.brand.gray[200]} !important`,
         },
+      },
+    }),
+    transparent: (props: StyleFunctionProps) => ({
+      bg: mode(colors.brand.blackAlpha[15], colors.brand.whiteAlpha[15])(props),
+      border: `1px solid ${mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props)}`,
+      color: mode("black", "white")(props),
+      _hover: {
+        bg: mode(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])(props),
       },
     }),
   },
