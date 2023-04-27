@@ -10,7 +10,7 @@ const Button: ComponentStyleConfig = {
   sizes: {
     md: {
       fontSize: "15px",
-      py: "12px",
+      py: "14px",
       px: "15px",
     },
   },

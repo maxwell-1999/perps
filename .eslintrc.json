@@ -1,5 +1,5 @@
 {
-  "extends": ["next", "prettier", "plugin:storybook/recommended"],
+  "extends": ["next", "prettier", "plugin:storybook/recommended", "plugin:jsx-a11y/recommended"],
   "rules": {
     "react/no-unescaped-entities": [0],
     "@next/next/no-img-element": [0],
@@ -9,5 +9,6 @@
         "argsIgnorePattern": "^_"
       }
     ]
-  }
+  },
+  "plugins": ["jsx-a11y"]
 }

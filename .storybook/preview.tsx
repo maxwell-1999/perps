@@ -1,6 +1,6 @@
 import type { Preview } from "@storybook/react";
 import theme from "../src/components/design-system/theme";
-import { ChakraProvider, useColorMode } from "@chakra-ui/react";
+import { ChakraProvider, useColorMode, CSSReset } from "@chakra-ui/react";
 import { useEffect } from "react";
 import React from "react";
 
@@ -23,6 +23,7 @@ export const decorators = [
   (Story, context) => {
     return (
       <ChakraProvider theme={theme}>
+        <CSSReset />
         <ColorMode colorMode={context.globals.colorMode}>
           <Story />
         </ColorMode>
