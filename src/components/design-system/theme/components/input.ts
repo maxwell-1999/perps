@@ -44,6 +44,9 @@ const trade = definePartsStyle({
       },
     },
   },
+  element: {
+    width: "fit-content",
+  },
 });
 
 export default defineMultiStyleConfig({ baseStyle, variants: { trade }, sizes });
