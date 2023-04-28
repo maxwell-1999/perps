@@ -2,6 +2,9 @@
   "name": "perennial-interface-v2",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "18.16.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,11 +14,10 @@
     "test:watch": "jest --watch",
     "lint": "next lint",
     "format": "prettier --write .",
-    "check-format": "prettier --check .",
+    "format:check": "prettier --check .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "gen:theme-typings": "chakra-cli tokens src/components/design-system/theme/index.ts",
-    "postinstall": "npm run gen:theme-typings",
     "prepush": " yarn tsc && yarn test && yarn format && yarn lint"
   },
   "dependencies": {
