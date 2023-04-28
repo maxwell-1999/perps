@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Container } from "./index";
 
 const meta: Meta<typeof Container> = {
-  title: "Perennial/Container",
+  title: "Design-System/Container",
   component: Container,
   tags: ["autodocs"],
   argTypes: {

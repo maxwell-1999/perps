@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import { Hanken_Grotesk } from "next/font/google";
-import styles from "@perennial/styles/Home.module.css";
+import styles from "@/styles/Home.module.css";
 import { Button } from "@ds/Button";
 import { useColorMode } from "@chakra-ui/react";
 
