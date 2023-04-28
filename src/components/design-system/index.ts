@@ -1,11 +1,3 @@
-import { Button } from "./Button";
-import { Container } from "./Container";
-import { Input } from "./Input";
-
-const components = {
-  Button,
-  Container,
-  Input,
-};
-
-export default components;
+export { Button } from "./Button";
+export { Container } from "./Container";
+export { Input } from "./Input";

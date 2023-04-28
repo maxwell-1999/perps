@@ -48,6 +48,22 @@ const Button: ComponentStyleConfig = {
         bg: mode(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])(props),
       },
     }),
+    toggleActive: (props: StyleFunctionProps) => ({
+      height: "35px",
+      // Figure out theme colors later
+      bg: mode("black", "black")(props),
+      color: mode(colors.brand.green, colors.brand.green)(props),
+    }),
+    toggleInactive: (props: StyleFunctionProps) => ({
+      height: "35px",
+      // Figure out theme colors later
+      bg: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
+      color: mode(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])(props),
+      border: mode(
+        `1px solid ${colors.brand.blackAlpha[10]}`,
+        `1px solid ${colors.brand.whiteAlpha[10]}`,
+      )(props),
+    }),
   },
 };
 

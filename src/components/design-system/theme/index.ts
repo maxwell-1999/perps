@@ -4,6 +4,7 @@ import Button from "./components/button";
 import Input from "./components/input";
 import Text from "./components/text";
 import Container from "./components/container";
+import { FormError, Form } from "./components/formControl";
 import { extendTheme, type ThemeConfig } from "@chakra-ui/react";
 import { Hanken_Grotesk } from "next/font/google";
 
@@ -29,6 +30,8 @@ const theme = extendTheme({
     Container,
     Input,
     Text,
+    FormError,
+    Form,
   },
 });
 

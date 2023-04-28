@@ -37,14 +37,11 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const theme = useTheme();
   const color = useColorModeValue(theme.colors.brand.blackAlpha[50], theme.colors.brand.gray[100]);
-  const fontWeight = 500;
-  const paddingX = 1;
-  const messageFontSize = "11px";
   return (
     <FormControl width={width} isInvalid={Boolean(errorMessage)}>
-      <Flex justifyContent="space-between" mb="1" p="0" px={paddingX}>
+      <Flex justifyContent="space-between" mb={1} p={0} px={1}>
         {labelText && (
-          <FormLabel m="0" htmlFor={id}>
+          <FormLabel m={0} htmlFor={id}>
             <Text variant="label">{labelText}</Text>
           </FormLabel>
         )}
@@ -59,18 +56,12 @@ export const Input: React.FC<InputProps> = ({
         {...inputProps}
       />
       {errorMessage && (
-        <FormErrorMessage mt={1} fontSize={messageFontSize} fontWeight={fontWeight} px={paddingX}>
+        <FormErrorMessage mt={1} px={1}>
           {errorMessage}
         </FormErrorMessage>
       )}
       {helperText && (
-        <FormHelperText
-          mt={1}
-          color={color}
-          fontSize={messageFontSize}
-          fontWeight={fontWeight}
-          px={paddingX}
-        >
+        <FormHelperText mt={1} px={1} color={color}>
           {helperText}
         </FormHelperText>
       )}
