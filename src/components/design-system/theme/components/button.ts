@@ -63,6 +63,9 @@ const Button: ComponentStyleConfig = {
         `1px solid ${colors.brand.blackAlpha[10]}`,
         `1px solid ${colors.brand.whiteAlpha[10]}`,
       )(props),
+      _hover: {
+        bg: mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props),
+      },
     }),
   },
 };
