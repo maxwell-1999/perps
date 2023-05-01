@@ -17,9 +17,10 @@
     "paths": {
       "@/*": ["./src/*"],
       "@ds/*": ["./src/components/design-system/*"],
-      "@utils/*": ["./src/utils/*"]
+      "@utils/*": ["./src/utils/*"],
+      "@public/*": ["./public/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "./types/**/*"],
   "exclude": ["node_modules"]
 }
