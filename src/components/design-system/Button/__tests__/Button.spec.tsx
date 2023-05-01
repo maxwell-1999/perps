@@ -1,7 +1,7 @@
 import React from "react";
 import { ChakraProvider } from "@chakra-ui/react";
 import { render, screen } from "@testing-library/react";
-import { Button, ButtonProps } from "../index";
+import { Button, ButtonProps, IconButton } from "../index";
 import theme from "../../theme";
 
 const testId = "test-btn";
@@ -52,5 +52,22 @@ describe("Button", () => {
     const button = screen.getByTestId(testId);
     const spinner = button.querySelector(".chakra-button__spinner");
     expect(spinner).toBeInTheDocument();
+  });
+
+  test("renders IconButton", () => {
+    const iconTestId = "icon";
+
+    render(
+      <ChakraProvider theme={theme}>
+        <IconButton
+          aria-label="test-icon"
+          data-testid={testId}
+          icon={<span data-testid={iconTestId} />}
+        />
+      </ChakraProvider>,
+    );
+
+    const icon = screen.getByTestId(iconTestId);
+    expect(icon).toBeInTheDocument();
   });
 });

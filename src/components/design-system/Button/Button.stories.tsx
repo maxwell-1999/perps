@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ButtonGroup } from "@chakra-ui/react";
-import { Button } from "./index";
+import { ButtonGroup, Flex } from "@chakra-ui/react";
+import { Button, IconButton } from "./index";
+import Settings from "../../../../public/icons/settings.svg";
+import RedX from "../../../../public/icons/red-x.svg";
 
 // More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction
 const meta: Meta<typeof Button> = {
@@ -44,6 +46,17 @@ export const Text: Story = {
     variant: "ghost",
     label: "Learn more",
   },
+};
+
+export const IconButtons: Story = () => (
+  <Flex>
+    <IconButton aria-label="settings" icon={<Settings />} mr={1} />
+    <IconButton aria-label="close" icon={<RedX />} />
+  </Flex>
+);
+
+IconButtons.parameters = {
+  controls: { hideNoControlsWarning: true },
 };
 
 export const Group: Story = () => (
