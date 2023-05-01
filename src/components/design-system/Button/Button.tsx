@@ -7,14 +7,12 @@ import {
 import { JSXElementConstructor, ReactElement } from "react";
 
 export interface ButtonProps extends ChakraButtonProps {
-  onClick: (_event: React.MouseEvent<HTMLButtonElement>) => void;
   label: React.ReactNode;
   variant?: "primary" | "secondary" | "ghost" | "transparent";
   isDisabled?: boolean;
   isLoading?: boolean;
   leftIcon?: ReactElement<any, string | JSXElementConstructor<any>>;
   rightIcon?: ReactElement<any, string | JSXElementConstructor<any>>;
-  size?: "xs" | "sm" | "md" | "lg";
 }
 
 export const Button: React.FC<ButtonProps> = ({ label, variant = "primary", ...props }) => {

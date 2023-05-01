@@ -67,6 +67,9 @@ const Button: ComponentStyleConfig = {
         bg: mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props),
       },
     }),
+    ghost: (props: StyleFunctionProps) => ({
+      color: mode(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])(props),
+    }),
   },
 };
 
