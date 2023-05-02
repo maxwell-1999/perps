@@ -3,6 +3,7 @@ import styles from "./styles";
 import Button from "./components/button";
 import Input from "./components/input";
 import Text from "./components/text";
+import Tabs from "./components/tabs";
 import Container from "./components/container";
 import { FormError, Form } from "./components/formControl";
 import { extendTheme, type ThemeConfig } from "@chakra-ui/react";
@@ -32,6 +33,7 @@ const theme = extendTheme({
     Text,
     FormError,
     Form,
+    Tabs,
   },
 });
 
