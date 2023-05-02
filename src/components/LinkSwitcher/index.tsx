@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { Button } from "../design-system/Button";
@@ -25,11 +25,11 @@ interface LinkSwitcherProps {
 
 const LinkSwitcher: React.FC<LinkSwitcherProps> = ({ links }) => {
   return (
-    <Box display="flex" p={4}>
+    <Flex p={4}>
       {links.map((link) => (
         <NavLink key={link.href} href={link.href} label={link.label} />
       ))}
-    </Box>
+    </Flex>
   );
 };
 
