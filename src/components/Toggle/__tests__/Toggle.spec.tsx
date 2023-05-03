@@ -1,16 +1,6 @@
-import React, { JSXElementConstructor, ReactElement } from "react";
-import { render as rtlRender, fireEvent, screen } from "@testing-library/react";
-import { ChakraProvider } from "@chakra-ui/react";
+import React from "react";
+import { render, fireEvent, screen } from "@utils/testUtils";
 import Toggle from "../index";
-
-const render = (ui: JSX.Element, options = {}) => {
-  const Wrapper = ({
-    children,
-  }: {
-    children: ReactElement<any, string | JSXElementConstructor<any>>;
-  }) => <ChakraProvider>{children}</ChakraProvider>;
-  return rtlRender(ui, { wrapper: Wrapper, ...options });
-};
 
 describe("Toggle component", () => {
   const labels: [string, string] = ["Option 1", "Option 2"];

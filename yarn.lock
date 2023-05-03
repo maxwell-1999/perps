@@ -5843,6 +5843,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-table@npm:^7":
+  version: 7.7.14
+  resolution: "@types/react-table@npm:7.7.14"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 11754d7e303cc1748dc2902abbae9fa832853ad5cea4507657031e2f29194d24cc415ea7943277f47a06883a29a9c20225af9a76596fad99758bbe9f34ca646d
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:*, @types/react@npm:18.0.38, @types/react@npm:>=16":
   version: 18.0.38
   resolution: "@types/react@npm:18.0.38"
@@ -13179,6 +13188,7 @@ __metadata:
     "@types/prettier": "npm:^2.7.2"
     "@types/react": "npm:18.0.38"
     "@types/react-dom": "npm:18.0.11"
+    "@types/react-table": "npm:^7"
     "@types/testing-library__jest-dom": "npm:^5.14.5"
     "@typescript-eslint/eslint-plugin": "npm:^5.59.1"
     "@typescript-eslint/parser": "npm:^5.59.1"
@@ -13194,6 +13204,7 @@ __metadata:
     prettier: "npm:^2.8.8"
     react: "npm:18.2.0"
     react-dom: "npm:18.2.0"
+    react-table: "npm:^7.8.0"
     storybook: "npm:^7.0.7"
     typescript: "npm:5.0.4"
     yarn: "npm:^1.22.19"
@@ -13888,6 +13899,15 @@ __metadata:
     "@types/react":
       optional: true
   checksum: cc559c4f5c7e45cd136a45c6c1043426b1d7c1dbd2abe6c3a520338a2fd2353bb85e908e2731c372e16535b6600998e44e847667d8d7be5e45a483486a0897b6
+  languageName: node
+  linkType: hard
+
+"react-table@npm:^7.8.0":
+  version: 7.8.0
+  resolution: "react-table@npm:7.8.0"
+  peerDependencies:
+    react: ^16.8.3 || ^17.0.0-0 || ^18.0.0
+  checksum: fb4060aac183d7b3976642d924b9e283954b41658e29dfae88908e1cbdf3943951c6f3ee91e358cd916d2cb27a0b742397b21322740783d24ac402864984e88a
   languageName: node
   linkType: hard
 

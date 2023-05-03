@@ -1,22 +1,13 @@
 import React from "react";
-import { ChakraProvider } from "@chakra-ui/react";
-import { render, screen } from "@testing-library/react";
-import { Button, ButtonProps, IconButton } from "../index";
-import theme from "../../theme";
+import { render, screen } from "@utils/testUtils";
+import { Button, IconButton } from "../index";
 
 const testId = "test-btn";
 
-const renderButton = (props: ButtonProps) => {
-  return render(
-    <ChakraProvider theme={theme}>
-      <Button data-testid={testId} {...props} />
-    </ChakraProvider>,
-  );
-};
-
 describe("Button", () => {
   test("renders button with provided label", () => {
-    renderButton({ label: "Test Button", onClick: () => {} });
+    const props = { label: "Test Button", onClick: () => {} };
+    render(<Button data-testid={testId} {...props} />);
 
     const button = screen.getByTestId(testId);
     expect(button).toBeInTheDocument();
@@ -25,13 +16,13 @@ describe("Button", () => {
   test("displays left and right icons when provided", () => {
     const leftIconTestId = "left-icon";
     const rightIconTestId = "right-icon";
-
-    renderButton({
+    const props = {
       label: "Test Button",
       onClick: () => {},
       leftIcon: <span data-testid={leftIconTestId} />,
       rightIcon: <span data-testid={rightIconTestId} />,
-    });
+    };
+    render(<Button data-testid={testId} {...props} />);
 
     const leftIcon = screen.getByTestId(leftIconTestId);
     const rightIcon = screen.getByTestId(rightIconTestId);
@@ -41,14 +32,17 @@ describe("Button", () => {
   });
 
   test("disables the button when isDisabled is true", () => {
-    renderButton({ label: "Test Button", onClick: () => {}, isDisabled: true });
+    const props = { label: "Test Button", onClick: () => {}, isDisabled: true };
+    render(<Button data-testid={testId} {...props} />);
 
     const button = screen.getByTestId(testId);
     expect(button).toBeDisabled();
   });
 
   test("shows loading spinner when isLoading is true", () => {
-    renderButton({ label: "Test Button", onClick: () => {}, isLoading: true });
+    const props = { label: "Test Button", onClick: () => {}, isLoading: true };
+    render(<Button data-testid={testId} {...props} />);
+
     const button = screen.getByTestId(testId);
     const spinner = button.querySelector(".chakra-button__spinner");
     expect(spinner).toBeInTheDocument();
@@ -58,13 +52,11 @@ describe("Button", () => {
     const iconTestId = "icon";
 
     render(
-      <ChakraProvider theme={theme}>
-        <IconButton
-          aria-label="test-icon"
-          data-testid={testId}
-          icon={<span data-testid={iconTestId} />}
-        />
-      </ChakraProvider>,
+      <IconButton
+        aria-label="test-icon"
+        data-testid={testId}
+        icon={<span data-testid={iconTestId} />}
+      />,
     );
 
     const icon = screen.getByTestId(iconTestId);

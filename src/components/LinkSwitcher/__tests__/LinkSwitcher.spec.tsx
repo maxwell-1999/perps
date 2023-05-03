@@ -1,5 +1,5 @@
-import { render as rtlRender, screen } from "@testing-library/react";
-import LinkSwitcher from "../index"; // Update this import path
+import { render, screen } from "@utils/testUtils";
+import LinkSwitcher from "../index";
 
 jest.mock("next/dist/client/router", () => ({
   __esModule: true,
@@ -17,10 +17,6 @@ jest.mock("next/dist/client/router", () => ({
     replace: jest.fn(() => Promise.resolve(true)),
   }),
 }));
-
-function render(ui: JSX.Element, { ...renderOptions } = {}) {
-  return rtlRender(ui, { ...renderOptions });
-}
 
 describe("LinkSwitcher", () => {
   const testLinks = [
