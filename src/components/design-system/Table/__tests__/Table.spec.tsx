@@ -1,6 +1,6 @@
 import { render, screen } from "@utils/testUtils";
 import { Table, TableProps } from "../index";
-import { UserData, data, columns } from "../__fixtures__/tableFixture"; // import your data and columns
+import { UserData, data, columns } from "../__fixtures__/tableFixture";
 
 describe("Table", () => {
   const defaultProps: TableProps<UserData> = {

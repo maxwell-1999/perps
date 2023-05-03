@@ -8,7 +8,7 @@ const Text = defineStyleConfig({
   },
   variants: {
     label: (props: StyleFunctionProps) => ({
-      color: mode(colors.brand.blackAlpha[50], colors.brand.gray[100])(props),
+      color: mode(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])(props),
       fontSize: "12px",
     }),
   },
