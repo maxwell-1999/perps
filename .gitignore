@@ -37,3 +37,6 @@ next-env.d.ts
 .vscode/
 .yarn/install-state.gz
 /.swc/
+
+
+storybook-static
