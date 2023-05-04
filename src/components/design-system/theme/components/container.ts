@@ -8,6 +8,7 @@ const Container = defineStyleConfig({
     flexDirection: "column",
     borderRadius: "6px",
     boxSizing: "border-box",
+    maxWidth: "100%",
   },
   variants: {
     transparent: (props: StyleFunctionProps) => ({
