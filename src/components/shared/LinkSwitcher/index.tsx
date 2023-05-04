@@ -1,7 +1,7 @@
 import { Flex } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Button } from "../design-system/Button";
+import { Button } from "../../design-system/Button";
 
 interface NavLinkProps {
   href: string;

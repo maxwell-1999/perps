@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import Toggle from "./index";
-import { Container } from "../design-system";
+import { Container } from "../../design-system";
 import { useState } from "react";
 
 // More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction
