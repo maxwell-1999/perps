@@ -1,4 +1,4 @@
-import { Grid, GridItem, useBreakpointValue } from "@chakra-ui/react";
+import { Grid, GridItem, GridProps, useBreakpointValue } from "@chakra-ui/react";
 // NOTE: Reference TradeLayout.stories.tsx for usage
 const mobileLayout = `
   "header"
@@ -12,12 +12,11 @@ const desktopLayout = `
   "tradeForm positionManager"
 `;
 
-interface LayoutProps {
+interface LayoutProps extends GridProps {
   children: React.ReactNode;
-  height?: string;
 }
 
-export const TradeLayout: React.FC<LayoutProps> = ({ children, height = "100vh" }) => {
+export const TradeLayout: React.FC<LayoutProps> = ({ children, ...props }) => {
   const templateAreas = useBreakpointValue({
     base: mobileLayout,
     md: desktopLayout,
@@ -36,11 +35,13 @@ export const TradeLayout: React.FC<LayoutProps> = ({ children, height = "100vh" 
   return (
     <Grid
       gap="15px"
-      h={height}
+      minHeight="100vh"
       w="100%"
+      p="1rem"
       templateAreas={templateAreas}
       gridTemplateColumns={gridTemplateColumns}
       gridTemplateRows={gridTemplateRows}
+      {...props}
     >
       {children}
     </Grid>
