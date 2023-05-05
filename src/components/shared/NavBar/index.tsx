@@ -1,5 +1,5 @@
 import { Flex } from "@chakra-ui/react";
-import LinkSwitcher from "../LinkSwitcher";
+import LinkSwitcher from "./LinkSwitcher";
 import { links } from "./constants";
 import { IconButton, Button, ButtonGroup } from "@ds/Button";
 import { Nav } from "./styles";

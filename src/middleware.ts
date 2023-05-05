@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GEOLOCATION_COOKIE } from "./constants";
 
-const GEOLOCATION_COOKIE = "perennial_user_geolocation";
 export function middleware(request: NextRequest) {
   const country = request.geo?.country;
   const res = NextResponse.rewrite(request.nextUrl);

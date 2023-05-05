@@ -33,7 +33,8 @@ describe("LinkSwitcher", () => {
     render(<LinkSwitcher links={testLinks} />);
 
     const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(testLinks.length);
+    // +1 for the home link
+    expect(links).toHaveLength(testLinks.length + 1);
   });
 
   it("renders the correct link text", () => {

@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Button, ButtonGroup, IconButton } from "../../design-system/Button";
+import { Button, ButtonGroup, IconButton } from "../../../design-system/Button";
 import Logo from "@public/logoTransparent.svg";
 
 interface NavLinkProps {
