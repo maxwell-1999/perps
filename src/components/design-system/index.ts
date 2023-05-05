@@ -1,4 +1,4 @@
-export { Button } from "./Button";
+export { Button, IconButton, ButtonGroup } from "./Button";
 export { Container } from "./Container";
 export { Input } from "./Input";
 export { Tabs } from "./Tabs";

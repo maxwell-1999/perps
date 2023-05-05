@@ -7,13 +7,14 @@ import {
   TradeLayout,
 } from "@/components/layout/TradeLayout";
 import { Container, useBreakpointValue } from "@chakra-ui/react";
+import NavBar from "@/components/shared/NavBar";
 
 export default function Trade() {
   const isBase = useBreakpointValue({ base: true, md: false });
   return (
     <TradeLayout>
       <HeaderGridItem>
-        <Container height="100%">Header</Container>
+        <NavBar />
       </HeaderGridItem>
       {!isBase && (
         <MarketBarGridItem>

@@ -1,7 +1,7 @@
-import { Flex } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Button } from "../../design-system/Button";
+import { Button, ButtonGroup, IconButton } from "../../design-system/Button";
+import Logo from "@public/logoTransparent.svg";
 
 interface NavLinkProps {
   href: string;
@@ -10,11 +10,11 @@ interface NavLinkProps {
 
 const NavLink: React.FC<NavLinkProps> = ({ href, label }) => {
   const { pathname } = useRouter();
-  const isActive = pathname === href;
+  const isActive = pathname === href.toLowerCase();
 
   return (
     <Link href={href} passHref>
-      <Button label={label} variant={isActive ? "transparent" : "ghost"} mr={1} />
+      <Button label={label} variant={isActive ? "transparent" : "ghost"} />
     </Link>
   );
 };
@@ -25,11 +25,14 @@ interface LinkSwitcherProps {
 
 const LinkSwitcher: React.FC<LinkSwitcherProps> = ({ links }) => {
   return (
-    <Flex p={4}>
+    <ButtonGroup>
+      <Link href="/" passHref>
+        <IconButton variant="invisible" aria-label="home" icon={<Logo />} mr={1} />
+      </Link>
       {links.map((link) => (
         <NavLink key={link.href} href={link.href} label={link.label} />
       ))}
-    </Flex>
+    </ButtonGroup>
   );
 };
 
