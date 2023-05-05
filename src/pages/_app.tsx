@@ -1,10 +1,12 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { ChakraProvider, CSSReset } from "@chakra-ui/react";
-import { ConnectKitProvider } from "connectkit";
-import { WagmiConfig } from "wagmi";
+import { ConnectKitProvider, getDefaultClient } from "connectkit";
+import { WagmiConfig, createClient } from "wagmi";
 import theme from "@ds/theme";
-import { client, connectKitProviderOptions } from "../constants";
+import { connectKitProviderOptions, clientConfig } from "../constants";
+
+const client = createClient(getDefaultClient(clientConfig));
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

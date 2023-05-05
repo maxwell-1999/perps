@@ -1,8 +1,7 @@
-import { configureChains, mainnet, goerli, createClient } from "wagmi";
+import { configureChains, mainnet, goerli } from "wagmi";
 import { arbitrum, arbitrumGoerli, baseGoerli } from "@wagmi/core/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
-import { getDefaultClient } from "connectkit";
 
 export const MINUTE = 60;
 export const HOUR = 60 * MINUTE;
@@ -19,18 +18,9 @@ if (!ALCHEMY_PROD_KEYS || !ALCHEMY_PROD_KEYS.length) {
 export const ALCHEMY_ACTIVE_KEY =
   ALCHEMY_PROD_KEYS[Math.floor(Math.random() * ALCHEMY_PROD_KEYS.length)];
 
-const { chains, provider } = configureChains(
+export const { chains, provider } = configureChains(
   [arbitrum, mainnet, goerli, arbitrumGoerli, baseGoerli],
   [alchemyProvider({ apiKey: ALCHEMY_ACTIVE_KEY }), publicProvider()],
-);
-
-export const client = createClient(
-  getDefaultClient({
-    appName: "Perennial Interface",
-    alchemyId: ALCHEMY_ACTIVE_KEY,
-    chains,
-    provider,
-  }),
 );
 
 export const connectKitProviderOptions = {
@@ -39,4 +29,11 @@ export const connectKitProviderOptions = {
   hideNoWalletCTA: true,
   hideQuestionMarkCTA: true,
   initialChainId: 0,
+};
+
+export const clientConfig = {
+  appName: "Perennial Interface V2",
+  alchemyId: ALCHEMY_ACTIVE_KEY,
+  chains,
+  provider,
 };
