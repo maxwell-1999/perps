@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:analyze": "ANALYZE=true npm run build",
+    "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -28,14 +28,17 @@
     "@types/node": "18.16.0",
     "@types/react": "18.0.38",
     "@types/react-dom": "18.0.11",
+    "connectkit": "^1.2.3",
     "eslint": "8.39.0",
     "eslint-config-next": "13.3.1",
+    "ethers": "^5.7.2",
     "framer-motion": "^10.12.4",
     "next": "13.3.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-table": "^7.8.0",
     "typescript": "5.0.4",
+    "wagmi": "^0.12.13",
     "yarn": "^1.22.19"
   },
   "devDependencies": {

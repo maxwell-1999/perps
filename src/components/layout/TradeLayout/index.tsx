@@ -37,7 +37,7 @@ export const TradeLayout: React.FC<LayoutProps> = ({ children, ...props }) => {
       gap="15px"
       minHeight="100vh"
       w="100%"
-      p="1rem"
+      p="1.2rem"
       templateAreas={templateAreas}
       gridTemplateColumns={gridTemplateColumns}
       gridTemplateRows={gridTemplateRows}

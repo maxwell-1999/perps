@@ -30,3 +30,5 @@ export interface IconButtonProps extends ChakraIconButtonProps {
 export const IconButton: React.FC<IconButtonProps> = ({ ...props }) => {
   return <ChakraIconButton variant="transparent" {...props} />;
 };
+
+export { ButtonGroup } from "@chakra-ui/react";

@@ -41,7 +41,7 @@ const Button: ComponentStyleConfig = {
       },
     }),
     transparent: (props: StyleFunctionProps) => ({
-      bg: mode(colors.brand.blackAlpha[15], colors.brand.whiteAlpha[15])(props),
+      bg: mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props),
       border: `1px solid ${mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props)}`,
       color: mode("black", "white")(props),
       _hover: {
@@ -70,6 +70,9 @@ const Button: ComponentStyleConfig = {
     ghost: (props: StyleFunctionProps) => ({
       color: mode(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])(props),
     }),
+    invisible: {
+      bg: "transparent",
+    },
   },
 };
 
