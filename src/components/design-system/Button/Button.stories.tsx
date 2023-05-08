@@ -41,9 +41,16 @@ export const Transparent: Story = {
   },
 };
 
-export const Text: Story = {
+export const Ghost: Story = {
   args: {
     variant: "ghost",
+    label: "Learn more",
+  },
+};
+
+export const Text: Story = {
+  args: {
+    variant: "text",
     label: "Learn more",
   },
 };

@@ -1,4 +1,5 @@
 import type { StorybookConfig } from "@storybook/nextjs";
+import path, { resolve } from "path";
 const config: StorybookConfig = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
   addons: [
@@ -14,7 +15,7 @@ const config: StorybookConfig = {
   docs: {
     autodocs: "tag",
   },
-  webpackFinal: (webpackConfig) => {
+  webpackFinal: async (webpackConfig) => {
     //@ts-ignore
     const imageRule = webpackConfig.module.rules.find((rule) => {
       if (typeof rule !== "string" && rule.test instanceof RegExp) {
@@ -30,6 +31,17 @@ const config: StorybookConfig = {
       test: /\.svg$/,
       use: ["@svgr/webpack"],
     });
+
+    webpackConfig.resolve = {
+      ...webpackConfig.resolve,
+      alias: {
+        ...webpackConfig?.resolve?.alias,
+        "@": path.resolve(__dirname, "../src/"),
+        "@ds": path.resolve(__dirname, "../src/components/design-system/"),
+        "@utils": path.resolve(__dirname, "../src/utils/"),
+        "@public": path.resolve(__dirname, "../public/"),
+      },
+    };
 
     return webpackConfig;
   },

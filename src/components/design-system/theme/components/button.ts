@@ -73,6 +73,13 @@ const Button: ComponentStyleConfig = {
     invisible: {
       bg: "transparent",
     },
+    text: (props: StyleFunctionProps) => ({
+      color: mode("black", "white")(props),
+      _hover: {
+        color: mode("blackAlpha.700", "whiteAlpha.700")(props),
+        background: "initial",
+      },
+    }),
   },
 };
 
