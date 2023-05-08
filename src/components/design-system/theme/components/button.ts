@@ -74,9 +74,9 @@ const Button: ComponentStyleConfig = {
       bg: "transparent",
     },
     text: (props: StyleFunctionProps) => ({
-      color: mode("black", "white")(props),
+      color: mode(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])(props),
       _hover: {
-        color: mode("blackAlpha.700", "whiteAlpha.700")(props),
+        color: mode("blackAlpha.800", "whiteAlpha.800")(props),
         background: "initial",
       },
     }),

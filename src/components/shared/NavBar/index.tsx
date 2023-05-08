@@ -28,7 +28,6 @@ function NavBar() {
   const isBase = useBreakpointValue({ base: true, md: false });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const theme = useTheme();
-  const linkColor = useColorModeValue("black", "white");
   const linkUnderlineColor = useColorModeValue(
     theme.colors.brand.blackAlpha[10],
     theme.colors.brand.whiteAlpha[10],
@@ -62,7 +61,6 @@ function NavBar() {
                       label={<MobileButtonLabel label={link.label} />}
                       variant="text"
                       width="100%"
-                      color={linkColor}
                     />
                     <Box height="1px" width="100%" bg={linkUnderlineColor} mt={2} />
                   </Link>
