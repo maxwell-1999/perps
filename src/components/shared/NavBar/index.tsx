@@ -41,11 +41,7 @@ function NavBar() {
           <LinkSwitcher links={links} />
         ) : (
           <>
-            <IconButton
-              aria-label="menu"
-              icon={<BurgerMenu height="70%" width="70%" />}
-              onClick={onOpen}
-            />
+            <IconButton aria-label="menu" icon={<BurgerMenu />} onClick={onOpen} />
             <MobileDrawer
               isOpen={isOpen}
               placement="left"
