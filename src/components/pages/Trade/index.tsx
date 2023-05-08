@@ -1,3 +1,5 @@
+import { Container, useBreakpointValue } from "@chakra-ui/react";
+import dynamic from "next/dynamic";
 import {
   ChartGridItem,
   HeaderGridItem,
@@ -6,8 +8,10 @@ import {
   TradeFormGridItem,
   TradeLayout,
 } from "@/components/layout/TradeLayout";
-import { Container, useBreakpointValue } from "@chakra-ui/react";
-import NavBar from "@/components/shared/NavBar";
+
+const NavBar = dynamic(() => import("@/components/shared/NavBar"), {
+  ssr: false,
+});
 
 export default function Trade() {
   const isBase = useBreakpointValue({ base: true, md: false });
