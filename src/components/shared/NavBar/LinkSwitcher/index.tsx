@@ -14,7 +14,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, label }) => {
 
   return (
     <Link href={href} passHref>
-      <Button label={label} variant={isActive ? "transparent" : "ghost"} p={3} />
+      <Button label={label} variant={isActive ? "transparent" : "text"} p={3} />
     </Link>
   );
 };

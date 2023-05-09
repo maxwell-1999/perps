@@ -9,7 +9,7 @@ const ConnectWalletButton: React.FC = () => {
       {({ show, isConnected, truncatedAddress }) => {
         return (
           <Button
-            label={isConnected ? formatAddress(truncatedAddress as string) : "Connect Wallet"}
+            label={isConnected ? formatAddress(truncatedAddress as string) : "Connect"}
             onClick={show}
             variant="transparent"
           />

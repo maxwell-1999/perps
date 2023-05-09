@@ -74,10 +74,19 @@ const Button: ComponentStyleConfig = {
       bg: "transparent",
     },
     text: (props: StyleFunctionProps) => ({
-      color: mode("black", "white")(props),
+      color: mode(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])(props),
       _hover: {
-        color: mode("blackAlpha.700", "whiteAlpha.700")(props),
+        color: mode("blackAlpha.800", "whiteAlpha.800")(props),
         background: "initial",
+      },
+    }),
+    pairSelector: (props: StyleFunctionProps) => ({
+      minWidth: "179px",
+      justifyContent: "space-between",
+      border: `1px solid ${mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props)}`,
+      bg: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
+      _hover: {
+        bg: mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props),
       },
     }),
   },
