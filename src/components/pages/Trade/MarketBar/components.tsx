@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import Hamburger from "@public/icons/burger.svg";
 import ethLogo from "@public/icons/eth.png";
 import Image from "next/image";
+import { breakpoints } from "@ds/theme/styles";
 
 export const HamburgerIcon = styled(Hamburger)`
   color: ${colors.brand.whiteAlpha[50]};
@@ -19,7 +20,7 @@ export const PairLabel: React.FC<{ pair: string }> = ({ pair }) => (
   </Flex>
 );
 
-export const MarketContainer: React.FC<FlexProps> = ({ children, ...props }) => (
+export const BaseMarketContainer: React.FC<FlexProps> = ({ children, ...props }) => (
   <Flex height="100%" alignItems="center" mr={8} {...props}>
     {children}
   </Flex>
@@ -42,14 +43,14 @@ export const ResponsiveFlex = styled(Flex)`
   height: 100%;
   justify-content: space-between;
   width: 100%;
-  @media (min-width: 48em) {
+  @media (min-width: ${breakpoints.sm}) {
     width: initial;
     justify-content: flex-start;
   }
 `;
 
 export const DesktopContainer = styled(Flex)`
-  overflow-x: scroll;
+  overflow-x: auto;
   display: none;
   &::-webkit-scrollbar {
     width: 2px;
@@ -62,14 +63,20 @@ export const DesktopContainer = styled(Flex)`
     background: ${colors.brand.whiteAlpha[20]};
     border-radius: 10px;
   }
-  @media (min-width: 48em) {
+  @media (min-width: ${breakpoints.sm}) {
     display: flex;
   }
 `;
 
-export const PriceContainer = styled(MarketContainer)`
-  margin-right: 0;
-  @media (min-width: 48em) {
+export const PriceContainer = styled(BaseMarketContainer)`
+  margin-right: 14px;
+  @media (min-width: ${breakpoints.sm}) {
     margin-right: 32px;
+  }
+`;
+
+export const MarketContainer = styled(BaseMarketContainer)<{ mobileOnly?: boolean }>`
+  @media (min-width: ${breakpoints.sm}) {
+    display: ${({ mobileOnly }) => (mobileOnly ? "none" : "flex")};
   }
 `;

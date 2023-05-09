@@ -1,4 +1,4 @@
-import { Container, Text } from "@chakra-ui/react";
+import { Flex, Container, Text } from "@chakra-ui/react";
 import { Button } from "@ds/Button";
 import colors from "@ds/theme/colors";
 import {
@@ -10,8 +10,10 @@ import {
   DesktopContainer,
   PriceContainer,
 } from "./components";
+import { useTradingPairs } from "@/contexts/tradingPairsContext";
 
 export default function MarketBar() {
+  const { toggleTradingPairs } = useTradingPairs();
   const dummyProps = {
     pair: "ETH-USD",
     price: "$2,000.00",
@@ -25,16 +27,22 @@ export default function MarketBar() {
   return (
     <Container display="flex" flexDirection="row" alignItems="center" height="100%">
       <ResponsiveFlex>
-        <MarketContainer mr={6}>
+        <MarketContainer mr={6} ml={0}>
           <Button
             variant="pairSelector"
             label={<PairLabel pair={dummyProps.pair} />}
             rightIcon={<HamburgerIcon />}
+            onClick={toggleTradingPairs}
           />
         </MarketContainer>
-        <PriceContainer>
-          <Text fontSize="20px">{dummyProps.price}</Text>
-        </PriceContainer>
+        <Flex>
+          <PriceContainer>
+            <Text fontSize="20px">{dummyProps.price}</Text>
+          </PriceContainer>
+          <MarketContainer mobileOnly mr={0}>
+            <Stat label="Change" value={dummyProps.change} valueColor={colors.brand.green} />
+          </MarketContainer>
+        </Flex>
       </ResponsiveFlex>
       <DesktopContainer>
         <MarketContainer>

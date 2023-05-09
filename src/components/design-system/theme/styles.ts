@@ -8,4 +8,12 @@ const styles = {
   }),
 };
 
+export const breakpoints = {
+  base: "0em",
+  sm: "40em",
+  md: "48em",
+  lg: "62em",
+  xl: "80em",
+};
+
 export default styles;

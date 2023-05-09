@@ -1,5 +1,5 @@
 import colors from "./colors";
-import styles from "./styles";
+import styles, { breakpoints } from "./styles";
 import Button from "./components/button";
 import Input from "./components/input";
 import Text from "./components/text";
@@ -26,6 +26,7 @@ const theme = extendTheme({
   config,
   colors,
   styles,
+  breakpoints,
   components: {
     Button,
     Container,

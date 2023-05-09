@@ -20,17 +20,17 @@ interface LayoutProps extends GridProps {
 export const TradeLayout: React.FC<LayoutProps> = ({ children, ...props }) => {
   const templateAreas = useBreakpointValue({
     base: mobileLayout,
-    md: desktopLayout,
+    sm: desktopLayout,
   });
 
   const gridTemplateColumns = useBreakpointValue({
     base: "1fr",
-    md: "304px 1fr",
+    sm: "304px 1fr",
   });
 
   const gridTemplateRows = useBreakpointValue({
     base: "54px 54px 1fr",
-    md: "54px 54px 1fr 0.7fr",
+    sm: "54px 54px 1fr 0.7fr",
   });
 
   return (

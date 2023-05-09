@@ -25,7 +25,7 @@ import Logo from "@public/logoTransparent.svg";
 function NavBar() {
   const { disconnect } = useDisconnect();
   const { address } = useAccount();
-  const isBase = useBreakpointValue({ base: true, md: false });
+  const isBase = useBreakpointValue({ base: true, sm: false });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const theme = useTheme();
   const linkUnderlineColor = useColorModeValue(
