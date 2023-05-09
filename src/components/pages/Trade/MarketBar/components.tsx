@@ -6,6 +6,7 @@ import ethLogo from "@public/icons/eth.png";
 import Image from "next/image";
 import { breakpoints } from "@ds/theme/styles";
 
+// @ts-ignore
 export const HamburgerIcon = styled(Hamburger)`
   color: ${colors.brand.whiteAlpha[50]};
   height: 18px;
