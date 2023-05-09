@@ -80,6 +80,15 @@ const Button: ComponentStyleConfig = {
         background: "initial",
       },
     }),
+    pairSelector: (props: StyleFunctionProps) => ({
+      minWidth: "179px",
+      justifyContent: "space-between",
+      border: `1px solid ${mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props)}`,
+      bg: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
+      _hover: {
+        bg: mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props),
+      },
+    }),
   },
 };
 

@@ -2,6 +2,7 @@ import { Grid, GridItem, GridProps, useBreakpointValue } from "@chakra-ui/react"
 // NOTE: Reference TradeLayout.stories.tsx for usage
 const mobileLayout = `
   "header"
+  "marketBar"
   "tradeForm"
 `;
 
@@ -28,7 +29,7 @@ export const TradeLayout: React.FC<LayoutProps> = ({ children, ...props }) => {
   });
 
   const gridTemplateRows = useBreakpointValue({
-    base: "54px 1fr",
+    base: "54px 54px 1fr",
     md: "54px 54px 1fr 0.7fr",
   });
 

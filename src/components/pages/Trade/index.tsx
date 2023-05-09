@@ -8,6 +8,7 @@ import {
   TradeFormGridItem,
   TradeLayout,
 } from "@/components/layout/TradeLayout";
+import MarketBar from "./MarketBar";
 
 const NavBar = dynamic(() => import("@/components/shared/NavBar"), {
   ssr: false,
@@ -20,11 +21,9 @@ export default function Trade() {
       <HeaderGridItem>
         <NavBar />
       </HeaderGridItem>
-      {!isBase && (
-        <MarketBarGridItem>
-          <Container height="100%">Market Bar</Container>
-        </MarketBarGridItem>
-      )}
+      <MarketBarGridItem>
+        <MarketBar />
+      </MarketBarGridItem>
       <TradeFormGridItem>
         <Container height="100%">Trade Form</Container>
       </TradeFormGridItem>
