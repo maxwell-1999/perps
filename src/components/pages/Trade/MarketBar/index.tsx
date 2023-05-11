@@ -9,11 +9,10 @@ import {
   ResponsiveFlex,
   DesktopContainer,
   PriceContainer,
+  DividerStyled,
 } from "./components";
-import { useTradingPairs } from "@/contexts/tradingPairsContext";
 
 export default function MarketBar() {
-  const { toggleTradingPairs } = useTradingPairs();
   const dummyProps = {
     pair: "ETH-USD",
     price: "$2,000.00",
@@ -32,13 +31,13 @@ export default function MarketBar() {
             variant="pairSelector"
             label={<PairLabel pair={dummyProps.pair} />}
             rightIcon={<HamburgerIcon />}
-            onClick={toggleTradingPairs}
           />
         </MarketContainer>
         <Flex>
           <PriceContainer>
             <Text fontSize="20px">{dummyProps.price}</Text>
           </PriceContainer>
+          <DividerStyled orientation="vertical" />
           <MarketContainer mobileOnly mr={0}>
             <Stat label="Change" value={dummyProps.change} valueColor={colors.brand.green} />
           </MarketContainer>

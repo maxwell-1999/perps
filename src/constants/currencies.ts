@@ -1,48 +1,37 @@
-export enum CryptoCurrencies {
-  BTC = "BTC",
-  ETH = "ETH",
-  ARB = "ARB",
-  USDC = "USDC",
-}
+import { L2SupportedAsset } from "@/types";
 
-export enum FiatCurrencies {
-  USD = "USD",
-}
+export type AssetMetadata = {
+  [asset in L2SupportedAsset]: {
+    name: string;
+    symbol: string;
+    displayDecimals: number;
+    tvTicker: string;
+  };
+};
 
-export const isFiat = (currency: string) =>
-  Object.values(FiatCurrencies).includes(currency as FiatCurrencies);
-
-export const isDollar = (currency: string) =>
-  [FiatCurrencies.USD, CryptoCurrencies.USDC].includes(currency as any);
-
-export const isCrypto = (currency: string) =>
-  Object.values(CryptoCurrencies).includes(currency as CryptoCurrencies);
-
-// TODO: decimal places for currencies?
-export const currencyDetails = {
-  [CryptoCurrencies.BTC]: {
+export const ASSET_METADATA: AssetMetadata = {
+  btc: {
     symbol: "BTC",
     name: "Bitcoin",
-    decimalPlaces: 8,
+    displayDecimals: 2,
+    tvTicker: "CRYPTO:BTCUSD",
   },
-  [CryptoCurrencies.ETH]: {
+  eth: {
     symbol: "ETH",
     name: "Ethereum",
-    decimalPlaces: 18,
+    displayDecimals: 2,
+    tvTicker: "CRYPTO:ETHUSD",
   },
-  [CryptoCurrencies.ARB]: {
+  arb: {
     symbol: "ARB",
     name: "Arbitrum",
-    decimalPlaces: 18,
+    displayDecimals: 4,
+    tvTicker: "CRYPTO:ARBIUSD",
   },
-  [CryptoCurrencies.USDC]: {
-    symbol: "USDC",
+  link: {
+    symbol: "LINK",
     name: "USD Coin",
-    decimalPlaces: 6,
-  },
-  [FiatCurrencies.USD]: {
-    symbol: "$",
-    name: "US Dollar",
-    decimalPlaces: 2,
+    displayDecimals: 4,
+    tvTicker: "CRYPTO:LINKUSD",
   },
 };

@@ -93,7 +93,7 @@ export const Pill: React.FC<PillProps> = ({ text, color, borderColor, ...props }
 
   const defaultColor = useColorModeValue(
     theme.colors.brand.blackAlpha[50],
-    theme.colors.whiteAlpha[50],
+    theme.colors.brand.whiteAlpha[50],
   );
   const textColor = color ? color : defaultColor;
 

@@ -1,9 +1,9 @@
 import { Button, ButtonGroup } from "@chakra-ui/react";
 
-interface ToggleProps {
-  labels: [string, string];
-  activeLabel: string;
-  onChange: (label: string) => void;
+interface ToggleProps<T = string> {
+  labels: [T, T];
+  activeLabel: T;
+  onChange: (label: T) => void;
 }
 
 function hideConnnectedBorder(index: number, side: "right" | "left") {
@@ -15,8 +15,8 @@ function hideConnnectedBorder(index: number, side: "right" | "left") {
   }
 }
 
-const Toggle: React.FC<ToggleProps> = ({ labels, activeLabel, onChange }) => {
-  const handleToggle = (label: string) => {
+function Toggle<T extends string>({ labels, activeLabel, onChange }: ToggleProps<T>) {
+  const handleToggle = (label: T) => {
     if (label !== activeLabel) {
       onChange(label);
     }
@@ -26,7 +26,7 @@ const Toggle: React.FC<ToggleProps> = ({ labels, activeLabel, onChange }) => {
     <ButtonGroup isAttached display="flex" flex={1} height="35px">
       {labels.map((label, index) => (
         <Button
-          key={label}
+          key={label as string}
           width="100%"
           variant={label === activeLabel ? "toggleActive" : "toggleInactive"}
           onClick={() => handleToggle(label)}
@@ -38,6 +38,6 @@ const Toggle: React.FC<ToggleProps> = ({ labels, activeLabel, onChange }) => {
       ))}
     </ButtonGroup>
   );
-};
+}
 
 export default Toggle;

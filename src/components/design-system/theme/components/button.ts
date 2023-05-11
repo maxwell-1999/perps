@@ -51,7 +51,7 @@ const Button: ComponentStyleConfig = {
     toggleActive: (props: StyleFunctionProps) => ({
       height: "35px",
       // Figure out theme colors later
-      bg: mode("black", "black")(props),
+      bg: mode(colors.brand.whiteAlpha[80], colors.brand.blackAlpha[80])(props),
       color: mode(colors.brand.green, colors.brand.green)(props),
     }),
     toggleInactive: (props: StyleFunctionProps) => ({
