@@ -2,6 +2,7 @@ import { Flex, Text, FormLabel, Divider } from "@chakra-ui/react";
 import { useTradeFormOverlay, TradeFormOverlayStates } from "@/contexts/tradeFormContext";
 import { Button } from "@ds/Button";
 import { Input, Pill } from "@ds/Input";
+import { Slider } from "@ds/Slider";
 import Toggle from "@/components/shared/Toggle";
 import { orderSides, OrderSide, formIds } from "../constants";
 import { useStyles } from "../hooks";
@@ -20,8 +21,13 @@ function TradeForm(props: TradeFormProps) {
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles();
   const { setTradeFormOverlay } = useTradeFormOverlay();
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    alert("order submitted");
+  };
+
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <Flex flexDirection="column" p="16px">
         <Flex justifyContent="space-between" mb="14px">
           <Text color={textColor}>Trade</Text>
@@ -65,6 +71,20 @@ function TradeForm(props: TradeFormProps) {
           }
           rightEl={<Pill text={asset} />}
           mb="12px"
+        />
+        {/* Default slider til we get designs */}
+        <Slider
+          label="Leverage"
+          ariaLabel="leverage-slider"
+          min={0}
+          max={20}
+          step={0.1}
+          onChangeEnd={(value: number) => {
+            console.log("leverage", value);
+          }}
+          containerProps={{
+            mb: 2,
+          }}
         />
       </Flex>
       <Divider />
