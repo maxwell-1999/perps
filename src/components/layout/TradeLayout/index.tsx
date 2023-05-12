@@ -1,5 +1,7 @@
-import { Grid, GridItem, GridProps, useBreakpointValue } from "@chakra-ui/react";
-// NOTE: Reference TradeLayout.stories.tsx for usage
+import styled from "@emotion/styled";
+import { breakpoints } from "@ds/theme/styles";
+import { GridItem } from "@chakra-ui/react";
+
 const mobileLayout = `
   "header"
   "marketBar"
@@ -13,40 +15,29 @@ const desktopLayout = `
   "tradeForm positionManager"
 `;
 
-interface LayoutProps extends GridProps {
+const GridContainer = styled.div`
+  display: grid;
+  grid-gap: 15px;
+  min-height: 100vh;
+  width: 100%;
+  padding: 1.2rem;
+
+  grid-template-areas: ${mobileLayout};
+  grid-template-columns: 1fr;
+  grid-template-rows: 54px 54px 1fr;
+
+  @media (min-width: ${breakpoints.sm}) {
+    grid-template-areas: ${desktopLayout};
+    grid-template-columns: 304px 1fr;
+    grid-template-rows: 54px 54px 1fr 0.7fr;
+  }
+`;
+interface LayoutProps {
   children: React.ReactNode;
 }
 
-export const TradeLayout: React.FC<LayoutProps> = ({ children, ...props }) => {
-  const templateAreas = useBreakpointValue({
-    base: mobileLayout,
-    sm: desktopLayout,
-  });
-
-  const gridTemplateColumns = useBreakpointValue({
-    base: "1fr",
-    sm: "304px 1fr",
-  });
-
-  const gridTemplateRows = useBreakpointValue({
-    base: "54px 54px 1fr",
-    sm: "54px 54px 1fr 0.7fr",
-  });
-
-  return (
-    <Grid
-      gap="15px"
-      minHeight="100vh"
-      w="100%"
-      p="1.2rem"
-      templateAreas={templateAreas}
-      gridTemplateColumns={gridTemplateColumns}
-      gridTemplateRows={gridTemplateRows}
-      {...props}
-    >
-      {children}
-    </Grid>
-  );
+export const TradeLayout: React.FC<LayoutProps> = ({ children }) => {
+  return <GridContainer>{children}</GridContainer>;
 };
 
 interface GridItemProps {
