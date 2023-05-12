@@ -23,7 +23,7 @@ export const Default: Story = () => {
   const isBase = useBreakpointValue({ base: true, md: false });
   // Offset layout height to account for the storybook header
   return (
-    <TradeLayout minHeight="calc(100vh - 40px)">
+    <TradeLayout>
       <HeaderGridItem>
         <Container height="100%">Header</Container>
       </HeaderGridItem>
