@@ -3,7 +3,6 @@ import { Flex, Text } from "@chakra-ui/react";
 
 import { DataRow } from "./index";
 import { Container } from "../Container";
-import { Money } from "../../../utils/Money";
 
 const meta: Meta<typeof DataRow> = {
   title: "Design-System/DataRow",
@@ -20,9 +19,7 @@ export const Default: Story = () => (
       label="Entry / Exit"
       value={
         <Flex>
-          <Text fontSize="13px">
-            <Money currency="USD" value={"2124.23"} />
-          </Text>
+          <Text fontSize="13px">$1,131.12</Text>
           <Text fontSize="13px" color="gray.500">
             / --
           </Text>

@@ -1,5 +1,5 @@
 import colors from "@/components/design-system/theme/colors";
-import { Flex, FlexProps, Text } from "@chakra-ui/react";
+import { Flex, FlexProps, Text, Divider } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import Hamburger from "@public/icons/burger.svg";
 import ethLogo from "@public/icons/eth.png";
@@ -79,5 +79,12 @@ export const PriceContainer = styled(BaseMarketContainer)`
 export const MarketContainer = styled(BaseMarketContainer)<{ mobileOnly?: boolean }>`
   @media (min-width: ${breakpoints.sm}) {
     display: ${({ mobileOnly }) => (mobileOnly ? "none" : "flex")};
+  }
+`;
+
+export const DividerStyled = styled(Divider)`
+  margin-right: 14px;
+  @media (min-width: ${breakpoints.sm}) {
+    display: none;
   }
 `;
