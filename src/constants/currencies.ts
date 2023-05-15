@@ -1,4 +1,9 @@
-import { L2SupportedAsset } from "@/types";
+export enum L2SupportedAsset {
+  btc = "btc",
+  eth = "eth",
+  arb = "arb",
+  link = "link",
+}
 
 export type AssetMetadata = {
   [asset in L2SupportedAsset]: {
