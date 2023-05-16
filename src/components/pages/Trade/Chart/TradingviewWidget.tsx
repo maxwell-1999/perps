@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 declare global {
   interface Window {
@@ -17,21 +17,7 @@ let tvScriptLoadingPromise: Promise<any> | null = null;
 const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ symbol, overrides, theme }) => {
   const onLoadScriptRef = useRef<(() => void) | null>(null);
 
-  useEffect(() => {
-    onLoadScriptRef.current = createWidget;
-
-    if (!tvScriptLoadingPromise) {
-      tvScriptLoadingPromise = loadTradingViewScript();
-    }
-
-    tvScriptLoadingPromise.then(() => onLoadScriptRef.current && onLoadScriptRef.current());
-
-    return () => {
-      onLoadScriptRef.current = null;
-    };
-  }, []);
-
-  function createWidget() {
+  const createWidget = useCallback(() => {
     if (document.getElementById("tv-widget-container") && "TradingView" in window) {
       new window.TradingView.widget({
         symbol,
@@ -49,7 +35,21 @@ const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ symbol, overrides
         loading_screen: { backgroundColor: "#000000" },
       });
     }
-  }
+  }, [symbol, theme, overrides]);
+
+  useEffect(() => {
+    onLoadScriptRef.current = createWidget;
+
+    if (!tvScriptLoadingPromise) {
+      tvScriptLoadingPromise = loadTradingViewScript();
+    }
+
+    tvScriptLoadingPromise.then(() => onLoadScriptRef.current && onLoadScriptRef.current());
+
+    return () => {
+      onLoadScriptRef.current = null;
+    };
+  }, [createWidget]);
 
   return <div id="tv-widget-container" />;
 };

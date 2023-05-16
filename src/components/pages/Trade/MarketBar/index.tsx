@@ -1,16 +1,23 @@
-import { Flex, Container, Text } from "@chakra-ui/react";
-import { Button } from "@ds/Button";
+import { Flex, Container, Text, Spinner } from "@chakra-ui/react";
 import colors from "@ds/theme/colors";
 import {
   MarketContainer,
-  PairLabel,
-  HamburgerIcon,
   Stat,
   ResponsiveFlex,
   DesktopContainer,
   PriceContainer,
   DividerStyled,
 } from "./components";
+import dynamic from "next/dynamic";
+
+const MarketSelector = dynamic(() => import("./MarketSelector"), {
+  ssr: false,
+  loading: () => (
+    <Flex height="40px" width="179px" justifyContent="center" alignItems="center">
+      <Spinner />
+    </Flex>
+  ),
+});
 
 export default function MarketBar() {
   const dummyProps = {
@@ -27,11 +34,7 @@ export default function MarketBar() {
     <Container display="flex" flexDirection="row" alignItems="center" height="100%">
       <ResponsiveFlex>
         <MarketContainer mr={6} ml={0}>
-          <Button
-            variant="pairSelector"
-            label={<PairLabel pair={dummyProps.pair} />}
-            rightIcon={<HamburgerIcon />}
-          />
+          <MarketSelector />
         </MarketContainer>
         <Flex>
           <PriceContainer>

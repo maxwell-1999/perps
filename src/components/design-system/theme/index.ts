@@ -6,6 +6,7 @@ import Text from "./components/text";
 import Tabs from "./components/tabs";
 import Divider from "./components/divider";
 import Container from "./components/container";
+import Popover from "./components/popover";
 import { FormError, Form } from "./components/formControl";
 import { extendTheme, type ThemeConfig } from "@chakra-ui/react";
 import { Hanken_Grotesk } from "next/font/google";
@@ -37,6 +38,7 @@ const theme = extendTheme({
     Form,
     Tabs,
     Divider,
+    Popover,
   },
 });
 

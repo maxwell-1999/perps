@@ -1,7 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { L2SupportedAsset } from "@/constants/currencies";
 
-// TODO: How do we think about novel markets like milli-squeeth in this context?
 const MarketContext = createContext({
   selectedMarket: L2SupportedAsset.eth,
   setSelectedMarket: (asset: L2SupportedAsset) => {
@@ -33,6 +32,7 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const setSelectedMarket = (asset: L2SupportedAsset) => {
+    localStorage.setItem("market", asset);
     _setSelectedMarket(asset);
   };
 
