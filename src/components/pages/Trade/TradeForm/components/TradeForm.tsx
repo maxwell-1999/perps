@@ -1,5 +1,6 @@
 import { Flex, Text, FormLabel, Divider } from "@chakra-ui/react";
 import { useTradeFormOverlay, TradeFormOverlayStates } from "@/contexts/tradeFormContext";
+import { useIntl } from "react-intl";
 import { Button } from "@ds/Button";
 import { Input, Pill } from "@ds/Input";
 import { Slider } from "@ds/Slider";
@@ -7,6 +8,7 @@ import Toggle from "@/components/shared/Toggle";
 import { orderSides, OrderSide, formIds } from "../constants";
 import { useStyles } from "../hooks";
 import Receipt from "./Receipt";
+import { getTradeFormCopy } from "../copy";
 
 interface TradeFormProps {
   orderSide: OrderSide;
@@ -20,6 +22,8 @@ function TradeForm(props: TradeFormProps) {
   const { orderSide, setOrderSide, asset, availableCollateral, amount } = props;
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles();
   const { setTradeFormOverlay } = useTradeFormOverlay();
+  const intl = useIntl();
+  const copy = getTradeFormCopy(intl);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,10 +34,10 @@ function TradeForm(props: TradeFormProps) {
     <form onSubmit={handleSubmit}>
       <Flex flexDirection="column" p="16px">
         <Flex justifyContent="space-between" mb="14px">
-          <Text color={textColor}>Trade</Text>
+          <Text color={textColor}>{copy.trade}</Text>
           <Button
             variant="text"
-            label="Add collateral"
+            label={copy.addCollateral}
             p={0}
             lineHeight={1}
             height="initial"
@@ -53,7 +57,9 @@ function TradeForm(props: TradeFormProps) {
           placeholder="0.0000"
           rightLabel={
             <FormLabel mr={0} mb={0}>
-              <Text variant="label">{availableCollateral} Max</Text>
+              <Text variant="label">
+                {availableCollateral} {copy.max}
+              </Text>
             </FormLabel>
           }
           rightEl={<Pill text={asset} />}
@@ -66,7 +72,9 @@ function TradeForm(props: TradeFormProps) {
           placeholder="0.0000"
           rightLabel={
             <FormLabel mr={0} mb={0}>
-              <Text variant="label">{amount} Max</Text>
+              <Text variant="label">
+                {amount} {copy.max}
+              </Text>
             </FormLabel>
           }
           rightEl={<Pill text={asset} />}
@@ -74,7 +82,7 @@ function TradeForm(props: TradeFormProps) {
         />
         {/* Default slider til we get designs */}
         <Slider
-          label="Leverage"
+          label={copy.leverage}
           ariaLabel="leverage-slider"
           min={0}
           max={20}
@@ -90,7 +98,7 @@ function TradeForm(props: TradeFormProps) {
       <Divider />
       <Flex flexDirection="column" p="16px">
         <Receipt mb="25px" px="3px" />
-        <Button type="submit" label="Place trade" />
+        <Button type="submit" label={copy.placeTrade} />
       </Flex>
     </form>
   );

@@ -1,5 +1,7 @@
 import { Flex, FlexProps } from "@chakra-ui/react";
 import { DataRow } from "@/components/design-system";
+import { useIntl } from "react-intl";
+import { getReceiptCopy } from "../copy";
 // import { BigNumberish } from "ethers";
 
 // export interface ReceiptProps {
@@ -19,13 +21,15 @@ const receiptData = {
 };
 
 function Receipt(props: FlexProps) {
+  const intl = useIntl();
+  const copy = getReceiptCopy(intl);
   const { entryPrice, exitPrice, priceImpact, liquidationPrice, tradingFee } = receiptData;
   return (
     <Flex flexDirection="column" {...props}>
-      <DataRow label="Entry / Exit" value={`${entryPrice} / ${exitPrice}`} />
-      <DataRow label="Price Impact" value={priceImpact} />
-      <DataRow label="Liquidation Price" value={liquidationPrice} />
-      <DataRow label="Trading Fee" value={tradingFee} />
+      <DataRow label={copy.entryExit} value={`${entryPrice} / ${exitPrice}`} />
+      <DataRow label={copy.priceImpact} value={priceImpact} />
+      <DataRow label={copy.liquidationPrice} value={liquidationPrice} />
+      <DataRow label={copy.tradingFee} value={tradingFee} />
     </Flex>
   );
 }

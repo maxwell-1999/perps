@@ -2,13 +2,16 @@ import { render } from "@testing-library/react";
 import { ChakraProvider, CSSReset } from "@chakra-ui/react";
 import { JSXElementConstructor, ReactElement, ReactNode } from "react";
 import theme from "@ds/theme";
+import { IntlProvider } from "react-intl";
 
 const AllTheProviders = ({ children }: { children?: ReactNode }) => {
   return (
-    <ChakraProvider theme={theme}>
-      <CSSReset />
-      {children}
-    </ChakraProvider>
+    <IntlProvider locale="en" defaultLocale="en" messages={{}}>
+      <ChakraProvider theme={theme}>
+        <CSSReset />
+        {children}
+      </ChakraProvider>
+    </IntlProvider>
   );
 };
 
