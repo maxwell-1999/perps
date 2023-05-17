@@ -1,25 +1,7 @@
 import colors from "@/components/design-system/theme/colors";
 import { Flex, FlexProps, Text, Divider } from "@chakra-ui/react";
 import styled from "@emotion/styled";
-import Hamburger from "@public/icons/burger.svg";
-import ethLogo from "@public/icons/eth.png";
-import Image from "next/image";
 import { breakpoints } from "@ds/theme/styles";
-
-// @ts-ignore
-export const HamburgerIcon = styled(Hamburger)`
-  color: ${colors.brand.whiteAlpha[50]};
-  height: 18px;
-`;
-
-export const PairLabel: React.FC<{ pair: string }> = ({ pair }) => (
-  <Flex alignItems="center">
-    <Image src={ethLogo} height={25} width={25} alt="ethereum" />
-    <Text ml={2} fontSize="16px">
-      {pair}
-    </Text>
-  </Flex>
-);
 
 export const BaseMarketContainer: React.FC<FlexProps> = ({ children, ...props }) => (
   <Flex height="100%" alignItems="center" mr={8} {...props}>

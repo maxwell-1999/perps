@@ -4,15 +4,17 @@ import { ASSET_METADATA } from "@/constants/currencies";
 import { useMarketContext } from "@/contexts/marketContext";
 
 const AdvancedRealTimeChart = dynamic(() => import("./TradingviewWidget"), { ssr: false });
+
 function Chart() {
   const { selectedMarket } = useMarketContext();
 
   return (
     <Container height="100%" p={0}>
       <AdvancedRealTimeChart
+        key={ASSET_METADATA[selectedMarket].tvTicker}
         symbol={ASSET_METADATA[selectedMarket].tvTicker}
         theme="dark"
-        // TODO: Circle back to this later
+        // Circle back to this later
         // overrides={{
         //   "paneProperties.backgroundType": "solid",
         //   "paneProperties.background": "#1A1A1A",
