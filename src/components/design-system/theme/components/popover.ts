@@ -17,8 +17,9 @@ const assetSelector = definePartsStyle((props) => ({
   header: {
     display: "flex",
     flexDirection: "column",
-    padding: "17px 21px",
+    paddingTop: "21px",
     paddingBottom: "8px",
+    px: "21px",
     borderBottom: `1px solid ${mode(
       colors.brand.blackAlpha[10],
       colors.brand.whiteAlpha[10],

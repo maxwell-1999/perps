@@ -32,7 +32,9 @@ const AssetButtonLabel = ({
     <Flex alignItems="center">
       <Image src={icon} height={25} width={25} alt={name} />
       <Flex ml={2} flexDirection="column" alignItems="flex-start">
-        <Text fontSize="16px">{name}</Text>
+        <Text fontSize="16px" mb={1}>
+          {name}
+        </Text>
         <Text variant="label">{symbol}</Text>
       </Flex>
     </Flex>
