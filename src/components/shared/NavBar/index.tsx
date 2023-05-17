@@ -10,12 +10,14 @@ import {
   useColorModeValue,
   useTheme,
 } from "@chakra-ui/react";
+import { useIntl } from "react-intl";
 import LinkSwitcher from "./LinkSwitcher";
 import { IconButton, ButtonGroup, Button } from "@ds/Button";
 import { MobileDrawer } from "@ds/MobileDrawer";
 import ConnectWalletButton from "./ConnectWalletButton";
 import { Nav, MobileButtonLabel } from "./styles";
 import { links } from "./constants";
+import { getNavCopy } from "./copy";
 
 import Settings from "@public/icons/settings.svg";
 import RedX from "@public/icons/red-x.svg";
@@ -32,6 +34,8 @@ function NavBar() {
     theme.colors.brand.blackAlpha[10],
     theme.colors.brand.whiteAlpha[10],
   );
+  const intl = useIntl();
+  const copy = getNavCopy(intl);
 
   return (
     <Nav>
@@ -40,7 +44,7 @@ function NavBar() {
           <LinkSwitcher links={links} />
         ) : (
           <>
-            <IconButton aria-label="menu" icon={<BurgerMenu />} onClick={onOpen} />
+            <IconButton aria-label={copy.menu} icon={<BurgerMenu />} onClick={onOpen} />
             <MobileDrawer
               isOpen={isOpen}
               placement="left"
@@ -50,7 +54,7 @@ function NavBar() {
                   <Box mr={3}>
                     <Logo />
                   </Box>
-                  <Text>Perennial</Text>
+                  <Text>{copy.perennial}</Text>
                 </Flex>
               }
             >
@@ -72,9 +76,9 @@ function NavBar() {
       </Flex>
       <ButtonGroup>
         <ConnectWalletButton />
-        {!isBase && <IconButton aria-label="settings" icon={<Settings />} mr={1} />}
+        {!isBase && <IconButton aria-label={copy.settings} icon={<Settings />} mr={1} />}
         {Boolean(address) && !isBase && (
-          <IconButton aria-label="close" icon={<RedX />} onClick={() => disconnect()} />
+          <IconButton aria-label={copy.close} icon={<RedX />} onClick={() => disconnect()} />
         )}
       </ButtonGroup>
     </Nav>

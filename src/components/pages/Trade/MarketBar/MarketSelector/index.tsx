@@ -9,14 +9,18 @@ import {
   Flex,
   useDisclosure,
 } from "@chakra-ui/react";
+import { useIntl } from "react-intl";
 import { Button } from "@ds/Button";
 import { useMarketContext } from "@/contexts/marketContext";
 import { PairLabel, HamburgerIcon, AssetButton } from "./components";
+import { getSelectorCopy } from "../copy";
 import { ASSET_METADATA, L2SupportedAsset } from "@/constants/currencies";
 
 function MarketSelector() {
   const { selectedMarket, setSelectedMarket } = useMarketContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const intl = useIntl();
+  const copy = getSelectorCopy(intl);
 
   return (
     <Popover
@@ -38,12 +42,12 @@ function MarketSelector() {
       <PopoverContent>
         <PopoverHeader>
           <Flex flex={1} alignItems="center" justifyContent="space-between" mb="14px">
-            <Text fontSize="17px">Switch market</Text>
+            <Text fontSize="17px">{copy.switchMarket}</Text>
             <PopoverCloseButton />
           </Flex>
           <Flex flex={1} justifyContent="space-between">
-            <Text variant="label">Market</Text>
-            <Text variant="label">Price / Liquidity</Text>
+            <Text variant="label">{copy.market}</Text>
+            <Text variant="label">{copy.priceLiquidity}</Text>
           </Flex>
         </PopoverHeader>
         <PopoverBody>

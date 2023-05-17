@@ -1,4 +1,5 @@
 import { Flex, Container, Text, Spinner } from "@chakra-ui/react";
+import { useIntl } from "react-intl";
 import colors from "@ds/theme/colors";
 import {
   MarketContainer,
@@ -9,6 +10,7 @@ import {
   DividerStyled,
 } from "./components";
 import dynamic from "next/dynamic";
+import { getMarketBarCopy } from "./copy";
 
 const MarketSelector = dynamic(() => import("./MarketSelector"), {
   ssr: false,
@@ -20,6 +22,8 @@ const MarketSelector = dynamic(() => import("./MarketSelector"), {
 });
 
 export default function MarketBar() {
+  const intl = useIntl();
+  const copy = getMarketBarCopy(intl);
   const dummyProps = {
     pair: "ETH-USD",
     price: "$2,000.00",
@@ -42,28 +46,28 @@ export default function MarketBar() {
           </PriceContainer>
           <DividerStyled orientation="vertical" />
           <MarketContainer mobileOnly mr={0}>
-            <Stat label="Change" value={dummyProps.change} valueColor={colors.brand.green} />
+            <Stat label={copy.change} value={dummyProps.change} valueColor={colors.brand.green} />
           </MarketContainer>
         </Flex>
       </ResponsiveFlex>
       <DesktopContainer>
         <MarketContainer>
-          <Stat label="Change" value={dummyProps.change} valueColor={colors.brand.green} />
+          <Stat label={copy.change} value={dummyProps.change} valueColor={colors.brand.green} />
         </MarketContainer>
         <MarketContainer>
-          <Stat label="Hourly funding" value={dummyProps.hourlyFunding} />
+          <Stat label={copy.hourlyFunding} value={dummyProps.hourlyFunding} />
         </MarketContainer>
         <MarketContainer>
-          <Stat label="24h low" value={dummyProps.low} />
+          <Stat label={copy.low} value={dummyProps.low} />
         </MarketContainer>
         <MarketContainer>
-          <Stat label="24h high" value={dummyProps.high} />
+          <Stat label={copy.high} value={dummyProps.high} />
         </MarketContainer>
         <MarketContainer>
-          <Stat label="Volume" value={dummyProps.volume} />
+          <Stat label={copy.volume} value={dummyProps.volume} />
         </MarketContainer>
         <MarketContainer>
-          <Stat label="Open interest" value={dummyProps.openInterest} />
+          <Stat label={copy.openInterest} value={dummyProps.openInterest} />
         </MarketContainer>
       </DesktopContainer>
     </Container>

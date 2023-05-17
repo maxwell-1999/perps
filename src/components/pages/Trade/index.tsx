@@ -18,6 +18,8 @@ const NavBar = dynamic(() => import("@/components/shared/NavBar"), {
   ssr: false,
 });
 
+const POSITION_MANAGER = "Position Manager";
+
 export default function Trade() {
   const isBase = useBreakpointValue({ base: true, sm: false });
   return (
@@ -39,7 +41,7 @@ export default function Trade() {
                 <Chart />
               </ChartGridItem>
               <PositionManagerGridItem>
-                <Container height="100%">Position Manager</Container>
+                <Container height="100%">{POSITION_MANAGER}</Container>
               </PositionManagerGridItem>
             </>
           )}
