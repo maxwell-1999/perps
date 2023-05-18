@@ -1,5 +1,4 @@
 import { Flex, Container, Text, Spinner } from "@chakra-ui/react";
-import { useIntl } from "react-intl";
 import colors from "@ds/theme/colors";
 import {
   MarketContainer,
@@ -10,7 +9,7 @@ import {
   DividerStyled,
 } from "./components";
 import dynamic from "next/dynamic";
-import { getMarketBarCopy } from "./copy";
+import { useMarketBarCopy } from "./hooks";
 
 const MarketSelector = dynamic(() => import("./MarketSelector"), {
   ssr: false,
@@ -22,8 +21,7 @@ const MarketSelector = dynamic(() => import("./MarketSelector"), {
 });
 
 export default function MarketBar() {
-  const intl = useIntl();
-  const copy = getMarketBarCopy(intl);
+  const copy = useMarketBarCopy();
   const dummyProps = {
     pair: "ETH-USD",
     price: "$2,000.00",

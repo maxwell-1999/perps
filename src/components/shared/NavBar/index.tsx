@@ -10,14 +10,13 @@ import {
   useColorModeValue,
   useTheme,
 } from "@chakra-ui/react";
-import { useIntl } from "react-intl";
 import LinkSwitcher from "./LinkSwitcher";
 import { IconButton, ButtonGroup, Button } from "@ds/Button";
 import { MobileDrawer } from "@ds/MobileDrawer";
 import ConnectWalletButton from "./ConnectWalletButton";
 import { Nav, MobileButtonLabel } from "./styles";
 import { links } from "./constants";
-import { getNavCopy } from "./copy";
+import { useNavCopy } from "./hooks";
 
 import Settings from "@public/icons/settings.svg";
 import RedX from "@public/icons/red-x.svg";
@@ -34,8 +33,8 @@ function NavBar() {
     theme.colors.brand.blackAlpha[10],
     theme.colors.brand.whiteAlpha[10],
   );
-  const intl = useIntl();
-  const copy = getNavCopy(intl);
+
+  const copy = useNavCopy();
 
   return (
     <Nav>

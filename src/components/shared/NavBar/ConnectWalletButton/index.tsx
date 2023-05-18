@@ -1,13 +1,11 @@
 import { ConnectKitButton } from "connectkit";
 import { Button } from "@ds/Button";
-import { useIntl } from "react-intl";
-import { getNavCopy } from "../copy";
+import { useNavCopy } from "../hooks";
 
 const formatAddress = (address: string) => address.replace(/•+/g, "...");
 
 const ConnectWalletButton: React.FC = () => {
-  const intl = useIntl();
-  const { connect } = getNavCopy(intl);
+  const { connect } = useNavCopy();
 
   return (
     <ConnectKitButton.Custom>

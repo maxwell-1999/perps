@@ -2,8 +2,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Button, ButtonGroup, IconButton } from "@ds/Button";
 import Logo from "@public/logoTransparent.svg";
-import { useIntl } from "react-intl";
-import { getNavCopy } from "../copy";
+import { useNavCopy } from "../hooks";
 
 interface NavLinkProps {
   href: string;
@@ -26,8 +25,7 @@ interface LinkSwitcherProps {
 }
 
 const LinkSwitcher: React.FC<LinkSwitcherProps> = ({ links }) => {
-  const intl = useIntl();
-  const { home } = getNavCopy(intl);
+  const { home } = useNavCopy();
   return (
     <ButtonGroup>
       <Link href="/" passHref>
