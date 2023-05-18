@@ -5,18 +5,18 @@ export enum TradeFormOverlayStates {
   modify = "modify",
   withdraw = "withdraw",
   add = "add",
-  hide = "",
+  none = "",
 }
 
 const TradeFormOverlayContext = createContext({
-  tradeFormOverlay: TradeFormOverlayStates.hide,
+  tradeFormOverlay: TradeFormOverlayStates.none,
   setTradeFormOverlay: (state: TradeFormOverlayStates) => {
     state;
   },
 });
 
 export const TradeFormProvider = ({ children }: { children: React.ReactNode }) => {
-  const [tradeFormOverlay, _setTradeFormOverlay] = useState(TradeFormOverlayStates.hide);
+  const [tradeFormOverlay, _setTradeFormOverlay] = useState(TradeFormOverlayStates.none);
   useState(tradeFormOverlay);
 
   const setTradeFormOverlay = (state: TradeFormOverlayStates) => {
