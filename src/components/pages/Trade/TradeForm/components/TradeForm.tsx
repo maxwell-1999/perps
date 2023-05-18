@@ -1,5 +1,5 @@
 import { Flex, Text, FormLabel, Divider } from "@chakra-ui/react";
-import { useTradeFormOverlay, TradeFormOverlayStates } from "@/contexts/tradeFormContext";
+import { useTradeFormState, FormState } from "@/contexts/tradeFormContext";
 import { Button } from "@ds/Button";
 import { Input, Pill } from "@ds/Input";
 import { Slider } from "@ds/Slider";
@@ -7,28 +7,25 @@ import Toggle from "@/components/shared/Toggle";
 import { orderSides, OrderSide, formIds } from "../constants";
 import { useStyles, useTradeFormCopy } from "../hooks";
 import Receipt from "./Receipt";
+import { AssetMetadata, L2SupportedAsset } from "@/constants/currencies";
 
 interface TradeFormProps {
   orderSide: OrderSide;
   setOrderSide: (orderSide: OrderSide) => void;
-  asset: string; // L2SupportedAsset?
   availableCollateral: string; //bignumberish
+  assetMetadata: AssetMetadata[L2SupportedAsset];
   amount: string; //bignumberish
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { orderSide, setOrderSide, asset, availableCollateral, amount } = props;
+  const { orderSide, setOrderSide, availableCollateral, amount, assetMetadata, onSubmit } = props;
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles();
-  const { setTradeFormOverlay } = useTradeFormOverlay();
+  const { setTradeFormState } = useTradeFormState();
   const copy = useTradeFormCopy();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert("order submitted");
-  };
-
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={onSubmit}>
       <Flex flexDirection="column" p="16px">
         <Flex justifyContent="space-between" mb="14px">
           <Text color={textColor}>{copy.trade}</Text>
@@ -41,7 +38,7 @@ function TradeForm(props: TradeFormProps) {
             fontSize="13px"
             color={textBtnColor}
             _hover={{ color: textBtnHoverColor }}
-            onClick={() => setTradeFormOverlay(TradeFormOverlayStates.add)}
+            onClick={() => setTradeFormState(FormState.modify)}
           />
         </Flex>
         <Flex mb="14px">
@@ -59,7 +56,7 @@ function TradeForm(props: TradeFormProps) {
               </Text>
             </FormLabel>
           }
-          rightEl={<Pill text={asset} />}
+          rightEl={<Pill text={assetMetadata.baseCurrency} />}
           mb="12px"
         />
         <Input
@@ -74,7 +71,7 @@ function TradeForm(props: TradeFormProps) {
               </Text>
             </FormLabel>
           }
-          rightEl={<Pill text={asset} />}
+          rightEl={<Pill text={assetMetadata.quoteCurrency} />}
           mb="12px"
         />
         {/* Default slider til we get designs */}
