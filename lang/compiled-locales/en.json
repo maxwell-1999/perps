@@ -5,6 +5,12 @@
       "value": "Connect"
     }
   ],
+  "47FYwb": [
+    {
+      "type": 0,
+      "value": "Cancel"
+    }
+  ],
   "6JqZwg": [
     {
       "type": 0,
@@ -67,6 +73,12 @@
     {
       "type": 1,
       "value": "title"
+    }
+  ],
+  "OOk+VQ": [
+    {
+      "type": 0,
+      "value": "Modify position"
     }
   ],
   "QFNxVm": [

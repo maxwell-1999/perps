@@ -1,8 +1,15 @@
 import { createContext, useState, useContext, useEffect } from "react";
-import { L2SupportedAsset } from "@/constants/currencies";
+import { L2SupportedAsset, ASSET_METADATA } from "@/constants/currencies";
 
-const MarketContext = createContext({
+type MarketContextType = {
+  selectedMarket: L2SupportedAsset;
+  assetMetadata: (typeof ASSET_METADATA)[L2SupportedAsset];
+  setSelectedMarket: (asset: L2SupportedAsset) => void;
+};
+
+const MarketContext = createContext<MarketContextType>({
   selectedMarket: L2SupportedAsset.eth,
+  assetMetadata: ASSET_METADATA[L2SupportedAsset.eth],
   setSelectedMarket: (asset: L2SupportedAsset) => {
     asset;
   },
@@ -37,7 +44,9 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <MarketContext.Provider value={{ selectedMarket, setSelectedMarket }}>
+    <MarketContext.Provider
+      value={{ selectedMarket, setSelectedMarket, assetMetadata: ASSET_METADATA[selectedMarket] }}
+    >
       {children}
     </MarketContext.Provider>
   );

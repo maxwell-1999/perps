@@ -1,44 +1,39 @@
-import { Flex, Text, FormLabel, Divider } from "@chakra-ui/react";
+import { Flex, Text, FormLabel, Divider, ButtonGroup } from "@chakra-ui/react";
 import { useTradeFormState, FormState } from "@/contexts/tradeFormContext";
-import { Button } from "@ds/Button";
+import { Button, IconButton } from "@ds/Button";
 import { Input, Pill } from "@ds/Input";
 import { Slider } from "@ds/Slider";
 import Toggle from "@/components/shared/Toggle";
 import { orderSides, OrderSide, formIds } from "../constants";
-import { useStyles, useTradeFormCopy } from "../hooks";
+import { useTradeFormCopy } from "../hooks";
 import Receipt from "./Receipt";
+import CloseX from "@public/icons/close-x.svg";
 import { AssetMetadata, L2SupportedAsset } from "@/constants/currencies";
 
-interface TradeFormProps {
+interface ModifyPositionProps {
   orderSide: OrderSide;
   setOrderSide: (orderSide: OrderSide) => void;
-  availableCollateral: string; //bignumberish
   assetMetadata: AssetMetadata[L2SupportedAsset];
+  availableCollateral: string; //bignumberish
   amount: string; //bignumberish
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
-function TradeForm(props: TradeFormProps) {
+function ModifyPositionForm(props: ModifyPositionProps) {
   const { orderSide, setOrderSide, availableCollateral, amount, assetMetadata, onSubmit } = props;
-  const { textColor, textBtnColor, textBtnHoverColor } = useStyles();
   const { setTradeFormState } = useTradeFormState();
   const copy = useTradeFormCopy();
 
   return (
     <form onSubmit={onSubmit}>
       <Flex flexDirection="column" p="16px">
-        <Flex justifyContent="space-between" mb="14px">
-          <Text color={textColor}>{copy.trade}</Text>
-          <Button
+        <Flex justifyContent="space-between" mb="14px" alignItems="center">
+          <Text>{copy.modifyPosition}</Text>
+          <IconButton
             variant="text"
-            label={copy.addCollateral}
-            p={0}
-            lineHeight={1}
-            height="initial"
-            fontSize="13px"
-            color={textBtnColor}
-            _hover={{ color: textBtnHoverColor }}
-            onClick={() => setTradeFormState(FormState.modify)}
+            icon={<CloseX />}
+            aria-label={copy.close}
+            onClick={() => setTradeFormState(FormState.trade)}
           />
         </Flex>
         <Flex mb="14px">
@@ -92,10 +87,17 @@ function TradeForm(props: TradeFormProps) {
       <Divider />
       <Flex flexDirection="column" p="16px">
         <Receipt mb="25px" px="3px" />
-        <Button type="submit" label={copy.placeTrade} />
+        <ButtonGroup>
+          <Button
+            label={copy.cancel}
+            variant="transparent"
+            onClick={() => setTradeFormState(FormState.trade)}
+          />
+          <Button flex={1} label={copy.modifyPosition} type="submit" />
+        </ButtonGroup>
       </Flex>
     </form>
   );
 }
 
-export default TradeForm;
+export default ModifyPositionForm;
