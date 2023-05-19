@@ -25,7 +25,7 @@ jobs:
         run: yarn install
 
       - name: Generate types
-        run: yarn gen:abi-typings
+        run: yarn gen:abi-typings && yarn gen:gql-typings
 
       - name: Typecheck
         run: yarn tsc

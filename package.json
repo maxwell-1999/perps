@@ -6,8 +6,8 @@
     "node": "18"
   },
   "scripts": {
-    "dev": "yarn gen:abi-typings && next dev",
-    "build": "yarn gen:abi-typings && next build",
+    "dev": "yarn gen:abi-typings && yarn gen:gql-typings && next dev",
+    "build": "yarn gen:abi-typings && yarn gen:gql-typings && next build",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "test": "jest",
