@@ -5,18 +5,18 @@ import { Input, Pill } from "@ds/Input";
 import { formIds, buttonPercentValues } from "../constants";
 import { useTradeFormCopy, useStyles } from "../hooks";
 import { TradeReceipt } from "./Receipt";
-import { AssetMetadata, SupportedAsset } from "@/constants/assets";
 import { Form, FormOverlayHeader } from "./styles";
+import { useMarketContext } from "@/contexts/marketContext";
 
 interface ClosePositionFormProps {
   positionSize: string; // placeholder for now
-  assetMetadata: AssetMetadata[SupportedAsset];
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
 function ClosePositionForm(props: ClosePositionFormProps) {
-  const { positionSize, assetMetadata, onSubmit } = props;
+  const { positionSize, onSubmit } = props;
   const { setTradeFormState } = useTradeFormState();
+  const { assetMetadata } = useMarketContext();
   const copy = useTradeFormCopy();
   const { percentBtnBg } = useStyles();
 
@@ -26,7 +26,7 @@ function ClosePositionForm(props: ClosePositionFormProps) {
         title={copy.closePosition}
         onClose={() => setTradeFormState(FormState.trade)}
       />
-      <Flex flexDirection="column" p="16px">
+      <Flex flexDirection="column" px="16px" mb="12px">
         <Input
           type="number"
           id={formIds.closeAmount}
