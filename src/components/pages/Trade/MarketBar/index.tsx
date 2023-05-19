@@ -7,6 +7,7 @@ import {
   DesktopContainer,
   PriceContainer,
   DividerStyled,
+  MobileMarketContainer,
 } from "./components";
 import dynamic from "next/dynamic";
 import { useMarketBarCopy } from "./hooks";
@@ -67,13 +68,13 @@ export default function MarketBar() {
             <Text fontSize="20px">{formattedValues.price}</Text>
           </PriceContainer>
           <DividerStyled orientation="vertical" />
-          <MarketContainer mobileOnly mr={0}>
+          <MobileMarketContainer mr={0} maxWidth="90px" overflowX="auto" overflowY="hidden">
             <Stat
               label={copy.change}
               value={formattedValues.change}
               valueColor={colors.brand.green}
             />
-          </MarketContainer>
+          </MobileMarketContainer>
         </Flex>
       </ResponsiveFlex>
       <DesktopContainer>

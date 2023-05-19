@@ -5,6 +5,17 @@ const styles = {
     "html, body": {
       bg: props.colorMode === "light" ? colors.background.light : colors.background.dark,
     },
+    "&::-webkit-scrollbar": {
+      width: "2px",
+      height: "2px",
+    },
+    "&::-webkit-scrollbar-track": {
+      width: "2px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      background: `${colors.brand.whiteAlpha[20]}`,
+      borderRadius: "10px",
+    },
   }),
 };
 
