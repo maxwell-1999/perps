@@ -18,7 +18,9 @@ export const Stat: React.FC<{ label: string; value: string; valueColor?: string 
     <Text whiteSpace="nowrap" fontSize="12px" color={colors.brand.whiteAlpha[50]}>
       {label}
     </Text>
-    <Text color={valueColor}>{value}</Text>
+    <Text color={valueColor} whiteSpace="nowrap">
+      {value}
+    </Text>
   </Flex>
 );
 
