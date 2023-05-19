@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GEOLOCATION_COOKIE } from "./constants";
+import { GeolocationCookie } from "./constants/cookies";
 
 export function middleware(request: NextRequest) {
   const country = request.geo?.country;
@@ -7,7 +7,7 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   if (path === "/") return NextResponse.redirect(request.nextUrl.origin + "/trade");
   if (country) {
-    res.cookies.set(GEOLOCATION_COOKIE, country);
+    res.cookies.set(GeolocationCookie, country);
   }
   return res;
 }

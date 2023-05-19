@@ -8,12 +8,12 @@ import { orderSides, OrderSide, formIds } from "../constants";
 import { useTradeFormCopy } from "../hooks";
 import { TradeReceipt } from "./Receipt";
 import CloseX from "@public/icons/close-x.svg";
-import { AssetMetadata, L2SupportedAsset } from "@/constants/currencies";
+import { AssetMetadata, SupportedAsset } from "@/constants/assets";
 
 interface ModifyPositionProps {
   orderSide: OrderSide;
   setOrderSide: (orderSide: OrderSide) => void;
-  assetMetadata: AssetMetadata[L2SupportedAsset];
+  assetMetadata: AssetMetadata[SupportedAsset];
   availableCollateral: string; //bignumberish
   amount: string; //bignumberish
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -51,7 +51,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
               </Text>
             </FormLabel>
           }
-          rightEl={<Pill text={assetMetadata.baseCurrency} />}
+          rightEl={<Pill text={assetMetadata.quoteCurrency} />}
           mb="12px"
         />
         <Input
@@ -66,7 +66,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
               </Text>
             </FormLabel>
           }
-          rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+          rightEl={<Pill text={assetMetadata.baseCurrency} />}
           mb="12px"
         />
         {/* Default slider til we get designs */}

@@ -1,4 +1,4 @@
-import { ConnectKitButton } from "connectkit";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "@ds/Button";
 import { useNavCopy } from "../hooks";
 
@@ -8,17 +8,17 @@ const ConnectWalletButton: React.FC = () => {
   const { connect } = useNavCopy();
 
   return (
-    <ConnectKitButton.Custom>
-      {({ show, isConnected, truncatedAddress }) => {
+    <ConnectButton.Custom>
+      {({ openConnectModal, openAccountModal, mounted, account }) => {
         return (
           <Button
-            label={isConnected ? formatAddress(truncatedAddress as string) : connect}
-            onClick={show}
+            label={mounted && account ? formatAddress(account?.displayName as string) : connect}
+            onClick={account ? openAccountModal : openConnectModal}
             variant="transparent"
           />
         );
       }}
-    </ConnectKitButton.Custom>
+    </ConnectButton.Custom>
   );
 };
 

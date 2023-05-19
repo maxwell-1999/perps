@@ -2,10 +2,10 @@ import { useRef, useEffect } from "react";
 import { useColorModeValue, useTheme } from "@chakra-ui/react";
 import { useIntl } from "react-intl";
 import { FormState } from "@/contexts/tradeFormContext";
-import { L2SupportedAsset } from "@/constants/currencies";
+import { SupportedAsset } from "@/constants/assets";
 
 type MarketChangeProps = {
-  selectedMarket: L2SupportedAsset;
+  selectedMarket: SupportedAsset;
   formState: FormState;
   setTradeFormState: (state: FormState) => void;
 };

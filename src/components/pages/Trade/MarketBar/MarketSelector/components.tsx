@@ -3,7 +3,7 @@ import { Flex, Text, useColorModeValue } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import Hamburger from "@public/icons/burger.svg";
 import Image from "next/image";
-import { AssetMetadata, L2SupportedAsset } from "@/constants/currencies";
+import { AssetMetadata, SupportedAsset } from "@/constants/assets";
 import { Button } from "@ds/Button";
 
 // @ts-ignore
@@ -12,7 +12,7 @@ export const HamburgerIcon = styled(Hamburger)`
   height: 18px;
 `;
 
-export const PairLabel: React.FC<{ market: AssetMetadata[L2SupportedAsset] }> = ({ market }) => (
+export const PairLabel: React.FC<{ market: AssetMetadata[SupportedAsset] }> = ({ market }) => (
   <Flex alignItems="center">
     <Image src={market.icon} height={25} width={25} alt={market.name} />
     <Text ml={2} fontSize="16px">
@@ -27,7 +27,7 @@ const AssetButtonLabel = ({
   price,
   liquidity,
   icon,
-}: AssetMetadata[L2SupportedAsset] & { price: string; liquidity: string }) => (
+}: AssetMetadata[SupportedAsset] & { price: string; liquidity: string }) => (
   <Flex flex={1} justifyContent="space-between" alignItems="center">
     <Flex alignItems="center">
       <Image src={icon} height={25} width={25} alt={name} />
@@ -52,7 +52,7 @@ interface AssetButtonProps {
   onClick: () => void;
   liquidity: string;
   price: string;
-  assetMetaData: AssetMetadata[L2SupportedAsset];
+  assetMetaData: AssetMetadata[SupportedAsset];
 }
 
 export const AssetButton = (props: AssetButtonProps) => {

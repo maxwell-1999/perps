@@ -7,13 +7,13 @@ import Toggle from "@/components/shared/Toggle";
 import { orderSides, OrderSide, formIds } from "../constants";
 import { useStyles, useTradeFormCopy } from "../hooks";
 import { TradeReceipt } from "./Receipt";
-import { AssetMetadata, L2SupportedAsset } from "@/constants/currencies";
+import { AssetMetadata, SupportedAsset } from "@/constants/assets";
 
 interface TradeFormProps {
   orderSide: OrderSide;
   setOrderSide: (orderSide: OrderSide) => void;
   availableCollateral: string; //bignumberish
-  assetMetadata: AssetMetadata[L2SupportedAsset];
+  assetMetadata: AssetMetadata[SupportedAsset];
   amount: string; //bignumberish
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
@@ -56,7 +56,7 @@ function TradeForm(props: TradeFormProps) {
               </Text>
             </FormLabel>
           }
-          rightEl={<Pill text={assetMetadata.baseCurrency} />}
+          rightEl={<Pill text={assetMetadata.quoteCurrency} />}
           mb="12px"
         />
         <Input
@@ -71,7 +71,7 @@ function TradeForm(props: TradeFormProps) {
               </Text>
             </FormLabel>
           }
-          rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+          rightEl={<Pill text={assetMetadata.baseCurrency} />}
           mb="12px"
         />
         {/* Default slider til we get designs */}

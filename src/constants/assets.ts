@@ -1,63 +1,73 @@
 import ethLogo from "@public/icons/eth.png";
 
-export enum L2SupportedAsset {
+export enum SupportedAsset {
   btc = "btc",
   eth = "eth",
   arb = "arb",
   link = "link",
+  msqth = "msqth",
 }
 
-export enum BaseCurrency {
+export enum QuoteCurrency {
   usd = "usd",
 }
 
 export type AssetMetadata = {
-  [asset in L2SupportedAsset]: {
+  [asset in SupportedAsset]: {
     name: string;
     symbol: string;
     displayDecimals: number;
     tvTicker: string;
     icon: string;
-    baseCurrency: BaseCurrency;
-    quoteCurrency: L2SupportedAsset;
+    baseCurrency: SupportedAsset;
+    quoteCurrency: QuoteCurrency;
   };
 };
 
-export const ASSET_METADATA: AssetMetadata = {
+export const AssetMetadata: AssetMetadata = {
   btc: {
     symbol: "BTC-USD",
     name: "Bitcoin",
     displayDecimals: 2,
     tvTicker: "CRYPTO:BTCUSD",
-    baseCurrency: BaseCurrency.usd,
-    quoteCurrency: L2SupportedAsset.btc,
     icon: ethLogo,
+    baseCurrency: SupportedAsset.btc,
+    quoteCurrency: QuoteCurrency.usd,
   },
   eth: {
     symbol: "ETH-USD",
     name: "Ethereum",
     displayDecimals: 2,
     tvTicker: "CRYPTO:ETHUSD",
-    baseCurrency: BaseCurrency.usd,
-    quoteCurrency: L2SupportedAsset.eth,
     icon: ethLogo,
+    baseCurrency: SupportedAsset.eth,
+    quoteCurrency: QuoteCurrency.usd,
   },
   arb: {
     symbol: "ARB-USD",
     name: "Arbitrum",
     displayDecimals: 4,
     tvTicker: "CRYPTO:ARBIUSD",
-    baseCurrency: BaseCurrency.usd,
-    quoteCurrency: L2SupportedAsset.arb,
     icon: ethLogo,
+    baseCurrency: SupportedAsset.arb,
+    quoteCurrency: QuoteCurrency.usd,
   },
   link: {
     symbol: "LINK-USD",
     name: "Chainlink",
     displayDecimals: 4,
     tvTicker: "CRYPTO:LINKUSD",
-    baseCurrency: BaseCurrency.usd,
-    quoteCurrency: L2SupportedAsset.link,
     icon: ethLogo,
+    baseCurrency: SupportedAsset.link,
+    quoteCurrency: QuoteCurrency.usd,
+  },
+  msqth: {
+    symbol: "MSQTH-USD",
+    name: "milli-Squeeth",
+    displayDecimals: 4,
+    tvTicker: "CRYPTO:MSQTHUSD",
+    icon: ethLogo,
+    baseCurrency: SupportedAsset.msqth,
+    quoteCurrency: QuoteCurrency.usd,
   },
 };

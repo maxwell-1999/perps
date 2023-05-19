@@ -1,51 +1,68 @@
-import { createContext, useState, useContext, useEffect } from "react";
-import { L2SupportedAsset, ASSET_METADATA } from "@/constants/currencies";
+import { createContext, useState, useEffect, useContext } from "react";
+import { DefaultChain } from "@/constants/network";
+import { SupportedAsset, AssetMetadata } from "@/constants/assets";
+import { useAssetSnapshot } from "@/hooks/markets";
+import { IPerennialLens } from "@t/generated/LensAbi";
+import { useChainId } from "@/hooks/network";
+import { SupportedChainId } from "@/constants/network";
 
 type MarketContextType = {
-  selectedMarket: L2SupportedAsset;
-  assetMetadata: (typeof ASSET_METADATA)[L2SupportedAsset];
-  setSelectedMarket: (asset: L2SupportedAsset) => void;
+  chainId: SupportedChainId;
+  assetMetadata: (typeof AssetMetadata)[SupportedAsset];
+  selectedMarket: SupportedAsset;
+  setSelectedMarket: (asset: SupportedAsset) => void;
+  snapshot?: {
+    long: IPerennialLens.ProductSnapshotStructOutput;
+    short: IPerennialLens.ProductSnapshotStructOutput;
+  };
 };
 
 const MarketContext = createContext<MarketContextType>({
-  selectedMarket: L2SupportedAsset.eth,
-  assetMetadata: ASSET_METADATA[L2SupportedAsset.eth],
-  setSelectedMarket: (asset: L2SupportedAsset) => {
+  chainId: DefaultChain.id,
+  selectedMarket: SupportedAsset.eth,
+  assetMetadata: AssetMetadata[SupportedAsset.eth],
+  setSelectedMarket: (asset: SupportedAsset) => {
     asset;
   },
+  snapshot: undefined,
 });
 
 export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedMarket, _setSelectedMarket] = useState(L2SupportedAsset.eth);
+  const chainId = useChainId();
+  const [selectedMarket, _setSelectedMarket] = useState<SupportedAsset>(SupportedAsset.eth);
+  const { data: snapshot } = useAssetSnapshot(selectedMarket);
 
   useEffect(() => {
     // check query params first
     const urlParams = new URLSearchParams(window.location.search);
     const marketFromParams = urlParams.get("market")?.toLowerCase();
 
-    if (marketFromParams && Object.keys(L2SupportedAsset).includes(marketFromParams)) {
-      _setSelectedMarket(marketFromParams as L2SupportedAsset);
+    if (marketFromParams && Object.keys(SupportedAsset).includes(marketFromParams)) {
+      _setSelectedMarket(marketFromParams as SupportedAsset);
     } else {
       // TODO: local storage key will include chain ID when we get there
       const marketFromLocalStorage = localStorage.getItem("market");
 
-      if (
-        marketFromLocalStorage &&
-        Object.keys(L2SupportedAsset).includes(marketFromLocalStorage)
-      ) {
-        _setSelectedMarket(marketFromLocalStorage as L2SupportedAsset);
+      if (marketFromLocalStorage && Object.keys(SupportedAsset).includes(marketFromLocalStorage)) {
+        _setSelectedMarket(marketFromLocalStorage as SupportedAsset);
       }
     }
   }, []);
 
-  const setSelectedMarket = (asset: L2SupportedAsset) => {
+  const setSelectedMarket = (asset: SupportedAsset) => {
     localStorage.setItem("market", asset);
     _setSelectedMarket(asset);
   };
 
   return (
     <MarketContext.Provider
-      value={{ selectedMarket, setSelectedMarket, assetMetadata: ASSET_METADATA[selectedMarket] }}
+      value={{
+        chainId,
+        selectedMarket,
+        setSelectedMarket,
+        snapshot,
+        assetMetadata: AssetMetadata[selectedMarket],
+      }}
     >
       {children}
     </MarketContext.Provider>

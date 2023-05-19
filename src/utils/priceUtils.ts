@@ -1,12 +1,13 @@
-import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
-import { commify, formatUnits, parseEther } from "ethers/lib/utils";
+import { FixedNumber, formatUnits, WeiPerEther, parseEther } from "ethers";
 
 // like formatEther but can specify num decimal places
 export const formatFixed18 = (
-  value: BigNumberish,
-  numDecimals = 2,
-  comma: boolean = true,
-  strictSigFigs: boolean = false, // whether to enforce decimals even if they are trailing 0
+  value: bigint,
+  {
+    numDecimals = 2,
+    comma = true,
+    strictSigFigs = false, // whether to enforce decimals even if they are trailing 0
+  }: { numDecimals?: number; comma?: boolean; strictSigFigs?: boolean } = {},
 ) => {
   const valFixed = Big18Math.divFixed(value, Big18Math.ONE);
   const withDecimals = formatFixedDecimals(valFixed, { numDecimals, floor: false, comma });
@@ -21,7 +22,10 @@ export const formatFixed18 = (
   return withDecimals;
 };
 
-export const formatFixed18USDPrice = (value?: BigNumberish, numDecimals = 2) => {
+export const formatFixed18USDPrice = (
+  value: bigint,
+  { numDecimals = 2 }: { numDecimals?: number } = {},
+) => {
   if (!value) return "$0.".padEnd(3 + numDecimals, "0");
   const fixedPrice = Big18Math.divFixed(value, Big18Math.ONE);
   const amountStr = formatFixedDecimals(fixedPrice, { numDecimals, floor: false, comma: true });
@@ -35,7 +39,7 @@ export const formatFixedDecimals = (
     floor = true,
     numDecimals = 6,
     comma = false,
-  }: { floor?: boolean; numDecimals?: number; comma?: boolean },
+  }: { floor?: boolean; numDecimals?: number; comma?: boolean } = {},
 ): string => {
   let amountStr = "";
   if (floor) {
@@ -45,66 +49,65 @@ export const formatFixedDecimals = (
     amountStr = num.round(numDecimals).toFormat(`fixed128x${numDecimals}`).toString();
   }
 
-  amountStr = comma ? commify(amountStr) : amountStr;
+  amountStr = comma ? amountStr : amountStr;
   const lengthBeforeDecimal = amountStr.substring(0, amountStr.indexOf(".") + 1).length;
   amountStr = amountStr.padEnd(lengthBeforeDecimal + numDecimals, "0");
   return amountStr;
 };
 
 export const formatPriceForDirection = (
-  value: BigNumberish,
-  direction: BigNumberish,
-  numDecimals = 2,
+  value: bigint,
+  direction: bigint,
+  { numDecimals = 2 }: { numDecimals?: number } = {},
 ) => {
-  return formatFixed18USDPrice(
-    Big18Math.isZero(direction) ? value : BigNumber.from(value).mul(-1),
-    numDecimals,
-  );
+  return formatFixed18USDPrice(Big18Math.isZero(direction) ? value : value * -1n, { numDecimals });
 };
 
-export const to18Decimals = (amount: BigNumberish, fromDecimals = 6): BigNumber => {
+export const to18Decimals = (
+  amount: bigint,
+  { fromDecimals = 6 }: { fromDecimals?: number } = {},
+): bigint => {
   return parseEther(formatUnits(amount, fromDecimals));
 };
 
 export class Big18Math {
+  public static FIXED_DECIMALS = 18;
   public static FIXED_WIDTH = "fixed256x18";
-  public static BASE = constants.WeiPerEther;
-  public static ZERO = BigNumber.from(0);
-  public static ZERO_FIXED = FixedNumber.from(Big18Math.ZERO, Big18Math.FIXED_WIDTH);
-  public static ONE = BigNumber.from(1).mul(this.BASE);
-  public static ONE_FIXED = FixedNumber.from(Big18Math.ONE, Big18Math.FIXED_WIDTH);
+  public static BASE = WeiPerEther;
+  public static ZERO = 0n;
+  public static ZERO_FIXED = Big18Math.fixedFrom(Big18Math.ZERO);
+  public static ONE = 1n * Big18Math.BASE;
+  public static ONE_FIXED = Big18Math.fixedFrom(Big18Math.ONE);
 
-  public static mul(a: BigNumberish, b: BigNumberish): BigNumber {
-    return BigNumber.from(a).mul(b).div(this.BASE);
+  public static mul(a: bigint, b: bigint): bigint {
+    return (a * b) / this.BASE;
   }
 
-  public static div(a: BigNumberish, b: BigNumberish): BigNumber {
-    return BigNumber.from(a).mul(this.BASE).div(b);
+  public static div(a: bigint, b: bigint): bigint {
+    return (a * this.BASE) / b;
   }
 
-  public static add(a: BigNumberish, b: BigNumberish): BigNumber {
-    return BigNumber.from(a).add(b);
+  public static add(a: bigint, b: bigint): bigint {
+    return a + b;
   }
 
-  public static sub(a: BigNumberish, b: BigNumberish): BigNumber {
-    return BigNumber.from(a).sub(b);
+  public static sub(a: bigint, b: bigint): bigint {
+    return a - b;
   }
 
-  public static divFixed(a: BigNumberish, b: BigNumberish): FixedNumber {
-    return FixedNumber.from(a, Big18Math.FIXED_WIDTH).divUnsafe(
-      FixedNumber.from(b, Big18Math.FIXED_WIDTH),
-    );
+  public static divFixed(a: bigint, b: bigint): FixedNumber {
+    return this.fixedFrom(a).divUnsafe(this.fixedFrom(b));
   }
 
-  public static isZero(a: BigNumberish): boolean {
-    return this.ZERO.eq(a);
+  public static isZero(a: bigint): boolean {
+    return this.ZERO === a;
   }
 
-  public static eq(a: BigNumberish, b: BigNumberish): boolean {
-    return BigNumber.from(a).eq(b);
+  public static eq(a: bigint, b: bigint): boolean {
+    return a === b;
   }
 
-  public static fixedFrom(a: BigNumberish): FixedNumber {
-    return FixedNumber.from(a, Big18Math.FIXED_WIDTH);
+  public static fixedFrom(a: bigint): FixedNumber {
+    return FixedNumber.fromValue(a, Big18Math.FIXED_DECIMALS, Big18Math.FIXED_WIDTH);
   }
 }

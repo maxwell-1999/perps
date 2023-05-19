@@ -10,6 +10,8 @@ import {
 } from "./components";
 import dynamic from "next/dynamic";
 import { useMarketBarCopy } from "./hooks";
+import { formatFixed18USDPrice } from "@/utils/priceUtils";
+import { useMarketContext } from "@/contexts/marketContext";
 
 const MarketSelector = dynamic(() => import("./MarketSelector"), {
   ssr: false,
@@ -22,12 +24,13 @@ const MarketSelector = dynamic(() => import("./MarketSelector"), {
 
 export default function MarketBar() {
   const copy = useMarketBarCopy();
+  const { snapshot } = useMarketContext();
   const dummyProps = {
     pair: "ETH-USD",
-    price: "$2,000.00",
+    price: formatFixed18USDPrice(snapshot?.long?.latestVersion?.price ?? 0n),
     change: "4.00%",
     hourlyFunding: "0.003%",
-    low: "$1,400.12",
+    low: "$1,900.00",
     high: "$2,100.22",
     volume: "$1,400,123",
     openInterest: "$885,412",
