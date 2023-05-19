@@ -6,8 +6,8 @@
     "node": "18"
   },
   "scripts": {
-    "dev": "yarn types && next dev",
-    "build": "yarn types && next build",
+    "dev": "yarn gen:abi-typings && next dev",
+    "build": "yarn gen:abi-typings && next build",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "test": "jest",
@@ -22,7 +22,7 @@
     "localize:extract": "formatjs extract 'src/{pages,components}/**/*.{ts,tsx}' --format simple --id-interpolation-pattern '[sha512:contenthash:base64:6]' --out-file lang/locales/en.json",
     "localize:compile": "formatjs compile-folder --ast --format simple lang/locales lang/compiled-locales",
     "localize": "yarn localize:extract && yarn localize:compile",
-    "types": "typechain --target ethers-v6 --out-dir types/generated abi/*.json"
+    "gen:abi-typings": "typechain --target ethers-v6 --out-dir types/generated abi/*.json"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.5.5",
