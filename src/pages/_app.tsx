@@ -11,8 +11,15 @@ import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { wagmiConfig, chains } from "@/constants/network";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Hour } from "@/utils/time";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Number(1n * Hour) * 1000, // 1 hour in ms
+    },
+  },
+});
 
 export default function App({ Component, pageProps }: AppProps) {
   const { locale = "en", defaultLocale = "en" } = useRouter();

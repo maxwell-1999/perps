@@ -6,8 +6,8 @@
     "node": "18"
   },
   "scripts": {
-    "dev": "yarn gen:abi-typings && next dev",
-    "build": "yarn gen:abi-typings && next build",
+    "dev": "yarn gen:abi-typings && yarn gen:gql-typings && next dev",
+    "build": "yarn gen:abi-typings && yarn gen:gql-typings && next build",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "test": "jest",
@@ -22,7 +22,9 @@
     "localize:extract": "formatjs extract 'src/{pages,components}/**/*.{ts,tsx}' --format simple --id-interpolation-pattern '[sha512:contenthash:base64:6]' --out-file lang/locales/en.json",
     "localize:compile": "formatjs compile-folder --ast --format simple lang/locales lang/compiled-locales",
     "localize": "yarn localize:extract && yarn localize:compile",
-    "gen:abi-typings": "typechain --target ethers-v6 --out-dir types/generated abi/*.json"
+    "gen:abi-typings": "typechain --target ethers-v6 --out-dir types/generated abi/*.json",
+    "gen:gql-typings": "graphql-codegen --config graph-codegen.ts",
+    "gen:gql-typings:watch": "graphql-codegen --watch --config graph-codegen.ts"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.5.5",
@@ -40,6 +42,8 @@
     "eslint-config-next": "13.3.1",
     "ethers": "^6.3.0",
     "framer-motion": "^10.12.4",
+    "graphql": "^16.6.0",
+    "graphql-request": "^6.0.0",
     "next": "13.4.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -56,6 +60,8 @@
     "@chakra-ui/storybook-addon": "4.0.16",
     "@formatjs/cli": "^6.1.1",
     "@formatjs/swc-plugin-experimental": "^0.3.6",
+    "@graphql-codegen/cli": "^3.3.1",
+    "@graphql-codegen/client-preset": "^3.0.1",
     "@next/bundle-analyzer": "^13.3.1",
     "@storybook/addon-essentials": "^7.0.7",
     "@storybook/addon-interactions": "^7.0.7",
