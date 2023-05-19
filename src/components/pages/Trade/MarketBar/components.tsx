@@ -3,7 +3,7 @@ import { Flex, FlexProps, Text, Divider } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { breakpoints } from "@ds/theme/styles";
 
-export const BaseMarketContainer: React.FC<FlexProps> = ({ children, ...props }) => (
+export const MarketContainer: React.FC<FlexProps> = ({ children, ...props }) => (
   <Flex height="100%" alignItems="center" mr={8} {...props}>
     {children}
   </Flex>
@@ -37,32 +37,23 @@ export const ResponsiveFlex = styled(Flex)`
 export const DesktopContainer = styled(Flex)`
   overflow-x: auto;
   display: none;
-  &::-webkit-scrollbar {
-    width: 2px;
-    height: 2px;
-  }
-  &::-webkit-scrollbar-track {
-    width: 2px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: ${colors.brand.whiteAlpha[20]};
-    border-radius: 10px;
-  }
   @media (min-width: ${breakpoints.md}) {
     display: flex;
   }
 `;
 
-export const PriceContainer = styled(BaseMarketContainer)`
+export const PriceContainer = styled(MarketContainer)`
   margin-right: 14px;
   @media (min-width: ${breakpoints.md}) {
     margin-right: 32px;
   }
 `;
 
-export const MarketContainer = styled(BaseMarketContainer)<{ mobileOnly?: boolean }>`
+export const MobileMarketContainer = styled(MarketContainer)`
+  overflow-x: auto;
+  display: flex;
   @media (min-width: ${breakpoints.md}) {
-    display: ${({ mobileOnly }) => (mobileOnly ? "none" : "flex")};
+    display: none;
   }
 `;
 
