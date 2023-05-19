@@ -8,20 +8,20 @@ import { orderSides, OrderSide, formIds } from "../constants";
 import { useTradeFormCopy } from "../hooks";
 import { TradeReceipt } from "./Receipt";
 import CloseX from "@public/icons/close-x.svg";
-import { AssetMetadata, SupportedAsset } from "@/constants/assets";
+import { useMarketContext } from "@/contexts/marketContext";
 
 interface ModifyPositionProps {
   orderSide: OrderSide;
   setOrderSide: (orderSide: OrderSide) => void;
-  assetMetadata: AssetMetadata[SupportedAsset];
   availableCollateral: string; //bignumberish
   amount: string; //bignumberish
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
 function ModifyPositionForm(props: ModifyPositionProps) {
-  const { orderSide, setOrderSide, availableCollateral, amount, assetMetadata, onSubmit } = props;
+  const { orderSide, setOrderSide, availableCollateral, amount, onSubmit } = props;
   const { setTradeFormState } = useTradeFormState();
+  const { assetMetadata } = useMarketContext();
   const copy = useTradeFormCopy();
 
   return (

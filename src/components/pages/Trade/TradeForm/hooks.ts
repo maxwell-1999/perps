@@ -61,6 +61,18 @@ export function useTradeFormCopy() {
     youWillReceive: intl.formatMessage({ defaultMessage: "You will receive..." }),
     collateral: intl.formatMessage({ defaultMessage: "Collateral" }),
     amount: intl.formatMessage({ defaultMessage: "Amount" }),
+    withdrawFunds: intl.formatMessage({ defaultMessage: "Withdraw funds" }),
+    withdrawCollateral: intl.formatMessage({ defaultMessage: "Withdraw collateral" }),
+    withdrawBodyText: intl.formatMessage({
+      defaultMessage:
+        "Please specify how much you would like to withdraw from the pool now that you have reduced your position size.",
+    }),
+    youCanNowWithdraw: intl.formatMessage({ defaultMessage: "You can now withdraw..." }),
+    youWillGet: intl.formatMessage({ defaultMessage: "You will get..." }),
+    withdrawConfirmText: intl.formatMessage({
+      defaultMessage:
+        "You will receive a transaction request in your wallet upon clicking the button above.",
+    }),
   };
 }
 
@@ -79,6 +91,7 @@ export const getContainerVariant = (formState: FormState) => {
     case FormState.modify:
       return "active";
     case FormState.close:
+    case FormState.withdraw:
       return "pink";
     default:
       return "transparent";

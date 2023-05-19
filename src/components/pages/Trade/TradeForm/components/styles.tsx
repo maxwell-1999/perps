@@ -19,7 +19,7 @@ export const FormOverlayHeader = ({ title, onClose }: { title: string; onClose: 
       justifyContent="space-between"
       px="16px"
       py="14px"
-      mb="14px"
+      mb="19px"
       alignItems="center"
       borderBottom={`1px dashed ${dashedBorderColor}`}
     >

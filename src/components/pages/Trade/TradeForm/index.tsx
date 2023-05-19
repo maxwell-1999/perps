@@ -8,6 +8,7 @@ import { FormState, useTradeFormState } from "@/contexts/tradeFormContext";
 import { useMarketContext } from "@/contexts/marketContext";
 import { useResetFormOnMarketChange, getContainerVariant } from "./hooks";
 import ClosePositionForm from "./components/ClosePositionForm";
+import WithdrawForm from "./components/WithdrawForm";
 
 const dummyData = {
   collateral: "0.000",
@@ -19,7 +20,7 @@ const dummyData = {
 function TradeContainer() {
   const [orderSide, setOrderSide] = useState<OrderSide>(OrderSide.Long);
   const { formState, setTradeFormState } = useTradeFormState();
-  const { assetMetadata, selectedMarket } = useMarketContext();
+  const { selectedMarket } = useMarketContext();
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState });
 
   const handleSubmitTrade = (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,6 +38,11 @@ function TradeContainer() {
     alert("close position");
   };
 
+  const handleWithdrawCollateral = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    alert("withdraw collateral");
+  };
+
   const containerVariant = getContainerVariant(formState);
 
   return (
@@ -48,7 +54,6 @@ function TradeContainer() {
           setOrderSide={setOrderSide}
           availableCollateral={dummyData.collateral}
           amount={dummyData.amount}
-          assetMetadata={assetMetadata}
         />
       )}
       {formState === FormState.modify && (
@@ -58,15 +63,13 @@ function TradeContainer() {
           setOrderSide={setOrderSide}
           availableCollateral={dummyData.collateral}
           amount={dummyData.amount}
-          assetMetadata={assetMetadata}
         />
       )}
       {formState === FormState.close && (
-        <ClosePositionForm
-          onSubmit={handleClosePosition}
-          positionSize={dummyData.positionSize}
-          assetMetadata={assetMetadata}
-        />
+        <ClosePositionForm onSubmit={handleClosePosition} positionSize={dummyData.positionSize} />
+      )}
+      {formState === FormState.withdraw && (
+        <WithdrawForm onSubmit={handleWithdrawCollateral} collateral={dummyData.collateral} />
       )}
     </Container>
   );

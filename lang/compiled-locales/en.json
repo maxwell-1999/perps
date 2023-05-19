@@ -17,6 +17,12 @@
       "value": "Cancel"
     }
   ],
+  "57jKwu": [
+    {
+      "type": 0,
+      "value": "You will receive a transaction request in your wallet upon clicking the button above."
+    }
+  ],
   "5SRJp1": [
     {
       "type": 0,
@@ -93,6 +99,12 @@
       "value": "title"
     }
   ],
+  "KxfKnW": [
+    {
+      "type": 0,
+      "value": "Withdraw funds"
+    }
+  ],
   "LzlMDx": [
     {
       "type": 0,
@@ -111,6 +123,12 @@
       "value": "Perennial is the defi-native derivatives platform for traders and developers."
     }
   ],
+  "QUM56G": [
+    {
+      "type": 0,
+      "value": "You will get..."
+    }
+  ],
   "RoqJiX": [
     {
       "type": 0,
@@ -121,6 +139,12 @@
     {
       "type": 0,
       "value": "Price impact"
+    }
+  ],
+  "XPD9S1": [
+    {
+      "type": 0,
+      "value": "You can now withdraw..."
     }
   ],
   "bri4Pp": [
@@ -151,6 +175,18 @@
     {
       "type": 0,
       "value": "Switch market"
+    }
+  ],
+  "npb5FN": [
+    {
+      "type": 0,
+      "value": "Withdraw collateral"
+    }
+  ],
+  "oUp3nU": [
+    {
+      "type": 0,
+      "value": "Please specify how much you would like to withdraw from the pool now that you have reduced your position size."
     }
   ],
   "ol8xdw": [

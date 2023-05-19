@@ -7,21 +7,22 @@ import Toggle from "@/components/shared/Toggle";
 import { orderSides, OrderSide, formIds } from "../constants";
 import { useStyles, useTradeFormCopy } from "../hooks";
 import { TradeReceipt } from "./Receipt";
-import { AssetMetadata, SupportedAsset } from "@/constants/assets";
+import { useMarketContext } from "@/contexts/marketContext";
 
 interface TradeFormProps {
   orderSide: OrderSide;
   setOrderSide: (orderSide: OrderSide) => void;
   availableCollateral: string; //bignumberish
-  assetMetadata: AssetMetadata[SupportedAsset];
   amount: string; //bignumberish
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { orderSide, setOrderSide, availableCollateral, amount, assetMetadata, onSubmit } = props;
+  const { orderSide, setOrderSide, availableCollateral, amount, onSubmit } = props;
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles();
   const { setTradeFormState } = useTradeFormState();
+  const { assetMetadata } = useMarketContext();
+
   const copy = useTradeFormCopy();
 
   return (
