@@ -1,10 +1,11 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { DefaultChain } from "@/constants/network";
 import { SupportedAsset, AssetMetadata } from "@/constants/assets";
-import { useAssetSnapshot } from "@/hooks/markets";
+import { useAsset24hrData, useAssetSnapshot } from "@/hooks/markets";
 import { IPerennialLens } from "@t/generated/LensAbi";
 import { useChainId } from "@/hooks/network";
 import { SupportedChainId } from "@/constants/network";
+import { Get24hrDataQuery } from "@t/gql/graphql";
 
 type MarketContextType = {
   chainId: SupportedChainId;
@@ -15,6 +16,7 @@ type MarketContextType = {
     long: IPerennialLens.ProductSnapshotStructOutput;
     short: IPerennialLens.ProductSnapshotStructOutput;
   };
+  dailyData?: Get24hrDataQuery;
 };
 
 const MarketContext = createContext<MarketContextType>({
@@ -25,12 +27,14 @@ const MarketContext = createContext<MarketContextType>({
     asset;
   },
   snapshot: undefined,
+  dailyData: undefined,
 });
 
 export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId();
   const [selectedMarket, _setSelectedMarket] = useState<SupportedAsset>(SupportedAsset.eth);
   const { data: snapshot } = useAssetSnapshot(selectedMarket);
+  const { data: dailyData } = useAsset24hrData(selectedMarket);
 
   useEffect(() => {
     // check query params first
@@ -61,6 +65,7 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
         selectedMarket,
         setSelectedMarket,
         snapshot,
+        dailyData,
         assetMetadata: AssetMetadata[selectedMarket],
       }}
     >

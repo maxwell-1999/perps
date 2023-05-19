@@ -18,4 +18,5 @@ yarn.lock
 /lang/
 
 types/generated/
+types/gql/
 storybook-static/

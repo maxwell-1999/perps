@@ -3,11 +3,13 @@ import {
   SupportedChainId,
   isSupportedChain,
   AlchemyActiveKey,
+  GraphUrls,
 } from "@/constants/network";
 import { useNetwork, usePublicClient } from "wagmi";
 import { baseGoerli } from "wagmi/chains";
 import { AlchemyProvider, JsonRpcProvider } from "ethers";
 import { useMemo } from "react";
+import { GraphQLClient } from "graphql-request";
 
 export const useChainId = () => {
   let { chain } = useNetwork();
@@ -21,9 +23,17 @@ export const useChainId = () => {
 export const useProvider = () => {
   const publicClient = usePublicClient();
 
-  return useMemo(() => {
-    if (publicClient.chain.id === baseGoerli.id)
-      return new JsonRpcProvider("https://goerli.base.org");
-    return new AlchemyProvider(publicClient.chain.id, AlchemyActiveKey);
-  }, [publicClient.chain.id]);
+  return useMemo(
+    () =>
+      publicClient.chain.id === baseGoerli.id
+        ? new JsonRpcProvider("https://goerli.base.org")
+        : new AlchemyProvider(publicClient.chain.id, AlchemyActiveKey),
+    [publicClient.chain.id],
+  );
+};
+
+export const useGraphClient = () => {
+  const chainId = useChainId();
+
+  return useMemo(() => new GraphQLClient(GraphUrls[chainId]), [chainId]);
 };

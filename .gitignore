@@ -41,3 +41,4 @@ next-env.d.ts
 
 storybook-static
 types/generated
+types/gql
