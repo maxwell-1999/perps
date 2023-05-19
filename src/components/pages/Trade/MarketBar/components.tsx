@@ -26,7 +26,7 @@ export const ResponsiveFlex = styled(Flex)`
   height: 100%;
   justify-content: space-between;
   width: 100%;
-  @media (min-width: ${breakpoints.sm}) {
+  @media (min-width: ${breakpoints.md}) {
     width: initial;
     justify-content: flex-start;
   }
@@ -46,27 +46,27 @@ export const DesktopContainer = styled(Flex)`
     background: ${colors.brand.whiteAlpha[20]};
     border-radius: 10px;
   }
-  @media (min-width: ${breakpoints.sm}) {
+  @media (min-width: ${breakpoints.md}) {
     display: flex;
   }
 `;
 
 export const PriceContainer = styled(BaseMarketContainer)`
   margin-right: 14px;
-  @media (min-width: ${breakpoints.sm}) {
+  @media (min-width: ${breakpoints.md}) {
     margin-right: 32px;
   }
 `;
 
 export const MarketContainer = styled(BaseMarketContainer)<{ mobileOnly?: boolean }>`
-  @media (min-width: ${breakpoints.sm}) {
+  @media (min-width: ${breakpoints.md}) {
     display: ${({ mobileOnly }) => (mobileOnly ? "none" : "flex")};
   }
 `;
 
 export const DividerStyled = styled(Divider)`
   margin-right: 14px;
-  @media (min-width: ${breakpoints.sm}) {
+  @media (min-width: ${breakpoints.md}) {
     display: none;
   }
 `;

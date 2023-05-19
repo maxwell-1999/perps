@@ -26,6 +26,10 @@ const Container = defineStyleConfig({
       )(props)}`,
       backdropFilter: "blur(107px)",
     }),
+    pink: (props: StyleFunctionProps) => ({
+      bg: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
+      border: `1px solid ${colors.brand.purple.alpha}`,
+    }),
   },
   defaultProps: {
     variant: "transparent",

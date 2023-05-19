@@ -4,16 +4,16 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverBody,
-  PopoverCloseButton,
   Text,
   Flex,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Button } from "@ds/Button";
+import { Button, IconButton } from "@ds/Button";
 import { useMarketContext } from "@/contexts/marketContext";
 import { PairLabel, HamburgerIcon, AssetButton } from "./components";
 import { useSelectorCopy } from "../hooks";
 import { ASSET_METADATA, L2SupportedAsset } from "@/constants/currencies";
+import CloseX from "@public/icons/close-x.svg";
 
 function MarketSelector() {
   const { selectedMarket, setSelectedMarket } = useMarketContext();
@@ -41,7 +41,12 @@ function MarketSelector() {
         <PopoverHeader>
           <Flex flex={1} alignItems="center" justifyContent="space-between" mb="14px">
             <Text fontSize="17px">{copy.switchMarket}</Text>
-            <PopoverCloseButton />
+            <IconButton
+              variant="text"
+              icon={<CloseX />}
+              aria-label={copy.close}
+              onClick={onClose}
+            />
           </Flex>
           <Flex flex={1} justifyContent="space-between">
             <Text variant="label">{copy.market}</Text>

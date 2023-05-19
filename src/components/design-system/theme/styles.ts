@@ -10,8 +10,8 @@ const styles = {
 
 export const breakpoints = {
   base: "0em",
-  sm: "40em",
-  md: "48em",
+  sm: "28em",
+  md: "40em",
   lg: "62em",
   xl: "80em",
 };

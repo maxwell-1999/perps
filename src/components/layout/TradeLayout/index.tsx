@@ -26,7 +26,7 @@ const GridContainer = styled.div`
   grid-template-columns: 1fr;
   grid-template-rows: 54px 54px 1fr;
 
-  @media (min-width: ${breakpoints.sm}) {
+  @media (min-width: ${breakpoints.md}) {
     grid-template-areas: ${desktopLayout};
     grid-template-columns: 304px 1fr;
     grid-template-rows: 54px 54px 1fr 0.7fr;

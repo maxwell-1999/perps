@@ -5,10 +5,22 @@
       "value": "Connect"
     }
   ],
+  "/0TOL5": [
+    {
+      "type": 0,
+      "value": "Amount"
+    }
+  ],
   "47FYwb": [
     {
       "type": 0,
       "value": "Cancel"
+    }
+  ],
+  "5SRJp1": [
+    {
+      "type": 0,
+      "value": "Amount to close..."
     }
   ],
   "6JqZwg": [
@@ -27,6 +39,12 @@
     {
       "type": 0,
       "value": "Trade"
+    }
+  ],
+  "9hIQHG": [
+    {
+      "type": 0,
+      "value": "You will receive..."
     }
   ],
   "BWsWnT": [
@@ -75,6 +93,12 @@
       "value": "title"
     }
   ],
+  "LzlMDx": [
+    {
+      "type": 0,
+      "value": "Close position"
+    }
+  ],
   "OOk+VQ": [
     {
       "type": 0,
@@ -85,6 +109,12 @@
     {
       "type": 0,
       "value": "Perennial is the defi-native derivatives platform for traders and developers."
+    }
+  ],
+  "RoqJiX": [
+    {
+      "type": 0,
+      "value": "Collateral"
     }
   ],
   "WBB92z": [

@@ -1,15 +1,6 @@
 import { Flex, FlexProps } from "@chakra-ui/react";
 import { DataRow } from "@/components/design-system";
 import { useReceiptCopy } from "../hooks";
-// import { BigNumberish } from "ethers";
-
-// export interface ReceiptProps {
-//   entryPrice: string;
-//   exitPrice: string;
-//   priceImpact: string;
-//   liquidationPrice: string;
-//   tradingFee: string;
-// }
 
 const receiptData = {
   entryPrice: "0.000",
@@ -19,17 +10,19 @@ const receiptData = {
   tradingFee: "0.000",
 };
 
-function Receipt(props: FlexProps) {
+interface ReceiptProps {
+  hideEntry?: boolean;
+}
+
+export function TradeReceipt({ hideEntry, ...props }: ReceiptProps & FlexProps) {
   const copy = useReceiptCopy();
   const { entryPrice, exitPrice, priceImpact, liquidationPrice, tradingFee } = receiptData;
   return (
     <Flex flexDirection="column" {...props}>
-      <DataRow label={copy.entryExit} value={`${entryPrice} / ${exitPrice}`} />
+      {!hideEntry && <DataRow label={copy.entryExit} value={`${entryPrice} / ${exitPrice}`} />}
       <DataRow label={copy.priceImpact} value={priceImpact} />
       <DataRow label={copy.liquidationPrice} value={liquidationPrice} />
       <DataRow label={copy.tradingFee} value={tradingFee} />
     </Flex>
   );
 }
-
-export default Receipt;

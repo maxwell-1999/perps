@@ -8,6 +8,7 @@ const colors = {
     purple: {
       250: "#dc5bea",
       300: "#E254EF",
+      alpha: "rgba(234, 92, 247, 0.3)",
     },
     gray: {
       100: "#929292",

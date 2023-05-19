@@ -30,11 +30,18 @@ export function useStyles() {
   const textColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50]);
   const textBtnColor = colors.brand.purple[300];
   const textBtnHoverColor = colors.brand.purple[250];
+  const dashedBorderColor = useColorModeValue(
+    colors.brand.blackAlpha[20],
+    colors.brand.whiteAlpha[20],
+  );
+  const percentBtnBg = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5]);
 
   return {
     textColor,
     textBtnColor,
     textBtnHoverColor,
+    dashedBorderColor,
+    percentBtnBg,
   };
 }
 
@@ -49,6 +56,11 @@ export function useTradeFormCopy() {
     close: intl.formatMessage({ defaultMessage: "Close" }),
     modifyPosition: intl.formatMessage({ defaultMessage: "Modify position" }),
     cancel: intl.formatMessage({ defaultMessage: "Cancel" }),
+    closePosition: intl.formatMessage({ defaultMessage: "Close position" }),
+    amountToClose: intl.formatMessage({ defaultMessage: "Amount to close..." }),
+    youWillReceive: intl.formatMessage({ defaultMessage: "You will receive..." }),
+    collateral: intl.formatMessage({ defaultMessage: "Collateral" }),
+    amount: intl.formatMessage({ defaultMessage: "Amount" }),
   };
 }
 
@@ -61,3 +73,14 @@ export function useReceiptCopy() {
     tradingFee: intl.formatMessage({ defaultMessage: "Trading fee" }),
   };
 }
+
+export const getContainerVariant = (formState: FormState) => {
+  switch (formState) {
+    case FormState.modify:
+      return "active";
+    case FormState.close:
+      return "pink";
+    default:
+      return "transparent";
+  }
+};
