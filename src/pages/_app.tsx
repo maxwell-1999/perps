@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "@rainbow-me/rainbowkit/styles.css";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
 import { IntlProvider } from "react-intl";
@@ -39,7 +40,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <IntlProvider locale={locale} defaultLocale={defaultLocale} messages={messages}>
       <QueryClientProvider client={queryClient}>
         <WagmiConfig config={wagmiConfig}>
-          <RainbowKitProvider chains={chains} theme={darkTheme()}>
+          <RainbowKitProvider chains={chains} theme={darkTheme()} modalSize="compact">
             <ChakraProvider theme={theme}>
               <CSSReset />
               <Component {...pageProps} />
