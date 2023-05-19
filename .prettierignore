@@ -16,3 +16,6 @@ yarn.lock
 .next/
 
 /lang/
+
+types/generated/
+storybook-static/

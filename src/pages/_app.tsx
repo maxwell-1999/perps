@@ -4,14 +4,15 @@ import { useRouter } from "next/router";
 import { IntlProvider } from "react-intl";
 import type { AppProps } from "next/app";
 import { ChakraProvider, CSSReset } from "@chakra-ui/react";
-import { ConnectKitProvider, getDefaultClient } from "connectkit";
-import { WagmiConfig, createClient } from "wagmi";
+import { WagmiConfig } from "wagmi";
 import theme from "@ds/theme";
-
-import { connectKitProviderOptions, clientConfig } from "../constants";
 import English from "../../lang/compiled-locales/en.json";
+import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { wagmiConfig, chains } from "@/constants/network";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-const client = createClient(getDefaultClient(clientConfig));
+const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: AppProps) {
   const { locale = "en", defaultLocale = "en" } = useRouter();
@@ -29,14 +30,17 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <IntlProvider locale={locale} defaultLocale={defaultLocale} messages={messages}>
-      <WagmiConfig client={client}>
-        <ConnectKitProvider options={connectKitProviderOptions} theme="midnight">
-          <ChakraProvider theme={theme}>
-            <CSSReset />
-            <Component {...pageProps} />
-          </ChakraProvider>
-        </ConnectKitProvider>
-      </WagmiConfig>
+      <QueryClientProvider client={queryClient}>
+        <WagmiConfig config={wagmiConfig}>
+          <RainbowKitProvider chains={chains} theme={darkTheme()}>
+            <ChakraProvider theme={theme}>
+              <CSSReset />
+              <Component {...pageProps} />
+            </ChakraProvider>
+          </RainbowKitProvider>
+        </WagmiConfig>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </IntlProvider>
   );
 }

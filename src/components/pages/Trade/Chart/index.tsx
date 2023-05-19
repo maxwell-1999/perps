@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { Container } from "@/components/design-system";
-import { ASSET_METADATA } from "@/constants/currencies";
+import { AssetMetadata } from "@/constants/assets";
 import { useMarketContext } from "@/contexts/marketContext";
 
 const AdvancedRealTimeChart = dynamic(() => import("./TradingviewWidget"), { ssr: false });
@@ -11,8 +11,8 @@ function Chart() {
   return (
     <Container height="100%" p={0}>
       <AdvancedRealTimeChart
-        key={ASSET_METADATA[selectedMarket].tvTicker}
-        symbol={ASSET_METADATA[selectedMarket].tvTicker}
+        key={AssetMetadata[selectedMarket].tvTicker}
+        symbol={AssetMetadata[selectedMarket].tvTicker}
         theme="dark"
         // Circle back to this later
         // overrides={{

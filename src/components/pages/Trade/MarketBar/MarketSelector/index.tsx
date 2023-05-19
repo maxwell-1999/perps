@@ -12,11 +12,12 @@ import { Button, IconButton } from "@ds/Button";
 import { useMarketContext } from "@/contexts/marketContext";
 import { PairLabel, HamburgerIcon, AssetButton } from "./components";
 import { useSelectorCopy } from "../hooks";
-import { ASSET_METADATA, L2SupportedAsset } from "@/constants/currencies";
+import { AssetMetadata, SupportedAsset } from "@/constants/assets";
+import { ChainMarkets } from "@/constants/markets";
 import CloseX from "@public/icons/close-x.svg";
 
 function MarketSelector() {
-  const { selectedMarket, setSelectedMarket } = useMarketContext();
+  const { chainId, selectedMarket, setSelectedMarket } = useMarketContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const copy = useSelectorCopy();
 
@@ -32,7 +33,7 @@ function MarketSelector() {
     >
       <PopoverTrigger>
         <Button
-          label={<PairLabel market={ASSET_METADATA[selectedMarket]} />}
+          label={<PairLabel market={AssetMetadata[selectedMarket]} />}
           variant="pairSelector"
           rightIcon={<HamburgerIcon />}
         />
@@ -54,10 +55,10 @@ function MarketSelector() {
           </Flex>
         </PopoverHeader>
         <PopoverBody>
-          {Object.keys(ASSET_METADATA).map((market) => (
+          {Object.keys(ChainMarkets[chainId]).map((market) => (
             <AssetButton
               key={market}
-              assetMetaData={ASSET_METADATA[market as L2SupportedAsset]}
+              assetMetaData={AssetMetadata[market as SupportedAsset]}
               price="0.0000"
               liquidity="0.0000"
               isSelected={market === selectedMarket}

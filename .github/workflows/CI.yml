@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Generate types
+        run: yarn gen:abi-typings
+
       - name: Typecheck
         run: yarn tsc
 

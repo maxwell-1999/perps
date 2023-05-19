@@ -5,12 +5,12 @@ import { Input, Pill } from "@ds/Input";
 import { formIds, buttonPercentValues } from "../constants";
 import { useTradeFormCopy, useStyles } from "../hooks";
 import { TradeReceipt } from "./Receipt";
-import { AssetMetadata, L2SupportedAsset } from "@/constants/currencies";
+import { AssetMetadata, SupportedAsset } from "@/constants/assets";
 import { Form, FormOverlayHeader } from "./styles";
 
 interface ClosePositionFormProps {
   positionSize: string; // placeholder for now
-  assetMetadata: AssetMetadata[L2SupportedAsset];
+  assetMetadata: AssetMetadata[SupportedAsset];
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
@@ -40,7 +40,7 @@ function ClosePositionForm(props: ClosePositionFormProps) {
               </Text>
             </FormLabel>
           }
-          rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+          rightEl={<Pill text={assetMetadata.baseCurrency} />}
           mb="12px"
         />
         <Flex mb="12px">
@@ -72,7 +72,7 @@ function ClosePositionForm(props: ClosePositionFormProps) {
               </Text>
             </FormLabel>
           }
-          rightEl={<Pill text={assetMetadata.baseCurrency} />}
+          rightEl={<Pill text={assetMetadata.quoteCurrency} />}
           mb="12px"
         />
       </Flex>
