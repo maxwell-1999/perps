@@ -8,7 +8,7 @@ export enum L2SupportedAsset {
 }
 
 export enum BaseCurrency {
-  eth = "eth",
+  usd = "usd",
 }
 
 export type AssetMetadata = {
@@ -29,7 +29,7 @@ export const ASSET_METADATA: AssetMetadata = {
     name: "Bitcoin",
     displayDecimals: 2,
     tvTicker: "CRYPTO:BTCUSD",
-    baseCurrency: BaseCurrency.eth,
+    baseCurrency: BaseCurrency.usd,
     quoteCurrency: L2SupportedAsset.btc,
     icon: ethLogo,
   },
@@ -38,7 +38,7 @@ export const ASSET_METADATA: AssetMetadata = {
     name: "Ethereum",
     displayDecimals: 2,
     tvTicker: "CRYPTO:ETHUSD",
-    baseCurrency: BaseCurrency.eth,
+    baseCurrency: BaseCurrency.usd,
     quoteCurrency: L2SupportedAsset.eth,
     icon: ethLogo,
   },
@@ -47,7 +47,7 @@ export const ASSET_METADATA: AssetMetadata = {
     name: "Arbitrum",
     displayDecimals: 4,
     tvTicker: "CRYPTO:ARBIUSD",
-    baseCurrency: BaseCurrency.eth,
+    baseCurrency: BaseCurrency.usd,
     quoteCurrency: L2SupportedAsset.arb,
     icon: ethLogo,
   },
@@ -56,7 +56,7 @@ export const ASSET_METADATA: AssetMetadata = {
     name: "Chainlink",
     displayDecimals: 4,
     tvTicker: "CRYPTO:LINKUSD",
-    baseCurrency: BaseCurrency.eth,
+    baseCurrency: BaseCurrency.usd,
     quoteCurrency: L2SupportedAsset.link,
     icon: ethLogo,
   },

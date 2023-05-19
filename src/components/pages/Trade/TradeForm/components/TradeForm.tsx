@@ -6,7 +6,7 @@ import { Slider } from "@ds/Slider";
 import Toggle from "@/components/shared/Toggle";
 import { orderSides, OrderSide, formIds } from "../constants";
 import { useStyles, useTradeFormCopy } from "../hooks";
-import Receipt from "./Receipt";
+import { TradeReceipt } from "./Receipt";
 import { AssetMetadata, L2SupportedAsset } from "@/constants/currencies";
 
 interface TradeFormProps {
@@ -38,7 +38,7 @@ function TradeForm(props: TradeFormProps) {
             fontSize="13px"
             color={textBtnColor}
             _hover={{ color: textBtnHoverColor }}
-            onClick={() => setTradeFormState(FormState.modify)}
+            onClick={() => setTradeFormState(FormState.close)}
           />
         </Flex>
         <Flex mb="14px">
@@ -47,7 +47,7 @@ function TradeForm(props: TradeFormProps) {
         <Input
           type="number"
           id={formIds.collateral}
-          labelText="Collateral"
+          labelText={copy.collateral}
           placeholder="0.0000"
           rightLabel={
             <FormLabel mr={0} mb={0}>
@@ -62,7 +62,7 @@ function TradeForm(props: TradeFormProps) {
         <Input
           type="number"
           id={formIds.amount}
-          labelText="Amount"
+          labelText={copy.amount}
           placeholder="0.0000"
           rightLabel={
             <FormLabel mr={0} mb={0}>
@@ -91,7 +91,7 @@ function TradeForm(props: TradeFormProps) {
       </Flex>
       <Divider />
       <Flex flexDirection="column" p="16px">
-        <Receipt mb="25px" px="3px" />
+        <TradeReceipt mb="25px" px="3px" />
         <Button type="submit" label={copy.placeTrade} />
       </Flex>
     </form>

@@ -27,8 +27,8 @@ module.exports = {
         props: {
           include: [
             ["*", "label"],
-            // check `message` of any component.
             ["*", "message"],
+            ["*", "labelText"],
           ],
           // Exclude will always override include.
           exclude: [],

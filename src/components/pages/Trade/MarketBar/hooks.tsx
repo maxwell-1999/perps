@@ -6,6 +6,7 @@ export const useSelectorCopy = () => {
     switchMarket: intl.formatMessage({ defaultMessage: "Switch market" }),
     market: intl.formatMessage({ defaultMessage: "Market" }),
     priceLiquidity: intl.formatMessage({ defaultMessage: "Price / Liquidity" }),
+    close: intl.formatMessage({ defaultMessage: "Close" }),
   };
 };
 

@@ -2,7 +2,7 @@ import { Flex, FlexProps, useStyleConfig } from "@chakra-ui/react";
 
 export interface ContainerProps {
   children?: React.ReactNode;
-  variant?: "transparent" | "active";
+  variant?: "transparent" | "active" | "pink";
 }
 
 export const Container: React.FC<ContainerProps & FlexProps> = ({

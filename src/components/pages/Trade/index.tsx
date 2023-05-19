@@ -21,7 +21,7 @@ const NavBar = dynamic(() => import("@/components/shared/NavBar"), {
 const POSITION_MANAGER = "Position Manager";
 
 export default function Trade() {
-  const isBase = useBreakpointValue({ base: true, sm: false });
+  const isBase = useBreakpointValue({ base: true, md: false });
   return (
     <MarketProvider>
       <TradeFormProvider>

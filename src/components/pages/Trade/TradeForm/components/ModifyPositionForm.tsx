@@ -6,7 +6,7 @@ import { Slider } from "@ds/Slider";
 import Toggle from "@/components/shared/Toggle";
 import { orderSides, OrderSide, formIds } from "../constants";
 import { useTradeFormCopy } from "../hooks";
-import Receipt from "./Receipt";
+import { TradeReceipt } from "./Receipt";
 import CloseX from "@public/icons/close-x.svg";
 import { AssetMetadata, L2SupportedAsset } from "@/constants/currencies";
 
@@ -42,7 +42,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
         <Input
           type="number"
           id={formIds.collateral}
-          labelText="Collateral"
+          labelText={copy.collateral}
           placeholder="0.0000"
           rightLabel={
             <FormLabel mr={0} mb={0}>
@@ -57,7 +57,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
         <Input
           type="number"
           id={formIds.amount}
-          labelText="Amount"
+          labelText={copy.amount}
           placeholder="0.0000"
           rightLabel={
             <FormLabel mr={0} mb={0}>
@@ -86,7 +86,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
       </Flex>
       <Divider />
       <Flex flexDirection="column" p="16px">
-        <Receipt mb="25px" px="3px" />
+        <TradeReceipt mb="25px" px="3px" />
         <ButtonGroup>
           <Button
             label={copy.cancel}
