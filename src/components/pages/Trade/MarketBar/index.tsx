@@ -36,9 +36,8 @@ export default function MarketBar() {
 
   const longRate = (snapshot?.long?.rate ?? 0n) * Hour;
   const shortRate = (snapshot?.short?.rate ?? 0n) * Hour;
-  const change =
-    (snapshot?.long?.latestVersion.price ?? 0n) -
-    BigInt(dailyData?.start?.at(0)?.toVersionPrice ?? 0);
+  const currentPrice = snapshot?.long.latestVersion.price ?? 0n;
+  const change = currentPrice - BigInt(dailyData?.start?.at(0)?.toVersionPrice ?? currentPrice);
 
   const formattedValues = {
     price: formatBig18USDPrice(snapshot?.long.latestVersion.price),
@@ -51,10 +50,10 @@ export default function MarketBar() {
     )}`,
     low: formatBig18USDPrice(BigInt(dailyData?.low?.at(0)?.toVersionPrice || 0)),
     high: formatBig18USDPrice(BigInt(dailyData?.high?.at(0)?.toVersionPrice || 0)),
-    volume: formatBig18USDPrice(totalVolume),
-    openInterest: `${formatBig18USDPrice(
-      snapshot?.long.openInterest.taker,
-    )} / ${formatBig18USDPrice(snapshot?.short.openInterest.taker)}`,
+    volume: formatBig18USDPrice(totalVolume, { compact: true }),
+    openInterest: `${formatBig18USDPrice(snapshot?.long.openInterest.taker, {
+      compact: true,
+    })} / ${formatBig18USDPrice(snapshot?.short.openInterest.taker, { compact: true })}`,
   };
 
   return (
