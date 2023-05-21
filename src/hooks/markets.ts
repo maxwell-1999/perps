@@ -1,52 +1,43 @@
 import { useQuery } from "@tanstack/react-query";
-import { Address } from "viem";
+import { getAddress } from "viem";
 import { SupportedAsset } from "@/constants/assets";
 
 import { useLens } from "./contracts";
 import { ChainMarkets } from "@/constants/markets";
 import { useChainId, useGraphClient } from "./network";
-import { last24hrBounds } from "@/utils/time";
+import { last24hrBounds } from "@/utils/timeUtils";
 import { gql } from "@t/gql";
+import { notEmpty } from "@/utils/arrayUtils";
+import { IPerennialLens } from "@t/generated/LensAbi";
 
-export const useAssetSnapshot = (asset: SupportedAsset) => {
+export const useChainAssetsSnapshots = () => {
   const chainId = useChainId();
   const lens = useLens();
 
   return useQuery({
-    queryKey: ["assetSnapshot", chainId, asset],
+    queryKey: ["assetSnapshots", chainId],
     queryFn: async () => {
-      const market = ChainMarkets[chainId][asset];
-      if (!market) return;
+      const assets = Object.keys(ChainMarkets[chainId]) as SupportedAsset[];
+      const markets = assets
+        .map((asset) => ChainMarkets[chainId][asset])
+        .filter(notEmpty)
+        .map((market) => [market.long, market.short].filter(notEmpty))
+        .flat();
 
-      const snapshots = await lens["snapshots(address[])"].staticCall([market.long, market.short]);
+      const snapshots = await lens["snapshots(address[])"].staticCall(markets);
 
-      return {
-        long: snapshots[0],
-        short: snapshots[1],
-      };
-    },
-  });
-};
+      return assets.reduce((acc, asset) => {
+        acc[asset] = {
+          long: snapshots.find(
+            (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.long,
+          ),
+          short: snapshots.find(
+            (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.short,
+          ),
+        };
 
-export const useUserAssetSnapshot = (user?: Address, asset?: SupportedAsset) => {
-  const chainId = useChainId();
-  const lens = useLens();
-  const market = !!asset && ChainMarkets[chainId][asset];
-
-  return useQuery({
-    queryKey: ["userAssetSnapshot", chainId, user, asset],
-    enabled: !!user && !!asset && !!market,
-    queryFn: async () => {
-      if (!user || !market) return;
-      const [longSnapshot, shortSnapshot] = await Promise.all([
-        lens["snapshot(address,address)"].staticCall(user, market.long),
-        lens["snapshot(address,address)"].staticCall(user, market.short),
-      ]);
-
-      return {
-        long: longSnapshot,
-        short: shortSnapshot,
-      };
+        return acc;
+      }, {} as { [key in SupportedAsset]?: { long?: IPerennialLens.ProductSnapshotStructOutput; short?: IPerennialLens.ProductSnapshotStructOutput } });
     },
   });
 };
@@ -98,8 +89,8 @@ export const useAsset24hrData = (asset: SupportedAsset) => {
       `);
 
       const result = await graphClient.request(query, {
-        products: [market.long, market.short],
-        long: market.long,
+        products: [market.long, market.short].filter(notEmpty),
+        long: market.long ?? market.short,
         from: from.toString(),
         to: to.toString(),
       });

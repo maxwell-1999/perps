@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { DefaultChain } from "@/constants/network";
 import { SupportedAsset, AssetMetadata } from "@/constants/assets";
-import { useAsset24hrData, useAssetSnapshot } from "@/hooks/markets";
+import { useAsset24hrData, useChainAssetsSnapshots } from "@/hooks/markets";
 import { IPerennialLens } from "@t/generated/LensAbi";
 import { useChainId } from "@/hooks/network";
 import { SupportedChainId } from "@/constants/network";
@@ -12,11 +12,17 @@ type MarketContextType = {
   assetMetadata: (typeof AssetMetadata)[SupportedAsset];
   selectedMarket: SupportedAsset;
   setSelectedMarket: (asset: SupportedAsset) => void;
-  snapshot?: {
-    long: IPerennialLens.ProductSnapshotStructOutput;
-    short: IPerennialLens.ProductSnapshotStructOutput;
+  snapshots?: {
+    [key in SupportedAsset]?: {
+      long?: IPerennialLens.ProductSnapshotStructOutput;
+      short?: IPerennialLens.ProductSnapshotStructOutput;
+    };
   };
-  dailyData?: Get24hrDataQuery;
+  selectedMarketSnapshot?: {
+    long?: IPerennialLens.ProductSnapshotStructOutput;
+    short?: IPerennialLens.ProductSnapshotStructOutput;
+  };
+  selectedMarketDailyData?: Get24hrDataQuery;
 };
 
 const MarketContext = createContext<MarketContextType>({
@@ -26,14 +32,15 @@ const MarketContext = createContext<MarketContextType>({
   setSelectedMarket: (asset: SupportedAsset) => {
     asset;
   },
-  snapshot: undefined,
-  dailyData: undefined,
+  snapshots: undefined,
+  selectedMarketSnapshot: undefined,
+  selectedMarketDailyData: undefined,
 });
 
 export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId();
   const [selectedMarket, _setSelectedMarket] = useState<SupportedAsset>(SupportedAsset.eth);
-  const { data: snapshot } = useAssetSnapshot(selectedMarket);
+  const { data: snapshots } = useChainAssetsSnapshots();
   const { data: dailyData } = useAsset24hrData(selectedMarket);
 
   useEffect(() => {
@@ -64,8 +71,9 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
         chainId,
         selectedMarket,
         setSelectedMarket,
-        snapshot,
-        dailyData,
+        snapshots,
+        selectedMarketSnapshot: snapshots?.[selectedMarket],
+        selectedMarketDailyData: dailyData,
         assetMetadata: AssetMetadata[selectedMarket],
       }}
     >

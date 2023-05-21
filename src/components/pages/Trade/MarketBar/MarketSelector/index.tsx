@@ -15,9 +15,10 @@ import { useSelectorCopy } from "../hooks";
 import { AssetMetadata, SupportedAsset } from "@/constants/assets";
 import { ChainMarkets } from "@/constants/markets";
 import CloseX from "@public/icons/close-x.svg";
+import { Big18Math, formatBig18USDPrice } from "@/utils/big18Utils";
 
 function MarketSelector() {
-  const { chainId, selectedMarket, setSelectedMarket } = useMarketContext();
+  const { chainId, selectedMarket, setSelectedMarket, snapshots } = useMarketContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const copy = useSelectorCopy();
 
@@ -59,8 +60,20 @@ function MarketSelector() {
             <AssetButton
               key={market}
               assetMetaData={AssetMetadata[market as SupportedAsset]}
-              price="0.0000"
-              liquidity="0.0000"
+              price={formatBig18USDPrice(
+                Big18Math.abs(
+                  snapshots?.[market as SupportedAsset]?.long?.latestVersion.price ??
+                    snapshots?.[market as SupportedAsset]?.short?.latestVersion.price ??
+                    0n,
+                ),
+              )}
+              liquidity={`${formatBig18USDPrice(
+                snapshots?.[market as SupportedAsset]?.long?.openInterest.maker ?? 0n,
+                { compact: true },
+              )} / ${formatBig18USDPrice(
+                snapshots?.[market as SupportedAsset]?.short?.openInterest.maker ?? 0n,
+                { compact: true },
+              )}`}
               isSelected={market === selectedMarket}
               onClick={() => {
                 setSelectedMarket(market as any);

@@ -1,10 +1,12 @@
 import { arbitrum, arbitrumGoerli, baseGoerli, mainnet, goerli } from "wagmi/chains";
-import { Address, getAddress, zeroAddress } from "viem";
+import { Address, getAddress } from "viem";
 import { SupportedAsset } from "@/constants/assets";
 import { SupportedChainId } from "@/constants/network";
 
 export const ChainMarkets: {
-  [chainId in SupportedChainId]: { [asset in SupportedAsset]?: { long: Address; short: Address } };
+  [chainId in SupportedChainId]: {
+    [asset in SupportedAsset]?: { long?: Address; short?: Address };
+  };
 } = {
   [arbitrumGoerli.id]: {
     btc: {
@@ -42,18 +44,15 @@ export const ChainMarkets: {
       short: getAddress("0xfeD3E166330341e0305594B8c6e6598F9f4Cbe9B"),
     },
     msqth: {
-      long: getAddress("0xfed3e166330341e0305594b8c6e6598f9f4cbe9b"),
-      short: zeroAddress,
+      long: getAddress("0x60b24e58A46896724f8E2B18F18c801976d2b569"),
     },
   },
   [goerli.id]: {
     eth: {
-      long: zeroAddress,
       short: getAddress("0xe45602c350d99dcf00ef8f53430c6affd6b029aa"),
     },
     msqth: {
       long: getAddress("0x3a5358300bffcf2f13af8c6d2ede0e5580ded9d8"),
-      short: zeroAddress,
     },
   },
 };

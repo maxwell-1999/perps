@@ -12,7 +12,7 @@ import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { wagmiConfig, chains } from "@/constants/network";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Hour } from "@/utils/time";
+import { Hour } from "@/utils/timeUtils";
 
 const queryClient = new QueryClient({
   defaultOptions: {

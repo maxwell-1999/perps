@@ -14,7 +14,7 @@ import { useMarketBarCopy } from "./hooks";
 import { Big18Math, formatBig18Percent, formatBig18USDPrice } from "@/utils/big18Utils";
 import { useMarketContext } from "@/contexts/marketContext";
 import { useMemo } from "react";
-import { Hour } from "@/utils/time";
+import { Hour } from "@/utils/timeUtils";
 
 const MarketSelector = dynamic(() => import("./MarketSelector"), {
   ssr: false,
@@ -27,7 +27,8 @@ const MarketSelector = dynamic(() => import("./MarketSelector"), {
 
 export default function MarketBar() {
   const copy = useMarketBarCopy();
-  const { snapshot, dailyData } = useMarketContext();
+  const { selectedMarketSnapshot: snapshot, selectedMarketDailyData: dailyData } =
+    useMarketContext();
 
   const totalVolume = useMemo(() => {
     if (!dailyData?.volume) return 0n;
@@ -36,11 +37,13 @@ export default function MarketBar() {
 
   const longRate = (snapshot?.long?.rate ?? 0n) * Hour;
   const shortRate = (snapshot?.short?.rate ?? 0n) * Hour;
-  const currentPrice = snapshot?.long.latestVersion.price ?? 0n;
+  const currentPrice = Big18Math.abs(
+    snapshot?.long?.latestVersion.price ?? snapshot?.short?.latestVersion.price ?? 0n,
+  );
   const change = currentPrice - BigInt(dailyData?.start?.at(0)?.toVersionPrice ?? currentPrice);
 
   const formattedValues = {
-    price: formatBig18USDPrice(snapshot?.long.latestVersion.price),
+    price: formatBig18USDPrice(currentPrice),
     change: formatBig18Percent(
       Big18Math.div(change, BigInt(dailyData?.start?.at(0)?.toVersionPrice || 1)),
     ),
@@ -51,9 +54,9 @@ export default function MarketBar() {
     low: formatBig18USDPrice(BigInt(dailyData?.low?.at(0)?.toVersionPrice || 0)),
     high: formatBig18USDPrice(BigInt(dailyData?.high?.at(0)?.toVersionPrice || 0)),
     volume: formatBig18USDPrice(totalVolume, { compact: true }),
-    openInterest: `${formatBig18USDPrice(snapshot?.long.openInterest.taker, {
+    openInterest: `${formatBig18USDPrice(snapshot?.long?.openInterest.taker, {
       compact: true,
-    })} / ${formatBig18USDPrice(snapshot?.short.openInterest.taker, { compact: true })}`,
+    })} / ${formatBig18USDPrice(snapshot?.short?.openInterest.taker, { compact: true })}`,
   };
 
   return (

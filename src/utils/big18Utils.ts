@@ -67,6 +67,10 @@ export class Big18Math {
     return a === b;
   }
 
+  public static abs(a: bigint): bigint {
+    return a < 0n ? -a : a;
+  }
+
   public static fixedFrom(a: bigint): FixedNumber {
     return FixedNumber.fromValue(a, Big18Math.FIXED_DECIMALS, Big18Math.FIXED_WIDTH);
   }
