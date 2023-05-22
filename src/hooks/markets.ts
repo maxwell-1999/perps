@@ -1,16 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAddress } from "viem";
+import { Address, getAddress, numberToHex } from "viem";
 import { SupportedAsset } from "@/constants/assets";
-
 import { useLens } from "./contracts";
 import { ChainMarkets } from "@/constants/markets";
 import { useChainId, useGraphClient } from "./network";
 import { last24hrBounds } from "@/utils/timeUtils";
 import { gql } from "@t/gql";
-import { notEmpty } from "@/utils/arrayUtils";
-import { IPerennialLens } from "@t/generated/LensAbi";
+import { notEmpty, sum, unique } from "@/utils/arrayUtils";
+import { IPerennialLens, LensAbi } from "@t/generated/LensAbi";
+import { useAccount } from "wagmi";
+import { GetAccountPositionsQuery } from "@t/gql/graphql";
+import { GraphDefaultPageSize, queryAll } from "@/utils/graphUtils";
+import { GraphQLClient } from "graphql-request";
+import { Big18Math } from "@/utils/big18Utils";
+import { calcLiquidationPrice, next, size } from "@/utils/positionUtils";
 
-export const useChainAssetsSnapshots = () => {
+export type AssetSnapshots = {
+  [key in SupportedAsset]?: {
+    long?: IPerennialLens.ProductSnapshotStructOutput;
+    short?: IPerennialLens.ProductSnapshotStructOutput;
+  };
+};
+export const useChainAssetSnapshots = () => {
   const chainId = useChainId();
   const lens = useLens();
 
@@ -37,7 +48,7 @@ export const useChainAssetsSnapshots = () => {
         };
 
         return acc;
-      }, {} as { [key in SupportedAsset]?: { long?: IPerennialLens.ProductSnapshotStructOutput; short?: IPerennialLens.ProductSnapshotStructOutput } });
+      }, {} as AssetSnapshots);
     },
   });
 };
@@ -45,11 +56,12 @@ export const useChainAssetsSnapshots = () => {
 export const useAsset24hrData = (asset: SupportedAsset) => {
   const chainId = useChainId();
   const graphClient = useGraphClient();
+  const market = ChainMarkets[chainId][asset];
 
   return useQuery({
     queryKey: ["asset24Data", chainId, asset],
+    enabled: !!market,
     queryFn: async () => {
-      const market = ChainMarkets[chainId][asset];
       if (!market) return;
 
       const { from, to } = last24hrBounds();
@@ -88,14 +100,242 @@ export const useAsset24hrData = (asset: SupportedAsset) => {
         }
       `);
 
-      const result = await graphClient.request(query, {
+      return graphClient.request(query, {
         products: [market.long, market.short].filter(notEmpty),
         long: market.long ?? market.short,
         from: from.toString(),
         to: to.toString(),
       });
-
-      return result;
     },
   });
+};
+
+export type UserCurrentPositions = {
+  [key in SupportedAsset]?: {
+    long?: Awaited<ReturnType<typeof fetchUserPositionDetails>>;
+    short?: Awaited<ReturnType<typeof fetchUserPositionDetails>>;
+  };
+};
+export const useUserCurrentPositions = () => {
+  const chainId = useChainId();
+  const { address } = useAccount();
+  const lens = useLens();
+  const graphClient = useGraphClient();
+  const { data: productSnapshots } = useChainAssetSnapshots();
+
+  return useQuery({
+    queryKey: ["userCurrentPosition", chainId, address],
+    enabled: !!address && !!productSnapshots,
+    queryFn: async () => {
+      if (!address || !productSnapshots) return;
+      const assets = Object.keys(ChainMarkets[chainId]) as SupportedAsset[];
+      const markets = assets
+        .map((asset) => ChainMarkets[chainId][asset])
+        .filter(notEmpty)
+        .map((market) => [market.long, market.short].filter(notEmpty))
+        .flat();
+
+      const accountSnapshots = await lens["snapshots(address,address[])"].staticCall(
+        address,
+        markets,
+      );
+
+      const query = gql(`
+        query getAccountPositions($account: Bytes!, $products: [Bytes!]!) {
+          positions: productAccountPositions(where: { account: $account, product_in: $products, endBlock: -1 }) {
+            product
+            side
+            depositAmount
+            startBlock
+            startVersion
+            valuePnl
+            preAmount
+            amount
+            fees
+          }
+        }
+      `);
+
+      const positions = await graphClient.request(query, {
+        account: address,
+        products: markets,
+      });
+
+      const positionDetails = await Promise.all(
+        assets.map(async (asset) => {
+          const market = ChainMarkets[chainId][asset];
+          if (!market) return;
+
+          return {
+            asset,
+            long: await fetchUserPositionDetails(
+              address,
+              lens,
+              graphClient,
+              accountSnapshots.find((s) => getAddress(s.productAddress) === market.long),
+              positions.positions.find((p) => getAddress(p.product) === market.long),
+              productSnapshots[asset]?.long,
+            ),
+            short: await fetchUserPositionDetails(
+              address,
+              lens,
+              graphClient,
+              accountSnapshots.find((s) => getAddress(s.productAddress) === market.short),
+              positions.positions.find((p) => getAddress(p.product) === market.short),
+              productSnapshots[asset]?.short,
+            ),
+          };
+        }),
+      );
+
+      return positionDetails.filter(notEmpty).reduce((acc, { asset, long, short }) => {
+        acc[asset] = { long: long || undefined, short: short || undefined };
+        return acc;
+      }, {} as UserCurrentPositions);
+    },
+  });
+};
+
+// Pulls all data required to calculate metrics across a user's current position
+const fetchUserPositionDetails = async (
+  address: Address,
+  lens: LensAbi,
+  graphClient: GraphQLClient,
+  snapshot?: IPerennialLens.UserProductSnapshotStructOutput,
+  graphPosition?: GetAccountPositionsQuery["positions"][0],
+  productSnapshot?: IPerennialLens.ProductSnapshotStructOutput,
+) => {
+  if (!snapshot) return { currentCollateral: 0n };
+  const { productAddress, collateral } = snapshot;
+
+  if (!graphPosition || !productSnapshot) return { currentCollateral: collateral };
+  const { side, startBlock } = graphPosition;
+
+  const query = gql(`
+    query getPositionChanges(
+      $account: Bytes!,
+      $product: Bytes!,
+      $startBlock: BigInt!,
+      $taker: Boolean!,
+      $first: Int!,
+      $skip: Int!
+    ) {
+      takeOpeneds(where:{
+        account: $account,
+        product: $product,
+        blockNumber_gte: $startBlock,
+      }, first: $first, skip: $skip, orderBy: blockNumber, orderDirection: asc) {
+        version
+        amount
+        blockNumber
+      }
+      takeCloseds(where:{
+        account: $account,
+        product: $product,
+        blockNumber_gte: $startBlock,
+      }, first: $first, skip: $skip, orderBy: blockNumber, orderDirection: asc) {
+        version
+        amount
+        blockNumber
+      }
+      makeOpeneds(where:{
+        account: $account,
+        product: $product,
+        blockNumber_gte: $startBlock,
+      }, first: $first, skip: $skip, orderBy: blockNumber, orderDirection: asc) {
+        version
+        amount
+        blockNumber
+      }
+      makeCloseds(where:{
+        account: $account,
+        product: $product,
+        blockNumber_gte: $startBlock,
+      }, first: $first, skip: $skip, orderBy: blockNumber, orderDirection: asc) {
+        version
+        amount
+        blockNumber
+      }
+    }
+  `);
+
+  // Pull all position changes that have occurred since the position was opened
+  const positionChanges = await queryAll(async (page: number) => {
+    return graphClient.request(query, {
+      account: address,
+      product: productAddress,
+      startBlock,
+      taker: side === "taker",
+      first: GraphDefaultPageSize,
+      skip: page * GraphDefaultPageSize,
+    });
+  });
+
+  // Merge opens and closes, sorting by blockNumber
+  const changesMerged = (
+    side === "taker"
+      ? [
+          ...positionChanges.takeOpeneds,
+          ...positionChanges.takeCloseds.map((c) => ({ ...c, amount: -c.amount })),
+        ]
+      : [
+          ...positionChanges.makeOpeneds,
+          ...positionChanges.makeCloseds.map((c) => ({ ...c, amount: -c.amount })),
+        ]
+  ).sort((a, b) => parseInt(a.blockNumber) - parseInt(b.blockNumber));
+
+  // Settle versions is change.version + 1 unless it is the latest version
+  const latestVersion = productSnapshot.latestVersion;
+  const settleVersions = unique(changesMerged.map((c) => BigInt(c.version))).map((v) =>
+    v === latestVersion.version ? v : v + 1n,
+  );
+
+  // Get all prices at the settle versions
+  const atVersions = (await lens.atVersions.staticCall(productAddress, settleVersions)).reduce(
+    (acc, v) => ({ ...acc, [v.version.toString()]: Big18Math.abs(v.price) }),
+    {} as { [key: string]: bigint },
+  );
+
+  // Create a separate sub position for each position change to calculate the average entry price
+  let currentPosition = 0n;
+  const subPositions = changesMerged.map((change) => {
+    const { version, amount } = change;
+    // Use settle version if available, otherwise use current version
+    const price = atVersions[(BigInt(version) + 1n).toString()] ?? atVersions[version];
+    currentPosition = BigInt(amount) + currentPosition;
+
+    return { price, size: currentPosition };
+  });
+
+  // Average Entry = Total Notional / Total Size
+  const averageEntry = Big18Math.div(
+    sum(subPositions.map((p) => Big18Math.mul(p.price, p.size))),
+    sum(subPositions.map((p) => p.size)),
+  );
+
+  // Collateral at the block before the position was opened
+  const startCollateral = await lens["collateral(address,address)"].staticCall(
+    address,
+    productAddress,
+    {
+      blockTag: numberToHex(Number(startBlock) - 1),
+    },
+  );
+
+  return {
+    side,
+    position: snapshot.position[side],
+    nextPosition: next(snapshot.pre, snapshot.position)[side],
+    startCollateral,
+    currentCollateral: collateral,
+    averageEntry,
+    liquidationPrice: calcLiquidationPrice(
+      productSnapshot,
+      next(snapshot.pre, snapshot.position),
+      collateral,
+    ),
+    notional: size(snapshot.openInterest),
+    leverage: Big18Math.div(size(snapshot.openInterest), collateral),
+    fees: graphPosition.fees,
+  };
 };

@@ -1,7 +1,13 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { DefaultChain } from "@/constants/network";
 import { SupportedAsset, AssetMetadata } from "@/constants/assets";
-import { useAsset24hrData, useChainAssetsSnapshots } from "@/hooks/markets";
+import {
+  AssetSnapshots,
+  UserCurrentPositions,
+  useAsset24hrData,
+  useChainAssetSnapshots,
+  useUserCurrentPositions,
+} from "@/hooks/markets";
 import { IPerennialLens } from "@t/generated/LensAbi";
 import { useChainId } from "@/hooks/network";
 import { SupportedChainId } from "@/constants/network";
@@ -12,12 +18,8 @@ type MarketContextType = {
   assetMetadata: (typeof AssetMetadata)[SupportedAsset];
   selectedMarket: SupportedAsset;
   setSelectedMarket: (asset: SupportedAsset) => void;
-  snapshots?: {
-    [key in SupportedAsset]?: {
-      long?: IPerennialLens.ProductSnapshotStructOutput;
-      short?: IPerennialLens.ProductSnapshotStructOutput;
-    };
-  };
+  snapshots?: AssetSnapshots;
+  positions?: UserCurrentPositions;
   selectedMarketSnapshot?: {
     long?: IPerennialLens.ProductSnapshotStructOutput;
     short?: IPerennialLens.ProductSnapshotStructOutput;
@@ -40,8 +42,9 @@ const MarketContext = createContext<MarketContextType>({
 export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId();
   const [selectedMarket, _setSelectedMarket] = useState<SupportedAsset>(SupportedAsset.eth);
-  const { data: snapshots } = useChainAssetsSnapshots();
+  const { data: snapshots } = useChainAssetSnapshots();
   const { data: dailyData } = useAsset24hrData(selectedMarket);
+  const { data: positions } = useUserCurrentPositions();
 
   useEffect(() => {
     // check query params first
@@ -75,6 +78,7 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
         selectedMarketSnapshot: snapshots?.[selectedMarket],
         selectedMarketDailyData: dailyData,
         assetMetadata: AssetMetadata[selectedMarket],
+        positions,
       }}
     >
       {children}
