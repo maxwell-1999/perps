@@ -1,8 +1,9 @@
-import { render } from "@testing-library/react";
-import { ChakraProvider, CSSReset } from "@chakra-ui/react";
-import { JSXElementConstructor, ReactElement, ReactNode } from "react";
-import theme from "@ds/theme";
-import { IntlProvider } from "react-intl";
+import { CSSReset, ChakraProvider } from '@chakra-ui/react'
+import { render } from '@testing-library/react'
+import { JSXElementConstructor, ReactElement, ReactNode } from 'react'
+import { IntlProvider } from 'react-intl'
+
+import theme from '@ds/theme'
 
 const AllTheProviders = ({ children }: { children?: ReactNode }) => {
   return (
@@ -12,14 +13,14 @@ const AllTheProviders = ({ children }: { children?: ReactNode }) => {
         {children}
       </ChakraProvider>
     </IntlProvider>
-  );
-};
+  )
+}
 
 const customRender = (ui: ReactElement<any, string | JSXElementConstructor<any>>, options?: any) =>
-  render(ui, { wrapper: AllTheProviders, ...options });
+  render(ui, { wrapper: AllTheProviders, ...options })
 
 // re-export everything
-export * from "@testing-library/react";
+export * from '@testing-library/react'
 
 // override render method
-export { customRender as render };
+export { customRender as render }

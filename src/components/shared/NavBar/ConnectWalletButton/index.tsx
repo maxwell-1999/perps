@@ -1,11 +1,13 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Button } from "@ds/Button";
-import { useNavCopy } from "../hooks";
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 
-const formatAddress = (address: string) => address.replace(/•+/g, "...");
+import { Button } from '@ds/Button'
+
+import { useNavCopy } from '../hooks'
+
+const formatAddress = (address: string) => address.replace(/•+/g, '...')
 
 const ConnectWalletButton: React.FC = () => {
-  const { connect } = useNavCopy();
+  const { connect } = useNavCopy()
 
   return (
     <ConnectButton.Custom>
@@ -16,10 +18,10 @@ const ConnectWalletButton: React.FC = () => {
             onClick={account ? openAccountModal : openConnectModal}
             variant="transparent"
           />
-        );
+        )
       }}
     </ConnectButton.Custom>
-  );
-};
+  )
+}
 
-export default ConnectWalletButton;
+export default ConnectWalletButton

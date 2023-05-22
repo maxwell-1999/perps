@@ -1,31 +1,33 @@
-import { useRouter } from "next/router";
-import Link from "next/link";
-import { Button, ButtonGroup, IconButton } from "@ds/Button";
-import Logo from "@public/logoTransparent.svg";
-import { useNavCopy } from "../hooks";
+import Logo from '@public/logoTransparent.svg'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+
+import { Button, ButtonGroup, IconButton } from '@ds/Button'
+
+import { useNavCopy } from '../hooks'
 
 interface NavLinkProps {
-  href: string;
-  label: string;
+  href: string
+  label: string
 }
 
 const NavLink: React.FC<NavLinkProps> = ({ href, label }) => {
-  const { pathname } = useRouter();
-  const isActive = pathname === href.toLowerCase();
+  const { pathname } = useRouter()
+  const isActive = pathname === href.toLowerCase()
 
   return (
     <Link href={href} passHref>
-      <Button label={label} variant={isActive ? "transparent" : "text"} p={3} />
+      <Button label={label} variant={isActive ? 'transparent' : 'text'} p={3} />
     </Link>
-  );
-};
+  )
+}
 
 interface LinkSwitcherProps {
-  links: NavLinkProps[];
+  links: NavLinkProps[]
 }
 
 const LinkSwitcher: React.FC<LinkSwitcherProps> = ({ links }) => {
-  const { home } = useNavCopy();
+  const { home } = useNavCopy()
   return (
     <ButtonGroup>
       <Link href="/" passHref>
@@ -35,7 +37,7 @@ const LinkSwitcher: React.FC<LinkSwitcherProps> = ({ links }) => {
         <NavLink key={link.href} href={link.href} label={link.label} />
       ))}
     </ButtonGroup>
-  );
-};
+  )
+}
 
-export default LinkSwitcher;
+export default LinkSwitcher

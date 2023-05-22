@@ -1,22 +1,23 @@
-import type { Preview } from "@storybook/react";
-import theme from "../src/components/design-system/theme";
-import { ChakraProvider, useColorMode, CSSReset } from "@chakra-ui/react";
-import { useEffect } from "react";
-import React from "react";
+import { CSSReset, ChakraProvider, useColorMode } from '@chakra-ui/react'
+import type { Preview } from '@storybook/react'
+import { useEffect } from 'react'
+import React from 'react'
+
+import theme from '../src/components/design-system/theme'
 
 interface ColorModeProps {
-  colorMode: "light" | "dark";
-  children: JSX.Element;
+  colorMode: 'light' | 'dark'
+  children: JSX.Element
 }
 
 function ColorMode(props: ColorModeProps) {
-  const { setColorMode } = useColorMode();
+  const { setColorMode } = useColorMode()
 
   useEffect(() => {
-    setColorMode(props.colorMode);
-  }, [props.colorMode]);
+    setColorMode(props.colorMode)
+  }, [props.colorMode])
 
-  return props.children;
+  return props.children
 }
 
 export const decorators = [
@@ -28,27 +29,27 @@ export const decorators = [
           <Story />
         </ColorMode>
       </ChakraProvider>
-    );
+    )
   },
-];
+]
 
 export const globalTypes = {
   colorMode: {
-    name: "Color Mode",
-    defaultValue: "light",
+    name: 'Color Mode',
+    defaultValue: 'light',
     toolbar: {
       items: [
-        { title: "Light", value: "light" },
-        { title: "Dark", value: "dark" },
+        { title: 'Light', value: 'light' },
+        { title: 'Dark', value: 'dark' },
       ],
       dynamicTitle: true,
     },
   },
-};
+}
 
 const preview: Preview = {
   parameters: {
-    actions: { argTypesRegex: "^on[A-Z].*" },
+    actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -59,6 +60,6 @@ const preview: Preview = {
       theme,
     },
   },
-};
+}
 
-export default preview;
+export default preview

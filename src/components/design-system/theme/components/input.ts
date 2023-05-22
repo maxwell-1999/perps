@@ -1,26 +1,25 @@
-import { inputAnatomy } from "@chakra-ui/anatomy";
-import { createMultiStyleConfigHelpers, defineStyle } from "@chakra-ui/react";
-import colors from "../colors";
+import { inputAnatomy } from '@chakra-ui/anatomy'
+import { createMultiStyleConfigHelpers, defineStyle } from '@chakra-ui/react'
 
-const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(
-  inputAnatomy.keys,
-);
+import colors from '../colors'
+
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(inputAnatomy.keys)
 
 const baseStyle = definePartsStyle({
   field: {
-    borderRadius: "5px",
+    borderRadius: '5px',
     fontWeight: 500,
   },
-});
+})
 
 const md = defineStyle({
-  fontSize: "18px",
-  h: "44px",
-});
+  fontSize: '18px',
+  h: '44px',
+})
 
 const sizes = {
   md: definePartsStyle({ field: md }),
-};
+}
 
 const trade = definePartsStyle({
   field: {
@@ -30,7 +29,7 @@ const trade = definePartsStyle({
       border: `1px solid ${colors.brand.blackAlpha[20]}`,
     },
     _invalid: {
-      borderColor: "red.300",
+      borderColor: 'red.300',
     },
 
     _dark: {
@@ -40,13 +39,13 @@ const trade = definePartsStyle({
         border: `1px solid ${colors.brand.whiteAlpha[20]}`,
       },
       _invalid: {
-        borderColor: "red.300",
+        borderColor: 'red.300',
       },
     },
   },
   element: {
-    width: "fit-content",
+    width: 'fit-content',
   },
-});
+})
 
-export default defineMultiStyleConfig({ baseStyle, variants: { trade }, sizes });
+export default defineMultiStyleConfig({ baseStyle, variants: { trade }, sizes })

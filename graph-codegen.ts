@@ -1,23 +1,23 @@
-import { CodegenConfig } from "@graphql-codegen/cli";
+import { CodegenConfig } from '@graphql-codegen/cli'
 
 const config: CodegenConfig = {
-  schema: "https://subgraph.satsuma-prod.com/4b3062a029bc/equilibria/perennial-arbitrum/api",
-  documents: ["src/**/*.{ts,tsx}"],
+  schema: 'https://subgraph.satsuma-prod.com/4b3062a029bc/equilibria/perennial-arbitrum/api',
+  documents: ['src/**/*.{ts,tsx}'],
   generates: {
-    "./types/gql/": {
-      preset: "client",
+    './types/gql/': {
+      preset: 'client',
       plugins: [],
       presetConfig: {
-        gqlTagName: "gql",
+        gqlTagName: 'gql',
       },
       config: {
         scalars: {
-          BigInt: "string",
+          BigInt: 'string',
         },
       },
     },
   },
   ignoreNoDocuments: true,
-};
+}
 
-export default config;
+export default config

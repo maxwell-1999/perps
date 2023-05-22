@@ -1,49 +1,51 @@
-import { useState } from "react";
-import { Container } from "@ds/Container";
-import { OrderSide } from "./constants";
+import { useState } from 'react'
 
-import TradeForm from "./components/TradeForm";
-import ModifyPositionForm from "./components/ModifyPositionForm";
-import { FormState, useTradeFormState } from "@/contexts/tradeFormContext";
-import { useMarketContext } from "@/contexts/marketContext";
-import { useResetFormOnMarketChange, getContainerVariant } from "./hooks";
-import ClosePositionForm from "./components/ClosePositionForm";
-import WithdrawForm from "./components/WithdrawForm";
+import { useMarketContext } from '@/contexts/marketContext'
+import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
+
+import { Container } from '@ds/Container'
+
+import ClosePositionForm from './components/ClosePositionForm'
+import ModifyPositionForm from './components/ModifyPositionForm'
+import TradeForm from './components/TradeForm'
+import WithdrawForm from './components/WithdrawForm'
+import { OrderSide } from './constants'
+import { getContainerVariant, useResetFormOnMarketChange } from './hooks'
 
 const dummyData = {
-  collateral: "0.000",
-  asset: "ETH",
-  amount: "0.000",
-  positionSize: "20000",
-};
+  collateral: '0.000',
+  asset: 'ETH',
+  amount: '0.000',
+  positionSize: '20000',
+}
 
 function TradeContainer() {
-  const [orderSide, setOrderSide] = useState<OrderSide>(OrderSide.Long);
-  const { formState, setTradeFormState } = useTradeFormState();
-  const { selectedMarket } = useMarketContext();
-  useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState });
+  const [orderSide, setOrderSide] = useState<OrderSide>(OrderSide.Long)
+  const { formState, setTradeFormState } = useTradeFormState()
+  const { selectedMarket } = useMarketContext()
+  useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
 
   const handleSubmitTrade = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert("order submitted");
-  };
+    e.preventDefault()
+    alert('order submitted')
+  }
 
   const handleModifyPosition = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert("modify position");
-  };
+    e.preventDefault()
+    alert('modify position')
+  }
 
   const handleClosePosition = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert("close position");
-  };
+    e.preventDefault()
+    alert('close position')
+  }
 
   const handleWithdrawCollateral = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert("withdraw collateral");
-  };
+    e.preventDefault()
+    alert('withdraw collateral')
+  }
 
-  const containerVariant = getContainerVariant(formState);
+  const containerVariant = getContainerVariant(formState)
 
   return (
     <Container height="100%" p="0" variant={containerVariant}>
@@ -72,7 +74,7 @@ function TradeContainer() {
         <WithdrawForm onSubmit={handleWithdrawCollateral} collateral={dummyData.collateral} />
       )}
     </Container>
-  );
+  )
 }
 
-export default TradeContainer;
+export default TradeContainer

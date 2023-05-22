@@ -1,6 +1,7 @@
-import { StyleFunctionProps, defineStyleConfig } from "@chakra-ui/react";
-import colors from "../colors";
-import { mode } from "@chakra-ui/theme-tools";
+import { StyleFunctionProps, defineStyleConfig } from '@chakra-ui/react'
+import { mode } from '@chakra-ui/theme-tools'
+
+import colors from '../colors'
 
 const Text = defineStyleConfig({
   baseStyle: {
@@ -9,9 +10,9 @@ const Text = defineStyleConfig({
   variants: {
     label: (props: StyleFunctionProps) => ({
       color: mode(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])(props),
-      fontSize: "12px",
+      fontSize: '12px',
     }),
   },
-});
+})
 
-export default Text;
+export default Text

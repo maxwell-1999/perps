@@ -1,18 +1,22 @@
-import "@/styles/globals.css";
-import "@rainbow-me/rainbowkit/styles.css";
-import { useMemo } from "react";
-import { useRouter } from "next/router";
-import { IntlProvider } from "react-intl";
-import type { AppProps } from "next/app";
-import { ChakraProvider, CSSReset } from "@chakra-ui/react";
-import { WagmiConfig } from "wagmi";
-import theme from "@ds/theme";
-import English from "../../lang/compiled-locales/en.json";
-import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { wagmiConfig, chains } from "@/constants/network";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Hour } from "@/utils/timeUtils";
+import { CSSReset, ChakraProvider } from '@chakra-ui/react'
+import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit'
+import '@rainbow-me/rainbowkit/styles.css'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import type { AppProps } from 'next/app'
+import { useRouter } from 'next/router'
+import { useMemo } from 'react'
+import { IntlProvider } from 'react-intl'
+import { WagmiConfig } from 'wagmi'
+
+import { chains, wagmiConfig } from '@/constants/network'
+import '@/styles/globals.css'
+
+import theme from '@ds/theme'
+
+import { Hour } from '@utils/timeUtils'
+
+import English from '../../lang/compiled-locales/en.json'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,21 +24,21 @@ const queryClient = new QueryClient({
       staleTime: Number(1n * Hour) * 1000, // 1 hour in ms
     },
   },
-});
+})
 
 export default function App({ Component, pageProps }: AppProps) {
-  const { locale = "en", defaultLocale = "en" } = useRouter();
+  const { locale = 'en', defaultLocale = 'en' } = useRouter()
 
   const messages = useMemo(() => {
     // add new languages here.
     switch (locale) {
-      case "en":
-      case "en-US":
-        return English;
+      case 'en':
+      case 'en-US':
+        return English
       default:
-        return English;
+        return English
     }
-  }, [locale]);
+  }, [locale])
 
   return (
     <IntlProvider locale={locale} defaultLocale={defaultLocale} messages={messages}>
@@ -50,5 +54,5 @@ export default function App({ Component, pageProps }: AppProps) {
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </IntlProvider>
-  );
+  )
 }

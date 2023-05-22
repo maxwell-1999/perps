@@ -1,17 +1,18 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Box } from "@chakra-ui/react";
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from "./index";
-import { Table } from "../Table/index";
-import { UserData, columns, data } from "../Table/__fixtures__/tableFixture";
+import { Box } from '@chakra-ui/react'
+import type { Meta, StoryObj } from '@storybook/react'
+
+import { UserData, columns, data } from '../Table/__fixtures__/tableFixture'
+import { Table } from '../Table/index'
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from './index'
 
 const meta: Meta<typeof Tabs> = {
-  title: "Design-System/Tabs",
+  title: 'Design-System/Tabs',
   component: Tabs,
-  tags: ["autodocs"],
-};
+  tags: ['autodocs'],
+}
 
-export default meta;
-type Story = StoryObj<typeof Tabs>;
+export default meta
+type Story = StoryObj<typeof Tabs>
 
 export const Default: Story = () => (
   <Tabs>
@@ -32,11 +33,11 @@ export const Default: Story = () => (
       </TabPanel>
     </TabPanels>
   </Tabs>
-);
+)
 
 Default.parameters = {
   controls: { hideNoControlsWarning: true },
-};
+}
 
 export const WithTables: Story = () => (
   <Tabs>
@@ -53,8 +54,8 @@ export const WithTables: Story = () => (
       </TabPanel>
     </TabPanels>
   </Tabs>
-);
+)
 
 WithTables.parameters = {
   controls: { hideNoControlsWarning: true },
-};
+}

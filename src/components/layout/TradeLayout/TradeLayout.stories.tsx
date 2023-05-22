@@ -1,4 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import { useBreakpointValue } from '@chakra-ui/react'
+import type { Meta, StoryObj } from '@storybook/react'
+
+import { Container } from '../../design-system/Container'
 import {
   ChartGridItem,
   HeaderGridItem,
@@ -6,21 +9,19 @@ import {
   PositionManagerGridItem,
   TradeFormGridItem,
   TradeLayout,
-} from "./index";
-import { Container } from "../../design-system/Container";
-import { useBreakpointValue } from "@chakra-ui/react";
+} from './index'
 
 const meta: Meta<typeof TradeLayout> = {
-  title: "Perennial/TradeLayout",
+  title: 'Perennial/TradeLayout',
   component: TradeLayout,
-  tags: ["autodocs"],
-};
+  tags: ['autodocs'],
+}
 
-export default meta;
-type Story = StoryObj<typeof TradeLayout>;
+export default meta
+type Story = StoryObj<typeof TradeLayout>
 
 export const Default: Story = () => {
-  const isBase = useBreakpointValue({ base: true, md: false });
+  const isBase = useBreakpointValue({ base: true, md: false })
   // Offset layout height to account for the storybook header
   return (
     <TradeLayout>
@@ -44,11 +45,11 @@ export const Default: Story = () => {
         </>
       )}
     </TradeLayout>
-  );
-};
+  )
+}
 
 Default.parameters = {
   nextRouter: {
-    path: "/Trade",
+    path: '/Trade',
   },
-};
+}

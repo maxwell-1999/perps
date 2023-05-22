@@ -1,40 +1,38 @@
-import Link from "next/link";
-import { useAccount, useDisconnect } from "wagmi";
 import {
+  Box,
   Flex,
   Stack,
-  Box,
   Text,
   useBreakpointValue,
-  useDisclosure,
   useColorModeValue,
+  useDisclosure,
   useTheme,
-} from "@chakra-ui/react";
-import LinkSwitcher from "./LinkSwitcher";
-import { IconButton, ButtonGroup, Button } from "@ds/Button";
-import { MobileDrawer } from "@ds/MobileDrawer";
-import ConnectWalletButton from "./ConnectWalletButton";
-import { Nav, MobileButtonLabel } from "./styles";
-import { links } from "./constants";
-import { useNavCopy } from "./hooks";
+} from '@chakra-ui/react'
+import BurgerMenu from '@public/icons/burger.svg'
+import RedX from '@public/icons/red-x.svg'
+import Settings from '@public/icons/settings.svg'
+import Logo from '@public/logoTransparent.svg'
+import Link from 'next/link'
+import { useAccount, useDisconnect } from 'wagmi'
 
-import Settings from "@public/icons/settings.svg";
-import RedX from "@public/icons/red-x.svg";
-import BurgerMenu from "@public/icons/burger.svg";
-import Logo from "@public/logoTransparent.svg";
+import { Button, ButtonGroup, IconButton } from '@ds/Button'
+import { MobileDrawer } from '@ds/MobileDrawer'
+
+import ConnectWalletButton from './ConnectWalletButton'
+import LinkSwitcher from './LinkSwitcher'
+import { links } from './constants'
+import { useNavCopy } from './hooks'
+import { MobileButtonLabel, Nav } from './styles'
 
 function NavBar() {
-  const { disconnect } = useDisconnect();
-  const { address } = useAccount();
-  const isBase = useBreakpointValue({ base: true, sm: false });
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const theme = useTheme();
-  const linkUnderlineColor = useColorModeValue(
-    theme.colors.brand.blackAlpha[10],
-    theme.colors.brand.whiteAlpha[10],
-  );
+  const { disconnect } = useDisconnect()
+  const { address } = useAccount()
+  const isBase = useBreakpointValue({ base: true, sm: false })
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const theme = useTheme()
+  const linkUnderlineColor = useColorModeValue(theme.colors.brand.blackAlpha[10], theme.colors.brand.whiteAlpha[10])
 
-  const copy = useNavCopy();
+  const copy = useNavCopy()
 
   return (
     <Nav>
@@ -60,11 +58,7 @@ function NavBar() {
               <Stack>
                 {links.map((link) => (
                   <Link href={link.href} key={link.href} passHref>
-                    <Button
-                      label={<MobileButtonLabel label={link.label} />}
-                      variant="text"
-                      width="100%"
-                    />
+                    <Button label={<MobileButtonLabel label={link.label} />} variant="text" width="100%" />
                     <Box height="1px" width="100%" bg={linkUnderlineColor} mt={2} />
                   </Link>
                 ))}
@@ -81,7 +75,7 @@ function NavBar() {
         )}
       </ButtonGroup>
     </Nav>
-  );
+  )
 }
 
-export default NavBar;
+export default NavBar

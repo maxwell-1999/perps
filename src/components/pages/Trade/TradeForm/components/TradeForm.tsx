@@ -1,29 +1,32 @@
-import { Flex, Text, FormLabel, Divider } from "@chakra-ui/react";
-import { useTradeFormState, FormState } from "@/contexts/tradeFormContext";
-import { Button } from "@ds/Button";
-import { Input, Pill } from "@ds/Input";
-import { Slider } from "@ds/Slider";
-import Toggle from "@/components/shared/Toggle";
-import { orderSides, OrderSide, formIds } from "../constants";
-import { useStyles, useTradeFormCopy } from "../hooks";
-import { TradeReceipt } from "./Receipt";
-import { useMarketContext } from "@/contexts/marketContext";
+import { Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
+
+import Toggle from '@/components/shared/Toggle'
+import { useMarketContext } from '@/contexts/marketContext'
+import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
+
+import { Button } from '@ds/Button'
+import { Input, Pill } from '@ds/Input'
+import { Slider } from '@ds/Slider'
+
+import { OrderSide, formIds, orderSides } from '../constants'
+import { useStyles, useTradeFormCopy } from '../hooks'
+import { TradeReceipt } from './Receipt'
 
 interface TradeFormProps {
-  orderSide: OrderSide;
-  setOrderSide: (orderSide: OrderSide) => void;
-  availableCollateral: string; //bignumberish
-  amount: string; //bignumberish
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  orderSide: OrderSide
+  setOrderSide: (orderSide: OrderSide) => void
+  availableCollateral: string //bignumberish
+  amount: string //bignumberish
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { orderSide, setOrderSide, availableCollateral, amount, onSubmit } = props;
-  const { textColor, textBtnColor, textBtnHoverColor } = useStyles();
-  const { setTradeFormState } = useTradeFormState();
-  const { assetMetadata } = useMarketContext();
+  const { orderSide, setOrderSide, availableCollateral, amount, onSubmit } = props
+  const { textColor, textBtnColor, textBtnHoverColor } = useStyles()
+  const { setTradeFormState } = useTradeFormState()
+  const { assetMetadata } = useMarketContext()
 
-  const copy = useTradeFormCopy();
+  const copy = useTradeFormCopy()
 
   return (
     <form onSubmit={onSubmit}>
@@ -83,7 +86,7 @@ function TradeForm(props: TradeFormProps) {
           max={20}
           step={0.1}
           onChangeEnd={(value: number) => {
-            console.log("leverage", value);
+            console.log('leverage', value)
           }}
           containerProps={{
             mb: 2,
@@ -96,7 +99,7 @@ function TradeForm(props: TradeFormProps) {
         <Button type="submit" label={copy.placeTrade} />
       </Flex>
     </form>
-  );
+  )
 }
 
-export default TradeForm;
+export default TradeForm

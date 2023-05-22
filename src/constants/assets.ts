@@ -1,73 +1,73 @@
-import ethLogo from "@public/icons/eth.png";
+import ethLogo from '@public/icons/eth.png'
 
 export enum SupportedAsset {
-  btc = "btc",
-  eth = "eth",
-  arb = "arb",
-  link = "link",
-  msqth = "msqth",
+  btc = 'btc',
+  eth = 'eth',
+  arb = 'arb',
+  link = 'link',
+  msqth = 'msqth',
 }
 
 export enum QuoteCurrency {
-  usd = "usd",
+  usd = 'usd',
 }
 
 export type AssetMetadata = {
   [asset in SupportedAsset]: {
-    name: string;
-    symbol: string;
-    displayDecimals: number;
-    tvTicker: string;
-    icon: string;
-    baseCurrency: SupportedAsset;
-    quoteCurrency: QuoteCurrency;
-  };
-};
+    name: string
+    symbol: string
+    displayDecimals: number
+    tvTicker: string
+    icon: string
+    baseCurrency: SupportedAsset
+    quoteCurrency: QuoteCurrency
+  }
+}
 
 export const AssetMetadata: AssetMetadata = {
   btc: {
-    symbol: "BTC-USD",
-    name: "Bitcoin",
+    symbol: 'BTC-USD',
+    name: 'Bitcoin',
     displayDecimals: 2,
-    tvTicker: "CRYPTO:BTCUSD",
+    tvTicker: 'CRYPTO:BTCUSD',
     icon: ethLogo,
     baseCurrency: SupportedAsset.btc,
     quoteCurrency: QuoteCurrency.usd,
   },
   eth: {
-    symbol: "ETH-USD",
-    name: "Ethereum",
+    symbol: 'ETH-USD',
+    name: 'Ethereum',
     displayDecimals: 2,
-    tvTicker: "CRYPTO:ETHUSD",
+    tvTicker: 'CRYPTO:ETHUSD',
     icon: ethLogo,
     baseCurrency: SupportedAsset.eth,
     quoteCurrency: QuoteCurrency.usd,
   },
   arb: {
-    symbol: "ARB-USD",
-    name: "Arbitrum",
+    symbol: 'ARB-USD',
+    name: 'Arbitrum',
     displayDecimals: 4,
-    tvTicker: "CRYPTO:ARBIUSD",
+    tvTicker: 'CRYPTO:ARBIUSD',
     icon: ethLogo,
     baseCurrency: SupportedAsset.arb,
     quoteCurrency: QuoteCurrency.usd,
   },
   link: {
-    symbol: "LINK-USD",
-    name: "Chainlink",
+    symbol: 'LINK-USD',
+    name: 'Chainlink',
     displayDecimals: 4,
-    tvTicker: "CRYPTO:LINKUSD",
+    tvTicker: 'CRYPTO:LINKUSD',
     icon: ethLogo,
     baseCurrency: SupportedAsset.link,
     quoteCurrency: QuoteCurrency.usd,
   },
   msqth: {
-    symbol: "MSQTH-USD",
-    name: "milli-Squeeth",
+    symbol: 'MSQTH-USD',
+    name: 'milli-Squeeth',
     displayDecimals: 4,
-    tvTicker: "CRYPTO:MSQTHUSD",
+    tvTicker: 'CRYPTO:MSQTHUSD',
     icon: ethLogo,
     baseCurrency: SupportedAsset.msqth,
     quoteCurrency: QuoteCurrency.usd,
   },
-};
+}

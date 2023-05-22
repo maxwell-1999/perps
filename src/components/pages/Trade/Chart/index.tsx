@@ -1,12 +1,13 @@
-import dynamic from "next/dynamic";
-import { Container } from "@/components/design-system";
-import { AssetMetadata } from "@/constants/assets";
-import { useMarketContext } from "@/contexts/marketContext";
+import dynamic from 'next/dynamic'
 
-const AdvancedRealTimeChart = dynamic(() => import("./TradingviewWidget"), { ssr: false });
+import { Container } from '@/components/design-system'
+import { AssetMetadata } from '@/constants/assets'
+import { useMarketContext } from '@/contexts/marketContext'
+
+const AdvancedRealTimeChart = dynamic(() => import('./TradingviewWidget'), { ssr: false })
 
 function Chart() {
-  const { selectedMarket } = useMarketContext();
+  const { selectedMarket } = useMarketContext()
 
   return (
     <Container height="100%" p={0}>
@@ -27,7 +28,7 @@ function Chart() {
         // }}
       />
     </Container>
-  );
+  )
 }
 
-export default Chart;
+export default Chart

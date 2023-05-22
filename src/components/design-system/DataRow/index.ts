@@ -1,1 +1,1 @@
-export { DataRow, type DataRowProps } from "./DataRow";
+export { DataRow, type DataRowProps } from './DataRow'

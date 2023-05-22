@@ -1,36 +1,35 @@
-import { tabsAnatomy } from "@chakra-ui/anatomy";
-import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
-import { mode } from "@chakra-ui/theme-tools";
-import colors from "../colors";
+import { tabsAnatomy } from '@chakra-ui/anatomy'
+import { createMultiStyleConfigHelpers } from '@chakra-ui/react'
+import { mode } from '@chakra-ui/theme-tools'
 
-const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(
-  tabsAnatomy.keys,
-);
+import colors from '../colors'
+
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(tabsAnatomy.keys)
 
 const line = definePartsStyle((props) => ({
   tab: {
-    fontWeight: "500",
-    fontSize: "15px",
-    paddingY: "6px",
+    fontWeight: '500',
+    fontSize: '15px',
+    paddingY: '6px',
     color: mode(colors.brand.blackAlpha[54], colors.brand.whiteAlpha[54])(props),
     _selected: {
       borderBottom: `1px solid ${colors.brand.purple[300]}`,
-      color: mode("black", "white")(props),
+      color: mode('black', 'white')(props),
     },
   },
   tablist: {
     borderBottom: `1px solid`,
-    borderColor: "inherit",
+    borderColor: 'inherit',
   },
   tabpanel: {
-    padding: "0px",
+    padding: '0px',
   },
   tabpanels: {},
   root: {
-    borderRadius: "6px",
+    borderRadius: '6px',
     background: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
     border: `1px solid ${mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props)}`,
   },
-}));
+}))
 
-export default defineMultiStyleConfig({ variants: { line } });
+export default defineMultiStyleConfig({ variants: { line } })

@@ -1,1 +1,1 @@
-export { TabList, TabPanels, Tab, TabPanel, Tabs } from "@chakra-ui/react";
+export { TabList, TabPanels, Tab, TabPanel, Tabs } from '@chakra-ui/react'

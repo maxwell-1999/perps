@@ -1,5 +1,5 @@
-import Head from "@/components/shared/Head";
-import Trade from "@/components/pages/Trade";
+import Trade from '@/components/pages/Trade'
+import Head from '@/components/shared/Head'
 
 export default function TradePage() {
   return (
@@ -7,5 +7,5 @@ export default function TradePage() {
       <Head title="Trade" />
       <Trade />
     </>
-  );
+  )
 }

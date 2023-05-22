@@ -1,24 +1,24 @@
-import NextHead from "next/head";
-import { useIntl } from "react-intl";
+import NextHead from 'next/head'
+import { useIntl } from 'react-intl'
 
 interface HeadProps {
-  title: string;
-  description?: string;
-  children?: React.ReactNode;
+  title: string
+  description?: string
+  children?: React.ReactNode
 }
 
 export default function Head({ title, children, description }: HeadProps) {
-  const intl = useIntl();
+  const intl = useIntl()
   const defaultDescription = intl.formatMessage({
-    defaultMessage: "Perennial is the defi-native derivatives platform for traders and developers.",
-  });
+    defaultMessage: 'Perennial is the defi-native derivatives platform for traders and developers.',
+  })
   const perennialTitle = intl.formatMessage(
     {
-      defaultMessage: "Perennial - {title}",
+      defaultMessage: 'Perennial - {title}',
     },
     { title },
-  );
-  const pageDescription = description ? description : defaultDescription;
+  )
+  const pageDescription = description ? description : defaultDescription
   return (
     <NextHead>
       <title>{perennialTitle}</title>
@@ -27,5 +27,5 @@ export default function Head({ title, children, description }: HeadProps) {
       <link rel="icon" href="/logo.svg" />
       {children}
     </NextHead>
-  );
+  )
 }

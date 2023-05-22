@@ -1,19 +1,20 @@
-import styled from "@emotion/styled";
-import { breakpoints } from "@ds/theme/styles";
-import { GridItem } from "@chakra-ui/react";
+import { GridItem } from '@chakra-ui/react'
+import styled from '@emotion/styled'
+
+import { breakpoints } from '@ds/theme/styles'
 
 const mobileLayout = `
   "header"
   "marketBar"
   "tradeForm"
-`;
+`
 
 const desktopLayout = `
   "header header "
   "marketBar marketBar"
   "tradeForm chart"
   "tradeForm positionManager"
-`;
+`
 
 const GridContainer = styled.div`
   display: grid;
@@ -31,35 +32,33 @@ const GridContainer = styled.div`
     grid-template-columns: 304px 1fr;
     grid-template-rows: 54px 54px 1fr 0.7fr;
   }
-`;
+`
 interface LayoutProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export const TradeLayout: React.FC<LayoutProps> = ({ children }) => {
-  return <GridContainer>{children}</GridContainer>;
-};
+  return <GridContainer>{children}</GridContainer>
+}
 
 interface GridItemProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export const HeaderGridItem: React.FC<GridItemProps> = ({ children }) => (
   <GridItem gridArea="header">{children}</GridItem>
-);
+)
 
 export const MarketBarGridItem: React.FC<GridItemProps> = ({ children }) => (
   <GridItem gridArea="marketBar">{children}</GridItem>
-);
+)
 
 export const TradeFormGridItem: React.FC<GridItemProps> = ({ children }) => (
   <GridItem gridArea="tradeForm">{children}</GridItem>
-);
+)
 
-export const ChartGridItem: React.FC<GridItemProps> = ({ children }) => (
-  <GridItem gridArea="chart">{children}</GridItem>
-);
+export const ChartGridItem: React.FC<GridItemProps> = ({ children }) => <GridItem gridArea="chart">{children}</GridItem>
 
 export const PositionManagerGridItem: React.FC<GridItemProps> = ({ children }) => (
   <GridItem gridArea="positionManager">{children}</GridItem>
-);
+)

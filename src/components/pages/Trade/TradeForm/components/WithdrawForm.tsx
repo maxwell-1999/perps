@@ -1,30 +1,30 @@
-import { Flex, Text, FormLabel, ButtonGroup } from "@chakra-ui/react";
-import { useTradeFormState, FormState } from "@/contexts/tradeFormContext";
-import { Button } from "@ds/Button";
-import { Input, Pill } from "@ds/Input";
-import { formIds } from "../constants";
-import { useTradeFormCopy } from "../hooks";
-import { Form, FormOverlayHeader } from "./styles";
-import { DataRow } from "@/components/design-system";
-import { useMarketContext } from "@/contexts/marketContext";
+import { ButtonGroup, Flex, FormLabel, Text } from '@chakra-ui/react'
+
+import { DataRow } from '@/components/design-system'
+import { useMarketContext } from '@/contexts/marketContext'
+import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
+
+import { Button } from '@ds/Button'
+import { Input, Pill } from '@ds/Input'
+
+import { formIds } from '../constants'
+import { useTradeFormCopy } from '../hooks'
+import { Form, FormOverlayHeader } from './styles'
 
 interface WithDrawFormProps {
-  collateral: string; // placeholder for now
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  collateral: string // placeholder for now
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
 function WithdrawForm(props: WithDrawFormProps) {
-  const { collateral, onSubmit } = props;
-  const { setTradeFormState } = useTradeFormState();
-  const copy = useTradeFormCopy();
-  const { assetMetadata } = useMarketContext();
+  const { collateral, onSubmit } = props
+  const { setTradeFormState } = useTradeFormState()
+  const copy = useTradeFormCopy()
+  const { assetMetadata } = useMarketContext()
 
   return (
     <Form onSubmit={onSubmit}>
-      <FormOverlayHeader
-        title={copy.withdrawCollateral}
-        onClose={() => setTradeFormState(FormState.trade)}
-      />
+      <FormOverlayHeader title={copy.withdrawCollateral} onClose={() => setTradeFormState(FormState.trade)} />
       <Flex flexDirection="column" px="16px">
         <Flex>
           <Text variant="label" fontSize="13px">
@@ -51,11 +51,7 @@ function WithdrawForm(props: WithDrawFormProps) {
       <Flex flexDirection="column" p="16px">
         <DataRow label={copy.youWillGet} value="0.000 USDC" />
         <ButtonGroup mb="15px">
-          <Button
-            label={copy.cancel}
-            variant="transparent"
-            onClick={() => setTradeFormState(FormState.trade)}
-          />
+          <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
           <Button flex={1} label={copy.withdrawFunds} type="submit" />
         </ButtonGroup>
         <Flex px="13px" textAlign="center">
@@ -63,7 +59,7 @@ function WithdrawForm(props: WithDrawFormProps) {
         </Flex>
       </Flex>
     </Form>
-  );
+  )
 }
 
-export default WithdrawForm;
+export default WithdrawForm

@@ -1,31 +1,31 @@
-import { Flex, Text, FormLabel, Divider, ButtonGroup } from "@chakra-ui/react";
-import { useTradeFormState, FormState } from "@/contexts/tradeFormContext";
-import { Button } from "@ds/Button";
-import { Input, Pill } from "@ds/Input";
-import { formIds, buttonPercentValues } from "../constants";
-import { useTradeFormCopy, useStyles } from "../hooks";
-import { TradeReceipt } from "./Receipt";
-import { Form, FormOverlayHeader } from "./styles";
-import { useMarketContext } from "@/contexts/marketContext";
+import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
+
+import { useMarketContext } from '@/contexts/marketContext'
+import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
+
+import { Button } from '@ds/Button'
+import { Input, Pill } from '@ds/Input'
+
+import { buttonPercentValues, formIds } from '../constants'
+import { useStyles, useTradeFormCopy } from '../hooks'
+import { TradeReceipt } from './Receipt'
+import { Form, FormOverlayHeader } from './styles'
 
 interface ClosePositionFormProps {
-  positionSize: string; // placeholder for now
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  positionSize: string // placeholder for now
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
 function ClosePositionForm(props: ClosePositionFormProps) {
-  const { positionSize, onSubmit } = props;
-  const { setTradeFormState } = useTradeFormState();
-  const { assetMetadata } = useMarketContext();
-  const copy = useTradeFormCopy();
-  const { percentBtnBg } = useStyles();
+  const { positionSize, onSubmit } = props
+  const { setTradeFormState } = useTradeFormState()
+  const { assetMetadata } = useMarketContext()
+  const copy = useTradeFormCopy()
+  const { percentBtnBg } = useStyles()
 
   return (
     <Form onSubmit={onSubmit}>
-      <FormOverlayHeader
-        title={copy.closePosition}
-        onClose={() => setTradeFormState(FormState.trade)}
-      />
+      <FormOverlayHeader title={copy.closePosition} onClose={() => setTradeFormState(FormState.trade)} />
       <Flex flexDirection="column" px="16px" mb="12px">
         <Input
           type="number"
@@ -52,7 +52,7 @@ function ClosePositionForm(props: ClosePositionFormProps) {
               key={value}
               // eslint-disable-next-line formatjs/no-literal-string-in-jsx
               label={`${value}%`}
-              mr={index === buttonPercentValues.length - 1 ? "0" : "8px"}
+              mr={index === buttonPercentValues.length - 1 ? '0' : '8px'}
               onClick={() => {
                 // apply percentage value here.
               }}
@@ -80,16 +80,12 @@ function ClosePositionForm(props: ClosePositionFormProps) {
       <Flex flexDirection="column" p="16px">
         <TradeReceipt mb="25px" px="3px" hideEntry />
         <ButtonGroup>
-          <Button
-            label={copy.cancel}
-            variant="transparent"
-            onClick={() => setTradeFormState(FormState.trade)}
-          />
+          <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
           <Button flex={1} label={copy.closePosition} type="submit" />
         </ButtonGroup>
       </Flex>
     </Form>
-  );
+  )
 }
 
-export default ClosePositionForm;
+export default ClosePositionForm
