@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react'
 import CloseX from '@public/icons/close-x.svg'
 
+import { AssetIconWithText } from '@/components/shared/components'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { ChainMarkets } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
@@ -19,7 +20,7 @@ import { Button, IconButton } from '@ds/Button'
 import { Big18Math, formatBig18USDPrice } from '@utils/big18Utils'
 
 import { useSelectorCopy } from '../hooks'
-import { AssetButton, HamburgerIcon, PairLabel } from './components'
+import { AssetButton, HamburgerIcon } from './components'
 
 function MarketSelector() {
   const { chainId, selectedMarket, setSelectedMarket, snapshots } = useMarketContext()
@@ -38,7 +39,7 @@ function MarketSelector() {
     >
       <PopoverTrigger>
         <Button
-          label={<PairLabel market={AssetMetadata[selectedMarket]} />}
+          label={<AssetIconWithText market={AssetMetadata[selectedMarket]} />}
           variant="pairSelector"
           rightIcon={<HamburgerIcon />}
         />

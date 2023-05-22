@@ -13,16 +13,6 @@ export const HamburgerIcon = styled(Hamburger)`
   color: ${colors.brand.whiteAlpha[50]};
   height: 18px;
 `
-
-export const PairLabel: React.FC<{ market: AssetMetadata[SupportedAsset] }> = ({ market }) => (
-  <Flex alignItems="center">
-    <Image src={market.icon} height={25} width={25} alt={market.name} />
-    <Text ml={2} fontSize="16px">
-      {market.symbol}
-    </Text>
-  </Flex>
-)
-
 const AssetButtonLabel = ({
   name,
   symbol,
