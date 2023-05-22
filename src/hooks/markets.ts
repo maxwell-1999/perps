@@ -124,7 +124,7 @@ export const useUserCurrentPositions = () => {
   const { data: productSnapshots } = useChainAssetSnapshots()
 
   return useQuery({
-    queryKey: ['userCurrentPosition', chainId, address],
+    queryKey: ['userCurrentPositions', chainId, address],
     enabled: !!address && !!productSnapshots,
     queryFn: async () => {
       if (!address || !productSnapshots) return
