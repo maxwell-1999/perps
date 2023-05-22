@@ -11,6 +11,12 @@
       "value": "Amount"
     }
   ],
+  "3Bd9gC": [
+    {
+      "type": 0,
+      "value": "All Positions"
+    }
+  ],
   "47FYwb": [
     {
       "type": 0,
@@ -27,6 +33,12 @@
     {
       "type": 0,
       "value": "Amount to close..."
+    }
+  ],
+  "5vASqA": [
+    {
+      "type": 0,
+      "value": "Daily funding rate"
     }
   ],
   "6JqZwg": [
@@ -77,6 +89,12 @@
       "value": "Settings"
     }
   ],
+  "Do29Mx": [
+    {
+      "type": 0,
+      "value": "P&L"
+    }
+  ],
   "GCY0dr": [
     {
       "type": 0,
@@ -97,6 +115,24 @@
     {
       "type": 1,
       "value": "title"
+    }
+  ],
+  "JfG49w": [
+    {
+      "type": 0,
+      "value": "Open"
+    }
+  ],
+  "Jrw8G7": [
+    {
+      "type": 0,
+      "value": "Modify"
+    }
+  ],
+  "KtEZXn": [
+    {
+      "type": 0,
+      "value": "Long"
     }
   ],
   "KxfKnW": [
@@ -135,6 +171,18 @@
       "value": "Collateral"
     }
   ],
+  "TmryQ6": [
+    {
+      "type": 0,
+      "value": "Your average entry"
+    }
+  ],
+  "UwvPFx": [
+    {
+      "type": 0,
+      "value": "This Position"
+    }
+  ],
   "WBB92z": [
     {
       "type": 0,
@@ -147,16 +195,34 @@
       "value": "You can now withdraw..."
     }
   ],
+  "agOXPD": [
+    {
+      "type": 0,
+      "value": "Size"
+    }
+  ],
   "bri4Pp": [
     {
       "type": 0,
       "value": "Liquidation price"
     }
   ],
+  "djJp6c": [
+    {
+      "type": 0,
+      "value": "History"
+    }
+  ],
   "ejEGdx": [
     {
       "type": 0,
       "value": "Home"
+    }
+  ],
+  "juU558": [
+    {
+      "type": 0,
+      "value": "Short"
     }
   ],
   "kkjl2v": [
@@ -195,6 +261,12 @@
       "value": "Open interest"
     }
   ],
+  "pKvURI": [
+    {
+      "type": 0,
+      "value": "x"
+    }
+  ],
   "pSHy1y": [
     {
       "type": 0,
@@ -205,6 +277,16 @@
     {
       "type": 0,
       "value": "Leverage"
+    }
+  ],
+  "q//Tic": [
+    {
+      "type": 1,
+      "value": "leverage"
+    },
+    {
+      "type": 0,
+      "value": "x"
     }
   ],
   "rbrahO": [
@@ -235,6 +317,12 @@
     {
       "type": 0,
       "value": "Price / Liquidity"
+    }
+  ],
+  "yeHZsK": [
+    {
+      "type": 0,
+      "value": "Share position"
     }
   ]
 }

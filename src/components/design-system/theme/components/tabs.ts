@@ -23,9 +23,13 @@ const line = definePartsStyle((props) => ({
   },
   tabpanel: {
     padding: '0px',
+    height: '100%',
   },
-  tabpanels: {},
+  tabpanels: { height: '100%' },
   root: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
     borderRadius: '6px',
     background: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
     border: `1px solid ${mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props)}`,
