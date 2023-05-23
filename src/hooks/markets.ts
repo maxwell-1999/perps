@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { GraphQLClient } from 'graphql-request'
+import { useEffect, useState } from 'react'
 import { Address, getAddress, numberToHex } from 'viem'
 import { useAccount } from 'wagmi'
 
-import { SupportedAsset } from '@/constants/assets'
+import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { ChainMarkets } from '@/constants/markets'
 import { notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
@@ -17,6 +18,7 @@ import { GetAccountPositionsQuery } from '@t/gql/graphql'
 
 import { useLens } from './contracts'
 import { useChainId, useGraphClient } from './network'
+import { usePyth } from './network'
 
 export type AssetSnapshots = {
   [key in SupportedAsset]?: {
@@ -347,4 +349,37 @@ const fetchUserPositionDetails = async (
     leverage: Big18Math.div(size(openInterest), collateral),
     fees,
   }
+}
+
+export const useChainPythPrices = () => {
+  const chain = useChainId()
+  const pyth = usePyth()
+  const markets = ChainMarkets[chain]
+  const [prices, setPrices] = useState<{ [key in SupportedAsset]?: bigint }>({})
+
+  useEffect(() => {
+    const feedToAsset = Object.keys(markets)
+      .map((k) => ({ asset: k, feed: AssetMetadata[k as SupportedAsset].pythFeedId }))
+      .filter(notEmpty)
+      .reduce((acc, { asset, feed }) => {
+        if (feed) acc[feed] = asset as SupportedAsset
+        return acc
+      }, {} as { [key: string]: SupportedAsset })
+    const feedIds = Object.keys(feedToAsset)
+
+    pyth.subscribePriceFeedUpdates(feedIds, (priceFeed) => {
+      const price = priceFeed.getPriceNoOlderThan(60)?.price
+      setPrices((prices) => ({
+        ...prices,
+        // Pyth price is 8 decimals, normalize to expected 18 decimals by multiplying by 10^10
+        [feedToAsset['0x' + priceFeed.id]]: price ? BigInt(price) * 10n ** 10n : undefined,
+      }))
+    })
+
+    return () => {
+      pyth.unsubscribePriceFeedUpdates(feedIds)
+    }
+  }, [markets, pyth])
+
+  return prices
 }

@@ -1,3 +1,4 @@
+import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
 import { AlchemyProvider, JsonRpcProvider } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useMemo } from 'react'
@@ -31,4 +32,8 @@ export const useGraphClient = () => {
   const chainId = useChainId()
 
   return useMemo(() => new GraphQLClient(GraphUrls[chainId]), [chainId])
+}
+
+export const usePyth = () => {
+  return useMemo(() => new EvmPriceServiceConnection('https://xc-mainnet.pyth.network'), [])
 }
