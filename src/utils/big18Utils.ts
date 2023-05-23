@@ -30,7 +30,6 @@ export const formatBig18Percent = (value: bigint = 0n, { numDecimals = 2 }: { nu
     maximumFractionDigits: numDecimals,
   }).format(Big18Math.divFixed(value, Big18Math.ONE).toUnsafeFloat())
 }
-
 export class Big18Math {
   public static FIXED_DECIMALS = 18
   public static FIXED_WIDTH = 'fixed256x18'

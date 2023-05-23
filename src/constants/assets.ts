@@ -37,7 +37,7 @@ export const AssetMetadata: AssetMetadata = {
   eth: {
     symbol: 'ETH-USD',
     name: 'Ethereum',
-    displayDecimals: 2,
+    displayDecimals: 6,
     tvTicker: 'CRYPTO:ETHUSD',
     icon: ethLogo,
     baseCurrency: SupportedAsset.eth,

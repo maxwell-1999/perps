@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
+import { OrderSide } from '@/components/pages/Trade/TradeForm/constants'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { DefaultChain } from '@/constants/network'
 import { SupportedChainId } from '@/constants/network'
@@ -17,6 +18,8 @@ import { Get24hrDataQuery } from '@t/gql/graphql'
 
 type MarketContextType = {
   chainId: SupportedChainId
+  orderSide: OrderSide
+  setOrderSide: (orderSide: OrderSide) => void
   assetMetadata: (typeof AssetMetadata)[SupportedAsset]
   selectedMarket: SupportedAsset
   setSelectedMarket: (asset: SupportedAsset) => void
@@ -31,6 +34,10 @@ type MarketContextType = {
 
 const MarketContext = createContext<MarketContextType>({
   chainId: DefaultChain.id,
+  orderSide: OrderSide.Long,
+  setOrderSide: (orderSide: OrderSide) => {
+    orderSide
+  },
   selectedMarket: SupportedAsset.eth,
   assetMetadata: AssetMetadata[SupportedAsset.eth],
   setSelectedMarket: (asset: SupportedAsset) => {
@@ -44,6 +51,8 @@ const MarketContext = createContext<MarketContextType>({
 export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId()
   const [selectedMarket, _setSelectedMarket] = useState<SupportedAsset>(SupportedAsset.eth)
+  const [orderSide, setOrderSide] = useState<OrderSide>(OrderSide.Long)
+
   const { data: snapshots } = useChainAssetSnapshots()
   const { data: dailyData } = useAsset24hrData(selectedMarket)
   const { data: positions } = useUserCurrentPositions()
@@ -74,6 +83,8 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
     <MarketContext.Provider
       value={{
         chainId,
+        orderSide,
+        setOrderSide,
         selectedMarket,
         setSelectedMarket,
         snapshots,

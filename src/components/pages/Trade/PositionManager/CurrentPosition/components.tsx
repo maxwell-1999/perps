@@ -6,12 +6,12 @@ import { breakpoints } from '@/components/design-system/theme/styles'
 
 import { useStyles } from '../hooks'
 
-export const StatusLight = styled.div<{ color: string }>`
+export const StatusLight = styled.div<{ color: string; glow: boolean }>`
   height: 6px;
   width: 6px;
   border-radius: 50%;
   background-color: ${(p) => p.color};
-  box-shadow: 0 0 6px ${(p) => p.color};
+  box-shadow: ${(p) => (p.glow ? `0 0 6px ${p.color}` : 'none')};
 `
 
 export const LeverageBadge = ({ leverage }: { leverage: string | number }) => {

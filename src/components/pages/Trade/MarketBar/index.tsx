@@ -40,7 +40,7 @@ export default function MarketBar() {
 
   const longRate = (snapshot?.long?.rate ?? 0n) * Hour
   const shortRate = (snapshot?.short?.rate ?? 0n) * Hour
-  const currentPrice = Big18Math.abs(snapshot?.long?.latestVersion.price ?? snapshot?.short?.latestVersion.price ?? 0n)
+  const currentPrice = Big18Math.abs(snapshot?.long?.latestVersion?.price ?? snapshot?.short?.latestVersion.price ?? 0n)
   const change = currentPrice - BigInt(dailyData?.start?.at(0)?.toVersionPrice ?? currentPrice)
 
   const formattedValues = {
