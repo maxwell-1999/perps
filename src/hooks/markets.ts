@@ -351,7 +351,7 @@ const fetchUserPositionDetails = async (
   }
 }
 
-export const useChainPythPrices = () => {
+export const useChainLivePrices = () => {
   const chain = useChainId()
   const pyth = usePyth()
   const markets = ChainMarkets[chain]

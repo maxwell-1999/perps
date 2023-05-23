@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
 import { useMarketContext } from '@/contexts/marketContext'
-import { useChainPythPrices } from '@/hooks/markets'
+import { useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { Hour } from '@/utils/timeUtils'
 
@@ -30,7 +30,7 @@ export const useMarketBarCopy = () => {
 }
 
 export const useFormattedMarketBarValues = () => {
-  const pythPrices = useChainPythPrices()
+  const livePrices = useChainLivePrices()
   const { selectedMarket, selectedMarketSnapshot: snapshot, selectedMarketDailyData: dailyData } = useMarketContext()
 
   const totalVolume = useMemo(() => {
@@ -41,7 +41,7 @@ export const useFormattedMarketBarValues = () => {
   const longRate = (snapshot?.long?.rate ?? 0n) * Hour
   const shortRate = (snapshot?.short?.rate ?? 0n) * Hour
   const currentPrice = Big18Math.abs(
-    pythPrices[selectedMarket] ?? snapshot?.long?.latestVersion?.price ?? snapshot?.short?.latestVersion.price ?? 0n,
+    livePrices[selectedMarket] ?? snapshot?.long?.latestVersion?.price ?? snapshot?.short?.latestVersion.price ?? 0n,
   )
   const change = currentPrice - BigInt(dailyData?.start?.at(0)?.toVersionPrice ?? currentPrice)
 
