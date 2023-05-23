@@ -37,6 +37,7 @@ function CurrentPosition() {
     pnl,
     pnlPercentage,
     isPnlPositive,
+    dailyFunding,
   } = useFormatPosition()
 
   const hasPosition = position !== copy.noValue
@@ -87,7 +88,7 @@ function CurrentPosition() {
           label={copy.dailyFundingRate}
           value={
             <Text fontSize="14px" color={alpha75}>
-              {copy.noValue}
+              {dailyFunding}
             </Text>
           }
         />

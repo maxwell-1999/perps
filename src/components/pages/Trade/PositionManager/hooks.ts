@@ -2,7 +2,8 @@ import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
 import { useMarketContext } from '@/contexts/marketContext'
-import { formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
+import { formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
+import { Day } from '@/utils/timeUtils'
 
 import { OrderSide } from '../TradeForm/constants'
 import { calculatePnl, unpackPosition } from './utils'
@@ -42,7 +43,7 @@ export const usePositionManagerCopy = () => {
 }
 
 export const useFormatPosition = () => {
-  const { assetMetadata, positions, selectedMarket, orderSide } = useMarketContext()
+  const { assetMetadata, positions, selectedMarket, orderSide, selectedMarketSnapshot } = useMarketContext()
   const { noValue, long, short } = usePositionManagerCopy()
   const position = unpackPosition({ positions, selectedMarket, orderSide })
 
@@ -50,6 +51,8 @@ export const useFormatPosition = () => {
   const positionPnl = position?.details
     ? calculatePnl(position?.details)
     : { pnl: 0n, pnlPercentage: 0n, isPnlPositive: true }
+  const fundingRate =
+    position?.side === OrderSide.Long ? selectedMarketSnapshot?.long?.rate : selectedMarketSnapshot?.short?.rate
 
   return {
     side: position ? (position.side === OrderSide.Long ? long : short) : noValue,
@@ -64,5 +67,6 @@ export const useFormatPosition = () => {
     pnl: position ? (positionPnl.pnl as string) : noValue,
     pnlPercentage: position ? (positionPnl.pnlPercentage as string) : noValue,
     isPnlPositive: positionPnl.isPnlPositive,
+    dailyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Day, { numDecimals: 4 }) : noValue,
   }
 }
