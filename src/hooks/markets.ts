@@ -204,10 +204,10 @@ const fetchUserPositionDetails = async (
   productSnapshot?: IPerennialLens.ProductSnapshotStructOutput,
 ) => {
   if (!snapshot) return { currentCollateral: 0n }
-  const { productAddress, collateral } = snapshot
+  const { productAddress, collateral, pre, position, openInterest } = snapshot
 
   if (!graphPosition || !productSnapshot) return { currentCollateral: collateral }
-  const { side, startBlock } = graphPosition
+  const { side, startBlock, depositAmount, fees } = graphPosition
 
   const query = gql(`
     query getPositionChanges(
@@ -253,6 +253,20 @@ const fetchUserPositionDetails = async (
         version
         amount
         blockNumber
+      }
+      initialDeposits: deposits(where:{
+        account: $account,
+        product: $product,
+        blockNumber: $startBlock,
+      }, first: $first, skip: $skip) {
+        amount
+      }
+      initialWithdrawals: withdrawals(where:{
+        account: $account,
+        product: $product,
+        blockNumber: $startBlock,
+      }, first: $first, skip: $skip) {
+        amount
       }
     }
   `)
@@ -311,24 +325,26 @@ const fetchUserPositionDetails = async (
     sum(subPositions.map((p) => p.size)),
   )
 
-  // Collateral at the block the position was opened
+  // Collateral at one block before the position was opened
   const startCollateral = await lens['collateral(address,address)'].staticCall(address, productAddress, {
-    blockTag: numberToHex(Number(startBlock)),
+    blockTag: numberToHex(Number(startBlock) - 1),
   })
+  const initialDepositits =
+    sum(positionChanges.initialDeposits.map((d) => BigInt(d.amount))) -
+    sum(positionChanges.initialWithdrawals.map((d) => BigInt(d.amount)))
 
   return {
     side,
-    position: snapshot.position[side],
-    nextPosition: next(snapshot.pre, snapshot.position)[side],
-    startCollateral,
+    position: position[side],
+    nextPosition: next(pre, position)[side],
+    startCollateral: startCollateral + initialDepositits,
     currentCollateral: collateral,
+    deposits: BigInt(depositAmount),
     averageEntry,
-    liquidationPrice: calcLiquidationPrice(productSnapshot, next(snapshot.pre, snapshot.position), collateral),
-    notional: size(snapshot.openInterest),
-    nextNotional: Big18Math.abs(
-      Big18Math.mul(size(next(snapshot.pre, snapshot.position)), productSnapshot.latestVersion.price),
-    ),
-    leverage: Big18Math.div(size(snapshot.openInterest), collateral),
-    fees: graphPosition.fees,
+    liquidationPrice: calcLiquidationPrice(productSnapshot, next(pre, position), collateral),
+    notional: size(openInterest),
+    nextNotional: Big18Math.abs(Big18Math.mul(size(next(pre, position)), productSnapshot.latestVersion.price)),
+    leverage: Big18Math.div(size(openInterest), collateral),
+    fees,
   }
 }

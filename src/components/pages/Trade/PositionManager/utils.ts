@@ -5,7 +5,10 @@ import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big1
 import { OrderSide } from '../TradeForm/constants'
 
 export const calculatePnl = (positionDetails: PositionDetails) => {
-  const pnl = Big18Math.sub(positionDetails?.currentCollateral ?? 0n, positionDetails?.startCollateral ?? 0n)
+  const pnl = Big18Math.sub(
+    Big18Math.sub(positionDetails?.currentCollateral ?? 0n, positionDetails?.startCollateral ?? 0n),
+    positionDetails?.deposits ?? 0n,
+  )
   const pnlPercentage = formatBig18Percent(Big18Math.div(pnl, positionDetails?.startCollateral ?? 0n), {
     numDecimals: 2,
   })
