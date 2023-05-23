@@ -61,3 +61,10 @@ export const DividerStyled = styled(Divider)`
     display: none;
   }
 `
+
+export const PriceText = styled(Text)`
+  font-size: 16px;
+  @media (min-width: ${breakpoints.md}) {
+    font-size: 20px;
+  }
+`

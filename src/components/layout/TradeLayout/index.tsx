@@ -10,10 +10,17 @@ const mobileLayout = `
 `
 
 const desktopLayout = `
-  "header header "
+  "header header"
   "marketBar marketBar"
   "tradeForm chart"
   "tradeForm positionManager"
+`
+
+const largeScreenLayout = `
+  "header header"
+  "marketBar marketBar"
+  "tradeForm chart"
+  ". positionManager"
 `
 
 const GridContainer = styled.div`
@@ -29,6 +36,12 @@ const GridContainer = styled.div`
 
   @media (min-width: ${breakpoints.md}) {
     grid-template-areas: ${desktopLayout};
+    grid-template-columns: 304px 1fr;
+    grid-template-rows: 54px 54px 1fr 230px;
+  }
+
+  @media (min-width: ${breakpoints.xl}) {
+    grid-template-areas: ${largeScreenLayout};
     grid-template-columns: 304px 1fr;
     grid-template-rows: 54px 54px 1fr 230px;
   }

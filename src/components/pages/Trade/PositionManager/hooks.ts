@@ -40,6 +40,7 @@ export const usePositionManagerCopy = () => {
     close: intl.formatMessage({ defaultMessage: 'Close' }),
     x: intl.formatMessage({ defaultMessage: 'x' }),
     noValue: intl.formatMessage({ defaultMessage: '--' }),
+    side: intl.formatMessage({ defaultMessage: 'Side' }),
   }
 }
 

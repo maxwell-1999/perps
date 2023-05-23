@@ -27,15 +27,32 @@ export const LeverageBadge = ({ leverage }: { leverage: string | number }) => {
 }
 
 export const LeftContainer = styled(Flex)<{ borderColor: string }>`
-  border-right: 1px solid ${(p) => p.borderColor};
-  width: 45%;
+  display: none;
+
+  @media (min-width: ${breakpoints.mdd}) {
+    display: flex;
+    border-right: 1px solid ${(p) => p.borderColor};
+    width: 45%;
+  }
 `
 
 export const RightContainer = styled(Flex)`
   flex-direction: column;
-  width: 55%;
-  max-width: 650px;
-  padding: 15px 24px 21px 24px;
+  width: 100%;
+  padding: 15px 24px 30px 24px;
+  flex: 1;
+  @media (min-width: ${breakpoints.mdd}) {
+    width: 55%;
+    padding-bottom: 21px;
+  }
+`
+
+export const HiddenOnLargeScreen = styled(Flex)`
+  flex-direction: column;
+  width: 100%;
+  @media (min-width: ${breakpoints.mdd}) {
+    display: none;
+  }
 `
 
 export const ActivePositionHeader = styled(Flex)<{ borderColor: string }>`
@@ -89,7 +106,18 @@ export const ActivePositionDetail = ({
 export const ResponsiveContainer = styled(Flex)`
   height: 100%;
   flex-direction: column;
-  @media (min-width: ${breakpoints.smd}) {
+
+  @media (min-width: ${breakpoints.mdd}) {
     flex-direction: row;
+  }
+`
+
+export const DesktopButtonContainer = styled(Flex)`
+  display: none;
+  @media (min-width: ${breakpoints.mdd}) {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    padding-top: 10px;
   }
 `

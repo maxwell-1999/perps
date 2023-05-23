@@ -1,4 +1,4 @@
-import { Container, Flex, Spinner, Text } from '@chakra-ui/react'
+import { Container, Flex, Spinner } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 
 import colors from '@ds/theme/colors'
@@ -9,6 +9,7 @@ import {
   MarketContainer,
   MobileMarketContainer,
   PriceContainer,
+  PriceText,
   ResponsiveFlex,
   Stat,
 } from './components'
@@ -35,7 +36,7 @@ export default function MarketBar() {
         </MarketContainer>
         <Flex>
           <PriceContainer>
-            <Text fontSize="20px">{formattedValues.price}</Text>
+            <PriceText>{formattedValues.price}</PriceText>
           </PriceContainer>
           <DividerStyled orientation="vertical" />
           <MobileMarketContainer mr={0} maxWidth="90px" overflowX="auto" overflowY="hidden">
