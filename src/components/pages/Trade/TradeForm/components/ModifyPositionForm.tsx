@@ -12,6 +12,7 @@ import { Slider } from '@ds/Slider'
 import { OrderSide, formIds, orderSides } from '../constants'
 import { useTradeFormCopy } from '../hooks'
 import { TradeReceipt } from './Receipt'
+import { Form } from './styles'
 
 interface ModifyPositionProps {
   orderSide: OrderSide
@@ -28,7 +29,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
   const copy = useTradeFormCopy()
 
   return (
-    <form onSubmit={onSubmit}>
+    <Form onSubmit={onSubmit}>
       <Flex flexDirection="column" p="16px">
         <Flex justifyContent="space-between" mb="14px" alignItems="center">
           <Text>{copy.modifyPosition}</Text>
@@ -87,7 +88,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
           }}
         />
       </Flex>
-      <Divider />
+      <Divider mt="auto" />
       <Flex flexDirection="column" p="16px">
         <TradeReceipt mb="25px" px="3px" />
         <ButtonGroup>
@@ -95,7 +96,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
           <Button flex={1} label={copy.modifyPosition} type="submit" />
         </ButtonGroup>
       </Flex>
-    </form>
+    </Form>
   )
 }
 

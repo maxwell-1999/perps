@@ -24,9 +24,11 @@ const line = definePartsStyle((props) => ({
   tabpanel: {
     padding: '0px',
     height: '100%',
+    overflow: 'auto',
   },
   tabpanels: { height: '100%' },
   root: {
+    overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',

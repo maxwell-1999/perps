@@ -10,7 +10,7 @@ const mobileLayout = `
 `
 
 const desktopLayout = `
-  "header header "
+  "header header"
   "marketBar marketBar"
   "tradeForm chart"
   "tradeForm positionManager"

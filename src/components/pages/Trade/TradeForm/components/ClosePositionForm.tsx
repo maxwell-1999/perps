@@ -76,7 +76,7 @@ function ClosePositionForm(props: ClosePositionFormProps) {
           mb="12px"
         />
       </Flex>
-      <Divider />
+      <Divider mt="auto" />
       <Flex flexDirection="column" p="16px">
         <TradeReceipt mb="25px" px="3px" hideEntry />
         <ButtonGroup>

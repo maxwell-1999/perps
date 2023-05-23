@@ -11,6 +11,7 @@ import { Slider } from '@ds/Slider'
 import { OrderSide, formIds, orderSides } from '../constants'
 import { useStyles, useTradeFormCopy } from '../hooks'
 import { TradeReceipt } from './Receipt'
+import { Form } from './styles'
 
 interface TradeFormProps {
   orderSide: OrderSide
@@ -29,7 +30,7 @@ function TradeForm(props: TradeFormProps) {
   const copy = useTradeFormCopy()
 
   return (
-    <form onSubmit={onSubmit}>
+    <Form onSubmit={onSubmit}>
       <Flex flexDirection="column" p="16px">
         <Flex justifyContent="space-between" mb="14px">
           <Text color={textColor}>{copy.trade}</Text>
@@ -93,12 +94,12 @@ function TradeForm(props: TradeFormProps) {
           }}
         />
       </Flex>
-      <Divider />
+      <Divider mt="auto" />
       <Flex flexDirection="column" p="16px">
         <TradeReceipt mb="25px" px="3px" />
         <Button type="submit" label={copy.placeTrade} />
       </Flex>
-    </form>
+    </Form>
   )
 }
 

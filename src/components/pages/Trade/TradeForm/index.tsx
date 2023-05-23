@@ -44,7 +44,7 @@ function TradeContainer() {
   const containerVariant = getContainerVariant(formState)
 
   return (
-    <Container height="100%" p="0" variant={containerVariant}>
+    <Container height="100%" minHeight="560px" p="0" variant={containerVariant}>
       {formState === FormState.trade && (
         <TradeForm
           onSubmit={handleSubmitTrade}

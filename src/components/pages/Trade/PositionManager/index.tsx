@@ -16,7 +16,7 @@ function PositionManager() {
         <Tab>{copy.history}</Tab>
       </TabList>
       <TabPanels>
-        <TabPanel>
+        <TabPanel display="flex" flexDirection="column" flex={1}>
           <CurrentPosition />
         </TabPanel>
         <TabPanel>

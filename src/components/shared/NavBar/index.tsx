@@ -27,7 +27,7 @@ import { MobileButtonLabel, Nav } from './styles'
 function NavBar() {
   const { disconnect } = useDisconnect()
   const { address } = useAccount()
-  const isBase = useBreakpointValue({ base: true, sm: false })
+  const isBase = useBreakpointValue({ base: true, md: false })
   const { isOpen, onOpen, onClose } = useDisclosure()
   const theme = useTheme()
   const linkUnderlineColor = useColorModeValue(theme.colors.brand.blackAlpha[10], theme.colors.brand.whiteAlpha[10])
