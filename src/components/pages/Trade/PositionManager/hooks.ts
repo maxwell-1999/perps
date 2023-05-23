@@ -2,7 +2,8 @@ import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
 import { useMarketContext } from '@/contexts/marketContext'
-import { formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
+import { useChainLivePrices } from '@/hooks/markets'
+import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { Day } from '@/utils/timeUtils'
 
 import { OrderSide } from '../TradeForm/constants'
@@ -45,11 +46,19 @@ export const usePositionManagerCopy = () => {
 export const useFormatPosition = () => {
   const { assetMetadata, positions, selectedMarket, orderSide, selectedMarketSnapshot } = useMarketContext()
   const { noValue, long, short } = usePositionManagerCopy()
+  const livePrices = useChainLivePrices()
   const position = unpackPosition({ positions, selectedMarket, orderSide })
 
   const numSigFigs = assetMetadata.displayDecimals
+
+  const currentPrice = Big18Math.abs(
+    selectedMarketSnapshot?.long?.latestVersion.price ?? selectedMarketSnapshot?.short?.latestVersion.price ?? 0n,
+  )
+  const pythPrice = livePrices[selectedMarket]
+  // Use the live price to calculate real time pnl
+  const currentPriceDelta = currentPrice > 0 && pythPrice ? pythPrice - currentPrice : undefined
   const positionPnl = position?.details
-    ? calculatePnl(position?.details)
+    ? calculatePnl(position?.details, currentPriceDelta)
     : { pnl: 0n, pnlPercentage: 0n, isPnlPositive: true }
   const fundingRate =
     position?.side === OrderSide.Long ? selectedMarketSnapshot?.long?.rate : selectedMarketSnapshot?.short?.rate

@@ -4,11 +4,19 @@ import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big1
 
 import { OrderSide } from '../TradeForm/constants'
 
-export const calculatePnl = (positionDetails: PositionDetails) => {
-  const pnl = Big18Math.sub(
+export const calculatePnl = (positionDetails: PositionDetails, livePriceDelta?: bigint) => {
+  let pnl = Big18Math.sub(
     Big18Math.sub(positionDetails?.currentCollateral ?? 0n, positionDetails?.startCollateral ?? 0n),
     positionDetails?.deposits ?? 0n,
   )
+
+  // If there is a new price from offchain sources, update PnL with the difference
+  // TODO: This should take into account socialization and/or utilization
+  if (livePriceDelta && positionDetails?.nextPosition) {
+    const additionalPnl = Big18Math.mul(positionDetails.nextPosition, livePriceDelta)
+    pnl = Big18Math.add(pnl, additionalPnl)
+  }
+
   const pnlPercentage = formatBig18Percent(Big18Math.div(pnl, positionDetails?.startCollateral ?? 0n), {
     numDecimals: 2,
   })
