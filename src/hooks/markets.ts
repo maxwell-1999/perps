@@ -5,12 +5,11 @@ import { useAccount } from 'wagmi'
 
 import { SupportedAsset } from '@/constants/assets'
 import { ChainMarkets } from '@/constants/markets'
-
-import { notEmpty, sum, unique } from '@utils/arrayUtils'
-import { Big18Math } from '@utils/big18Utils'
-import { GraphDefaultPageSize, queryAll } from '@utils/graphUtils'
-import { calcLiquidationPrice, next, size } from '@utils/positionUtils'
-import { last24hrBounds } from '@utils/timeUtils'
+import { notEmpty, sum, unique } from '@/utils/arrayUtils'
+import { Big18Math } from '@/utils/big18Utils'
+import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
+import { calcLiquidationPrice, next, size } from '@/utils/positionUtils'
+import { last24hrBounds } from '@/utils/timeUtils'
 
 import { IPerennialLens, LensAbi } from '@t/generated/LensAbi'
 import { gql } from '@t/gql'
@@ -110,10 +109,12 @@ export const useAsset24hrData = (asset: SupportedAsset) => {
   })
 }
 
+export type PositionDetails = Awaited<ReturnType<typeof fetchUserPositionDetails>>
+
 export type UserCurrentPositions = {
   [key in SupportedAsset]?: {
-    long?: Awaited<ReturnType<typeof fetchUserPositionDetails>>
-    short?: Awaited<ReturnType<typeof fetchUserPositionDetails>>
+    long?: PositionDetails
+    short?: PositionDetails
   }
 }
 export const useUserCurrentPositions = () => {
@@ -271,15 +272,9 @@ const fetchUserPositionDetails = async (
   // Merge opens and closes, sorting by blockNumber
   const changesMerged = (
     side === 'taker'
-      ? [
-          ...positionChanges.takeOpeneds,
-          ...positionChanges.takeCloseds.map((c) => ({ ...c, amount: -BigInt(c.amount) })),
-        ]
-      : [
-          ...positionChanges.makeOpeneds,
-          ...positionChanges.makeCloseds.map((c) => ({ ...c, amount: -BigInt(c.amount) })),
-        ]
-  ).sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber))
+      ? [...positionChanges.takeOpeneds, ...positionChanges.takeCloseds.map((c) => ({ ...c, amount: -c.amount }))]
+      : [...positionChanges.makeOpeneds, ...positionChanges.makeCloseds.map((c) => ({ ...c, amount: -c.amount }))]
+  ).sort((a, b) => parseInt(a.blockNumber) - parseInt(b.blockNumber))
 
   // Settle versions is change.version + 1 unless it is the latest version
   const latestVersion = productSnapshot.latestVersion
