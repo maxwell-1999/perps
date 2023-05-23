@@ -26,8 +26,6 @@ function CurrentPosition() {
   const { borderColor, green, red, alpha75, subheaderTextColor } = useStyles()
   const { assetMetadata } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
-  const formattedPosition = useFormatPosition()
-
   const {
     side,
     currentCollateral,
@@ -39,7 +37,7 @@ function CurrentPosition() {
     pnl,
     pnlPercentage,
     isPnlPositive,
-  } = formattedPosition
+  } = useFormatPosition()
 
   const hasPosition = position !== copy.noValue
 
@@ -101,7 +99,7 @@ function CurrentPosition() {
             </Text>
           }
         />
-        {formattedPosition.position !== copy.noValue && (
+        {hasPosition && (
           <Flex flex={1} justifyContent="flex-end" pt={'10px'}>
             <ButtonGroup>
               <Button size="sm" label={copy.modify} onClick={() => setTradeFormState(FormState.modify)} />

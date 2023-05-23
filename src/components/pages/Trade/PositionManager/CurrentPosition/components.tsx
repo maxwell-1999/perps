@@ -2,7 +2,6 @@ import { Flex, Text } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 import { useIntl } from 'react-intl'
 
-import colors from '@/components/design-system/theme/colors'
 import { breakpoints } from '@/components/design-system/theme/styles'
 
 import { useStyles } from '../hooks'
@@ -13,11 +12,6 @@ export const StatusLight = styled.div<{ color: string; glow: boolean }>`
   border-radius: 50%;
   background-color: ${(p) => p.color};
   box-shadow: ${(p) => (p.glow ? `0 0 6px ${p.color}` : 'none')};
-`
-
-export const DarkStatusLight = styled(StatusLight)`
-  box-shadow: none;
-  background-color: ${colors.brand.gray[300]};
 `
 
 export const LeverageBadge = ({ leverage }: { leverage: string | number }) => {
