@@ -1,5 +1,12 @@
 import { FixedNumber, WeiPerEther } from 'ethers'
 
+export const formatBig18 = (value: bigint = 0n, { numSigFigs = 2 }: { numSigFigs?: number } = {}) => {
+  return Intl.NumberFormat('en-US', {
+    minimumSignificantDigits: numSigFigs,
+    maximumSignificantDigits: numSigFigs,
+  }).format(Big18Math.divFixed(value, Big18Math.ONE).toUnsafeFloat())
+}
+
 // Formats an 18 decimal bigint as a USD price
 export const formatBig18USDPrice = (value: bigint = 0n, { compact = false }: { compact?: boolean } = {}) => {
   return Intl.NumberFormat('en-US', {

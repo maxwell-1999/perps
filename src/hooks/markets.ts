@@ -310,9 +310,9 @@ const fetchUserPositionDetails = async (
     sum(subPositions.map((p) => p.size)),
   )
 
-  // Collateral at the block before the position was opened
+  // Collateral at the block the position was opened
   const startCollateral = await lens['collateral(address,address)'].staticCall(address, productAddress, {
-    blockTag: numberToHex(Number(startBlock) - 1),
+    blockTag: numberToHex(Number(startBlock)),
   })
 
   return {
@@ -324,6 +324,9 @@ const fetchUserPositionDetails = async (
     averageEntry,
     liquidationPrice: calcLiquidationPrice(productSnapshot, next(snapshot.pre, snapshot.position), collateral),
     notional: size(snapshot.openInterest),
+    nextNotional: Big18Math.abs(
+      Big18Math.mul(size(next(snapshot.pre, snapshot.position)), productSnapshot.latestVersion.price),
+    ),
     leverage: Big18Math.div(size(snapshot.openInterest), collateral),
     fees: graphPosition.fees,
   }
