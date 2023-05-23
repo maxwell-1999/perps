@@ -19,17 +19,43 @@ export const calculatePnl = (positionDetails: PositionDetails) => {
 export const unpackPosition = ({
   positions,
   selectedMarket,
+  orderSide,
 }: {
   positions?: UserCurrentPositions
   selectedMarket: SupportedAsset
+  orderSide: OrderSide
 }): { side: OrderSide; details: PositionDetails } | null => {
   if (!positions) return null
   const position = positions[selectedMarket]
-  const isShort = !Big18Math.isZero(position?.long?.currentCollateral ?? 0n)
-  const isLong = !Big18Math.isZero(position?.long?.currentCollateral ?? 0n)
-  if (!isShort && !isLong) return null
-  return {
-    side: isLong ? OrderSide.Long : OrderSide.Short,
-    details: isLong ? (position?.long as PositionDetails) : (position?.short as PositionDetails),
+
+  const longCollateral = position?.long?.currentCollateral ?? 0n
+  const shortCollateral = position?.short?.currentCollateral ?? 0n
+
+  const hasLongCollateral = !Big18Math.isZero(longCollateral)
+  const hasShortCollateral = !Big18Math.isZero(shortCollateral)
+
+  if (!hasLongCollateral && !hasShortCollateral) return null
+
+  let side: OrderSide
+  let details: PositionDetails
+
+  if (orderSide === OrderSide.Long) {
+    if (hasLongCollateral) {
+      side = OrderSide.Long
+      details = position?.long as PositionDetails
+    } else {
+      side = OrderSide.Short
+      details = position?.short as PositionDetails
+    }
+  } else {
+    if (hasShortCollateral) {
+      side = OrderSide.Short
+      details = position?.short as PositionDetails
+    } else {
+      side = OrderSide.Long
+      details = position?.long as PositionDetails
+    }
   }
+
+  return { side, details }
 }

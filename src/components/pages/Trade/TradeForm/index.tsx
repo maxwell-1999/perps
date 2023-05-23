@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 
@@ -9,7 +7,6 @@ import ClosePositionForm from './components/ClosePositionForm'
 import ModifyPositionForm from './components/ModifyPositionForm'
 import TradeForm from './components/TradeForm'
 import WithdrawForm from './components/WithdrawForm'
-import { OrderSide } from './constants'
 import { getContainerVariant, useResetFormOnMarketChange } from './hooks'
 
 const dummyData = {
@@ -20,9 +17,8 @@ const dummyData = {
 }
 
 function TradeContainer() {
-  const [orderSide, setOrderSide] = useState<OrderSide>(OrderSide.Long)
   const { formState, setTradeFormState } = useTradeFormState()
-  const { selectedMarket } = useMarketContext()
+  const { selectedMarket, orderSide, setOrderSide } = useMarketContext()
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
 
   const handleSubmitTrade = (e: React.FormEvent<HTMLFormElement>) => {

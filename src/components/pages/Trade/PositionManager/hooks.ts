@@ -42,12 +42,12 @@ export const usePositionManagerCopy = () => {
 }
 
 export const useFormatPosition = () => {
-  const { assetMetadata, positions, selectedMarket } = useMarketContext()
+  const { assetMetadata, positions, selectedMarket, orderSide } = useMarketContext()
   const { noValue, long, short } = usePositionManagerCopy()
-  const position = unpackPosition({ positions, selectedMarket })
+  const position = unpackPosition({ positions, selectedMarket, orderSide })
 
   const numSigFigs = assetMetadata.displayDecimals
-  const PositionPnl = position?.details
+  const positionPnl = position?.details
     ? calculatePnl(position?.details)
     : { pnl: 0n, pnlPercentage: 0n, isPnlPositive: true }
 
@@ -61,8 +61,8 @@ export const useFormatPosition = () => {
     liquidationPrice: position ? formatBig18USDPrice(position?.details?.liquidationPrice) : noValue,
     notional: position ? formatBig18USDPrice(position?.details?.notional) : noValue,
     leverage: position ? formatBig18(position?.details?.leverage) : noValue,
-    pnl: position ? (PositionPnl.pnl as string) : noValue,
-    pnlPercentage: position ? (PositionPnl.pnlPercentage as string) : noValue,
-    isPnlPositive: PositionPnl.isPnlPositive,
+    pnl: position ? (positionPnl.pnl as string) : noValue,
+    pnlPercentage: position ? (positionPnl.pnlPercentage as string) : noValue,
+    isPnlPositive: positionPnl.isPnlPositive,
   }
 }

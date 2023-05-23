@@ -272,9 +272,15 @@ const fetchUserPositionDetails = async (
   // Merge opens and closes, sorting by blockNumber
   const changesMerged = (
     side === 'taker'
-      ? [...positionChanges.takeOpeneds, ...positionChanges.takeCloseds.map((c) => ({ ...c, amount: -c.amount }))]
-      : [...positionChanges.makeOpeneds, ...positionChanges.makeCloseds.map((c) => ({ ...c, amount: -c.amount }))]
-  ).sort((a, b) => parseInt(a.blockNumber) - parseInt(b.blockNumber))
+      ? [
+          ...positionChanges.takeOpeneds,
+          ...positionChanges.takeCloseds.map((c) => ({ ...c, amount: -BigInt(c.amount) })),
+        ]
+      : [
+          ...positionChanges.makeOpeneds,
+          ...positionChanges.makeCloseds.map((c) => ({ ...c, amount: -BigInt(c.amount) })),
+        ]
+  ).sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber))
 
   // Settle versions is change.version + 1 unless it is the latest version
   const latestVersion = productSnapshot.latestVersion
