@@ -26,7 +26,7 @@ export const breakpoints = {
   md: '40em',
   mdd: '54em',
   lg: '62em',
-  xl: '80em',
+  xl: '95em',
 }
 
 export default styles
