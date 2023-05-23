@@ -55,6 +55,9 @@ export default function MarketBar() {
     openInterest: `${formatBig18USDPrice(snapshot?.long?.openInterest.taker, {
       compact: true,
     })} / ${formatBig18USDPrice(snapshot?.short?.openInterest.taker, { compact: true })}`,
+    liquidity: `${formatBig18USDPrice(snapshot?.long?.openInterest.maker, {
+      compact: true,
+    })} / ${formatBig18USDPrice(snapshot?.short?.openInterest.maker, { compact: true })}`,
   }
 
   return (
@@ -91,6 +94,9 @@ export default function MarketBar() {
         </MarketContainer>
         <MarketContainer>
           <Stat label={copy.openInterest} value={formattedValues.openInterest} />
+        </MarketContainer>
+        <MarketContainer>
+          <Stat label={copy.liquidity} value={formattedValues.liquidity} />
         </MarketContainer>
       </DesktopContainer>
     </Container>
