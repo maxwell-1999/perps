@@ -74,34 +74,27 @@ export const unpackPosition = ({
   return { side, details }
 }
 
-export const getPositionStatus = (position?: PositionDetails) => {
-  if (!position) {
+export const getPositionStatus = (positionDetails?: PositionDetails) => {
+  if (!positionDetails) {
     return PositionStatus.resolved
   }
-  const isClosing = Big18Math.isZero(position?.nextPosition ?? 0n) && !Big18Math.isZero(position?.position ?? 0n)
-  if (isClosing) {
+  const nextPosition = positionDetails?.nextPosition ?? 0n
+  const position = positionDetails?.position ?? 0n
+  const currentCollateral = positionDetails?.currentCollateral ?? 0n
+
+  if (Big18Math.isZero(nextPosition) && !Big18Math.isZero(position)) {
     return PositionStatus.closing
   }
-  const isClosed =
-    Big18Math.isZero(position?.nextPosition ?? 0n) &&
-    Big18Math.isZero(position?.position ?? 0n) &&
-    !Big18Math.isZero(position?.currentCollateral ?? 0n)
-  if (isClosed) {
+  if (Big18Math.isZero(nextPosition) && Big18Math.isZero(position) && !Big18Math.isZero(currentCollateral)) {
     return PositionStatus.closed
   }
-  const isOpening = !Big18Math.isZero(position?.nextPosition ?? 0n) && Big18Math.isZero(position?.position ?? 0n)
-  if (isOpening) {
+  if (!Big18Math.isZero(nextPosition) && Big18Math.isZero(position)) {
     return PositionStatus.opening
   }
-  const isPricing =
-    !Big18Math.isZero(position?.nextPosition ?? 0n) &&
-    !Big18Math.isZero(position?.position ?? 0n) &&
-    !Big18Math.eq(position?.nextPosition ?? 0n, position?.position ?? 0n)
-  if (isPricing) {
+  if (!Big18Math.isZero(nextPosition) && !Big18Math.isZero(position) && !Big18Math.eq(nextPosition, position)) {
     return PositionStatus.pricing
   }
-  const isOpen = !Big18Math.isZero(position?.nextPosition ?? 0n) && !Big18Math.isZero(position?.position ?? 0n)
-  if (isOpen) {
+  if (!Big18Math.isZero(nextPosition) && !Big18Math.isZero(position)) {
     return PositionStatus.open
   }
   return PositionStatus.resolved
