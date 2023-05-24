@@ -2,8 +2,7 @@ import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
 import { useMarketContext } from '@/contexts/marketContext'
-import { usePositionContext } from '@/contexts/positionContext'
-import { useChainLivePrices } from '@/hooks/markets'
+import { useChainLivePrices, useUserCurrentPositions } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { Day } from '@/utils/timeUtils'
 
@@ -53,13 +52,11 @@ export const usePositionManagerCopy = () => {
 
 export const useFormatPosition = () => {
   const { assetMetadata, selectedMarket, orderSide, selectedMarketSnapshot } = useMarketContext()
-  const { positions } = usePositionContext()
+  const { data: positions } = useUserCurrentPositions()
   const { noValue, long, short } = usePositionManagerCopy()
   const livePrices = useChainLivePrices()
   const position = unpackPosition({ positions, selectedMarket, orderSide })
   const positionStatus = getPositionStatus(position?.details)
-  console.log(positionStatus)
-
   const numSigFigs = assetMetadata.displayDecimals
 
   const currentPrice = Big18Math.abs(

@@ -10,7 +10,6 @@ import {
   TradeLayout,
 } from '@/components/layout/TradeLayout'
 import { MarketProvider } from '@/contexts/marketContext'
-import { PositionProvider } from '@/contexts/positionContext'
 import { TradeFormProvider } from '@/contexts/tradeFormContext'
 
 import Chart from './Chart'
@@ -26,31 +25,29 @@ export default function Trade() {
   const isBase = useBreakpointValue({ base: true, md: false })
   return (
     <MarketProvider>
-      <PositionProvider>
-        <TradeFormProvider>
-          <TradeLayout>
-            <HeaderGridItem>
-              <NavBar />
-            </HeaderGridItem>
-            <MarketBarGridItem>
-              <MarketBar />
-            </MarketBarGridItem>
-            <TradeFormGridItem>
-              <TradeForm />
-            </TradeFormGridItem>
-            {!isBase && (
-              <>
-                <ChartGridItem>
-                  <Chart />
-                </ChartGridItem>
-                <PositionManagerGridItem>
-                  <PositionManager />
-                </PositionManagerGridItem>
-              </>
-            )}
-          </TradeLayout>
-        </TradeFormProvider>
-      </PositionProvider>
+      <TradeFormProvider>
+        <TradeLayout>
+          <HeaderGridItem>
+            <NavBar />
+          </HeaderGridItem>
+          <MarketBarGridItem>
+            <MarketBar />
+          </MarketBarGridItem>
+          <TradeFormGridItem>
+            <TradeForm />
+          </TradeFormGridItem>
+          {!isBase && (
+            <>
+              <ChartGridItem>
+                <Chart />
+              </ChartGridItem>
+              <PositionManagerGridItem>
+                <PositionManager />
+              </PositionManagerGridItem>
+            </>
+          )}
+        </TradeLayout>
+      </TradeFormProvider>
     </MarketProvider>
   )
 }

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
 import { useMarketContext } from '@/contexts/marketContext'
-import { useChainLivePrices } from '@/hooks/markets'
+import { useAsset24hrData, useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { Hour } from '@/utils/timeUtils'
 
@@ -31,7 +31,8 @@ export const useMarketBarCopy = () => {
 
 export const useFormattedMarketBarValues = () => {
   const livePrices = useChainLivePrices()
-  const { selectedMarket, selectedMarketSnapshot: snapshot, selectedMarketDailyData: dailyData } = useMarketContext()
+  const { selectedMarket, selectedMarketSnapshot: snapshot } = useMarketContext()
+  const { data: dailyData } = useAsset24hrData(selectedMarket)
 
   const totalVolume = useMemo(() => {
     if (!dailyData?.volume) return 0n
