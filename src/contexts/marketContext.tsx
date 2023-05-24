@@ -4,13 +4,7 @@ import { OrderSide } from '@/components/pages/Trade/TradeForm/constants'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { DefaultChain } from '@/constants/network'
 import { SupportedChainId } from '@/constants/network'
-import {
-  AssetSnapshots,
-  UserCurrentPositions,
-  useAsset24hrData,
-  useChainAssetSnapshots,
-  useUserCurrentPositions,
-} from '@/hooks/markets'
+import { AssetSnapshots, UserCurrentPositions, useAsset24hrData, useChainAssetSnapshots } from '@/hooks/markets'
 import { useChainId } from '@/hooks/network'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
@@ -55,7 +49,6 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
 
   const { data: snapshots } = useChainAssetSnapshots()
   const { data: dailyData } = useAsset24hrData(selectedMarket)
-  const { data: positions } = useUserCurrentPositions()
 
   useEffect(() => {
     // check query params first
@@ -91,7 +84,6 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
         selectedMarketSnapshot: snapshots?.[selectedMarket],
         selectedMarketDailyData: dailyData,
         assetMetadata: AssetMetadata[selectedMarket],
-        positions,
       }}
     >
       {children}

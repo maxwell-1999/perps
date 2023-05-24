@@ -2,12 +2,13 @@ import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
 import { useMarketContext } from '@/contexts/marketContext'
+import { usePositionContext } from '@/contexts/positionContext'
 import { useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { Day } from '@/utils/timeUtils'
 
 import { OrderSide } from '../TradeForm/constants'
-import { calculatePnl, unpackPosition } from './utils'
+import { calculatePnl, getPositionStatus, unpackPosition } from './utils'
 
 export const useStyles = () => {
   const theme = useTheme()
@@ -27,6 +28,11 @@ export const usePositionManagerCopy = () => {
     allPositions: intl.formatMessage({ defaultMessage: 'All Positions' }),
     history: intl.formatMessage({ defaultMessage: 'History' }),
     open: intl.formatMessage({ defaultMessage: 'Open' }),
+    closed: intl.formatMessage({ defaultMessage: 'Closed' }),
+    opening: intl.formatMessage({ defaultMessage: 'Opening...' }),
+    closing: intl.formatMessage({ defaultMessage: 'Closing...' }),
+    pricing: intl.formatMessage({ defaultMessage: 'Pricing...' }),
+    resolved: intl.formatMessage({ defaultMessage: 'Resolved' }),
     long: intl.formatMessage({ defaultMessage: 'Long' }),
     short: intl.formatMessage({ defaultMessage: 'Short' }),
     size: intl.formatMessage({ defaultMessage: 'Size' }),
@@ -41,19 +47,23 @@ export const usePositionManagerCopy = () => {
     x: intl.formatMessage({ defaultMessage: 'x' }),
     noValue: intl.formatMessage({ defaultMessage: '--' }),
     side: intl.formatMessage({ defaultMessage: 'Side' }),
+    withdraw: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
   }
 }
 
 export const useFormatPosition = () => {
-  const { assetMetadata, positions, selectedMarket, orderSide, selectedMarketSnapshot } = useMarketContext()
+  const { assetMetadata, selectedMarket, orderSide, selectedMarketSnapshot } = useMarketContext()
+  const { positions } = usePositionContext()
   const { noValue, long, short } = usePositionManagerCopy()
   const livePrices = useChainLivePrices()
   const position = unpackPosition({ positions, selectedMarket, orderSide })
+  const positionStatus = getPositionStatus(position?.details)
+  console.log(positionStatus)
 
   const numSigFigs = assetMetadata.displayDecimals
 
   const currentPrice = Big18Math.abs(
-    selectedMarketSnapshot?.long?.latestVersion.price ?? selectedMarketSnapshot?.short?.latestVersion.price ?? 0n,
+    selectedMarketSnapshot?.long?.latestVersion?.price ?? selectedMarketSnapshot?.short?.latestVersion?.price ?? 0n,
   )
   const pythPrice = livePrices[selectedMarket]
   // Use the live price to calculate real time pnl
@@ -65,6 +75,7 @@ export const useFormatPosition = () => {
     position?.side === OrderSide.Long ? selectedMarketSnapshot?.long?.rate : selectedMarketSnapshot?.short?.rate
 
   return {
+    status: positionStatus,
     side: position ? (position.side === OrderSide.Long ? long : short) : noValue,
     currentCollateral: position ? formatBig18USDPrice(position?.details?.currentCollateral) : noValue,
     startCollateral: position ? formatBig18USDPrice(position?.details?.startCollateral) : noValue,

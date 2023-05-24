@@ -10,6 +10,7 @@ import { Button } from '@ds/Button'
 import { DataRow } from '@ds/DataRow'
 
 import { OrderSide } from '../../TradeForm/constants'
+import { PositionStatus } from '../constants'
 import { useFormatPosition, usePositionManagerCopy, useStyles } from '../hooks'
 import {
   ActivePositionDetail,
@@ -25,6 +26,7 @@ import {
 
 function CurrentPosition() {
   const copy = usePositionManagerCopy()
+  const { noValue } = copy
   const { borderColor, green, red, alpha75, subheaderTextColor } = useStyles()
   const { assetMetadata } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
@@ -40,26 +42,34 @@ function CurrentPosition() {
     pnlPercentage,
     isPnlPositive,
     dailyFunding,
+    status,
   } = useFormatPosition()
 
-  const hasPosition = position !== copy.noValue
-  const positionStatus = hasPosition ? copy.open : copy.noValue
+  const hasPosition = position !== noValue
   const pnlTextColor = isPnlPositive ? green : red
   const sideTextColor = side === OrderSide.Long ? green : red
+  const isOpenPosition =
+    status === PositionStatus.open || status === PositionStatus.pricing || status === PositionStatus.closing
+  const isClosedPosition = status === PositionStatus.closed
 
+  const statusLabel = copy[status]
   return (
     <ResponsiveContainer>
       <LeftContainer borderColor={borderColor}>
         <Flex width="50%" flexDirection="column" borderRight={`1px solid ${borderColor}`}>
           <ActivePositionHeader borderColor={borderColor}>
-            <AssetIconWithText market={assetMetadata} text={positionStatus} />
-            <StatusLight color={hasPosition ? green : 'darkGray'} glow={hasPosition} />
+            <AssetIconWithText market={assetMetadata} text={statusLabel} />
+            <StatusLight color={isOpenPosition ? green : 'darkGray'} glow={isOpenPosition} />
           </ActivePositionHeader>
-          <ActivePositionDetail label={copy.size} value={position} valueSubheader={notional} />
+          <ActivePositionDetail
+            label={copy.size}
+            value={isOpenPosition ? position : noValue}
+            valueSubheader={isOpenPosition ? notional : noValue}
+          />
         </Flex>
         <Flex width="50%" flexDirection="column">
           <ActivePositionHeader borderColor={borderColor}>
-            <Text fontSize="17px" color={hasPosition ? sideTextColor : subheaderTextColor}>
+            <Text fontSize="17px" color={isOpenPosition ? sideTextColor : subheaderTextColor}>
               {side}
             </Text>
             <LeverageBadge leverage={leverage} />
@@ -77,19 +87,24 @@ function CurrentPosition() {
           {hasPosition && (
             <Flex flex={1} justifyContent="space-between" mb="10px" alignItems="center">
               <Flex alignItems="center">
-                <Text mr={3}>{positionStatus}</Text>
+                <Text mr={3}>{statusLabel}</Text>
                 <StatusLight color={hasPosition ? green : 'darkGray'} glow={hasPosition} />
               </Flex>
-              <ButtonGroup>
-                <Button size="sm" label={copy.modify} onClick={() => setTradeFormState(FormState.modify)} />
-                <Button
-                  size="sm"
-                  leftIcon={<ClosePositionIcon />}
-                  variant="transparent"
-                  label={copy.close}
-                  onClick={() => setTradeFormState(FormState.close)}
-                />
-              </ButtonGroup>
+              {isOpenPosition && (
+                <ButtonGroup>
+                  <Button size="sm" label={copy.modify} onClick={() => setTradeFormState(FormState.modify)} />
+                  <Button
+                    size="sm"
+                    leftIcon={<ClosePositionIcon />}
+                    variant="transparent"
+                    label={copy.close}
+                    onClick={() => setTradeFormState(FormState.close)}
+                  />
+                </ButtonGroup>
+              )}
+              {isClosedPosition && (
+                <Button size="sm" label={copy.withdraw} onClick={() => setTradeFormState(FormState.withdraw)} />
+              )}
             </Flex>
           )}
 
@@ -106,7 +121,7 @@ function CurrentPosition() {
             value={
               <Text fontSize="14px" color={alpha75}>
                 {/*eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
-                {position} / {notional}
+                {isOpenPosition ? `${position} / {notional}` : noValue}
               </Text>
             }
           />
@@ -154,16 +169,21 @@ function CurrentPosition() {
         />
         {hasPosition && (
           <DesktopButtonContainer>
-            <ButtonGroup>
-              <Button size="sm" label={copy.modify} onClick={() => setTradeFormState(FormState.modify)} />
-              <Button
-                size="sm"
-                leftIcon={<ClosePositionIcon />}
-                variant="transparent"
-                label={copy.close}
-                onClick={() => setTradeFormState(FormState.close)}
-              />
-            </ButtonGroup>
+            {isOpenPosition && (
+              <ButtonGroup>
+                <Button size="sm" label={copy.modify} onClick={() => setTradeFormState(FormState.modify)} />
+                <Button
+                  size="sm"
+                  leftIcon={<ClosePositionIcon />}
+                  variant="transparent"
+                  label={copy.close}
+                  onClick={() => setTradeFormState(FormState.close)}
+                />
+              </ButtonGroup>
+            )}
+            {isClosedPosition && (
+              <Button size="sm" label={copy.withdraw} onClick={() => setTradeFormState(FormState.withdraw)} />
+            )}
           </DesktopButtonContainer>
         )}
       </RightContainer>

@@ -53,10 +53,22 @@
       "value": "Perennial"
     }
   ],
+  "6uS8Qe": [
+    {
+      "type": 0,
+      "value": "Opening..."
+    }
+  ],
   "7xpfuy": [
     {
       "type": 0,
       "value": "Side"
+    }
+  ],
+  "8LaTBL": [
+    {
+      "type": 0,
+      "value": "Switch Market"
     }
   ],
   "90axO4": [
@@ -69,12 +81,6 @@
     {
       "type": 0,
       "value": "You will receive..."
-    }
-  ],
-  "BWsWnT": [
-    {
-      "type": 0,
-      "value": "24h volume"
     }
   ],
   "BY343C": [
@@ -101,16 +107,16 @@
       "value": "P&L"
     }
   ],
+  "Fv1ZSz": [
+    {
+      "type": 0,
+      "value": "Closed"
+    }
+  ],
   "GCY0dr": [
     {
       "type": 0,
       "value": "Market"
-    }
-  ],
-  "GRj1bg": [
-    {
-      "type": 0,
-      "value": "24h low"
     }
   ],
   "HpDope": [
@@ -135,6 +141,12 @@
       "value": "Modify"
     }
   ],
+  "K5GOP+": [
+    {
+      "type": 0,
+      "value": "Hourly Funding"
+    }
+  ],
   "KtEZXn": [
     {
       "type": 0,
@@ -157,6 +169,12 @@
     {
       "type": 0,
       "value": "Modify position"
+    }
+  ],
+  "PQiNnk": [
+    {
+      "type": 0,
+      "value": "Open Interest"
     }
   ],
   "QFNxVm": [
@@ -189,6 +207,12 @@
       "value": "This Position"
     }
   ],
+  "W6nSYE": [
+    {
+      "type": 0,
+      "value": "Resolved"
+    }
+  ],
   "WBB92z": [
     {
       "type": 0,
@@ -201,10 +225,22 @@
       "value": "You can now withdraw..."
     }
   ],
+  "XmwS+S": [
+    {
+      "type": 0,
+      "value": "24h Volume"
+    }
+  ],
   "agOXPD": [
     {
       "type": 0,
       "value": "Size"
+    }
+  ],
+  "bYFLPY": [
+    {
+      "type": 0,
+      "value": "24h High"
     }
   ],
   "bri4Pp": [
@@ -217,6 +253,12 @@
     {
       "type": 0,
       "value": "Liquidity"
+    }
+  ],
+  "czGSYM": [
+    {
+      "type": 0,
+      "value": "Pricing..."
     }
   ],
   "djJp6c": [
@@ -249,10 +291,10 @@
       "value": "Trading fee"
     }
   ],
-  "mVtdKc": [
+  "l0NFC6": [
     {
       "type": 0,
-      "value": "Switch market"
+      "value": "24h Low"
     }
   ],
   "npb5FN": [
@@ -267,22 +309,10 @@
       "value": "Please specify how much you would like to withdraw from the pool now that you have reduced your position size."
     }
   ],
-  "ol8xdw": [
-    {
-      "type": 0,
-      "value": "Open interest"
-    }
-  ],
   "pKvURI": [
     {
       "type": 0,
       "value": "x"
-    }
-  ],
-  "pSHy1y": [
-    {
-      "type": 0,
-      "value": "24h high"
     }
   ],
   "pbpdV6": [
@@ -307,12 +337,6 @@
       "value": "Close"
     }
   ],
-  "satTem": [
-    {
-      "type": 0,
-      "value": "Hourly funding"
-    }
-  ],
   "sxIVr5": [
     {
       "type": 0,
@@ -329,6 +353,12 @@
     {
       "type": 0,
       "value": "--"
+    }
+  ],
+  "wUU3x3": [
+    {
+      "type": 0,
+      "value": "Closing..."
     }
   ],
   "yR4V5C": [
