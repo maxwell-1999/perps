@@ -4,17 +4,10 @@ import { OrderSide } from '@/components/pages/Trade/TradeForm/constants'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { DefaultChain } from '@/constants/network'
 import { SupportedChainId } from '@/constants/network'
-import {
-  AssetSnapshots,
-  UserCurrentPositions,
-  useAsset24hrData,
-  useChainAssetSnapshots,
-  useUserCurrentPositions,
-} from '@/hooks/markets'
+import { AssetSnapshots, UserCurrentPositions, useChainAssetSnapshots } from '@/hooks/markets'
 import { useChainId } from '@/hooks/network'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
-import { Get24hrDataQuery } from '@t/gql/graphql'
 
 type MarketContextType = {
   chainId: SupportedChainId
@@ -29,7 +22,6 @@ type MarketContextType = {
     long?: IPerennialLens.ProductSnapshotStructOutput
     short?: IPerennialLens.ProductSnapshotStructOutput
   }
-  selectedMarketDailyData?: Get24hrDataQuery
 }
 
 const MarketContext = createContext<MarketContextType>({
@@ -45,7 +37,6 @@ const MarketContext = createContext<MarketContextType>({
   },
   snapshots: undefined,
   selectedMarketSnapshot: undefined,
-  selectedMarketDailyData: undefined,
 })
 
 export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
@@ -54,8 +45,6 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   const [orderSide, setOrderSide] = useState<OrderSide>(OrderSide.Long)
 
   const { data: snapshots } = useChainAssetSnapshots()
-  const { data: dailyData } = useAsset24hrData(selectedMarket)
-  const { data: positions } = useUserCurrentPositions()
 
   useEffect(() => {
     // check query params first
@@ -89,9 +78,7 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
         setSelectedMarket,
         snapshots,
         selectedMarketSnapshot: snapshots?.[selectedMarket],
-        selectedMarketDailyData: dailyData,
         assetMetadata: AssetMetadata[selectedMarket],
-        positions,
       }}
     >
       {children}

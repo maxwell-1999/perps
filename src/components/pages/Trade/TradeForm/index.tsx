@@ -23,16 +23,19 @@ function TradeContainer() {
 
   const handleSubmitTrade = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    // TODO: invalidate positions query
     alert('order submitted')
   }
 
   const handleModifyPosition = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    // TODO: invalidate positions query
     alert('modify position')
   }
 
   const handleClosePosition = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    // TODO: invalidate positions query
     alert('close position')
   }
 

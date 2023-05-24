@@ -3,6 +3,7 @@ import { PositionDetails, UserCurrentPositions } from '@/hooks/markets'
 import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 
 import { OrderSide } from '../TradeForm/constants'
+import { PositionStatus } from './constants'
 
 export const calculatePnl = (positionDetails: PositionDetails, livePriceDelta?: bigint) => {
   let pnl = Big18Math.sub(
@@ -16,10 +17,12 @@ export const calculatePnl = (positionDetails: PositionDetails, livePriceDelta?: 
     const additionalPnl = Big18Math.mul(positionDetails.nextPosition, livePriceDelta)
     pnl = Big18Math.add(pnl, additionalPnl)
   }
-
-  const pnlPercentage = formatBig18Percent(Big18Math.div(pnl, positionDetails?.startCollateral ?? 0n), {
-    numDecimals: 2,
-  })
+  let pnlPercentage = '0'
+  if (positionDetails?.startCollateral) {
+    pnlPercentage = formatBig18Percent(Big18Math.div(pnl, positionDetails?.startCollateral ?? 0n), {
+      numDecimals: 2,
+    })
+  }
   return {
     pnl: formatBig18USDPrice(pnl),
     pnlPercentage,
@@ -69,4 +72,30 @@ export const unpackPosition = ({
   }
 
   return { side, details }
+}
+
+export const getPositionStatus = (positionDetails?: PositionDetails) => {
+  if (!positionDetails) {
+    return PositionStatus.resolved
+  }
+  const nextPosition = positionDetails?.nextPosition ?? 0n
+  const position = positionDetails?.position ?? 0n
+  const currentCollateral = positionDetails?.currentCollateral ?? 0n
+
+  if (Big18Math.isZero(nextPosition) && !Big18Math.isZero(position)) {
+    return PositionStatus.closing
+  }
+  if (Big18Math.isZero(nextPosition) && Big18Math.isZero(position) && !Big18Math.isZero(currentCollateral)) {
+    return PositionStatus.closed
+  }
+  if (!Big18Math.isZero(nextPosition) && Big18Math.isZero(position)) {
+    return PositionStatus.opening
+  }
+  if (!Big18Math.isZero(nextPosition) && !Big18Math.isZero(position) && !Big18Math.eq(nextPosition, position)) {
+    return PositionStatus.pricing
+  }
+  if (!Big18Math.isZero(nextPosition) && !Big18Math.isZero(position)) {
+    return PositionStatus.open
+  }
+  return PositionStatus.resolved
 }
