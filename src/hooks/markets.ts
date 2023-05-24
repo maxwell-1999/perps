@@ -77,26 +77,27 @@ export const useAsset24hrData = (asset: SupportedAsset) => {
             periodStartTimestamp
             takerNotional
           }
-          low: settles(
-            where: { product: $long, blockTimestamp_gte: $from, blockTimestamp_lte: $to }
-            orderBy: toVersionPrice
+          low: productVersions(
+            where: { product: $long, timestamp_gte: $from, timestamp_lte: $to }
+            orderBy: price
             orderDirection: asc
           ) {
-            toVersionPrice
+            price
           }
-          high: settles(
-            where: { product: $long, blockTimestamp_gte: $from, blockTimestamp_lte: $to }
-            orderBy: toVersionPrice
+          high: productVersions(
+            where: { product: $long, timestamp_gte: $from, timestamp_lte: $to }
+            orderBy: price
             orderDirection: desc
           ) {
-            toVersionPrice
+            price
           }
-          start: settles(
-            where: { product: $long, blockTimestamp_gte: $from, blockTimestamp_lte: $to }
-            orderBy: blockTimestamp
+          start: productVersions(
+            where: { product: $long, timestamp_gte: $from, timestamp_lte: $to }
+            orderBy: timestamp
             orderDirection: asc
+            first: 1
           ) {
-            toVersionPrice
+            price
           }
         }
       `)

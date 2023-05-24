@@ -32,6 +32,7 @@ const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ symbol, overrides
         enable_publishing: false,
         allow_symbol_change: false,
         container_id: 'tv-widget-container',
+        range: '24H',
         loading_screen: { backgroundColor: '#000000' },
       })
     }

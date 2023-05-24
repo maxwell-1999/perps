@@ -1,8 +1,7 @@
 import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
 import { AlchemyProvider, JsonRpcProvider } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
-import { useMemo } from 'react'
-import { useNetwork, usePublicClient } from 'wagmi'
+import { useNetwork } from 'wagmi'
 import { baseGoerli } from 'wagmi/chains'
 
 import { AlchemyActiveKey, DefaultChain, GraphUrls, SupportedChainId, isSupportedChain } from '@/constants/network'
@@ -16,24 +15,33 @@ export const useChainId = () => {
   return chain.id as SupportedChainId
 }
 
+const providers = new Map<SupportedChainId, AlchemyProvider | JsonRpcProvider>()
 export const useProvider = () => {
-  const publicClient = usePublicClient()
+  const chainId = useChainId()
 
-  return useMemo(
-    () =>
-      publicClient.chain.id === baseGoerli.id
+  if (!providers.has(chainId)) {
+    providers.set(
+      chainId,
+      chainId === baseGoerli.id
         ? new JsonRpcProvider('https://goerli.base.org')
-        : new AlchemyProvider(publicClient.chain.id, AlchemyActiveKey),
-    [publicClient.chain.id],
-  )
+        : new AlchemyProvider(chainId, AlchemyActiveKey),
+    )
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return providers.get(chainId)!
 }
 
+const graphClients = new Map<SupportedChainId, GraphQLClient>()
 export const useGraphClient = () => {
   const chainId = useChainId()
 
-  return useMemo(() => new GraphQLClient(GraphUrls[chainId]), [chainId])
+  if (!graphClients.has(chainId)) graphClients.set(chainId, new GraphQLClient(GraphUrls[chainId]))
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return graphClients.get(chainId)!
 }
 
+const pythClient = new EvmPriceServiceConnection('https://xc-mainnet.pyth.network')
 export const usePyth = () => {
-  return useMemo(() => new EvmPriceServiceConnection('https://xc-mainnet.pyth.network'), [])
+  return pythClient
 }

@@ -9,7 +9,7 @@ import { Hour } from '@/utils/timeUtils'
 export const useSelectorCopy = () => {
   const intl = useIntl()
   return {
-    switchMarket: intl.formatMessage({ defaultMessage: 'Switch market' }),
+    switchMarket: intl.formatMessage({ defaultMessage: 'Switch Market' }),
     market: intl.formatMessage({ defaultMessage: 'Market' }),
     priceLiquidity: intl.formatMessage({ defaultMessage: 'Price / Liquidity' }),
     close: intl.formatMessage({ defaultMessage: 'Close' }),
@@ -20,11 +20,11 @@ export const useMarketBarCopy = () => {
   const intl = useIntl()
   return {
     change: intl.formatMessage({ defaultMessage: 'Change' }),
-    hourlyFunding: intl.formatMessage({ defaultMessage: 'Hourly funding' }),
-    low: intl.formatMessage({ defaultMessage: '24h low' }),
-    high: intl.formatMessage({ defaultMessage: '24h high' }),
-    volume: intl.formatMessage({ defaultMessage: '24h volume' }),
-    openInterest: intl.formatMessage({ defaultMessage: 'Open interest' }),
+    hourlyFunding: intl.formatMessage({ defaultMessage: 'Hourly Funding' }),
+    low: intl.formatMessage({ defaultMessage: '24h Low' }),
+    high: intl.formatMessage({ defaultMessage: '24h High' }),
+    volume: intl.formatMessage({ defaultMessage: '24h Volume' }),
+    openInterest: intl.formatMessage({ defaultMessage: 'Open Interest' }),
     liquidity: intl.formatMessage({ defaultMessage: 'Liquidity' }),
   }
 }
@@ -43,16 +43,16 @@ export const useFormattedMarketBarValues = () => {
   const currentPrice = Big18Math.abs(
     livePrices[selectedMarket] ?? snapshot?.long?.latestVersion?.price ?? snapshot?.short?.latestVersion.price ?? 0n,
   )
-  const change = currentPrice - BigInt(dailyData?.start?.at(0)?.toVersionPrice ?? currentPrice)
+  const change = currentPrice - BigInt(dailyData?.start?.at(0)?.price ?? currentPrice)
 
   return {
     price: formatBig18USDPrice(currentPrice),
-    change: formatBig18Percent(Big18Math.div(change, BigInt(dailyData?.start?.at(0)?.toVersionPrice || 1))),
+    change: formatBig18Percent(Big18Math.div(change, BigInt(dailyData?.start?.at(0)?.price || 1))),
     hourlyFunding: `${formatBig18Percent(longRate, { numDecimals: 4 })} / ${formatBig18Percent(shortRate, {
       numDecimals: 4,
     })}`,
-    low: formatBig18USDPrice(BigInt(dailyData?.low?.at(0)?.toVersionPrice || 0)),
-    high: formatBig18USDPrice(BigInt(dailyData?.high?.at(0)?.toVersionPrice || 0)),
+    low: formatBig18USDPrice(BigInt(dailyData?.low?.at(0)?.price || 0)),
+    high: formatBig18USDPrice(BigInt(dailyData?.high?.at(0)?.price || 0)),
     volume: formatBig18USDPrice(totalVolume, { compact: true }),
     openInterest: `${formatBig18USDPrice(snapshot?.long?.openInterest.taker, {
       compact: true,

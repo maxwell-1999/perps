@@ -71,6 +71,14 @@ export class Big18Math {
     return a < 0n ? -a : a
   }
 
+  public static max(a: bigint, b: bigint): bigint {
+    return a >= b ? a : b
+  }
+
+  public static min(a: bigint, b: bigint): bigint {
+    return a <= b ? a : b
+  }
+
   public static fixedFrom(a: bigint): FixedNumber {
     return FixedNumber.fromValue(a, Big18Math.FIXED_DECIMALS, Big18Math.FIXED_WIDTH)
   }

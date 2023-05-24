@@ -25,6 +25,20 @@ export function add(a: PositionStructOutput, b: PositionStructOutput) {
   } as PositionStructOutput
 }
 
+export function utilization(pre: PrePositionStructOutput, pos: PositionStructOutput) {
+  const nextPosition = next(pre, pos)
+  if (nextPosition.maker === 0n) return 0n
+
+  return Big18Math.min(Big18Math.ONE, Big18Math.div(nextPosition.taker, nextPosition.maker))
+}
+
+export function socialization(pre: PrePositionStructOutput, pos: PositionStructOutput) {
+  const nextPosition = next(pre, pos)
+  if (nextPosition.taker === 0n) return 0n
+
+  return Big18Math.min(Big18Math.ONE, Big18Math.div(nextPosition.maker, nextPosition.taker))
+}
+
 // LiquidationPrice = ((position * abs(price) + collateral) / (position * (1 + maintenanceRatio))
 export const calcLiquidationPrice = (
   product: IPerennialLens.ProductSnapshotStructOutput,
