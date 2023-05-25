@@ -7,7 +7,23 @@ import { Column } from '@ds/Table'
 
 import { OrderSide } from '../../TradeForm/constants'
 import { OpenPositionTableData } from '../constants'
-import { usePositionManagerCopy, useStyles } from '../hooks'
+import { usePnl, usePositionManagerCopy, useStyles } from '../hooks'
+
+const PnlCell = (row: OpenPositionTableData) => {
+  const { isPnlPositive, pnl, pnlPercentage } = usePnl({ asset: row.asset, positionDetails: row.details })
+  const { green, red } = useStyles()
+  const pnlColor = isPnlPositive ? green : red
+  return (
+    <Flex flexDirection="column">
+      <Text fontSize="13px" color={pnlColor}>
+        {pnlPercentage}
+      </Text>
+      <Text variant="label" fontSize="11px">
+        {pnl}
+      </Text>
+    </Flex>
+  )
+}
 
 export const useOpenPositionColumns = () => {
   const copy = usePositionManagerCopy()
@@ -45,19 +61,9 @@ export const useOpenPositionColumns = () => {
     },
     {
       Header: copy.pnl,
-      accessor: 'pnl',
+      accessor: 'details',
       renderer: (row: OpenPositionTableData) => {
-        const pnlColor = row.isPnlPositive ? green : red
-        return (
-          <Flex flexDirection="column">
-            <Text fontSize="13px" color={pnlColor}>
-              {row.pnlPercentage}
-            </Text>
-            <Text variant="label" fontSize="11px">
-              {row.pnl}
-            </Text>
-          </Flex>
-        )
+        return <PnlCell {...row} />
       },
     },
     {

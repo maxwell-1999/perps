@@ -1,9 +1,9 @@
 import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
-import { AssetMetadata } from '@/constants/assets'
+import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useChainAssetSnapshots, useChainLivePrices, useUserCurrentPositions } from '@/hooks/markets'
+import { PositionDetails, useChainAssetSnapshots, useChainLivePrices, useUserCurrentPositions } from '@/hooks/markets'
 import { formatBig18Percent } from '@/utils/big18Utils'
 import { Day } from '@/utils/timeUtils'
 
@@ -65,23 +65,18 @@ export const useFormatPosition = () => {
   const { data: snapshots } = useChainAssetSnapshots()
   const { data: positions } = useUserCurrentPositions()
   const { noValue, long, short } = usePositionManagerCopy()
-  const livePrices = useChainLivePrices()
   const position = unpackPosition({ positions, selectedMarket, orderSide })
   const positionStatus = getPositionStatus(position?.details)
   const numSigFigs = assetMetadata.displayDecimals
   const selectedMarketSnapshot = snapshots?.[selectedMarket]
 
-  const currentPriceDelta = getCurrentPriceDelta({ snapshots, livePrices, asset: selectedMarket })
-  const positionPnl = calculatePnl(position?.details, currentPriceDelta)
   const fundingRate =
     position?.side === OrderSide.Long ? selectedMarketSnapshot?.long?.rate : selectedMarketSnapshot?.short?.rate
 
   return {
+    positionDetails: position?.details,
     status: positionStatus,
     side: position ? (position.side === OrderSide.Long ? long : short) : noValue,
-    pnl: position ? (positionPnl.pnl as string) : noValue,
-    pnlPercentage: position ? (positionPnl.pnlPercentage as string) : noValue,
-    isPnlPositive: positionPnl.isPnlPositive,
     dailyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Day, { numDecimals: 4 }) : noValue,
     ...getFormattedPositionDetails({ positionDetails: position?.details, placeholderString: noValue, numSigFigs }),
   }
@@ -89,24 +84,26 @@ export const useFormatPosition = () => {
 
 export const useOpenPositionTableData = () => {
   const { data: positionData } = useUserCurrentPositions()
-  const livePrices = useChainLivePrices()
-  const { data: snapshots } = useChainAssetSnapshots()
   const { noValue } = usePositionManagerCopy()
   const positions = transformPositionDataToArray(positionData)
 
   return positions.map((position) => {
-    const currentPriceDelta = getCurrentPriceDelta({ snapshots, livePrices, asset: position.asset })
     const numSigFigs = AssetMetadata[position.asset]?.displayDecimals ?? 2
-    const positionPnl = calculatePnl(position?.details, currentPriceDelta)
 
     return {
+      details: position.details,
       side: position.side,
-      pnl: position ? positionPnl.pnl : noValue,
-      pnlPercentage: position ? positionPnl.pnlPercentage : noValue,
-      isPnlPositive: position ? positionPnl.isPnlPositive : noValue,
       asset: position.asset,
       symbol: position.symbol,
       ...getFormattedPositionDetails({ positionDetails: position.details, placeholderString: noValue, numSigFigs }),
     }
   })
+}
+
+export const usePnl = ({ asset, positionDetails }: { asset: SupportedAsset; positionDetails: PositionDetails }) => {
+  const livePrices = useChainLivePrices()
+  const { data: snapshots } = useChainAssetSnapshots()
+  const currentPriceDelta = getCurrentPriceDelta({ snapshots, livePrices, asset: asset })
+  const { pnl, pnlPercentage, isPnlPositive } = calculatePnl(positionDetails, currentPriceDelta)
+  return { pnl, pnlPercentage, isPnlPositive }
 }

@@ -28,10 +28,8 @@ export type OpenPositionTableData = {
   liquidationPrice: string
   nextPosition: string
   notional: string
-  pnl: string
-  pnlPercentage: string
-  isPnlPositive: boolean | string
   position: string
   startCollateral: string
   symbol: string
+  details: PositionDetails
 }
