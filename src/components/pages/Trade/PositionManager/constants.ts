@@ -1,3 +1,8 @@
+import { SupportedAsset } from '@/constants/assets'
+import { PositionDetails } from '@/hooks/markets'
+
+import { OrderSide } from '../TradeForm/constants'
+
 export enum PositionStatus {
   open = 'open',
   closed = 'closed',
@@ -5,4 +10,28 @@ export enum PositionStatus {
   closing = 'closing',
   pricing = 'pricing',
   resolved = 'noValue',
+}
+
+export type FormattedPositionDetail = {
+  asset: SupportedAsset
+  symbol: string
+  side: OrderSide
+  details: PositionDetails
+}
+
+export type OpenPositionTableData = {
+  asset: SupportedAsset
+  side: OrderSide
+  averageEntry: string
+  currentCollateral: string
+  leverage: string
+  liquidationPrice: string
+  nextPosition: string
+  notional: string
+  pnl: string
+  pnlPercentage: string
+  isPnlPositive: boolean | string
+  position: string
+  startCollateral: string
+  symbol: string
 }

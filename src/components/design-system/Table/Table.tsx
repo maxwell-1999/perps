@@ -12,7 +12,7 @@ import {
   useTheme,
 } from '@chakra-ui/react'
 import { useMemo } from 'react'
-import { useSortBy, useTable } from 'react-table'
+import { TableOptions, UseSortByOptions, useSortBy, useTable } from 'react-table'
 
 import DownArrow from '../../../../public/icons/downArrow.svg'
 import UpArrow from '../../../../public/icons/upArrow.svg'
@@ -25,7 +25,11 @@ export interface Column<T = any> {
   isSortedDesc?: boolean
 }
 
-export interface TableProps<T = any> {
+interface ExtendedTableOptions<T extends object> extends TableOptions<T>, UseSortByOptions<T> {
+  autoResetSortBy?: boolean
+}
+
+export interface TableProps<T extends object> {
   data: T[]
   columns: Column<T>[]
   caption?: string
@@ -40,7 +44,7 @@ export const Table = <T extends object = any>({ data, columns, caption }: TableP
   const thActiveColor = useColorModeValue(theme.colors.black, theme.colors.white)
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
-    { columns: memoColumns, data: memoData },
+    { columns: memoColumns, data: memoData, autoResetSortBy: false } as ExtendedTableOptions<T>,
     useSortBy,
   )
   const lastRow = rows.length - 1

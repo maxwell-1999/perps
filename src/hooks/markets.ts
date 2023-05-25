@@ -384,3 +384,5 @@ export const useChainLivePrices = () => {
 
   return prices
 }
+
+export type LivePrices = Awaited<ReturnType<typeof useChainLivePrices>>
