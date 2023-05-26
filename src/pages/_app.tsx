@@ -21,6 +21,7 @@ import English from '../../lang/compiled-locales/en.json'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      keepPreviousData: true, // Keep previous data when fetching new data
       staleTime: Number(1n * Hour) * 1000, // 1 hour in ms
     },
   },

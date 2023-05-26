@@ -13,6 +13,7 @@ const config: CodegenConfig = {
       config: {
         scalars: {
           BigInt: 'string',
+          Bytes: 'string',
         },
       },
     },

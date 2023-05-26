@@ -57,3 +57,16 @@ export const ChainMarkets: {
     },
   },
 }
+
+export const addressToAsset = (address: Address) => {
+  for (const chainId of Object.keys(ChainMarkets)) {
+    for (const asset of Object.keys(ChainMarkets[Number(chainId) as SupportedChainId])) {
+      if (ChainMarkets[Number(chainId) as SupportedChainId][asset as SupportedAsset]?.long === address) {
+        return asset as SupportedAsset
+      }
+      if (ChainMarkets[Number(chainId) as SupportedChainId][asset as SupportedAsset]?.short === address) {
+        return asset as SupportedAsset
+      }
+    }
+  }
+}
