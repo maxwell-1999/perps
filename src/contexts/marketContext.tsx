@@ -9,6 +9,12 @@ import { useChainId } from '@/hooks/network'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
 
+export enum PositionsTab {
+  current,
+  all,
+  history,
+}
+
 type MarketContextType = {
   chainId: SupportedChainId
   orderSide: OrderSide
@@ -22,6 +28,8 @@ type MarketContextType = {
     long?: IPerennialLens.ProductSnapshotStructOutput
     short?: IPerennialLens.ProductSnapshotStructOutput
   }
+  activePositionTab: PositionsTab
+  setActivePositionTab: (tab: PositionsTab) => void
 }
 
 const MarketContext = createContext<MarketContextType>({
@@ -37,12 +45,17 @@ const MarketContext = createContext<MarketContextType>({
   },
   snapshots: undefined,
   selectedMarketSnapshot: undefined,
+  activePositionTab: PositionsTab.current,
+  setActivePositionTab: (tab: PositionsTab) => {
+    tab
+  },
 })
 
 export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId()
   const [selectedMarket, _setSelectedMarket] = useState<SupportedAsset>(SupportedAsset.eth)
   const [orderSide, setOrderSide] = useState<OrderSide>(OrderSide.Long)
+  const [activePositionTab, setActivePositionTab] = useState<PositionsTab>(PositionsTab.current)
 
   const { data: snapshots } = useChainAssetSnapshots()
 
@@ -79,6 +92,8 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
         snapshots,
         selectedMarketSnapshot: snapshots?.[selectedMarket],
         assetMetadata: AssetMetadata[selectedMarket],
+        activePositionTab,
+        setActivePositionTab,
       }}
     >
       {children}

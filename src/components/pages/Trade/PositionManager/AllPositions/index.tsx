@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { useMarketContext } from '@/contexts/marketContext'
+import { PositionsTab, useMarketContext } from '@/contexts/marketContext'
 
 import { Table } from '@ds/Table'
 
@@ -9,12 +9,14 @@ import { useOpenPositionTableData } from '../hooks'
 import { useOpenPositionColumns } from './hooks'
 
 function AllPositions() {
-  const { setSelectedMarket, selectedMarket } = useMarketContext()
+  const { setSelectedMarket, setOrderSide, setActivePositionTab, selectedMarket, orderSide } = useMarketContext()
   const tableData = useOpenPositionTableData()
   const columns = useOpenPositionColumns()
   const handleRowClick = (row: OpenPositionTableData) => {
-    if (row.asset === selectedMarket) return
+    setActivePositionTab(PositionsTab.current)
+    if (row.asset === selectedMarket && row.side === orderSide) return
     setSelectedMarket(row.asset)
+    setOrderSide(row.side)
   }
   return <Table<OpenPositionTableData> columns={columns} data={tableData} handleRowClick={handleRowClick} />
 }
