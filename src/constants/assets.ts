@@ -1,3 +1,6 @@
+import arbLogo from '@public/icons/arb.png'
+import btcLogo from '@public/icons/btc.png'
+import linkLogo from '@public/icons/chainlink.png'
 import ethLogo from '@public/icons/eth.png'
 
 export enum SupportedAsset {
@@ -31,7 +34,7 @@ export const AssetMetadata: AssetMetadata = {
     name: 'Bitcoin',
     displayDecimals: 2,
     tvTicker: 'PYTH:BTCUSD',
-    icon: ethLogo,
+    icon: btcLogo,
     baseCurrency: SupportedAsset.btc,
     quoteCurrency: QuoteCurrency.usd,
     pythFeedId: '0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43',
@@ -51,7 +54,7 @@ export const AssetMetadata: AssetMetadata = {
     name: 'Arbitrum',
     displayDecimals: 4,
     tvTicker: 'PYTH:ARBUSD',
-    icon: ethLogo,
+    icon: arbLogo,
     baseCurrency: SupportedAsset.arb,
     quoteCurrency: QuoteCurrency.usd,
     pythFeedId: '0x3fa4252848f9f0a1480be62745a4629d9eb1322aebab8a791e344b3b9c1adcf5',
@@ -61,7 +64,7 @@ export const AssetMetadata: AssetMetadata = {
     name: 'Chainlink',
     displayDecimals: 4,
     tvTicker: 'PYTH:LINKUSD',
-    icon: ethLogo,
+    icon: linkLogo,
     baseCurrency: SupportedAsset.link,
     quoteCurrency: QuoteCurrency.usd,
     pythFeedId: '0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221',
