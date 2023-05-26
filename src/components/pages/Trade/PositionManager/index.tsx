@@ -2,6 +2,7 @@ import { Box } from '@chakra-ui/react'
 
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@ds/Tabs'
 
+import AllPositions from './AllPositions'
 import CurrentPosition from './CurrentPosition'
 import { usePositionManagerCopy } from './hooks'
 
@@ -20,7 +21,7 @@ function PositionManager() {
           <CurrentPosition />
         </TabPanel>
         <TabPanel>
-          <Box padding={4}>{copy.allPositions}</Box>
+          <AllPositions />
         </TabPanel>
         <TabPanel>
           <Box padding={4}>{copy.history}</Box>

@@ -1,11 +1,12 @@
-import { SupportedAsset } from '@/constants/assets'
-import { PositionDetails, UserCurrentPositions } from '@/hooks/markets'
-import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
+import { AssetMetadata, SupportedAsset } from '@/constants/assets'
+import { AssetSnapshots, LivePrices, PositionDetails, UserCurrentPositions } from '@/hooks/markets'
+import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 
 import { OrderSide } from '../TradeForm/constants'
-import { PositionStatus } from './constants'
+import { FormattedPositionDetail, PositionStatus } from './constants'
 
-export const calculatePnl = (positionDetails: PositionDetails, livePriceDelta?: bigint) => {
+export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?: bigint) => {
+  if (!positionDetails) return { pnl: '0', pnlPercentage: '0', isPnlPositive: false }
   let pnl = Big18Math.sub(
     Big18Math.sub(positionDetails?.currentCollateral ?? 0n, positionDetails?.startCollateral ?? 0n),
     positionDetails?.deposits ?? 0n,
@@ -99,3 +100,64 @@ export const getPositionStatus = (positionDetails?: PositionDetails) => {
   }
   return PositionStatus.resolved
 }
+
+export const transformPositionDataToArray = (userPositions?: UserCurrentPositions) => {
+  const result: FormattedPositionDetail[] = []
+  if (!userPositions) return result
+  for (const [_asset, positionData] of Object.entries(userPositions)) {
+    const asset = _asset as SupportedAsset
+    const symbol = AssetMetadata[asset].symbol
+    if (positionData) {
+      if (positionData?.long && positionData?.long?.currentCollateral !== 0n) {
+        result.push({ asset, symbol, details: positionData?.long, side: OrderSide.Long })
+      }
+      if (positionData?.short && positionData?.short?.currentCollateral !== 0n) {
+        result.push({ asset, symbol, details: positionData?.short, side: OrderSide.Short })
+      }
+    }
+  }
+  return result
+}
+
+export const getCurrentPriceDelta = ({
+  snapshots,
+  asset,
+  livePrices,
+}: {
+  snapshots?: AssetSnapshots
+  asset: SupportedAsset
+  livePrices: LivePrices
+}) => {
+  if (!snapshots) return undefined
+  const selectedMarketSnapshot = snapshots[asset]
+  const currentPrice = Big18Math.abs(
+    selectedMarketSnapshot?.long?.latestVersion?.price ?? selectedMarketSnapshot?.short?.latestVersion?.price ?? 0n,
+  )
+  const pythPrice = livePrices[asset]
+  // Use the live price to calculate real time pnl
+  const currentPriceDelta = currentPrice > 0 && pythPrice ? pythPrice - currentPrice : undefined
+  return currentPriceDelta
+}
+
+export const getFormattedPositionDetails = ({
+  positionDetails,
+  numSigFigs,
+  placeholderString,
+}: {
+  positionDetails?: PositionDetails
+  numSigFigs: number
+  placeholderString: string
+}) => ({
+  currentCollateral: positionDetails ? formatBig18USDPrice(positionDetails?.currentCollateral) : placeholderString,
+  startCollateral: positionDetails ? formatBig18USDPrice(positionDetails?.startCollateral) : placeholderString,
+  position: positionDetails ? formatBig18(positionDetails?.position, { numSigFigs }) : placeholderString,
+  nextPosition: positionDetails ? formatBig18(positionDetails?.nextPosition, { numSigFigs }) : placeholderString,
+  averageEntry: positionDetails ? formatBig18USDPrice(positionDetails?.averageEntry) : placeholderString,
+  liquidationPrice: positionDetails ? formatBig18USDPrice(positionDetails?.liquidationPrice) : placeholderString,
+  unformattedLiquidationPrice: positionDetails
+    ? formatBig18(positionDetails?.liquidationPrice, { numSigFigs: 8 })
+    : placeholderString,
+  notional: positionDetails ? formatBig18USDPrice(positionDetails?.notional) : placeholderString,
+  unformattedNotional: positionDetails ? formatBig18(positionDetails?.notional) : placeholderString,
+  leverage: positionDetails ? formatBig18(positionDetails?.leverage) : placeholderString,
+})

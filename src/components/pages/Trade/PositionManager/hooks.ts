@@ -1,13 +1,21 @@
 import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
+import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useChainLivePrices, useUserCurrentPositions } from '@/hooks/markets'
-import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
+import { PositionDetails, useChainAssetSnapshots, useChainLivePrices, useUserCurrentPositions } from '@/hooks/markets'
+import { formatBig18Percent } from '@/utils/big18Utils'
 import { Day } from '@/utils/timeUtils'
 
 import { OrderSide } from '../TradeForm/constants'
-import { calculatePnl, getPositionStatus, unpackPosition } from './utils'
+import {
+  calculatePnl,
+  getCurrentPriceDelta,
+  getFormattedPositionDetails,
+  getPositionStatus,
+  transformPositionDataToArray,
+  unpackPosition,
+} from './utils'
 
 export const useStyles = () => {
   const theme = useTheme()
@@ -47,44 +55,55 @@ export const usePositionManagerCopy = () => {
     noValue: intl.formatMessage({ defaultMessage: '--' }),
     side: intl.formatMessage({ defaultMessage: 'Side' }),
     withdraw: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
+    market: intl.formatMessage({ defaultMessage: 'Market' }),
+    liquidation: intl.formatMessage({ defaultMessage: 'Liquidation' }),
   }
 }
 
 export const useFormatPosition = () => {
-  const { assetMetadata, selectedMarket, orderSide, selectedMarketSnapshot } = useMarketContext()
+  const { assetMetadata, selectedMarket, orderSide } = useMarketContext()
+  const { data: snapshots } = useChainAssetSnapshots()
   const { data: positions } = useUserCurrentPositions()
   const { noValue, long, short } = usePositionManagerCopy()
-  const livePrices = useChainLivePrices()
   const position = unpackPosition({ positions, selectedMarket, orderSide })
   const positionStatus = getPositionStatus(position?.details)
   const numSigFigs = assetMetadata.displayDecimals
+  const selectedMarketSnapshot = snapshots?.[selectedMarket]
 
-  const currentPrice = Big18Math.abs(
-    selectedMarketSnapshot?.long?.latestVersion?.price ?? selectedMarketSnapshot?.short?.latestVersion?.price ?? 0n,
-  )
-  const pythPrice = livePrices[selectedMarket]
-  // Use the live price to calculate real time pnl
-  const currentPriceDelta = currentPrice > 0 && pythPrice ? pythPrice - currentPrice : undefined
-  const positionPnl = position?.details
-    ? calculatePnl(position?.details, currentPriceDelta)
-    : { pnl: 0n, pnlPercentage: 0n, isPnlPositive: true }
   const fundingRate =
     position?.side === OrderSide.Long ? selectedMarketSnapshot?.long?.rate : selectedMarketSnapshot?.short?.rate
 
   return {
+    positionDetails: position?.details,
     status: positionStatus,
     side: position ? (position.side === OrderSide.Long ? long : short) : noValue,
-    currentCollateral: position ? formatBig18USDPrice(position?.details?.currentCollateral) : noValue,
-    startCollateral: position ? formatBig18USDPrice(position?.details?.startCollateral) : noValue,
-    position: position ? formatBig18(position?.details?.position, { numSigFigs }) : noValue,
-    nextPosition: position ? formatBig18(position?.details?.nextPosition, { numSigFigs }) : noValue,
-    averageEntry: position ? formatBig18USDPrice(position?.details?.averageEntry) : noValue,
-    liquidationPrice: position ? formatBig18USDPrice(position?.details?.liquidationPrice) : noValue,
-    notional: position ? formatBig18USDPrice(position?.details?.notional) : noValue,
-    leverage: position ? formatBig18(position?.details?.leverage) : noValue,
-    pnl: position ? (positionPnl.pnl as string) : noValue,
-    pnlPercentage: position ? (positionPnl.pnlPercentage as string) : noValue,
-    isPnlPositive: positionPnl.isPnlPositive,
     dailyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Day, { numDecimals: 4 }) : noValue,
+    ...getFormattedPositionDetails({ positionDetails: position?.details, placeholderString: noValue, numSigFigs }),
   }
+}
+
+export const useOpenPositionTableData = () => {
+  const { data: positionData } = useUserCurrentPositions()
+  const { noValue } = usePositionManagerCopy()
+  const positions = transformPositionDataToArray(positionData)
+
+  return positions.map((position) => {
+    const numSigFigs = AssetMetadata[position.asset]?.displayDecimals ?? 2
+
+    return {
+      details: position.details,
+      side: position.side,
+      asset: position.asset,
+      symbol: position.symbol,
+      ...getFormattedPositionDetails({ positionDetails: position.details, placeholderString: noValue, numSigFigs }),
+    }
+  })
+}
+
+export const usePnl = ({ asset, positionDetails }: { asset: SupportedAsset; positionDetails: PositionDetails }) => {
+  const livePrices = useChainLivePrices()
+  const { data: snapshots } = useChainAssetSnapshots()
+  const currentPriceDelta = getCurrentPriceDelta({ snapshots, livePrices, asset: asset })
+  const { pnl, pnlPercentage, isPnlPositive } = calculatePnl(positionDetails, currentPriceDelta)
+  return { pnl, pnlPercentage, isPnlPositive }
 }

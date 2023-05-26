@@ -2,9 +2,12 @@ import { Flex, Text } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 import { useIntl } from 'react-intl'
 
+import { DataRow } from '@/components/design-system'
 import { breakpoints } from '@/components/design-system/theme/styles'
+import { SupportedAsset } from '@/constants/assets'
+import { PositionDetails } from '@/hooks/markets'
 
-import { useStyles } from '../hooks'
+import { usePnl, usePositionManagerCopy, useStyles } from '../hooks'
 
 export const StatusLight = styled.div<{ color: string; glow: boolean }>`
   height: 6px;
@@ -106,6 +109,7 @@ export const ActivePositionDetail = ({
 export const ResponsiveContainer = styled(Flex)`
   height: 100%;
   flex-direction: column;
+  overflow-y: auto;
 
   @media (min-width: ${breakpoints.mdd}) {
     flex-direction: row;
@@ -121,3 +125,37 @@ export const DesktopButtonContainer = styled(Flex)`
     padding-top: 10px;
   }
 `
+
+export const PnlPositionDetail = ({
+  asset,
+  positionDetails,
+}: {
+  asset: SupportedAsset
+  positionDetails: PositionDetails
+}) => {
+  const copy = usePositionManagerCopy()
+  const { pnl, pnlPercentage, isPnlPositive } = usePnl({ asset, positionDetails })
+  const { red, green } = useStyles()
+  const pnlTextColor = isPnlPositive ? green : red
+
+  return <ActivePositionDetail label={copy.pnl} value={pnlPercentage} valueSubheader={pnl} valueColor={pnlTextColor} />
+}
+
+export const PnlDataRow = ({ asset, positionDetails }: { asset: SupportedAsset; positionDetails: PositionDetails }) => {
+  const copy = usePositionManagerCopy()
+  const { pnl, pnlPercentage, isPnlPositive } = usePnl({ asset, positionDetails })
+  const { red, green } = useStyles()
+  const pnlTextColor = isPnlPositive ? green : red
+
+  return (
+    <DataRow
+      label={copy.pnl}
+      value={
+        <Text fontSize="14px" color={pnlTextColor}>
+          {/*eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+          {pnlPercentage} / {pnl}
+        </Text>
+      }
+    />
+  )
+}

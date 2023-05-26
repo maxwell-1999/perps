@@ -5,6 +5,7 @@ import React from 'react'
 import { AssetIconWithText } from '@/components/shared/components'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
+import { PositionDetails } from '@/hooks/markets'
 
 import { Button } from '@ds/Button'
 import { DataRow } from '@ds/DataRow'
@@ -19,6 +20,8 @@ import {
   HiddenOnLargeScreen,
   LeftContainer,
   LeverageBadge,
+  PnlDataRow,
+  PnlPositionDetail,
   ResponsiveContainer,
   RightContainer,
   StatusLight,
@@ -28,7 +31,7 @@ function CurrentPosition() {
   const copy = usePositionManagerCopy()
   const { noValue } = copy
   const { borderColor, green, red, alpha75, subheaderTextColor } = useStyles()
-  const { assetMetadata } = useMarketContext()
+  const { assetMetadata, selectedMarket } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
   const {
     side,
@@ -38,15 +41,12 @@ function CurrentPosition() {
     liquidationPrice,
     notional,
     leverage,
-    pnl,
-    pnlPercentage,
-    isPnlPositive,
     dailyFunding,
     status,
+    positionDetails,
   } = useFormatPosition()
 
   const hasPosition = position !== noValue
-  const pnlTextColor = isPnlPositive ? green : red
   const sideTextColor = side === OrderSide.Long ? green : red
   const isOpenPosition =
     status === PositionStatus.open || status === PositionStatus.pricing || status === PositionStatus.closing
@@ -65,6 +65,7 @@ function CurrentPosition() {
             label={copy.size}
             value={isOpenPosition ? position : noValue}
             valueSubheader={isOpenPosition ? notional : noValue}
+            valueColor={isOpenPosition ? 'initial' : subheaderTextColor}
           />
         </Flex>
         <Flex width="50%" flexDirection="column">
@@ -74,12 +75,16 @@ function CurrentPosition() {
             </Text>
             <LeverageBadge leverage={leverage} />
           </ActivePositionHeader>
-          <ActivePositionDetail
-            label={copy.pnl}
-            value={pnlPercentage}
-            valueSubheader={pnl}
-            valueColor={hasPosition ? pnlTextColor : subheaderTextColor}
-          />
+          {hasPosition ? (
+            <PnlPositionDetail asset={selectedMarket} positionDetails={positionDetails as PositionDetails} />
+          ) : (
+            <ActivePositionDetail
+              label={copy.pnl}
+              value={noValue}
+              valueSubheader={noValue}
+              valueColor={subheaderTextColor}
+            />
+          )}
         </Flex>
       </LeftContainer>
       <RightContainer>
@@ -125,15 +130,19 @@ function CurrentPosition() {
               </Text>
             }
           />
-          <DataRow
-            label={copy.pnl}
-            value={
-              <Text fontSize="14px" color={pnlTextColor}>
-                {/*eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
-                {pnlPercentage} / {pnl}
-              </Text>
-            }
-          />
+          {hasPosition ? (
+            <PnlDataRow asset={selectedMarket} positionDetails={positionDetails as PositionDetails} />
+          ) : (
+            <DataRow
+              label={copy.pnl}
+              value={
+                <Text fontSize="14px">
+                  {/*eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+                  {noValue} / {noValue}
+                </Text>
+              }
+            />
+          )}
         </HiddenOnLargeScreen>
         <DataRow
           label={copy.liquidationPrice}
