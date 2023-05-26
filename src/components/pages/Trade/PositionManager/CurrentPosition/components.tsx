@@ -109,6 +109,7 @@ export const ActivePositionDetail = ({
 export const ResponsiveContainer = styled(Flex)`
   height: 100%;
   flex-direction: column;
+  overflow-y: auto;
 
   @media (min-width: ${breakpoints.mdd}) {
     flex-direction: row;

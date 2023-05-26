@@ -154,6 +154,10 @@ export const getFormattedPositionDetails = ({
   nextPosition: positionDetails ? formatBig18(positionDetails?.nextPosition, { numSigFigs }) : placeholderString,
   averageEntry: positionDetails ? formatBig18USDPrice(positionDetails?.averageEntry) : placeholderString,
   liquidationPrice: positionDetails ? formatBig18USDPrice(positionDetails?.liquidationPrice) : placeholderString,
+  unformattedLiquidationPrice: positionDetails
+    ? formatBig18(positionDetails?.liquidationPrice, { numSigFigs: 8 })
+    : placeholderString,
   notional: positionDetails ? formatBig18USDPrice(positionDetails?.notional) : placeholderString,
+  unformattedNotional: positionDetails ? formatBig18(positionDetails?.notional) : placeholderString,
   leverage: positionDetails ? formatBig18(positionDetails?.leverage) : placeholderString,
 })

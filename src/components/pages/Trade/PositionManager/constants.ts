@@ -32,4 +32,6 @@ export type OpenPositionTableData = {
   startCollateral: string
   symbol: string
   details: PositionDetails
+  unformattedNotional: string
+  unformattedLiquidationPrice: string
 }

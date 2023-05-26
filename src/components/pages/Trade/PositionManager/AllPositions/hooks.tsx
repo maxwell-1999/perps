@@ -1,4 +1,5 @@
 import { Flex, Text } from '@chakra-ui/react'
+import { Row } from 'react-table'
 
 import { AssetIconWithText } from '@/components/shared/components'
 import { AssetMetadata } from '@/constants/assets'
@@ -32,6 +33,7 @@ export const useOpenPositionColumns = () => {
     {
       Header: copy.market,
       accessor: 'asset',
+      disableSortBy: true,
       renderer: (row: OpenPositionTableData) => {
         const market = AssetMetadata[row.asset]
         const sideColor = row.side === OrderSide.Long ? green : red
@@ -47,7 +49,18 @@ export const useOpenPositionColumns = () => {
     },
     {
       Header: copy.size,
-      accessor: 'position',
+      accessor: 'unformattedNotional',
+      sortType: (rowA: Row, rowB: Row, id: string) => {
+        const a = parseFloat(rowA.values[id])
+        const b = parseFloat(rowB.values[id])
+        if (a > b) {
+          return 1
+        }
+        if (b > a) {
+          return -1
+        }
+        return 0
+      },
       renderer: (row: OpenPositionTableData) => (
         <Flex flexDirection="column">
           <Text fontSize="13px">
@@ -62,13 +75,15 @@ export const useOpenPositionColumns = () => {
     {
       Header: copy.pnl,
       accessor: 'details',
+      disableSortBy: true,
       renderer: (row: OpenPositionTableData) => {
         return <PnlCell {...row} />
       },
     },
     {
       Header: copy.liquidation,
-      accessor: 'liquidationPrice',
+      accessor: 'unformattedLiquidationPrice',
+      disableSortBy: true,
       renderer: (row: OpenPositionTableData) => <Text fontSize="13px">{row.liquidationPrice}</Text>,
     },
   ]

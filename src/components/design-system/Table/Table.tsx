@@ -12,7 +12,7 @@ import {
   useTheme,
 } from '@chakra-ui/react'
 import { useMemo } from 'react'
-import { TableOptions, UseSortByOptions, useSortBy, useTable } from 'react-table'
+import { Row, TableOptions, UseSortByOptions, useSortBy, useTable } from 'react-table'
 
 import DownArrow from '../../../../public/icons/downArrow.svg'
 import UpArrow from '../../../../public/icons/upArrow.svg'
@@ -23,6 +23,8 @@ export interface Column<T = any> {
   renderer?: (row: T) => JSX.Element
   isSorted?: boolean
   isSortedDesc?: boolean
+  disableSortBy?: boolean
+  sortType?: (rowA: Row, rowB: Row, id: string, desc: boolean) => number
 }
 
 interface ExtendedTableOptions<T extends object> extends TableOptions<T>, UseSortByOptions<T> {
@@ -33,15 +35,17 @@ export interface TableProps<T extends object> {
   data: T[]
   columns: Column<T>[]
   caption?: string
+  handleRowClick?: (row: T) => void
 }
 
-export const Table = <T extends object = any>({ data, columns, caption }: TableProps<T>) => {
+export const Table = <T extends object = any>({ data, columns, caption, handleRowClick }: TableProps<T>) => {
   const memoData = useMemo(() => data, [data])
   const memoColumns = useMemo(() => columns, [columns])
 
   const theme = useTheme()
   const thColor = useColorModeValue(theme.colors.brand.whiteAlpha[50], theme.colors.brand.whiteAlpha[50])
   const thActiveColor = useColorModeValue(theme.colors.black, theme.colors.white)
+  const trHoverColor = useColorModeValue(theme.colors.brand.blackAlpha[5], theme.colors.brand.whiteAlpha[5])
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
     { columns: memoColumns, data: memoData, autoResetSortBy: false } as ExtendedTableOptions<T>,
@@ -51,7 +55,7 @@ export const Table = <T extends object = any>({ data, columns, caption }: TableP
   const borderColor = useColorModeValue(theme.colors.brand.blackAlpha[10], theme.colors.brand.whiteAlpha[10])
 
   return (
-    <Box overflowX="auto">
+    <Box overflowX="auto" height="194px">
       <ChakraTable {...getTableProps()} size="sm">
         {caption && <TableCaption>{caption}</TableCaption>}
         <Thead height="35px">
@@ -81,7 +85,17 @@ export const Table = <T extends object = any>({ data, columns, caption }: TableP
           {rows.map((row, rowIndex) => {
             prepareRow(row)
             return (
-              <Tr {...row.getRowProps()} key={`tr-${rowIndex}`}>
+              <Tr
+                {...row.getRowProps()}
+                key={`tr-${rowIndex}`}
+                onClick={() => {
+                  if (handleRowClick) {
+                    handleRowClick(row.original)
+                  }
+                }}
+                _hover={{ background: trHoverColor }}
+                cursor={handleRowClick ? 'pointer' : 'initial'}
+              >
                 {row.cells.map((cell, cellIndex) => {
                   return (
                     <Td
