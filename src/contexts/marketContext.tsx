@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
-import { OrderSide } from '@/components/pages/Trade/TradeForm/constants'
+import { OrderDirection } from '@/components/pages/Trade/TradeForm/constants'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { DefaultChain } from '@/constants/network'
 import { SupportedChainId } from '@/constants/network'
@@ -17,8 +17,8 @@ export enum PositionsTab {
 
 type MarketContextType = {
   chainId: SupportedChainId
-  orderSide: OrderSide
-  setOrderSide: (orderSide: OrderSide) => void
+  orderDirection: OrderDirection
+  setOrderDirection: (orderDirection: OrderDirection) => void
   assetMetadata: (typeof AssetMetadata)[SupportedAsset]
   selectedMarket: SupportedAsset
   setSelectedMarket: (asset: SupportedAsset) => void
@@ -34,9 +34,9 @@ type MarketContextType = {
 
 const MarketContext = createContext<MarketContextType>({
   chainId: DefaultChain.id,
-  orderSide: OrderSide.Long,
-  setOrderSide: (orderSide: OrderSide) => {
-    orderSide
+  orderDirection: OrderDirection.Long,
+  setOrderDirection: (orderDirection: OrderDirection) => {
+    orderDirection
   },
   selectedMarket: SupportedAsset.eth,
   assetMetadata: AssetMetadata[SupportedAsset.eth],
@@ -54,7 +54,7 @@ const MarketContext = createContext<MarketContextType>({
 export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId()
   const [selectedMarket, _setSelectedMarket] = useState<SupportedAsset>(SupportedAsset.eth)
-  const [orderSide, setOrderSide] = useState<OrderSide>(OrderSide.Long)
+  const [orderDirection, setOrderDirection] = useState<OrderDirection>(OrderDirection.Long)
   const [activePositionTab, setActivePositionTab] = useState<PositionsTab>(PositionsTab.current)
 
   const { data: snapshots } = useChainAssetSnapshots()
@@ -85,8 +85,8 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
     <MarketContext.Provider
       value={{
         chainId,
-        orderSide,
-        setOrderSide,
+        orderDirection,
+        setOrderDirection,
         selectedMarket,
         setSelectedMarket,
         snapshots,

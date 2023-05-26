@@ -9,21 +9,21 @@ import { Button, IconButton } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
 
-import { OrderSide, formIds, orderSides } from '../constants'
+import { OrderDirection, formIds, orderDirections } from '../constants'
 import { useTradeFormCopy } from '../hooks'
 import { TradeReceipt } from './Receipt'
 import { Form } from './styles'
 
 interface ModifyPositionProps {
-  orderSide: OrderSide
-  setOrderSide: (orderSide: OrderSide) => void
+  orderDirection: OrderDirection
+  setOrderDirection: (orderDirection: OrderDirection) => void
   availableCollateral: string //bignumberish
   amount: string //bignumberish
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
 function ModifyPositionForm(props: ModifyPositionProps) {
-  const { orderSide, setOrderSide, availableCollateral, amount, onSubmit } = props
+  const { orderDirection, setOrderDirection, availableCollateral, amount, onSubmit } = props
   const { setTradeFormState } = useTradeFormState()
   const { assetMetadata } = useMarketContext()
   const copy = useTradeFormCopy()
@@ -41,7 +41,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
           />
         </Flex>
         <Flex mb="14px">
-          <Toggle<OrderSide> labels={orderSides} activeLabel={orderSide} onChange={setOrderSide} />
+          <Toggle<OrderDirection> labels={orderDirections} activeLabel={orderDirection} onChange={setOrderDirection} />
         </Flex>
         <Input
           type="number"

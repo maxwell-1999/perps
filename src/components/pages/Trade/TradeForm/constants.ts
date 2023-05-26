@@ -1,9 +1,9 @@
-export enum OrderSide {
+export enum OrderDirection {
   Long = 'Long',
   Short = 'Short',
 }
 
-export const orderSides: [OrderSide, OrderSide] = [OrderSide.Long, OrderSide.Short]
+export const orderDirections: [OrderDirection, OrderDirection] = [OrderDirection.Long, OrderDirection.Short]
 
 export const formIds = {
   collateral: 'collateral-input',

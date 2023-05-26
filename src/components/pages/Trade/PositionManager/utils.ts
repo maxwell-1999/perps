@@ -2,7 +2,7 @@ import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { AssetSnapshots, LivePrices, PositionDetails, UserCurrentPositions } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 
-import { OrderSide } from '../TradeForm/constants'
+import { OrderDirection } from '../TradeForm/constants'
 import { FormattedPositionDetail, PositionStatus } from './constants'
 
 export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?: bigint) => {
@@ -34,12 +34,12 @@ export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?:
 export const unpackPosition = ({
   positions,
   selectedMarket,
-  orderSide,
+  orderDirection,
 }: {
   positions?: UserCurrentPositions
   selectedMarket: SupportedAsset
-  orderSide: OrderSide
-}): { side: OrderSide; details: PositionDetails } | null => {
+  orderDirection: OrderDirection
+}): { direction: OrderDirection; details: PositionDetails } | null => {
   if (!positions) return null
   const position = positions[selectedMarket]
 
@@ -51,28 +51,28 @@ export const unpackPosition = ({
 
   if (!hasLongCollateral && !hasShortCollateral) return null
 
-  let side: OrderSide
+  let direction: OrderDirection
   let details: PositionDetails
 
-  if (orderSide === OrderSide.Long) {
+  if (orderDirection === OrderDirection.Long) {
     if (hasLongCollateral) {
-      side = OrderSide.Long
+      direction = OrderDirection.Long
       details = position?.long as PositionDetails
     } else {
-      side = OrderSide.Short
+      direction = OrderDirection.Short
       details = position?.short as PositionDetails
     }
   } else {
     if (hasShortCollateral) {
-      side = OrderSide.Short
+      direction = OrderDirection.Short
       details = position?.short as PositionDetails
     } else {
-      side = OrderSide.Long
+      direction = OrderDirection.Long
       details = position?.long as PositionDetails
     }
   }
 
-  return { side, details }
+  return { direction: direction, details }
 }
 
 export const getPositionStatus = (positionDetails?: PositionDetails) => {
@@ -109,10 +109,10 @@ export const transformPositionDataToArray = (userPositions?: UserCurrentPosition
     const symbol = AssetMetadata[asset].symbol
     if (positionData) {
       if (positionData?.long && positionData?.long?.currentCollateral !== 0n) {
-        result.push({ asset, symbol, details: positionData?.long, side: OrderSide.Long })
+        result.push({ asset, symbol, details: positionData?.long, direction: OrderDirection.Long })
       }
       if (positionData?.short && positionData?.short?.currentCollateral !== 0n) {
-        result.push({ asset, symbol, details: positionData?.short, side: OrderSide.Short })
+        result.push({ asset, symbol, details: positionData?.short, direction: OrderDirection.Short })
       }
     }
   }

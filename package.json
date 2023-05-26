@@ -18,7 +18,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "gen:theme-typings": "chakra-cli tokens src/components/design-system/theme/index.ts",
-    "prepush": " yarn tsc && yarn test && yarn format && yarn lint && yarn localize",
+    "prepush": "yarn tsc && yarn test && yarn format && yarn lint && yarn localize",
     "localize:extract": "formatjs extract 'src/{pages,components}/**/*.{ts,tsx}' --format simple --id-interpolation-pattern '[sha512:contenthash:base64:6]' --out-file lang/locales/en.json",
     "localize:compile": "formatjs compile-folder --ast --format simple lang/locales lang/compiled-locales",
     "localize": "yarn localize:extract && yarn localize:compile",

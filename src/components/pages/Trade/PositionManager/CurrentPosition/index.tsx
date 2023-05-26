@@ -10,7 +10,7 @@ import { PositionDetails } from '@/hooks/markets'
 import { Button } from '@ds/Button'
 import { DataRow } from '@ds/DataRow'
 
-import { OrderSide } from '../../TradeForm/constants'
+import { OrderDirection } from '../../TradeForm/constants'
 import { PositionStatus } from '../constants'
 import { useFormatPosition, usePositionManagerCopy, useStyles } from '../hooks'
 import {
@@ -34,7 +34,7 @@ function CurrentPosition() {
   const { assetMetadata, selectedMarket } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
   const {
-    side,
+    direction,
     currentCollateral,
     position,
     averageEntry,
@@ -47,7 +47,7 @@ function CurrentPosition() {
   } = useFormatPosition()
 
   const hasPosition = position !== noValue
-  const sideTextColor = side === OrderSide.Long ? green : red
+  const directionTextColor = direction === OrderDirection.Long ? green : red
   const isOpenPosition =
     status === PositionStatus.open || status === PositionStatus.pricing || status === PositionStatus.closing
   const isClosedPosition = status === PositionStatus.closed
@@ -70,8 +70,8 @@ function CurrentPosition() {
         </Flex>
         <Flex width="50%" flexDirection="column">
           <ActivePositionHeader borderColor={borderColor}>
-            <Text fontSize="17px" color={isOpenPosition ? sideTextColor : subheaderTextColor}>
-              {side}
+            <Text fontSize="17px" color={isOpenPosition ? directionTextColor : subheaderTextColor}>
+              {direction}
             </Text>
             <LeverageBadge leverage={leverage} />
           </ActivePositionHeader>
@@ -114,10 +114,10 @@ function CurrentPosition() {
           )}
 
           <DataRow
-            label={copy.side}
+            label={copy.direction}
             value={
-              <Text fontSize="14px" color={sideTextColor}>
-                {side}
+              <Text fontSize="14px" color={directionTextColor}>
+                {direction}
               </Text>
             }
           />

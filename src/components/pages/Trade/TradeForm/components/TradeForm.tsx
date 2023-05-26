@@ -8,21 +8,21 @@ import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
 
-import { OrderSide, formIds, orderSides } from '../constants'
+import { OrderDirection, formIds, orderDirections } from '../constants'
 import { useStyles, useTradeFormCopy } from '../hooks'
 import { TradeReceipt } from './Receipt'
 import { Form } from './styles'
 
 interface TradeFormProps {
-  orderSide: OrderSide
-  setOrderSide: (orderSide: OrderSide) => void
+  orderDirection: OrderDirection
+  setOrderDirection: (orderDirection: OrderDirection) => void
   availableCollateral: string //bignumberish
   amount: string //bignumberish
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { orderSide, setOrderSide, availableCollateral, amount, onSubmit } = props
+  const { orderDirection, setOrderDirection, availableCollateral, amount, onSubmit } = props
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles()
   const { setTradeFormState } = useTradeFormState()
   const { assetMetadata } = useMarketContext()
@@ -47,7 +47,7 @@ function TradeForm(props: TradeFormProps) {
           />
         </Flex>
         <Flex mb="14px">
-          <Toggle<OrderSide> labels={orderSides} activeLabel={orderSide} onChange={setOrderSide} />
+          <Toggle<OrderDirection> labels={orderDirections} activeLabel={orderDirection} onChange={setOrderDirection} />
         </Flex>
         <Input
           type="number"

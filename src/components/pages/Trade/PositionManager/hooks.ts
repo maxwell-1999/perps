@@ -7,7 +7,7 @@ import { PositionDetails, useChainAssetSnapshots, useChainLivePrices, useUserCur
 import { formatBig18Percent } from '@/utils/big18Utils'
 import { Day } from '@/utils/timeUtils'
 
-import { OrderSide } from '../TradeForm/constants'
+import { OrderDirection } from '../TradeForm/constants'
 import {
   calculatePnl,
   getCurrentPriceDelta,
@@ -53,7 +53,7 @@ export const usePositionManagerCopy = () => {
     close: intl.formatMessage({ defaultMessage: 'Close' }),
     x: intl.formatMessage({ defaultMessage: 'x' }),
     noValue: intl.formatMessage({ defaultMessage: '--' }),
-    side: intl.formatMessage({ defaultMessage: 'Side' }),
+    direction: intl.formatMessage({ defaultMessage: 'Direction' }),
     withdraw: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
     market: intl.formatMessage({ defaultMessage: 'Market' }),
     liquidation: intl.formatMessage({ defaultMessage: 'Liquidation' }),
@@ -61,22 +61,24 @@ export const usePositionManagerCopy = () => {
 }
 
 export const useFormatPosition = () => {
-  const { assetMetadata, selectedMarket, orderSide } = useMarketContext()
+  const { assetMetadata, selectedMarket, orderDirection } = useMarketContext()
   const { data: snapshots } = useChainAssetSnapshots()
   const { data: positions } = useUserCurrentPositions()
   const { noValue, long, short } = usePositionManagerCopy()
-  const position = unpackPosition({ positions, selectedMarket, orderSide })
+  const position = unpackPosition({ positions, selectedMarket, orderDirection })
   const positionStatus = getPositionStatus(position?.details)
   const numSigFigs = assetMetadata.displayDecimals
   const selectedMarketSnapshot = snapshots?.[selectedMarket]
 
   const fundingRate =
-    position?.side === OrderSide.Long ? selectedMarketSnapshot?.long?.rate : selectedMarketSnapshot?.short?.rate
+    position?.direction === OrderDirection.Long
+      ? selectedMarketSnapshot?.long?.rate
+      : selectedMarketSnapshot?.short?.rate
 
   return {
     positionDetails: position?.details,
     status: positionStatus,
-    side: position ? (position.side === OrderSide.Long ? long : short) : noValue,
+    direction: position ? (position.direction === OrderDirection.Long ? long : short) : noValue,
     dailyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Day, { numDecimals: 4 }) : noValue,
     ...getFormattedPositionDetails({ positionDetails: position?.details, placeholderString: noValue, numSigFigs }),
   }
@@ -92,7 +94,7 @@ export const useOpenPositionTableData = () => {
 
     return {
       details: position.details,
-      side: position.side,
+      direction: position.direction,
       asset: position.asset,
       symbol: position.symbol,
       ...getFormattedPositionDetails({ positionDetails: position.details, placeholderString: noValue, numSigFigs }),

@@ -6,7 +6,7 @@ import { AssetMetadata } from '@/constants/assets'
 
 import { Column } from '@ds/Table'
 
-import { OrderSide } from '../../TradeForm/constants'
+import { OrderDirection } from '../../TradeForm/constants'
 import { OpenPositionTableData } from '../constants'
 import { usePnl, usePositionManagerCopy, useStyles } from '../hooks'
 
@@ -36,12 +36,12 @@ export const useOpenPositionColumns = () => {
       disableSortBy: true,
       renderer: (row: OpenPositionTableData) => {
         const market = AssetMetadata[row.asset]
-        const sideColor = row.side === OrderSide.Long ? green : red
+        const directionColor = row.direction === OrderDirection.Long ? green : red
         return (
           <Flex alignItems="center">
             <AssetIconWithText market={market} fontSize="15px" mr="10px" />
-            <Text fontSize="14px" color={sideColor}>
-              {row.side}
+            <Text fontSize="14px" color={directionColor}>
+              {row.direction}
             </Text>
           </Flex>
         )

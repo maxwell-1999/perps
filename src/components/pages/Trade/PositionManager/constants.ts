@@ -1,7 +1,7 @@
 import { SupportedAsset } from '@/constants/assets'
 import { PositionDetails } from '@/hooks/markets'
 
-import { OrderSide } from '../TradeForm/constants'
+import { OrderDirection } from '../TradeForm/constants'
 
 export enum PositionStatus {
   open = 'open',
@@ -15,13 +15,13 @@ export enum PositionStatus {
 export type FormattedPositionDetail = {
   asset: SupportedAsset
   symbol: string
-  side: OrderSide
+  direction: OrderDirection
   details: PositionDetails
 }
 
 export type OpenPositionTableData = {
   asset: SupportedAsset
-  side: OrderSide
+  direction: OrderDirection
   averageEntry: string
   currentCollateral: string
   leverage: string
