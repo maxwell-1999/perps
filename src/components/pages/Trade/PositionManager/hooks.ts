@@ -2,12 +2,13 @@ import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
+import { OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { PositionDetails, useChainAssetSnapshots, useChainLivePrices, useUserCurrentPositions } from '@/hooks/markets'
-import { formatBig18Percent } from '@/utils/big18Utils'
+import { Big18Math, formatBig18Percent } from '@/utils/big18Utils'
+import { socialization, utilization } from '@/utils/positionUtils'
 import { Day } from '@/utils/timeUtils'
 
-import { OrderDirection } from '../TradeForm/constants'
 import {
   calculatePnl,
   getCurrentPriceDelta,
@@ -72,8 +73,8 @@ export const useFormatPosition = () => {
 
   const fundingRate =
     position?.direction === OrderDirection.Long
-      ? selectedMarketSnapshot?.long?.rate
-      : selectedMarketSnapshot?.short?.rate
+      ? selectedMarketSnapshot?.Long?.rate
+      : selectedMarketSnapshot?.Short?.rate
 
   return {
     positionDetails: position?.details,
@@ -94,7 +95,6 @@ export const useOpenPositionTableData = () => {
 
     return {
       details: position.details,
-      direction: position.direction,
       asset: position.asset,
       symbol: position.symbol,
       ...getFormattedPositionDetails({ positionDetails: position.details, placeholderString: noValue, numSigFigs }),
@@ -105,7 +105,15 @@ export const useOpenPositionTableData = () => {
 export const usePnl = ({ asset, positionDetails }: { asset: SupportedAsset; positionDetails: PositionDetails }) => {
   const livePrices = useChainLivePrices()
   const { data: snapshots } = useChainAssetSnapshots()
-  const currentPriceDelta = getCurrentPriceDelta({ snapshots, livePrices, asset: asset })
-  const { pnl, pnlPercentage, isPnlPositive } = calculatePnl(positionDetails, currentPriceDelta)
-  return { pnl, pnlPercentage, isPnlPositive }
+  const productSnapshot = positionDetails?.direction ? snapshots?.[asset]?.[positionDetails.direction] : undefined
+  let currentPriceDelta = getCurrentPriceDelta({ snapshots, livePrices, asset: asset })
+
+  // If taker, apply socialization dampening
+  if (productSnapshot && positionDetails.side === 'taker' && currentPriceDelta)
+    currentPriceDelta = Big18Math.mul(currentPriceDelta, socialization(productSnapshot.pre, productSnapshot.position))
+  // If maker, apply utilization dampening
+  else if (productSnapshot && positionDetails.side === 'maker' && currentPriceDelta)
+    currentPriceDelta = Big18Math.mul(currentPriceDelta, utilization(productSnapshot.pre, productSnapshot.position))
+
+  return calculatePnl(positionDetails, currentPriceDelta)
 }

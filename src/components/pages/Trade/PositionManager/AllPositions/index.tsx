@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { OrderDirection } from '@/constants/markets'
 import { PositionsTab, useMarketContext } from '@/contexts/marketContext'
 
 import { Table } from '@ds/Table'
@@ -15,9 +16,9 @@ function AllPositions() {
   const columns = useOpenPositionColumns()
   const handleRowClick = (row: OpenPositionTableData) => {
     setActivePositionTab(PositionsTab.current)
-    if (row.asset === selectedMarket && row.direction === orderDirection) return
+    if (row.asset === selectedMarket && row.details.direction === orderDirection) return
     setSelectedMarket(row.asset)
-    setOrderDirection(row.direction)
+    setOrderDirection(row.details.direction ?? OrderDirection.Long)
   }
   return <Table<OpenPositionTableData> columns={columns} data={tableData} handleRowClick={handleRowClick} />
 }

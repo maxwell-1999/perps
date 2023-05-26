@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
-import { OrderDirection } from '@/components/pages/Trade/TradeForm/constants'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
+import { OrderDirection } from '@/constants/markets'
 import { DefaultChain } from '@/constants/network'
 import { SupportedChainId } from '@/constants/network'
 import { AssetSnapshots, UserCurrentPositions, useChainAssetSnapshots } from '@/hooks/markets'
@@ -25,8 +25,8 @@ type MarketContextType = {
   snapshots?: AssetSnapshots
   positions?: UserCurrentPositions
   selectedMarketSnapshot?: {
-    long?: IPerennialLens.ProductSnapshotStructOutput
-    short?: IPerennialLens.ProductSnapshotStructOutput
+    [OrderDirection.Long]?: IPerennialLens.ProductSnapshotStructOutput
+    [OrderDirection.Short]?: IPerennialLens.ProductSnapshotStructOutput
   }
   activePositionTab: PositionsTab
   setActivePositionTab: (tab: PositionsTab) => void

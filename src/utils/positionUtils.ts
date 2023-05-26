@@ -13,7 +13,7 @@ export function size(pos: PositionStructOutput) {
   return pos.maker || pos.taker || 0n
 }
 
-export function direction(pos?: PositionStructOutput) {
+export function side(pos?: PositionStructOutput) {
   if (pos && pos.maker > 0n) return 'maker'
   return 'taker'
 }
@@ -27,14 +27,14 @@ export function add(a: PositionStructOutput, b: PositionStructOutput) {
 
 export function utilization(pre: PrePositionStructOutput, pos: PositionStructOutput) {
   const nextPosition = next(pre, pos)
-  if (nextPosition.maker === 0n) return 0n
+  if (nextPosition.maker === 0n) return Big18Math.ONE
 
   return Big18Math.min(Big18Math.ONE, Big18Math.div(nextPosition.taker, nextPosition.maker))
 }
 
 export function socialization(pre: PrePositionStructOutput, pos: PositionStructOutput) {
   const nextPosition = next(pre, pos)
-  if (nextPosition.taker === 0n) return 0n
+  if (nextPosition.taker === 0n) return Big18Math.ONE
 
   return Big18Math.min(Big18Math.ONE, Big18Math.div(nextPosition.maker, nextPosition.taker))
 }
@@ -49,7 +49,7 @@ export const calcLiquidationPrice = (
   if (!collateral || Big18Math.isZero(collateral) || !product.maintenance) return 0n
 
   const payoffDirection = product.productInfo.payoffDefinition.payoffDirection
-  const [posSize, posDirection] = [size(userPosition), direction(userPosition)]
+  const [posSize, posSide] = [size(userPosition), side(userPosition)]
   if (Big18Math.isZero(posSize)) return 0n
 
   // If we have user position deltas, calculate next global position based on deltas
@@ -59,16 +59,16 @@ export const calcLiquidationPrice = (
   )
 
   // Long Market, Maker Position takes Short exposure
-  if (payoffDirection === 0n && posDirection === 'maker')
+  if (payoffDirection === 0n && posSide === 'maker')
     return calcLiquidationPriceShort(product, nextGlobalPosition, posSize, collateral, false)
   // Long Market, Taker Position takes Long exposure
-  else if (payoffDirection === 0n && posDirection === 'taker')
+  else if (payoffDirection === 0n && posSide === 'taker')
     return calcLiquidationPriceLong(product, nextGlobalPosition, posSize, collateral, true)
   // Short Market, Maker Position takes Long exposure
-  else if (payoffDirection === 1n && posDirection === 'maker')
+  else if (payoffDirection === 1n && posSide === 'maker')
     return calcLiquidationPriceLong(product, nextGlobalPosition, posSize, collateral, false)
   // Short Market, Taker Position takes Short exposure
-  else if (payoffDirection === 1n && posDirection === 'taker')
+  else if (payoffDirection === 1n && posSide === 'taker')
     return calcLiquidationPriceShort(product, nextGlobalPosition, posSize, collateral, true)
 
   return 0n

@@ -1,7 +1,4 @@
-export enum OrderDirection {
-  Long = 'Long',
-  Short = 'Short',
-}
+import { OrderDirection } from '@/constants/markets'
 
 export const orderDirections: [OrderDirection, OrderDirection] = [OrderDirection.Long, OrderDirection.Short]
 

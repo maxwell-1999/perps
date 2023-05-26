@@ -3,6 +3,7 @@ import ClosePositionIcon from '@public/icons/closePositionIcon.svg'
 import React from 'react'
 
 import { AssetIconWithText } from '@/components/shared/components'
+import { OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails } from '@/hooks/markets'
@@ -10,7 +11,6 @@ import { PositionDetails } from '@/hooks/markets'
 import { Button } from '@ds/Button'
 import { DataRow } from '@ds/DataRow'
 
-import { OrderDirection } from '../../TradeForm/constants'
 import { PositionStatus } from '../constants'
 import { useFormatPosition, usePositionManagerCopy, useStyles } from '../hooks'
 import {

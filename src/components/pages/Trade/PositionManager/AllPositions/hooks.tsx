@@ -3,10 +3,10 @@ import { Row } from 'react-table'
 
 import { AssetIconWithText } from '@/components/shared/components'
 import { AssetMetadata } from '@/constants/assets'
+import { OrderDirection } from '@/constants/markets'
 
 import { Column } from '@ds/Table'
 
-import { OrderDirection } from '../../TradeForm/constants'
 import { OpenPositionTableData } from '../constants'
 import { usePnl, usePositionManagerCopy, useStyles } from '../hooks'
 
@@ -36,12 +36,12 @@ export const useOpenPositionColumns = () => {
       disableSortBy: true,
       renderer: (row: OpenPositionTableData) => {
         const market = AssetMetadata[row.asset]
-        const directionColor = row.direction === OrderDirection.Long ? green : red
+        const directionColor = row.details.direction === OrderDirection.Long ? green : red
         return (
           <Flex alignItems="center">
             <AssetIconWithText market={market} fontSize="15px" mr="10px" />
             <Text fontSize="14px" color={directionColor}>
-              {row.direction}
+              {row.details.direction}
             </Text>
           </Flex>
         )

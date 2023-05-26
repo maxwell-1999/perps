@@ -5,7 +5,7 @@ import { Address, getAddress, numberToHex, toHex, zeroAddress } from 'viem'
 import { useAccount } from 'wagmi'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import { ChainMarkets, addressToAsset } from '@/constants/markets'
+import { ChainMarkets, OrderDirection, addressToAsset } from '@/constants/markets'
 import { notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
@@ -23,8 +23,8 @@ import { usePyth } from './network'
 
 export type AssetSnapshots = {
   [key in SupportedAsset]?: {
-    long?: IPerennialLens.ProductSnapshotStructOutput
-    short?: IPerennialLens.ProductSnapshotStructOutput
+    [OrderDirection.Long]?: IPerennialLens.ProductSnapshotStructOutput
+    [OrderDirection.Short]?: IPerennialLens.ProductSnapshotStructOutput
   }
 }
 export const useChainAssetSnapshots = () => {
@@ -38,15 +38,19 @@ export const useChainAssetSnapshots = () => {
       const markets = assets
         .map((asset) => ChainMarkets[chainId][asset])
         .filter(notEmpty)
-        .map((market) => [market.long, market.short].filter(notEmpty))
+        .map((market) => [market.Long, market.Short].filter(notEmpty))
         .flat()
 
       const snapshots = await lens['snapshots(address[])'].staticCall(markets)
 
       return assets.reduce((acc, asset) => {
         acc[asset] = {
-          long: snapshots.find((s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.long),
-          short: snapshots.find((s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.short),
+          [OrderDirection.Long]: snapshots.find(
+            (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Long,
+          ),
+          [OrderDirection.Short]: snapshots.find(
+            (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Short,
+          ),
         }
 
         return acc
@@ -104,8 +108,8 @@ export const useAsset24hrData = (asset: SupportedAsset) => {
       `)
 
       return graphClient.request(query, {
-        products: [market.long, market.short].filter(notEmpty),
-        long: market.long ?? market.short ?? zeroAddress,
+        products: [market.Long, market.Short].filter(notEmpty),
+        long: market.Long ?? market.Short ?? zeroAddress,
         from: from.toString(),
         to: to.toString(),
       })
@@ -117,8 +121,8 @@ export type PositionDetails = Awaited<ReturnType<typeof fetchUserPositionDetails
 
 export type UserCurrentPositions = {
   [key in SupportedAsset]?: {
-    long?: PositionDetails
-    short?: PositionDetails
+    [OrderDirection.Long]?: PositionDetails
+    [OrderDirection.Short]?: PositionDetails
   }
 }
 export const useUserCurrentPositions = () => {
@@ -137,7 +141,7 @@ export const useUserCurrentPositions = () => {
       const markets = assets
         .map((asset) => ChainMarkets[chainId][asset])
         .filter(notEmpty)
-        .map((market) => [market.long, market.short].filter(notEmpty))
+        .map((market) => [market.Long, market.Short].filter(notEmpty))
         .flat()
 
       const accountSnapshots = await lens['snapshots(address,address[])'].staticCall(address, markets)
@@ -172,30 +176,32 @@ export const useUserCurrentPositions = () => {
 
           return {
             asset,
-            long: await fetchUserPositionDetails(
+            [OrderDirection.Long]: await fetchUserPositionDetails(
               asset,
+              OrderDirection.Long,
               address,
               lens,
               graphClient,
-              accountSnapshots.find((s) => getAddress(s.productAddress) === market.long),
-              positions.positions.find((p) => getAddress(p.product) === market.long),
-              productSnapshots[asset]?.long,
+              accountSnapshots.find((s) => getAddress(s.productAddress) === market.Long),
+              positions.positions.find((p) => getAddress(p.product) === market.Long),
+              productSnapshots[asset]?.Long,
             ),
-            short: await fetchUserPositionDetails(
+            [OrderDirection.Short]: await fetchUserPositionDetails(
               asset,
+              OrderDirection.Short,
               address,
               lens,
               graphClient,
-              accountSnapshots.find((s) => getAddress(s.productAddress) === market.short),
-              positions.positions.find((p) => getAddress(p.product) === market.short),
-              productSnapshots[asset]?.short,
+              accountSnapshots.find((s) => getAddress(s.productAddress) === market.Short),
+              positions.positions.find((p) => getAddress(p.product) === market.Short),
+              productSnapshots[asset]?.Short,
             ),
           }
         }),
       )
 
-      return positionDetails.filter(notEmpty).reduce((acc, { asset, long, short }) => {
-        acc[asset] = { long: long, short: short }
+      return positionDetails.filter(notEmpty).reduce((acc, { asset, Long, Short }) => {
+        acc[asset] = { Long, Short }
         return acc
       }, {} as UserCurrentPositions)
     },
@@ -218,7 +224,7 @@ export const useUserChainPositionHistory = () => {
       const markets = assets
         .map((asset) => ChainMarkets[chainId][asset])
         .filter(notEmpty)
-        .map((market) => [market.long, market.short].filter(notEmpty))
+        .map((market) => [market.Long, market.Short].filter(notEmpty))
         .flat()
 
       const query = gql(`
@@ -264,7 +270,8 @@ export const useUserChainPositionHistory = () => {
 
         if (!asset) return
         const positionDetails = await fetchUserPositionDetails(
-          asset,
+          asset.asset,
+          asset.direction,
           address,
           lens,
           graphClient,
@@ -289,6 +296,7 @@ export const useUserChainPositionHistory = () => {
 // Pulls all data required to calculate metrics across a user's current or historical position
 const fetchUserPositionDetails = async (
   asset: SupportedAsset,
+  direction: OrderDirection,
   address: Address,
   lens: LensAbi,
   graphClient: GraphQLClient,
@@ -553,6 +561,7 @@ const fetchUserPositionDetails = async (
 
   return {
     asset,
+    direction,
     product: productAddress,
     side,
     position: position[side],

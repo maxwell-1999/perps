@@ -62,17 +62,17 @@ function MarketSelector() {
               assetMetaData={AssetMetadata[market as SupportedAsset]}
               price={formatBig18USDPrice(
                 Big18Math.abs(
-                  snapshots?.[market as SupportedAsset]?.long?.latestVersion?.price ??
-                    snapshots?.[market as SupportedAsset]?.short?.latestVersion?.price ??
+                  snapshots?.[market as SupportedAsset]?.Long?.latestVersion?.price ??
+                    snapshots?.[market as SupportedAsset]?.Short?.latestVersion?.price ??
                     0n,
                 ),
               )}
               liquidity={`${formatBig18USDPrice(
-                snapshots?.[market as SupportedAsset]?.long?.openInterest?.maker ?? 0n,
+                snapshots?.[market as SupportedAsset]?.Long?.openInterest?.maker ?? 0n,
                 {
                   compact: true,
                 },
-              )} / ${formatBig18USDPrice(snapshots?.[market as SupportedAsset]?.short?.openInterest?.maker ?? 0n, {
+              )} / ${formatBig18USDPrice(snapshots?.[market as SupportedAsset]?.Short?.openInterest?.maker ?? 0n, {
                 compact: true,
               })}`}
               isSelected={market === selectedMarket}

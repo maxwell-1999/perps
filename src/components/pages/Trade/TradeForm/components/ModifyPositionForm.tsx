@@ -2,6 +2,7 @@ import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
 import CloseX from '@public/icons/close-x.svg'
 
 import Toggle from '@/components/shared/Toggle'
+import { OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 
@@ -9,7 +10,7 @@ import { Button, IconButton } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
 
-import { OrderDirection, formIds, orderDirections } from '../constants'
+import { formIds, orderDirections } from '../constants'
 import { useTradeFormCopy } from '../hooks'
 import { TradeReceipt } from './Receipt'
 import { Form } from './styles'

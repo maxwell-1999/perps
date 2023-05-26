@@ -1,8 +1,8 @@
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
+import { OrderDirection } from '@/constants/markets'
 import { AssetSnapshots, LivePrices, PositionDetails, UserCurrentPositions } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 
-import { OrderDirection } from '../TradeForm/constants'
 import { FormattedPositionDetail, PositionStatus } from './constants'
 
 export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?: bigint) => {
@@ -13,7 +13,6 @@ export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?:
   )
 
   // If there is a new price from offchain sources, update PnL with the difference
-  // TODO: This should take into account socialization and/or utilization
   if (livePriceDelta && positionDetails?.nextPosition) {
     const additionalPnl = Big18Math.mul(positionDetails.nextPosition, livePriceDelta)
     pnl = Big18Math.add(pnl, additionalPnl)
@@ -43,8 +42,8 @@ export const unpackPosition = ({
   if (!positions) return null
   const position = positions[selectedMarket]
 
-  const longCollateral = position?.long?.currentCollateral ?? 0n
-  const shortCollateral = position?.short?.currentCollateral ?? 0n
+  const longCollateral = position?.Long?.currentCollateral ?? 0n
+  const shortCollateral = position?.Short?.currentCollateral ?? 0n
 
   const hasLongCollateral = !Big18Math.isZero(longCollateral)
   const hasShortCollateral = !Big18Math.isZero(shortCollateral)
@@ -57,18 +56,18 @@ export const unpackPosition = ({
   if (orderDirection === OrderDirection.Long) {
     if (hasLongCollateral) {
       direction = OrderDirection.Long
-      details = position?.long as PositionDetails
+      details = position?.Long as PositionDetails
     } else {
       direction = OrderDirection.Short
-      details = position?.short as PositionDetails
+      details = position?.Short as PositionDetails
     }
   } else {
     if (hasShortCollateral) {
       direction = OrderDirection.Short
-      details = position?.short as PositionDetails
+      details = position?.Short as PositionDetails
     } else {
       direction = OrderDirection.Long
-      details = position?.long as PositionDetails
+      details = position?.Long as PositionDetails
     }
   }
 
@@ -108,11 +107,11 @@ export const transformPositionDataToArray = (userPositions?: UserCurrentPosition
     const asset = _asset as SupportedAsset
     const symbol = AssetMetadata[asset].symbol
     if (positionData) {
-      if (positionData?.long && positionData?.long?.currentCollateral !== 0n) {
-        result.push({ asset, symbol, details: positionData?.long, direction: OrderDirection.Long })
+      if (positionData?.Long && positionData?.Long?.currentCollateral !== 0n) {
+        result.push({ asset, symbol, details: positionData?.Long })
       }
-      if (positionData?.short && positionData?.short?.currentCollateral !== 0n) {
-        result.push({ asset, symbol, details: positionData?.short, direction: OrderDirection.Short })
+      if (positionData?.Short && positionData?.Short?.currentCollateral !== 0n) {
+        result.push({ asset, symbol, details: positionData?.Short })
       }
     }
   }
@@ -131,7 +130,7 @@ export const getCurrentPriceDelta = ({
   if (!snapshots) return undefined
   const selectedMarketSnapshot = snapshots[asset]
   const currentPrice = Big18Math.abs(
-    selectedMarketSnapshot?.long?.latestVersion?.price ?? selectedMarketSnapshot?.short?.latestVersion?.price ?? 0n,
+    selectedMarketSnapshot?.Long?.latestVersion?.price ?? selectedMarketSnapshot?.Short?.latestVersion?.price ?? 0n,
   )
   const pythPrice = livePrices[asset]
   // Use the live price to calculate real time pnl

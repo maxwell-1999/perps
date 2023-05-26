@@ -39,10 +39,10 @@ export const useFormattedMarketBarValues = () => {
     return dailyData.volume.reduce((acc, cur) => acc + BigInt(cur.takerNotional), 0n)
   }, [dailyData?.volume])
 
-  const longRate = (snapshot?.long?.rate ?? 0n) * Hour
-  const shortRate = (snapshot?.short?.rate ?? 0n) * Hour
+  const longRate = (snapshot?.Long?.rate ?? 0n) * Hour
+  const shortRate = (snapshot?.Short?.rate ?? 0n) * Hour
   const currentPrice = Big18Math.abs(
-    livePrices[selectedMarket] ?? snapshot?.long?.latestVersion?.price ?? snapshot?.short?.latestVersion?.price ?? 0n,
+    livePrices[selectedMarket] ?? snapshot?.Long?.latestVersion?.price ?? snapshot?.Short?.latestVersion?.price ?? 0n,
   )
   const change = currentPrice - BigInt(dailyData?.start?.at(0)?.price ?? currentPrice)
 
@@ -55,11 +55,11 @@ export const useFormattedMarketBarValues = () => {
     low: formatBig18USDPrice(BigInt(dailyData?.low?.at(0)?.price || 0)),
     high: formatBig18USDPrice(BigInt(dailyData?.high?.at(0)?.price || 0)),
     volume: formatBig18USDPrice(totalVolume, { compact: true }),
-    openInterest: `${formatBig18USDPrice(snapshot?.long?.openInterest?.taker, {
+    openInterest: `${formatBig18USDPrice(snapshot?.Long?.openInterest?.taker, {
       compact: true,
-    })} / ${formatBig18USDPrice(snapshot?.short?.openInterest?.taker, { compact: true })}`,
-    liquidity: `${formatBig18USDPrice(snapshot?.long?.openInterest?.maker, {
+    })} / ${formatBig18USDPrice(snapshot?.Short?.openInterest?.taker, { compact: true })}`,
+    liquidity: `${formatBig18USDPrice(snapshot?.Long?.openInterest?.maker, {
       compact: true,
-    })} / ${formatBig18USDPrice(snapshot?.short?.openInterest?.maker, { compact: true })}`,
+    })} / ${formatBig18USDPrice(snapshot?.Short?.openInterest?.maker, { compact: true })}`,
   }
 }
