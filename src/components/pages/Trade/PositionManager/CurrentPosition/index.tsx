@@ -126,7 +126,7 @@ function CurrentPosition() {
             value={
               <Text fontSize="14px" color={alpha75}>
                 {/*eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
-                {isOpenPosition ? `${position} / {notional}` : noValue}
+                {isOpenPosition ? `${position} / ${notional}` : noValue}
               </Text>
             }
           />
