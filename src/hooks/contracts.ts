@@ -1,10 +1,10 @@
-import { Address } from 'viem'
+import { Address, getAddress } from 'viem'
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from 'wagmi/chains'
 
 import { SupportedChainId } from '@/constants/network'
 import { useChainId, useProvider } from '@/hooks/network'
 
-import { LensAbi__factory } from '@t/generated'
+import { ICollateralAbi__factory, LensAbi__factory } from '@t/generated'
 
 type AddressMapping = { [chain in SupportedChainId]: Address }
 
@@ -21,4 +21,19 @@ export const useLens = () => {
   const chainId = useChainId()
 
   return LensAbi__factory.connect(addresses[chainId], provider)
+}
+
+export const useCollateral = () => {
+  const addresses: AddressMapping = {
+    [mainnet.id]: getAddress('0x2d264EBDb6632A06A1726193D4d37FeF1E5dbDcd'),
+    [arbitrum.id]: getAddress('0xAF8CeD28FcE00ABD30463D55dA81156AA5aEEEc2'),
+    [arbitrumGoerli.id]: getAddress('0xf3E6057474199179D9eFb733f2cf47F41Cc8a1ED'),
+    [goerli.id]: getAddress('0x741FC06B5DE25AC5b31F54B92eE3Bf1C97bf8666'),
+    [baseGoerli.id]: getAddress('0xA59eF0208418559770a48D7ae4f260A28763167B'),
+  }
+
+  const provider = useProvider()
+  const chainId = useChainId()
+
+  return ICollateralAbi__factory.connect(addresses[chainId], provider)
 }

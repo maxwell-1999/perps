@@ -37,9 +37,9 @@ export const usePositionManagerCopy = () => {
     history: intl.formatMessage({ defaultMessage: 'History' }),
     open: intl.formatMessage({ defaultMessage: 'Open' }),
     closed: intl.formatMessage({ defaultMessage: 'Closed' }),
-    opening: intl.formatMessage({ defaultMessage: 'Opening...' }),
-    closing: intl.formatMessage({ defaultMessage: 'Closing...' }),
-    pricing: intl.formatMessage({ defaultMessage: 'Pricing...' }),
+    opening: intl.formatMessage({ defaultMessage: 'Opening' }),
+    closing: intl.formatMessage({ defaultMessage: 'Closing' }),
+    pricing: intl.formatMessage({ defaultMessage: 'Pricing' }),
     resolved: intl.formatMessage({ defaultMessage: 'Resolved' }),
     long: intl.formatMessage({ defaultMessage: 'Long' }),
     short: intl.formatMessage({ defaultMessage: 'Short' }),
@@ -108,12 +108,24 @@ export const usePnl = ({ asset, positionDetails }: { asset: SupportedAsset; posi
   const productSnapshot = positionDetails?.direction ? snapshots?.[asset]?.[positionDetails.direction] : undefined
   let currentPriceDelta = getCurrentPriceDelta({ snapshots, livePrices, asset: asset })
 
+  // Multiply the live price by the payoff direction of the market
+  let payoffDirectionMultiplier = 1n
+  if (productSnapshot) {
+    payoffDirectionMultiplier = productSnapshot.productInfo.payoffDefinition.payoffDirection === 0n ? 1n : -1n
+    // Makers take the opposite side of the payoff
+    if (positionDetails.side === 'maker') payoffDirectionMultiplier = payoffDirectionMultiplier * -1n
+  }
+
   // If taker, apply socialization dampening
   if (productSnapshot && positionDetails.side === 'taker' && currentPriceDelta)
-    currentPriceDelta = Big18Math.mul(currentPriceDelta, socialization(productSnapshot.pre, productSnapshot.position))
+    currentPriceDelta =
+      Big18Math.mul(currentPriceDelta, socialization(productSnapshot.pre, productSnapshot.position)) *
+      payoffDirectionMultiplier
   // If maker, apply utilization dampening
   else if (productSnapshot && positionDetails.side === 'maker' && currentPriceDelta)
-    currentPriceDelta = Big18Math.mul(currentPriceDelta, utilization(productSnapshot.pre, productSnapshot.position))
+    currentPriceDelta =
+      Big18Math.mul(currentPriceDelta, utilization(productSnapshot.pre, productSnapshot.position)) *
+      payoffDirectionMultiplier
 
   return calculatePnl(positionDetails, currentPriceDelta)
 }

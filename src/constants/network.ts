@@ -16,7 +16,7 @@ export const AlchemyActiveKey = AlchemyProdKeys[Math.floor(Math.random() * Alche
 export const SupportedChainIds = [arbitrum.id, mainnet.id, arbitrumGoerli.id, goerli.id, baseGoerli.id] as const
 export type SupportedChainId = (typeof SupportedChainIds)[number]
 
-export const { chains, publicClient } = configureChains(
+export const { chains, publicClient, webSocketPublicClient } = configureChains(
   [arbitrum, mainnet, goerli, arbitrumGoerli, baseGoerli],
   [alchemyProvider({ apiKey: AlchemyActiveKey }), publicProvider()],
 )
@@ -31,6 +31,7 @@ export const wagmiConfig = createConfig({
   autoConnect: true,
   connectors,
   publicClient,
+  webSocketPublicClient,
 })
 
 export const DefaultChain = chains[0]

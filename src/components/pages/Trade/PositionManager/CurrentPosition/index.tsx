@@ -37,20 +37,27 @@ function CurrentPosition() {
     direction,
     currentCollateral,
     position,
+    nextPosition,
     averageEntry,
     liquidationPrice,
-    notional,
+    nextNotional,
     leverage,
     dailyFunding,
     status,
     positionDetails,
   } = useFormatPosition()
 
-  const hasPosition = position !== noValue
+  const hasPosition = position !== noValue || nextPosition !== noValue
   const directionTextColor = direction === OrderDirection.Long ? green : red
   const isOpenPosition =
-    status === PositionStatus.open || status === PositionStatus.pricing || status === PositionStatus.closing
+    status === PositionStatus.open ||
+    status === PositionStatus.pricing ||
+    status === PositionStatus.closing ||
+    status === PositionStatus.opening
+  const isTransitionPosition =
+    status === PositionStatus.pricing || status === PositionStatus.opening || status === PositionStatus.closing
   const isClosedPosition = status === PositionStatus.closed
+  const statusColor = isOpenPosition ? (isTransitionPosition ? 'goldenRod' : green) : 'darkGray'
 
   const statusLabel = copy[status]
   return (
@@ -59,12 +66,12 @@ function CurrentPosition() {
         <Flex width="50%" flexDirection="column" borderRight={`1px solid ${borderColor}`}>
           <ActivePositionHeader borderColor={borderColor}>
             <AssetIconWithText market={assetMetadata} text={statusLabel} />
-            <StatusLight color={isOpenPosition ? green : 'darkGray'} glow={isOpenPosition} />
+            <StatusLight color={statusColor} glow={isOpenPosition} />
           </ActivePositionHeader>
           <ActivePositionDetail
             label={copy.size}
-            value={isOpenPosition ? position : noValue}
-            valueSubheader={isOpenPosition ? notional : noValue}
+            value={isOpenPosition ? nextPosition : noValue}
+            valueSubheader={isOpenPosition ? nextNotional : noValue}
             valueColor={isOpenPosition ? 'initial' : subheaderTextColor}
           />
         </Flex>
@@ -93,7 +100,7 @@ function CurrentPosition() {
             <Flex flex={1} justifyContent="space-between" mb="10px" alignItems="center">
               <Flex alignItems="center">
                 <Text mr={3}>{statusLabel}</Text>
-                <StatusLight color={hasPosition ? green : 'darkGray'} glow={hasPosition} />
+                <StatusLight color={statusColor} glow={hasPosition} />
               </Flex>
               {isOpenPosition && (
                 <ButtonGroup>
@@ -126,7 +133,7 @@ function CurrentPosition() {
             value={
               <Text fontSize="14px" color={alpha75}>
                 {/*eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
-                {isOpenPosition ? `${position} / ${notional}` : noValue}
+                {isOpenPosition ? `${nextPosition} / ${nextNotional}` : noValue}
               </Text>
             }
           />

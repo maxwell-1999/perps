@@ -1,5 +1,5 @@
 import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
-import { AlchemyProvider, JsonRpcProvider } from 'ethers'
+import { AlchemyProvider, JsonRpcProvider, WebSocketProvider } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useNetwork } from 'wagmi'
 import { baseGoerli } from 'wagmi/chains'
@@ -29,6 +29,24 @@ export const useProvider = () => {
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return providers.get(chainId)!
+}
+
+const wsProviders = new Map<SupportedChainId, WebSocketProvider>()
+export const useWsProvider = () => {
+  const chainId = useChainId()
+  const provider = useProvider()
+
+  if (!wsProviders.has(chainId)) {
+    const providerUrl = provider._getConnection().url // TODO: Find a better way to get the provider url
+    wsProviders.set(
+      chainId,
+      chainId === baseGoerli.id
+        ? new WebSocketProvider('wss://goerli.base.org')
+        : new WebSocketProvider(providerUrl.replace('https://', 'wss://')),
+    )
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return wsProviders.get(chainId)!
 }
 
 const graphClients = new Map<SupportedChainId, GraphQLClient>()

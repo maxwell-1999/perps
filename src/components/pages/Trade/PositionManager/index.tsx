@@ -10,7 +10,6 @@ import { usePositionManagerCopy } from './hooks'
 
 function PositionManager() {
   const { activePositionTab, setActivePositionTab } = useMarketContext()
-  console.log(activePositionTab)
   const copy = usePositionManagerCopy()
 
   return (

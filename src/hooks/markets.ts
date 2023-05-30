@@ -1,24 +1,27 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { multicall } from '@wagmi/core'
+import { ethers } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
-import { useEffect, useState } from 'react'
-import { Address, getAddress, numberToHex, toHex, zeroAddress } from 'viem'
+import { useCallback, useEffect, useState } from 'react'
+import { Address, getAddress, numberToHex, parseAbi, toHex, zeroAddress } from 'viem'
 import { useAccount } from 'wagmi'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { ChainMarkets, OrderDirection, addressToAsset } from '@/constants/markets'
+import { SupportedChainId } from '@/constants/network'
 import { notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
-import { calcLiquidationPrice, next, size } from '@/utils/positionUtils'
+import { calcLiquidationPrice, next, side as positionSide, size } from '@/utils/positionUtils'
 import { last24hrBounds } from '@/utils/timeUtils'
 
-import { IProductAbi__factory } from '@t/generated'
+import { ICollateralAbi, IProductAbi__factory } from '@t/generated'
 import { IPerennialLens, LensAbi } from '@t/generated/LensAbi'
 import { gql } from '@t/gql'
 import { GetAccountPositionsQuery } from '@t/gql/graphql'
 
-import { useLens } from './contracts'
-import { useChainId, useGraphClient } from './network'
+import { useCollateral, useLens } from './contracts'
+import { useChainId, useGraphClient, useWsProvider } from './network'
 import { usePyth } from './network'
 
 export type AssetSnapshots = {
@@ -129,6 +132,7 @@ export const useUserCurrentPositions = () => {
   const chainId = useChainId()
   const { address } = useAccount()
   const lens = useLens()
+  const collateral = useCollateral()
   const graphClient = useGraphClient()
   const { data: productSnapshots } = useChainAssetSnapshots()
 
@@ -177,20 +181,24 @@ export const useUserCurrentPositions = () => {
           return {
             asset,
             [OrderDirection.Long]: await fetchUserPositionDetails(
+              chainId,
               asset,
               OrderDirection.Long,
               address,
               lens,
+              collateral,
               graphClient,
               accountSnapshots.find((s) => getAddress(s.productAddress) === market.Long),
               positions.positions.find((p) => getAddress(p.product) === market.Long),
               productSnapshots[asset]?.Long,
             ),
             [OrderDirection.Short]: await fetchUserPositionDetails(
+              chainId,
               asset,
               OrderDirection.Short,
               address,
               lens,
+              collateral,
               graphClient,
               accountSnapshots.find((s) => getAddress(s.productAddress) === market.Short),
               positions.positions.find((p) => getAddress(p.product) === market.Short),
@@ -214,6 +222,7 @@ export const useUserChainPositionHistory = () => {
   const graphClient = useGraphClient()
   const { address } = useAccount()
   const lens = useLens()
+  const collateral = useCollateral()
 
   return useInfiniteQuery({
     queryKey: ['userChainPositionHistory', chainId, address],
@@ -270,10 +279,12 @@ export const useUserChainPositionHistory = () => {
 
         if (!asset) return
         const positionDetails = await fetchUserPositionDetails(
+          chainId,
           asset.asset,
           asset.direction,
           address,
           lens,
+          collateral,
           graphClient,
           snapshot,
           graphPosition,
@@ -295,20 +306,40 @@ export const useUserChainPositionHistory = () => {
 
 // Pulls all data required to calculate metrics across a user's current or historical position
 const fetchUserPositionDetails = async (
+  chainId: SupportedChainId,
   asset: SupportedAsset,
   direction: OrderDirection,
   address: Address,
   lens: LensAbi,
+  collateralContract: ICollateralAbi,
   graphClient: GraphQLClient,
   snapshot?: IPerennialLens.UserProductSnapshotStructOutput,
   graphPosition?: GetAccountPositionsQuery['positions'][0],
   productSnapshot?: IPerennialLens.ProductSnapshotStructOutput,
 ) => {
-  if (!snapshot) return { currentCollateral: 0n }
+  if (!snapshot || !productSnapshot) return { asset, direction, currentCollateral: 0n }
   const { productAddress, collateral, pre, position, openInterest } = snapshot
+  const nextNotional = Big18Math.abs(Big18Math.mul(size(next(pre, position)), productSnapshot.latestVersion.price))
+  const side = positionSide(next(pre, position))
 
-  if (!graphPosition || !productSnapshot) return { currentCollateral: collateral }
-  const { side, startBlock, depositAmount, fees } = graphPosition
+  // If no graph position, return snapshot values
+  if (!graphPosition) {
+    return {
+      asset,
+      direction,
+      position: snapshot.position[side],
+      nextPosition: next(pre, position)[side],
+      startCollateral: collateral,
+      currentCollateral: collateral,
+      averageEntry: productSnapshot.latestVersion.price,
+      liquidationPrice: calcLiquidationPrice(productSnapshot, next(pre, position), collateral),
+      notional: size(openInterest),
+      nextNotional,
+      leverage: collateral > 0n ? Big18Math.div(size(openInterest), collateral) : 0n,
+      nextLeverage: collateral > 0n ? Big18Math.div(nextNotional, collateral) : 0n,
+    }
+  }
+  const { startBlock, depositAmount, fees, endBlock, lastUpdatedBlockNumber } = graphPosition
 
   const query = gql(`
     query getPositionChanges(
@@ -397,6 +428,11 @@ const fetchUserPositionDetails = async (
       }, first: $first, skip: $skip) {
         amount
       }
+      meta: _meta {
+        block {
+          number
+        }
+      }
     }
   `)
 
@@ -448,47 +484,91 @@ const fetchUserPositionDetails = async (
     }
   `)
 
+  const productContract = IProductAbi__factory.connect(productAddress, lens.runner)
+  const currentVersion = productSnapshot.latestVersion
+  const latestVersion = await productContract['latestVersion()']()
+  // Get the post-settlement value
+  const [, latestValue, latestPrice, currentValue] = await multicall({
+    chainId,
+    allowFailure: false,
+    contracts: [
+      {
+        abi: parseAbi(['function settle() external']),
+        address: getAddress(productAddress),
+        functionName: 'settle',
+      },
+      {
+        abi: parseAbi(['function valueAtVersion(uint256) external view returns ((int256 maker, int256 taker))']),
+        address: getAddress(productAddress),
+        functionName: 'valueAtVersion',
+        args: [latestVersion + 1n],
+      },
+      {
+        abi: parseAbi([
+          'function atVersion(uint256) external view returns ((uint256 version, uint256 timestamp, int256 price))',
+        ]),
+        address: getAddress(productAddress),
+        functionName: 'atVersion',
+        args: [latestVersion + 1n],
+      },
+      {
+        abi: parseAbi(['function valueAtVersion(uint256) external view returns ((int256 maker, int256 taker))']),
+        address: getAddress(productAddress),
+        functionName: 'valueAtVersion',
+        args: [currentVersion.version],
+      },
+    ],
+  })
+
   const atVersions = (
     await graphClient.request(valueAtVersionQuery, {
       product: productAddress,
       versions: settleVersions.map((v) => v.toString()),
     })
-  ).settles.reduce((acc, settle) => {
-    acc.set(BigInt(settle.preVersion), {
-      price: BigInt(settle.preVersionPrice),
-      makerValue: BigInt(settle.preMakerValue),
-      takerValue: BigInt(settle.preTakerValue),
-    })
-    acc.set(BigInt(settle.toVersion), {
-      price: BigInt(settle.toVersionPrice),
-      makerValue: BigInt(settle.toMakerValue),
-      takerValue: BigInt(settle.toTakerValue),
-    })
+  ).settles.reduce(
+    (acc, settle) => {
+      acc.set(BigInt(settle.preVersion), {
+        price: BigInt(settle.preVersionPrice),
+        makerValue: BigInt(settle.preMakerValue),
+        takerValue: BigInt(settle.preTakerValue),
+      })
+      acc.set(BigInt(settle.toVersion), {
+        price: BigInt(settle.toVersionPrice),
+        makerValue: BigInt(settle.toMakerValue),
+        takerValue: BigInt(settle.toTakerValue),
+      })
 
-    return acc
-  }, new Map<bigint, { price: bigint; makerValue: bigint; takerValue: bigint }>())
-  // TODO: we should fetch the maker and taker values for the latest version post settlement
-  // but the lens does support this, and we don't have a multicall provider yet
-  const productContract = IProductAbi__factory.connect(productAddress, lens.runner)
-  const latestVersion = productSnapshot.latestVersion
-  const settledLatest = await productContract['latestVersion()']()
-  const latestValue = await productContract.valueAtVersion(settledLatest)
-  atVersions.set(latestVersion.version, {
-    price: latestVersion.price,
-    makerValue: latestValue.maker,
-    takerValue: latestValue.taker,
-  })
+      return acc
+    },
+    new Map<bigint, { price: bigint; makerValue: bigint; takerValue: bigint }>([
+      [
+        latestVersion + 1n, // Place version + 1 in map, since this data isn't available in the graph yet
+        {
+          price: latestPrice.price,
+          makerValue: latestValue.maker ?? 0n,
+          takerValue: latestValue.taker ?? 0n,
+        },
+      ],
+      [
+        currentVersion.version, // Place current version in map, since this data isn't available in the graph yet
+        {
+          price: currentVersion.price,
+          makerValue: currentValue.maker ?? 0n,
+          takerValue: currentValue.taker ?? 0n,
+        },
+      ],
+    ]),
+  )
 
   // Create a separate sub position for each position change to calculate the average entry price
-  // Open 10 ETH @ $1000: PNL 0
-  // Close 1 ETH @ 1100: Leg PNL = 10 * (1100 - 1000) = $1000
-  // Close 2 ETH @ 900: Leg PNL = 9 * (900 - 1100) = -$1,800
-  // Open 3 ETH @ 1000: Leg PNL = $700
-  // etc…
   let currentPosition = 0n
+  let totalNotional = 0n
+  let totalSize = 0n
   const subPositions = changesMerged.map((change, i) => {
     const { version, amount } = change
-    const settleVersion = BigInt(version) === latestVersion.version ? BigInt(version) : BigInt(version) + 1n
+    let settleVersion = BigInt(version) + 1n
+    // If the settle version is ahead of currentVersion, set the settle version to the current version
+    if (settleVersion > currentVersion.version) settleVersion = currentVersion.version
     const settleVersionData = atVersions.get(settleVersion)
     const settleValue =
       graphPosition.side === 'maker' ? settleVersionData?.makerValue ?? 0n : settleVersionData?.takerValue ?? 0n
@@ -516,20 +596,23 @@ const fetchUserPositionDetails = async (
       transctionHash: change.transactionHash,
     }
 
-    currentPosition = BigInt(amount) + currentPosition
+    currentPosition += subPosition.delta
+    totalNotional += Big18Math.mul(currentPosition, subPosition.settlePrice)
+    totalSize += currentPosition
     return subPosition
   })
+
   if (currentPosition !== 0n) {
     // If the position is still open, add a sub position for the last version to latest version
-    const settleValue = side === 'maker' ? latestValue.maker : latestValue.taker
+    const settleValue = side === 'maker' ? currentValue.maker : currentValue.taker
     const prevVersion = subPositions.at(-1)?.settleVersion ?? 0n
     const prevValue = subPositions.at(-1)?.settleValue ?? 0n
     const prevPrice = subPositions.at(-1)?.settlePrice ?? 0n
 
     subPositions.push({
-      settleVersion: latestVersion.version,
+      settleVersion: currentVersion.version,
       settleValue,
-      settlePrice: Big18Math.abs(latestVersion.price),
+      settlePrice: Big18Math.abs(currentVersion.price),
 
       prevVersion,
       prevValue,
@@ -546,10 +629,7 @@ const fetchUserPositionDetails = async (
   }
 
   // Average Entry = Total Notional / Total Size
-  const averageEntry = Big18Math.div(
-    sum(subPositions.map((p) => Big18Math.mul(p.settlePrice, p.size))),
-    sum(subPositions.map((p) => p.size)),
-  )
+  const averageEntry = Big18Math.div(totalNotional, totalSize)
 
   // Collateral at one block before the position was opened
   const startCollateral = await lens['collateral(address,address)'].staticCall(address, productAddress, {
@@ -558,6 +638,25 @@ const fetchUserPositionDetails = async (
   const initialDeposits =
     sum(positionChanges.initialDeposits.map((d) => BigInt(d.amount))) -
     sum(positionChanges.initialWithdrawals.map((d) => BigInt(d.amount)))
+
+  let deposits = BigInt(depositAmount)
+
+  // If this is the current position, pull values between graph head and chain head
+  if (BigInt(endBlock) === -1n) {
+    // Pull any deposits/withdrawals that have happened between graph syncs
+    const [_deposits, _withdrawals] = await Promise.all([
+      collateralContract.queryFilter(
+        collateralContract.filters.Deposit(address, productAddress),
+        toHex(BigInt(positionChanges.meta?.block.number || lastUpdatedBlockNumber) + 1n),
+      ),
+      collateralContract.queryFilter(
+        collateralContract.filters.Withdrawal(address, productAddress),
+        toHex(BigInt(positionChanges.meta?.block.number || lastUpdatedBlockNumber) + 1n),
+      ),
+    ])
+
+    deposits = deposits + sum(_deposits.map((d) => d.args.amount)) - sum(_withdrawals.map((d) => d.args.amount))
+  }
 
   return {
     asset,
@@ -568,12 +667,13 @@ const fetchUserPositionDetails = async (
     nextPosition: next(pre, position)[side],
     startCollateral: startCollateral + initialDeposits,
     currentCollateral: collateral,
-    deposits: BigInt(depositAmount),
+    deposits,
     averageEntry,
     liquidationPrice: calcLiquidationPrice(productSnapshot, next(pre, position), collateral),
     notional: size(openInterest),
-    nextNotional: Big18Math.abs(Big18Math.mul(size(next(pre, position)), productSnapshot.latestVersion.price)),
+    nextNotional,
     leverage: collateral > 0n ? Big18Math.div(size(openInterest), collateral) : 0n,
+    nextLeverage: collateral > 0n ? Big18Math.div(nextNotional, collateral) : 0n,
     fees,
     subPositions,
     liquidations: positionChanges.liquidations,
@@ -615,3 +715,73 @@ export const useChainLivePrices = () => {
 }
 
 export type LivePrices = Awaited<ReturnType<typeof useChainLivePrices>>
+
+export const useRefreshMarketDataOnPriceUpdates = () => {
+  const chainId = useChainId()
+  const [aggregators, setAggregators] = useState<string[]>([])
+  const { data: products } = useChainAssetSnapshots()
+  const wsProvider = useWsProvider()
+  const { refetch: refetchAssetSnapshots } = useChainAssetSnapshots()
+  const { refetch: refetchUserCurrentPositions } = useUserCurrentPositions()
+
+  const refresh = useCallback(
+    () => Promise.all([refetchAssetSnapshots, refetchUserCurrentPositions]),
+    [refetchAssetSnapshots, refetchUserCurrentPositions],
+  )
+
+  useEffect(() => {
+    const fetchAggregatorAddresses = async () => {
+      if (!products) return
+
+      // Product -> Perennial ChainlinkFeedOracle
+      const pnlOracle = Array.from(
+        new Set(
+          Object.values(products).flatMap((p) =>
+            [p.Long?.productInfo.oracle, p.Short?.productInfo.oracle].filter(notEmpty),
+          ),
+        ),
+      )
+
+      const aggregatorAbi = parseAbi(['function aggregator() view returns (address)'])
+      // Feed Oracle -> Proxy
+      const proxyAddresses = await multicall({
+        chainId,
+        allowFailure: false,
+        contracts: pnlOracle.map((p) => ({
+          address: getAddress(p),
+          abi: aggregatorAbi,
+          functionName: 'aggregator',
+        })),
+      })
+
+      // Proxy -> Aggregator
+      const aggregatorAddresses = await multicall({
+        chainId,
+        allowFailure: false,
+        contracts: proxyAddresses.map((p) => ({
+          address: p,
+          abi: aggregatorAbi,
+          functionName: 'aggregator',
+        })),
+      })
+      setAggregators(unique(aggregatorAddresses))
+    }
+
+    fetchAggregatorAddresses()
+  }, [products, chainId])
+
+  useEffect(() => {
+    if (!aggregators.length || !wsProvider) return
+    // Ideally we could use wagmi for this, but they don't support eth_subscribe
+    const contracts = aggregators.map(
+      (a) =>
+        new ethers.Contract(
+          a,
+          ['event AnswerUpdated(int256 indexed current,uint256 indexed roundId,uint256 updatedAt)'],
+          wsProvider,
+        ),
+    )
+    contracts.forEach((c) => c.on(c.filters.AnswerUpdated(), refresh))
+    return () => contracts.forEach((l) => l.removeAllListeners())
+  }, [aggregators, refresh, wsProvider])
+}

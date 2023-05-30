@@ -50,28 +50,35 @@ export const unpackPosition = ({
 
   if (!hasLongCollateral && !hasShortCollateral) return null
 
-  let direction: OrderDirection
-  let details: PositionDetails
+  const hasLongTaker = position?.Long?.side === 'taker'
+  const hasShortTaker = position?.Short?.side === 'taker'
+
+  if (!hasLongTaker && !hasShortTaker) return null
+
+  let direction: OrderDirection | undefined = undefined
+  let details: PositionDetails | undefined = undefined
 
   if (orderDirection === OrderDirection.Long) {
-    if (hasLongCollateral) {
+    if (hasLongCollateral && hasLongTaker) {
       direction = OrderDirection.Long
       details = position?.Long as PositionDetails
-    } else {
+    } else if (hasShortCollateral && hasShortTaker) {
       direction = OrderDirection.Short
       details = position?.Short as PositionDetails
     }
   } else {
-    if (hasShortCollateral) {
+    if (hasShortCollateral && hasShortTaker) {
       direction = OrderDirection.Short
       details = position?.Short as PositionDetails
-    } else {
+    } else if (hasLongCollateral && hasLongTaker) {
       direction = OrderDirection.Long
       details = position?.Long as PositionDetails
     }
   }
 
-  return { direction: direction, details }
+  if (!direction || !details) return null
+
+  return { direction, details }
 }
 
 export const getPositionStatus = (positionDetails?: PositionDetails) => {
@@ -107,10 +114,14 @@ export const transformPositionDataToArray = (userPositions?: UserCurrentPosition
     const asset = _asset as SupportedAsset
     const symbol = AssetMetadata[asset].symbol
     if (positionData) {
-      if (positionData?.Long && positionData?.Long?.currentCollateral !== 0n) {
+      if (positionData?.Long && positionData?.Long.side === 'taker' && positionData?.Long?.currentCollateral !== 0n) {
         result.push({ asset, symbol, details: positionData?.Long })
       }
-      if (positionData?.Short && positionData?.Short?.currentCollateral !== 0n) {
+      if (
+        positionData?.Short &&
+        positionData?.Short.side === 'taker' &&
+        positionData?.Short?.currentCollateral !== 0n
+      ) {
         result.push({ asset, symbol, details: positionData?.Short })
       }
     }
@@ -157,6 +168,7 @@ export const getFormattedPositionDetails = ({
     ? formatBig18(positionDetails?.liquidationPrice, { numSigFigs: 8 })
     : placeholderString,
   notional: positionDetails ? formatBig18USDPrice(positionDetails?.notional) : placeholderString,
+  nextNotional: positionDetails ? formatBig18USDPrice(positionDetails?.nextNotional) : placeholderString,
   unformattedNotional: positionDetails ? formatBig18(positionDetails?.notional) : placeholderString,
   leverage: positionDetails ? formatBig18(positionDetails?.leverage) : placeholderString,
 })
