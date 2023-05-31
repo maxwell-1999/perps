@@ -5,6 +5,7 @@ import { GraphQLClient } from 'graphql-request'
 import { useCallback, useEffect, useState } from 'react'
 import { Address, getAddress, numberToHex, parseAbi, toHex, zeroAddress } from 'viem'
 import { useAccount } from 'wagmi'
+import { goerli, mainnet } from 'wagmi/chains'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { ChainMarkets, OrderDirection, addressToAsset } from '@/constants/markets'
@@ -723,7 +724,7 @@ export type LivePrices = Awaited<ReturnType<typeof useChainLivePrices>>
 export const useRefreshMarketDataOnPriceUpdates = () => {
   const chainId = useChainId()
   const [aggregators, setAggregators] = useState<string[]>([])
-  const { data: products } = useChainAssetSnapshots()
+  const { data: products, isPreviousData } = useChainAssetSnapshots()
   const wsProvider = useWsProvider()
   const { refetch: refetchAssetSnapshots } = useChainAssetSnapshots()
   const { refetch: refetchUserCurrentPositions } = useUserCurrentPositions()
@@ -735,37 +736,84 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
 
   useEffect(() => {
     const fetchAggregatorAddresses = async () => {
-      if (!products) return
+      if (!products || isPreviousData) return
 
-      // Product -> Perennial ChainlinkFeedOracle
+      // Product -> Perennial ChainlinkFeedOracle or ChainlinkOracle
       const productOracles = unique(
         Object.values(products).flatMap((p) =>
           [p.Long?.productInfo.oracle, p.Short?.productInfo.oracle].filter(notEmpty),
         ),
       )
 
-      const aggregatorAbi = parseAbi(['function aggregator() view returns (address)'])
-      // Feed Oracle -> Proxy
-      const proxyAddresses = await multicall({
-        chainId,
-        allowFailure: false,
-        contracts: productOracles.map((p) => ({
-          address: getAddress(p),
-          abi: aggregatorAbi,
-          functionName: 'aggregator',
-        })),
-      })
+      let aggregatorAddresses: Address[] = []
 
-      // Proxy -> Aggregator
-      const aggregatorAddresses = await multicall({
-        chainId,
-        allowFailure: false,
-        contracts: proxyAddresses.map((p) => ({
-          address: p,
-          abi: aggregatorAbi,
-          functionName: 'aggregator',
-        })),
-      })
+      // If mainnet or goerli, use registry
+      if (mainnet.id === chainId || goerli.id === chainId) {
+        const registryLookup = await Promise.all(
+          productOracles.map(async (p) => {
+            const [base, quote, registry] = await multicall({
+              chainId: chainId,
+              allowFailure: false,
+              contracts: [
+                {
+                  address: getAddress(p),
+                  abi: parseAbi(['function base() view returns (address)']),
+                  functionName: 'base',
+                },
+                {
+                  address: getAddress(p),
+                  abi: parseAbi(['function quote() view returns (address)']),
+                  functionName: 'quote',
+                },
+                {
+                  address: getAddress(p),
+                  abi: parseAbi(['function registry() view returns (address)']),
+                  functionName: 'registry',
+                },
+              ],
+            })
+
+            return { base, quote, registry }
+          }),
+        )
+
+        // Registry -> Aggregator
+        aggregatorAddresses = await multicall({
+          chainId,
+          allowFailure: false,
+          contracts: registryLookup.map((p) => ({
+            address: p.registry,
+            abi: parseAbi(['function getFeed(address base, address quote) view returns (address)']),
+            functionName: 'getFeed',
+            args: [p.base, p.quote],
+          })),
+        })
+      } else {
+        const aggregatorAbi = parseAbi(['function aggregator() view returns (address)'])
+
+        // Feed Oracle -> Proxy
+        const proxyAddresses = await multicall({
+          chainId,
+          allowFailure: false,
+          contracts: productOracles.map((p) => ({
+            address: getAddress(p),
+            abi: aggregatorAbi,
+            functionName: 'aggregator',
+          })),
+        })
+
+        // Proxy -> Aggregator
+        aggregatorAddresses = await multicall({
+          chainId,
+          allowFailure: false,
+          contracts: proxyAddresses.map((p) => ({
+            address: p,
+            abi: aggregatorAbi,
+            functionName: 'aggregator',
+          })),
+        })
+      }
+
       setAggregators((currAggregators) => {
         if (equal(currAggregators, aggregatorAddresses)) return currAggregators
         return aggregatorAddresses
@@ -773,7 +821,7 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
     }
 
     fetchAggregatorAddresses()
-  }, [products, chainId])
+  }, [products, chainId, isPreviousData])
 
   useEffect(() => {
     if (!aggregators.length || !wsProvider) return
