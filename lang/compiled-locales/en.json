@@ -35,6 +35,12 @@
       "value": "Amount to close..."
     }
   ],
+  "5Wwopw": [
+    {
+      "type": 0,
+      "value": "Pricing"
+    }
+  ],
   "5vASqA": [
     {
       "type": 0,
@@ -51,12 +57,6 @@
     {
       "type": 0,
       "value": "Perennial"
-    }
-  ],
-  "6uS8Qe": [
-    {
-      "type": 0,
-      "value": "Opening..."
     }
   ],
   "8LaTBL": [
@@ -237,6 +237,12 @@
       "value": "24h Volume"
     }
   ],
+  "XviFuR": [
+    {
+      "type": 0,
+      "value": "$0.00"
+    }
+  ],
   "agOXPD": [
     {
       "type": 0,
@@ -261,10 +267,10 @@
       "value": "Liquidity"
     }
   ],
-  "czGSYM": [
+  "d0Gd72": [
     {
       "type": 0,
-      "value": "Pricing..."
+      "value": "Opening"
     }
   ],
   "djJp6c": [
@@ -277,6 +283,12 @@
     {
       "type": 0,
       "value": "Home"
+    }
+  ],
+  "h3ShxL": [
+    {
+      "type": 0,
+      "value": "Closing"
     }
   ],
   "juU558": [
@@ -359,12 +371,6 @@
     {
       "type": 0,
       "value": "--"
-    }
-  ],
-  "wUU3x3": [
-    {
-      "type": 0,
-      "value": "Closing..."
     }
   ],
   "yR4V5C": [

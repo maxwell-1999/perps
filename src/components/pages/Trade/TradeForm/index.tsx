@@ -19,6 +19,7 @@ const dummyData = {
 function TradeContainer() {
   const { formState, setTradeFormState } = useTradeFormState()
   const { selectedMarket, orderDirection, setOrderDirection } = useMarketContext()
+
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
 
   const handleSubmitTrade = (e: React.FormEvent<HTMLFormElement>) => {
@@ -53,7 +54,6 @@ function TradeContainer() {
           onSubmit={handleSubmitTrade}
           orderDirection={orderDirection}
           setOrderDirection={setOrderDirection}
-          availableCollateral={dummyData.collateral}
           amount={dummyData.amount}
         />
       )}
@@ -62,16 +62,13 @@ function TradeContainer() {
           onSubmit={handleModifyPosition}
           orderDirection={orderDirection}
           setOrderDirection={setOrderDirection}
-          availableCollateral={dummyData.collateral}
           amount={dummyData.amount}
         />
       )}
       {formState === FormState.close && (
         <ClosePositionForm onSubmit={handleClosePosition} positionSize={dummyData.positionSize} />
       )}
-      {formState === FormState.withdraw && (
-        <WithdrawForm onSubmit={handleWithdrawCollateral} collateral={dummyData.collateral} />
-      )}
+      {formState === FormState.withdraw && <WithdrawForm onSubmit={handleWithdrawCollateral} />}
     </Container>
   )
 }

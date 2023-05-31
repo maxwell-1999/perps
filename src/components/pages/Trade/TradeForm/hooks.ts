@@ -1,9 +1,12 @@
 import { useColorModeValue, useTheme } from '@chakra-ui/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useIntl } from 'react-intl'
+import { formatEther } from 'viem'
 
-import { SupportedAsset } from '@/constants/assets'
+import { Currency, SupportedAsset } from '@/constants/assets'
 import { FormState } from '@/contexts/tradeFormContext'
+
+import { calculateInitialLeverage } from './utils'
 
 type MarketChangeProps = {
   selectedMarket: SupportedAsset
@@ -66,6 +69,7 @@ export function useTradeFormCopy() {
     withdrawConfirmText: intl.formatMessage({
       defaultMessage: 'You will receive a transaction request in your wallet upon clicking the button above.',
     }),
+    zeroUsd: intl.formatMessage({ defaultMessage: '$0.00' }),
   }
 }
 
@@ -90,3 +94,23 @@ export const getContainerVariant = (formState: FormState) => {
       return 'transparent'
   }
 }
+
+type UseInitialInputs = {
+  userCollateral?: bigint
+  amount: bigint
+  price: bigint
+  isNewPosition: boolean
+}
+
+export const useInitialInputs = ({ userCollateral, amount, price, isNewPosition }: UseInitialInputs) =>
+  useMemo(() => {
+    const formattedCollateral = formatEther(userCollateral ?? 0n)
+    const formattedAmount = formatEther(amount)
+    return {
+      currency: Currency.USDC,
+      positionAmount: formattedAmount === '0.0' ? '0' : formattedAmount,
+      collateralAmount: formattedCollateral === '0.0' ? '0' : formattedCollateral,
+      isLeverageFixed: false,
+      leverage: calculateInitialLeverage({ isNewPosition, amount, currentCollateralAmount: userCollateral, price }),
+    }
+  }, [userCollateral, amount, price, isNewPosition])

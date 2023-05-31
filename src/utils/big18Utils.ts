@@ -1,9 +1,13 @@
 import { FixedNumber, WeiPerEther } from 'ethers'
 
-export const formatBig18 = (value: bigint = 0n, { numSigFigs = 2 }: { numSigFigs?: number } = {}) => {
+export const formatBig18 = (
+  value: bigint = 0n,
+  { numSigFigs = 2, useGrouping = true }: { numSigFigs?: number; useGrouping?: boolean | undefined } = {},
+) => {
   return Intl.NumberFormat('en-US', {
     minimumSignificantDigits: numSigFigs,
     maximumSignificantDigits: numSigFigs,
+    useGrouping,
   }).format(Big18Math.divFixed(value, Big18Math.ONE).toUnsafeFloat())
 }
 

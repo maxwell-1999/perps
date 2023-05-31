@@ -12,15 +12,15 @@ import { useTradeFormCopy } from '../hooks'
 import { Form, FormOverlayHeader } from './styles'
 
 interface WithDrawFormProps {
-  collateral: string // placeholder for now
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
 function WithdrawForm(props: WithDrawFormProps) {
-  const { collateral, onSubmit } = props
+  const { onSubmit } = props
   const { setTradeFormState } = useTradeFormState()
   const copy = useTradeFormCopy()
   const { assetMetadata } = useMarketContext()
+  // Todo: fetch collateral
 
   return (
     <Form onSubmit={onSubmit}>
@@ -40,7 +40,7 @@ function WithdrawForm(props: WithDrawFormProps) {
           rightLabel={
             <FormLabel mr={0} mb={0}>
               <Text variant="label">
-                {collateral} {copy.max}
+                {copy.zeroUsd} {copy.max}
               </Text>
             </FormLabel>
           }

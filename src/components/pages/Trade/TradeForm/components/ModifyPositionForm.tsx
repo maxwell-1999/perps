@@ -5,6 +5,7 @@ import Toggle from '@/components/shared/Toggle'
 import { OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
+import { useBalances } from '@/hooks/wallet'
 
 import { Button, IconButton } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
@@ -18,16 +19,16 @@ import { Form } from './styles'
 interface ModifyPositionProps {
   orderDirection: OrderDirection
   setOrderDirection: (orderDirection: OrderDirection) => void
-  availableCollateral: string //bignumberish
   amount: string //bignumberish
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
 function ModifyPositionForm(props: ModifyPositionProps) {
-  const { orderDirection, setOrderDirection, availableCollateral, amount, onSubmit } = props
+  const { orderDirection, setOrderDirection, amount, onSubmit } = props
   const { setTradeFormState } = useTradeFormState()
   const { assetMetadata } = useMarketContext()
   const copy = useTradeFormCopy()
+  const { data: balances } = useBalances()
 
   return (
     <Form onSubmit={onSubmit}>
@@ -52,7 +53,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
           rightLabel={
             <FormLabel mr={0} mb={0}>
               <Text variant="label">
-                {availableCollateral} {copy.max}
+                {balances?.usdcFormatted ?? copy.zeroUsd} {copy.max}
               </Text>
             </FormLabel>
           }

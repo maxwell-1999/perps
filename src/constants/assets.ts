@@ -15,6 +15,11 @@ export enum QuoteCurrency {
   usd = 'usd',
 }
 
+export enum Currency {
+  USDC = 'USDC',
+  DSU = 'DSU',
+}
+
 export type AssetMetadata = {
   [asset in SupportedAsset]: {
     name: string

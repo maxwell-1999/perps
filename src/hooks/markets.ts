@@ -8,7 +8,8 @@ import { useAccount } from 'wagmi'
 import { goerli, mainnet } from 'wagmi/chains'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import { ChainMarkets, OrderDirection, addressToAsset } from '@/constants/markets'
+import { multiInvokerContract } from '@/constants/contracts'
+import { ChainMarkets, ONLY_INCLUDE, OrderDirection, addressToAsset } from '@/constants/markets'
 import { SupportedChainId } from '@/constants/network'
 import { equal, notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
@@ -22,7 +23,7 @@ import { IPerennialLens, LensAbi } from '@t/generated/LensAbi'
 import { gql } from '@t/gql'
 import { GetAccountPositionsQuery } from '@t/gql/graphql'
 
-import { useCollateral, useLens } from './contracts'
+import { useCollateral, useController, useDSU, useLens, useUSDC } from './contracts'
 import { useChainId, useGraphClient, useWsProvider } from './network'
 import { usePyth } from './network'
 
@@ -837,4 +838,54 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
     contracts.forEach((c) => c.on(c.filters.AnswerUpdated(), refresh))
     return () => contracts.forEach((l) => l.removeAllListeners())
   }, [aggregators, refresh, wsProvider])
+}
+
+export const useUserCollateral = (productAddress: string) => {
+  const chainId = useChainId()
+  const { address } = useAccount()
+  const lensContract = useLens()
+  const usdcContract = useUSDC()
+  const dsuContract = useDSU()
+
+  return useQuery({
+    queryKey: ['productCollateral', chainId, productAddress, address],
+    enabled: !!productAddress,
+    queryFn: async () => {
+      if (!address || !chainId || !productAddress) return
+
+      const [userCollateral, maintenance, usdcAllowance, dsuAllowance] = await Promise.all([
+        await lensContract['collateral(address,address)'].staticCall(address, productAddress),
+        await lensContract.maintenance(address, productAddress),
+        await usdcContract.allowance(address, multiInvokerContract.address[chainId]),
+        await dsuContract.allowance(address, multiInvokerContract.address[chainId]),
+      ])
+
+      return {
+        userCollateral,
+        maintenance,
+        usdcAllowance,
+        dsuAllowance,
+      }
+    },
+  })
+}
+
+export const useProducts = () => {
+  const chainId = useChainId()
+  const controller = useController()
+  return useQuery({
+    queryKey: ['products', chainId],
+    queryFn: async () => {
+      if (!chainId) return []
+
+      if (ONLY_INCLUDE[chainId] && ONLY_INCLUDE[chainId].length) {
+        return ONLY_INCLUDE[chainId]
+      }
+      const filter = controller.filters.ProductCreated()
+      const events = await controller.queryFilter(filter)
+      const addresses = events.map((event) => event.args.product).map((address) => address.toLowerCase())
+
+      return addresses
+    },
+  })
 }
