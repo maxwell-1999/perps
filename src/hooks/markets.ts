@@ -9,9 +9,10 @@ import { useAccount } from 'wagmi'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { ChainMarkets, OrderDirection, addressToAsset } from '@/constants/markets'
 import { SupportedChainId } from '@/constants/network'
-import { notEmpty, sum, unique } from '@/utils/arrayUtils'
+import { equal, notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
+import { ethersResultToPOJO } from '@/utils/objectUtils'
 import { calcLiquidationPrice, next, side as positionSide, size } from '@/utils/positionUtils'
 import { last24hrBounds } from '@/utils/timeUtils'
 
@@ -47,13 +48,16 @@ export const useChainAssetSnapshots = () => {
       const snapshots = await lens['snapshots(address[])'].staticCall(markets)
 
       return assets.reduce((acc, asset) => {
+        const longSnapshot = snapshots.find((s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Long)
+        const shortSnapshot = snapshots.find(
+          (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Short,
+        )
+        // Since we're directly returning the ethers result, we need to convert it to a POJO
+        // so that react-query can correctly serialize it
+        // TODO: when we switch to viem, we should be able to remove this
         acc[asset] = {
-          [OrderDirection.Long]: snapshots.find(
-            (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Long,
-          ),
-          [OrderDirection.Short]: snapshots.find(
-            (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Short,
-          ),
+          [OrderDirection.Long]: longSnapshot ? ethersResultToPOJO(longSnapshot) : undefined,
+          [OrderDirection.Short]: shortSnapshot ? ethersResultToPOJO(shortSnapshot) : undefined,
         }
 
         return acc
@@ -725,7 +729,7 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
   const { refetch: refetchUserCurrentPositions } = useUserCurrentPositions()
 
   const refresh = useCallback(
-    () => Promise.all([refetchAssetSnapshots, refetchUserCurrentPositions]),
+    () => Promise.all([refetchAssetSnapshots(), refetchUserCurrentPositions()]),
     [refetchAssetSnapshots, refetchUserCurrentPositions],
   )
 
@@ -734,11 +738,9 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
       if (!products) return
 
       // Product -> Perennial ChainlinkFeedOracle
-      const pnlOracle = Array.from(
-        new Set(
-          Object.values(products).flatMap((p) =>
-            [p.Long?.productInfo.oracle, p.Short?.productInfo.oracle].filter(notEmpty),
-          ),
+      const productOracles = unique(
+        Object.values(products).flatMap((p) =>
+          [p.Long?.productInfo.oracle, p.Short?.productInfo.oracle].filter(notEmpty),
         ),
       )
 
@@ -747,7 +749,7 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
       const proxyAddresses = await multicall({
         chainId,
         allowFailure: false,
-        contracts: pnlOracle.map((p) => ({
+        contracts: productOracles.map((p) => ({
           address: getAddress(p),
           abi: aggregatorAbi,
           functionName: 'aggregator',
@@ -764,7 +766,10 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
           functionName: 'aggregator',
         })),
       })
-      setAggregators(unique(aggregatorAddresses))
+      setAggregators((currAggregators) => {
+        if (equal(currAggregators, aggregatorAddresses)) return currAggregators
+        return aggregatorAddresses
+      })
     }
 
     fetchAggregatorAddresses()
