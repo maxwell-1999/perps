@@ -5,9 +5,10 @@ import { useAccount } from 'wagmi'
 
 import Toggle from '@/components/shared/Toggle'
 import { Currency } from '@/constants/assets'
-import { OrderDirection } from '@/constants/markets'
+import { OpenPositionType, OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
+import { useProductTransactions, useUserCollateral } from '@/hooks/markets'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18 } from '@/utils/big18Utils'
 
@@ -19,12 +20,19 @@ import { useFormatPosition } from '../../PositionManager/hooks'
 import { formIds, orderDirections } from '../constants'
 import { useInitialInputs, useStyles, useTradeFormCopy } from '../hooks'
 import {
+  calcPositionFee,
   calculateAndUpdateCollateral,
   calculateAndUpdateLeverage,
   calculateAndUpdatePosition,
+  getCollateralDifference,
+  getLeverageDifference,
+  getPositionDifference,
   max18Decimals,
+  needsApproval,
   usePrevious,
 } from '../utils'
+import AdjustPositionModal from './AdjustPositionModal'
+import { Adjustment, AdjustmentType } from './AdjustPositionModal/constants'
 import { TradeReceipt } from './Receipt'
 import { Form } from './styles'
 
@@ -43,14 +51,21 @@ function TradeForm(props: TradeFormProps) {
   const prevAddress = usePrevious(address)
 
   const { assetMetadata, selectedMarketSnapshot } = useMarketContext()
-  const product = selectedMarketSnapshot?.[orderDirection]
-  const prevProductAddress = usePrevious(product?.productAddress)
 
-  const price = product?.latestVersion?.price
+  const product = selectedMarketSnapshot?.[orderDirection]
+  const price = product?.latestVersion?.price ?? 0n
+  const symbol = product?.productInfo?.symbol ?? ''
+  const takerFee = product?.productInfo?.takerFee ?? 0n
+  const prevProductAddress = usePrevious(product?.productAddress)
+  const { onApproveDSU, onApproveUSDC, onModifyPosition } = useProductTransactions(product?.productAddress)
+
   const position = useFormatPosition()
-  const amount = position?.positionDetails?.position ?? 0n
+  const currentPositionAmount = position?.positionDetails?.position ?? 0n
   const currentCollateral = position?.positionDetails?.currentCollateral ?? 0n
-  const isNewPosition = Big18Math.isZero(amount ?? 0n)
+  const isNewPosition = Big18Math.isZero(currentPositionAmount ?? 0n)
+
+  const { data: collateralData } = useUserCollateral(product?.productAddress)
+
   const initialInputs = useInitialInputs({
     userCollateral: position?.positionDetails?.currentCollateral ?? 0n,
     price: price ?? 0n,
@@ -58,6 +73,7 @@ function TradeForm(props: TradeFormProps) {
     isNewPosition,
   })
 
+  const [adjustment, setAdjustment] = useState<Adjustment | null>(null)
   const [positionAmountStr, setPositionAmount] = useState<string>(initialInputs.positionAmount)
   const [collateralAmountStr, setCollateralAmount] = useState<string>(initialInputs.collateralAmount)
   const [collateralHasInput, setCollateralHasInput] = useState<boolean>(false)
@@ -96,6 +112,7 @@ function TradeForm(props: TradeFormProps) {
   useEffect(() => {
     if (prevProductAddress !== product?.productAddress) resetInputs()
     // If going from discnnected to connected, reset updating state
+    else if (!prevAddress && address) setUpdating(isNewPosition)
     else if (prevAddress !== address) resetInputs()
     else if (!Big18Math.eq(collateralAmount, currentCollateral))
       resetInputs() // Update collateral field on price update
@@ -165,88 +182,159 @@ function TradeForm(props: TradeFormProps) {
     }
   }
 
+  const onConfirm = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const collateralDifference = getCollateralDifference(collateralAmount, currentCollateral)
+    const positionDifference = getPositionDifference(positionAmount, currentPositionAmount)
+    const leverageDifference = getLeverageDifference({
+      currentCollateral,
+      price,
+      currentPositionAmount,
+      newCollateralAmount: collateralAmount,
+      newPositionAMount: positionAmount,
+    })
+
+    const dsuAllowance = collateralData?.dsuAllowance ?? 0n
+    const usdcAllowance = collateralData?.usdcAllowance ?? 0n
+
+    setAdjustment({
+      collateral: {
+        newCollateral: collateralAmountStr,
+        difference: collateralDifference,
+        currency,
+        isWithdrawingTotalBalance: Big18Math.isZero(collateralAmount),
+        needsApproval: needsApproval({ collateralDifference, currency, dsuAllowance, usdcAllowance }),
+        requiresManualWrap: false,
+      },
+      position: {
+        newPosition: positionAmountStr,
+        difference: positionDifference,
+        isNewPosition,
+        isClosingPosition: Big18Math.isZero(positionAmount),
+        symbol,
+        fee: calcPositionFee(price, positionDifference, takerFee),
+      },
+      leverage: leverage ?? undefined,
+      leverageDifference,
+      adjustmentType: Big18Math.isZero(currentPositionAmount) ? AdjustmentType.Create : AdjustmentType.Adjust,
+    })
+  }
+
+  const callbacks = {
+    onApproveDSU,
+    onApproveUSDC,
+    onModifyPosition,
+  }
+
+  const closeAdjustmentModal = () => {
+    setAdjustment(null)
+    setUpdating(false)
+  }
+
+  const cancelAdjustmentModal = () => {
+    setAdjustment(null)
+    resetInputs()
+  }
+
   return (
-    <Form onSubmit={() => {}}>
-      <Flex flexDirection="column" p="16px">
-        <Flex justifyContent="space-between" mb="14px">
-          <Text color={textColor}>{copy.trade}</Text>
-          <Button
-            variant="text"
-            label={copy.addCollateral}
-            p={0}
-            lineHeight={1}
-            height="initial"
-            fontSize="13px"
-            color={textBtnColor}
-            _hover={{ color: textBtnHoverColor }}
-            onClick={() => setTradeFormState(FormState.close)}
+    <>
+      {adjustment && (
+        <AdjustPositionModal
+          callbacks={callbacks}
+          isOpen={!!adjustment}
+          onClose={closeAdjustmentModal}
+          onCancel={cancelAdjustmentModal}
+          title={'confirm'}
+          adjustment={adjustment}
+          positionType={OpenPositionType.taker}
+        />
+      )}
+      <Form onSubmit={onConfirm}>
+        <Flex flexDirection="column" p="16px">
+          <Flex justifyContent="space-between" mb="14px">
+            <Text color={textColor}>{copy.trade}</Text>
+            <Button
+              variant="text"
+              label={copy.addCollateral}
+              p={0}
+              lineHeight={1}
+              height="initial"
+              fontSize="13px"
+              color={textBtnColor}
+              _hover={{ color: textBtnHoverColor }}
+              onClick={() => setTradeFormState(FormState.close)}
+            />
+          </Flex>
+          <Flex mb="14px">
+            <Toggle<OrderDirection>
+              labels={orderDirections}
+              activeLabel={orderDirection}
+              onChange={setOrderDirection}
+            />
+          </Flex>
+          <Input
+            type="number"
+            id={formIds.collateral}
+            key={formIds.collateral}
+            labelText={copy.collateral}
+            title={copy.collateral}
+            placeholder="0.0000"
+            rightLabel={
+              <FormLabel mr={0} mb={0}>
+                <Text variant="label">
+                  {balances?.usdcFormatted ?? copy.zeroUsd} {copy.max}
+                </Text>
+              </FormLabel>
+            }
+            rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+            mb="12px"
+            value={
+              updating
+                ? collateralAmountStr
+                : collateralAmount === 0n
+                ? '$0.00'
+                : `$${formatBig18(collateralAmount, { numSigFigs: 6 })}}`
+            }
+            onChange={onChangeCollateral}
+          />
+          <Input
+            type="number"
+            key={formIds.amount}
+            id={formIds.amount}
+            labelText={copy.amount}
+            placeholder="0.0000"
+            rightLabel={
+              <FormLabel mr={0} mb={0}>
+                <Text variant="label">{copy.max}</Text>
+              </FormLabel>
+            }
+            rightEl={<Pill text={assetMetadata.baseCurrency} />}
+            mb="12px"
+            value={positionAmountStr}
+            onChange={onChangeAmount}
+          />
+          {/* Default slider til we get designs */}
+          <Slider
+            label={copy.leverage}
+            ariaLabel="leverage-slider"
+            min={0}
+            max={20}
+            step={0.1}
+            value={parseFloat(leverage)}
+            onChange={onChangeLeverage}
+            containerProps={{
+              mb: 2,
+            }}
+            focusThumbOnChange={false}
           />
         </Flex>
-        <Flex mb="14px">
-          <Toggle<OrderDirection> labels={orderDirections} activeLabel={orderDirection} onChange={setOrderDirection} />
+        <Divider mt="auto" />
+        <Flex flexDirection="column" p="16px">
+          <TradeReceipt mb="25px" px="3px" />
+          <Button type="submit" label={copy.placeTrade} />
         </Flex>
-        <Input
-          type="number"
-          id={formIds.collateral}
-          key={formIds.collateral}
-          labelText={copy.collateral}
-          title={copy.collateral}
-          placeholder="0.0000"
-          rightLabel={
-            <FormLabel mr={0} mb={0}>
-              <Text variant="label">
-                {balances?.usdcFormatted ?? copy.zeroUsd} {copy.max}
-              </Text>
-            </FormLabel>
-          }
-          rightEl={<Pill text={assetMetadata.quoteCurrency} />}
-          mb="12px"
-          value={
-            updating
-              ? collateralAmountStr
-              : collateralAmount === 0n
-              ? '$0.00'
-              : `$${formatBig18(collateralAmount, { numSigFigs: 6 })}}`
-          }
-          onChange={onChangeCollateral}
-        />
-        <Input
-          type="number"
-          key={formIds.amount}
-          id={formIds.amount}
-          labelText={copy.amount}
-          placeholder="0.0000"
-          rightLabel={
-            <FormLabel mr={0} mb={0}>
-              <Text variant="label">{copy.max}</Text>
-            </FormLabel>
-          }
-          rightEl={<Pill text={assetMetadata.baseCurrency} />}
-          mb="12px"
-          value={positionAmountStr}
-          onChange={onChangeAmount}
-        />
-        {/* Default slider til we get designs */}
-        <Slider
-          label={copy.leverage}
-          ariaLabel="leverage-slider"
-          min={0}
-          max={20}
-          step={0.1}
-          value={parseFloat(leverage)}
-          onChange={onChangeLeverage}
-          containerProps={{
-            mb: 2,
-          }}
-          focusThumbOnChange={false}
-        />
-      </Flex>
-      <Divider mt="auto" />
-      <Flex flexDirection="column" p="16px">
-        <TradeReceipt mb="25px" px="3px" />
-        <Button type="submit" label={copy.placeTrade} />
-      </Flex>
-    </Form>
+      </Form>
+    </>
   )
 }
 

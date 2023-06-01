@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { formatEther, parseEther } from 'viem'
+import { formatEther, formatUnits, parseEther } from 'viem'
 
+import { Currency } from '@/constants/assets'
 import { Big18Math, formatBig18 } from '@/utils/big18Utils'
 
 export const calcLeverage = (price: bigint, position: bigint, collateral: bigint) => {
@@ -114,4 +115,59 @@ export function usePrevious<T>(value: T) {
   }, [value])
 
   return ref.current
+}
+
+export const getCollateralDifference = (newCollateralAmount: bigint, currentCollateralAmount: bigint): bigint => {
+  return Big18Math.sub(newCollateralAmount, currentCollateralAmount)
+}
+
+export const getPositionDifference = (newPositionAmount: bigint, currentPositionAmount: bigint): bigint => {
+  return Big18Math.sub(newPositionAmount, currentPositionAmount)
+}
+
+export const getLeverageDifference = ({
+  currentCollateral,
+  newCollateralAmount,
+  price,
+  currentPositionAmount,
+  newPositionAMount,
+}: {
+  currentCollateral: bigint
+  newCollateralAmount: bigint
+  price: bigint
+  currentPositionAmount: bigint
+  newPositionAMount: bigint
+}): bigint => {
+  if (!currentCollateral) return 0n
+
+  const prevLev = calcLeverage(price, currentPositionAmount, currentCollateral)
+  const newLev = calcLeverage(price, newPositionAMount, newCollateralAmount)
+  return Big18Math.sub(newLev, prevLev)
+}
+
+export const to18Decimals = (amount: bigint, fromDecimals = 6): bigint => {
+  return parseEther(formatUnits(amount, fromDecimals) as `${number}`)
+}
+
+export const needsApproval = ({
+  currency,
+  collateralDifference,
+  usdcAllowance,
+  dsuAllowance,
+}: {
+  currency: Currency
+  collateralDifference: bigint
+  usdcAllowance: bigint
+  dsuAllowance: bigint
+}) => {
+  return (
+    (currency === 'DSU' && dsuAllowance < collateralDifference) ||
+    Big18Math.isZero(dsuAllowance) ||
+    (currency === 'USDC' && to18Decimals(usdcAllowance) < collateralDifference) ||
+    Big18Math.isZero(usdcAllowance)
+  )
+}
+
+export const calcPositionFee = (price: bigint, positionDelta: bigint, feeRate: bigint) => {
+  return Big18Math.abs(Big18Math.mul(Big18Math.mul(price, positionDelta), feeRate))
 }

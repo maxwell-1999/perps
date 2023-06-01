@@ -9,6 +9,11 @@ export enum OrderDirection {
   Short = 'Short',
 }
 
+export enum OpenPositionType {
+  maker = 'maker',
+  taker = 'taker',
+}
+
 export const ChainMarkets: {
   [chainId in SupportedChainId]: {
     [asset in SupportedAsset]?: { [OrderDirection.Long]?: Address; [OrderDirection.Short]?: Address }
@@ -92,3 +97,5 @@ export const ONLY_INCLUDE: { [chainId: number]: string[] | (`0x${string}` | unde
     .map((x) => [x.Long, x.Short])
     .flat(),
 }
+
+export const MaxUint256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')

@@ -70,6 +70,7 @@ export function useTradeFormCopy() {
       defaultMessage: 'You will receive a transaction request in your wallet upon clicking the button above.',
     }),
     zeroUsd: intl.formatMessage({ defaultMessage: '$0.00' }),
+    openPosition: intl.formatMessage({ defaultMessage: 'Open position' }),
   }
 }
 

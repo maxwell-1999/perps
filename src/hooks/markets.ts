@@ -4,16 +4,28 @@ import { ethers } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useCallback, useEffect, useState } from 'react'
 import { Address, getAddress, numberToHex, parseAbi, toHex, zeroAddress } from 'viem'
+<<<<<<< HEAD
 import { useAccount } from 'wagmi'
 import { goerli, mainnet } from 'wagmi/chains'
+=======
+import { useAccount, useWalletClient } from 'wagmi'
+>>>>>>> 393946d (tradeform related hooks and utils, more integration..)
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { multiInvokerContract } from '@/constants/contracts'
-import { ChainMarkets, ONLY_INCLUDE, OrderDirection, addressToAsset } from '@/constants/markets'
-import { SupportedChainId } from '@/constants/network'
+import {
+  ChainMarkets,
+  MaxUint256,
+  ONLY_INCLUDE,
+  OpenPositionType,
+  OrderDirection,
+  addressToAsset,
+} from '@/constants/markets'
+import { SupportedChainId, SupportedChainIds } from '@/constants/network'
 import { equal, notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
+import { InvokerAction, buildInvokerAction } from '@/utils/multiinvoker'
 import { ethersResultToPOJO } from '@/utils/objectUtils'
 import { calcLiquidationPrice, next, side as positionSide, size } from '@/utils/positionUtils'
 import { last24hrBounds } from '@/utils/timeUtils'
@@ -23,9 +35,10 @@ import { IPerennialLens, LensAbi } from '@t/generated/LensAbi'
 import { gql } from '@t/gql'
 import { GetAccountPositionsQuery } from '@t/gql/graphql'
 
-import { useCollateral, useController, useDSU, useLens, useUSDC } from './contracts'
+import { useCollateral, useController, useDSU, useLens, useMultiInvoker, useUSDC } from './contracts'
 import { useChainId, useGraphClient, useWsProvider } from './network'
 import { usePyth } from './network'
+import { useBalances } from './wallet'
 
 export type AssetSnapshots = {
   [key in SupportedAsset]?: {
@@ -840,7 +853,7 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
   }, [aggregators, refresh, wsProvider])
 }
 
-export const useUserCollateral = (productAddress: string) => {
+export const useUserCollateral = (productAddress?: string) => {
   const chainId = useChainId()
   const { address } = useAccount()
   const lensContract = useLens()
@@ -888,4 +901,85 @@ export const useProducts = () => {
       return addresses
     },
   })
+}
+
+export const useProductTransactions = (productAddress?: string) => {
+  const chainId = useChainId()
+  const dsuContract = useDSU()
+  const usdcContract = useUSDC()
+  const { address } = useAccount()
+  // provide signer
+  const multiInvoker = useMultiInvoker(/* signer */)
+
+  const { refetch: refetchCollateral } = useUserCollateral(productAddress)
+  const { refetch: refetchCurrentPositions } = useUserCurrentPositions()
+  const { refetch: refetchBalances } = useBalances()
+  // TODO: whatever else needs to be refetched..
+
+  const onApproveDSU = async () => {
+    if (!address || !chainId || !signer || !SupportedChainIds.includes(chainId)) {
+      return
+    }
+
+    const res = await dsuContract.approve(multiInvokerContract.address[chainId], MaxUint256)
+    await res.wait()
+    await refetchCollateral()
+  }
+
+  const onApproveUSDC = async () => {
+    if (!address || !signer || !chainId || !SupportedChainIds.includes(chainId)) {
+      return
+    }
+    const res = await usdcContract.approve(multiInvokerContract.address[chainId], MaxUint256)
+    await res.wait()
+    await refetchCollateral()
+  }
+
+  const onModifyPosition = async (
+    currency: string,
+    collateralDelta: bigint,
+    positionSide: OpenPositionType,
+    positionDelta: bigint,
+  ) => {
+    if (!address || !signer || !chainId || !SupportedChainIds.includes(chainId)) {
+      return
+    }
+
+    let collateralAction: InvokerAction = InvokerAction.NOOP
+    if (collateralDelta > 0n) {
+      collateralAction = currency === 'USDC' ? InvokerAction.WRAP_AND_DEPOSIT : InvokerAction.DEPOSIT
+    } else if (collateralDelta > 0) {
+      collateralAction = currency === 'USDC' ? InvokerAction.WITHDRAW_AND_UNWRAP : InvokerAction.WITHDRAW
+    }
+
+    let positionAction: InvokerAction = InvokerAction.NOOP
+    if (positionDelta > 0n) {
+      positionAction = positionSide === 'maker' ? InvokerAction.OPEN_MAKE : InvokerAction.OPEN_TAKE
+    } else if (positionDelta > 0n) {
+      positionAction = positionSide === 'maker' ? InvokerAction.CLOSE_MAKE : InvokerAction.CLOSE_TAKE
+    }
+
+    const orderedActions = [
+      buildInvokerAction(collateralAction, {
+        productAddress,
+        userAddress: address,
+        amount: Big18Math.abs(collateralDelta),
+      }),
+      buildInvokerAction(positionAction, {
+        productAddress,
+        userAddress: address,
+        position: Big18Math.abs(positionDelta),
+      }),
+    ].filter(({ action }) => !Big18Math.eq(BigInt(action), 0n)) // Can i do this?
+
+    const invokerRes = await multiInvoker.invoke(orderedActions)
+    await invokerRes.wait()
+    await Promise.all([refetchBalances(), refetchCurrentPositions(), refetchCollateral()])
+  }
+
+  return {
+    onApproveDSU,
+    onApproveUSDC,
+    onModifyPosition,
+  }
 }
