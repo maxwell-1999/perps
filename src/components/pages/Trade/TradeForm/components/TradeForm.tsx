@@ -238,6 +238,7 @@ function TradeForm(props: TradeFormProps) {
           containerProps={{
             mb: 2,
           }}
+          focusThumbOnChange={false}
         />
       </Flex>
       <Divider mt="auto" />
