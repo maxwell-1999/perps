@@ -86,7 +86,10 @@ const PositionTableRow = ({
       <Box>
         <AccordionButton textAlign="left" _expanded={{ borderBottom: `1px solid ${borderColor}` }}>
           <Box flex="2" display="flex">
-            <Link onClick={() => (onClick ? onClick(row) : null)}>
+            <Link
+              onClick={() => (onClick ? onClick(row) : undefined)}
+              _hover={!onClick ? { textDecoration: 'none' } : undefined}
+            >
               <Flex alignItems="center">
                 <AssetIconWithText market={market} fontSize="15px" mr="10px" />
                 <Text fontSize="14px" color={directionColor}>
