@@ -31,7 +31,7 @@ function CurrentPosition() {
   const copy = usePositionManagerCopy()
   const { noValue } = copy
   const { borderColor, green, red, alpha75, subheaderTextColor } = useStyles()
-  const { assetMetadata, selectedMarket } = useMarketContext()
+  const { assetMetadata } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
   const {
     direction,
@@ -83,7 +83,7 @@ function CurrentPosition() {
             <LeverageBadge leverage={leverage} />
           </ActivePositionHeader>
           {hasPosition ? (
-            <PnlPositionDetail asset={selectedMarket} positionDetails={positionDetails as PositionDetails} />
+            <PnlPositionDetail positionDetails={positionDetails as PositionDetails} />
           ) : (
             <ActivePositionDetail
               label={copy.pnl}
@@ -138,7 +138,7 @@ function CurrentPosition() {
             }
           />
           {hasPosition ? (
-            <PnlDataRow asset={selectedMarket} positionDetails={positionDetails as PositionDetails} />
+            <PnlDataRow positionDetails={positionDetails as PositionDetails} />
           ) : (
             <DataRow
               label={copy.pnl}
@@ -160,7 +160,7 @@ function CurrentPosition() {
           }
         />
         <DataRow
-          label={copy.yourAverageEntry}
+          label={copy.averageEntry}
           value={
             <Text fontSize="14px" color={alpha75}>
               {averageEntry}

@@ -11,6 +11,12 @@
       "value": "Amount"
     }
   ],
+  "00LcfG": [
+    {
+      "type": 0,
+      "value": "Load more"
+    }
+  ],
   "3Bd9gC": [
     {
       "type": 0,
@@ -35,6 +41,12 @@
       "value": "Amount to close..."
     }
   ],
+  "5Wwopw": [
+    {
+      "type": 0,
+      "value": "Pricing"
+    }
+  ],
   "5vASqA": [
     {
       "type": 0,
@@ -53,10 +65,10 @@
       "value": "Perennial"
     }
   ],
-  "6uS8Qe": [
+  "77wPcX": [
     {
       "type": 0,
-      "value": "Opening..."
+      "value": "Execution Price"
     }
   ],
   "8LaTBL": [
@@ -171,10 +183,22 @@
       "value": "Modify position"
     }
   ],
+  "OiLWYo": [
+    {
+      "type": 0,
+      "value": "Avg. Entry"
+    }
+  ],
   "Oj4si1": [
     {
       "type": 0,
       "value": "Liquidation"
+    }
+  ],
+  "P7PLVj": [
+    {
+      "type": 0,
+      "value": "Date"
     }
   ],
   "PQiNnk": [
@@ -199,12 +223,6 @@
     {
       "type": 0,
       "value": "Collateral"
-    }
-  ],
-  "TmryQ6": [
-    {
-      "type": 0,
-      "value": "Your average entry"
     }
   ],
   "UwvPFx": [
@@ -261,10 +279,10 @@
       "value": "Liquidity"
     }
   ],
-  "czGSYM": [
+  "d0Gd72": [
     {
       "type": 0,
-      "value": "Pricing..."
+      "value": "Opening"
     }
   ],
   "djJp6c": [
@@ -277,6 +295,12 @@
     {
       "type": 0,
       "value": "Home"
+    }
+  ],
+  "h3ShxL": [
+    {
+      "type": 0,
+      "value": "Closing"
     }
   ],
   "juU558": [
@@ -337,6 +361,18 @@
       "value": "x"
     }
   ],
+  "qZbedW": [
+    {
+      "type": 0,
+      "value": "Fees"
+    }
+  ],
+  "qciRKk": [
+    {
+      "type": 0,
+      "value": "Average entry"
+    }
+  ],
   "rbrahO": [
     {
       "type": 0,
@@ -359,12 +395,6 @@
     {
       "type": 0,
       "value": "--"
-    }
-  ],
-  "wUU3x3": [
-    {
-      "type": 0,
-      "value": "Closing..."
     }
   ],
   "yR4V5C": [

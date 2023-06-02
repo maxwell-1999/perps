@@ -16,7 +16,7 @@ export type FormattedPositionDetail = {
   details: PositionDetails
 }
 
-export type OpenPositionTableData = {
+export type PositionTableData = {
   asset: SupportedAsset
   averageEntry: string
   currentCollateral: string
@@ -27,6 +27,7 @@ export type OpenPositionTableData = {
   position: string
   startCollateral: string
   symbol: string
+  fees: string
   details: PositionDetails
   unformattedNotional: string
   unformattedLiquidationPrice: string

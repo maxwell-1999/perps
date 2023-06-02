@@ -1,13 +1,22 @@
 import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
-import { AssetMetadata, SupportedAsset } from '@/constants/assets'
+import { AssetMetadata } from '@/constants/assets'
 import { OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
-import { PositionDetails, useChainAssetSnapshots, useChainLivePrices, useUserCurrentPositions } from '@/hooks/markets'
-import { Big18Math, formatBig18Percent } from '@/utils/big18Utils'
+import {
+  PositionDetails,
+  useChainAssetSnapshots,
+  useChainLivePrices,
+  useUserChainPositionHistory,
+  useUserCurrentPositions,
+} from '@/hooks/markets'
+import { notEmpty } from '@/utils/arrayUtils'
+import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { socialization, utilization } from '@/utils/positionUtils'
 import { Day } from '@/utils/timeUtils'
+
+import { PositionSide } from '@t/gql/graphql'
 
 import {
   calculatePnl,
@@ -24,9 +33,11 @@ export const useStyles = () => {
   const subheaderTextColor = useColorModeValue(theme.colors.brand.blackAlpha[50], theme.colors.brand.whiteAlpha[50])
   const alpha75 = useColorModeValue(theme.colors.brand.blackAlpha[75], theme.colors.brand.whiteAlpha[75])
   const alpha90 = useColorModeValue(theme.colors.brand.blackAlpha[90], theme.colors.brand.whiteAlpha[90])
+  // TODO: light color theme background
+  const background = useColorModeValue(theme.colors.brand.blackSolid[5], theme.colors.brand.blackSolid[5])
   const green = theme.colors.brand.green
   const red = theme.colors.brand.red
-  return { borderColor, green, red, subheaderTextColor, alpha75, alpha90 }
+  return { borderColor, green, red, subheaderTextColor, alpha75, alpha90, background }
 }
 
 export const usePositionManagerCopy = () => {
@@ -45,9 +56,9 @@ export const usePositionManagerCopy = () => {
     short: intl.formatMessage({ defaultMessage: 'Short' }),
     size: intl.formatMessage({ defaultMessage: 'Size' }),
     pnl: intl.formatMessage({ defaultMessage: 'P&L' }),
-    liquidationPrice: intl.formatMessage({ defaultMessage: 'Liquidation price' }),
-    yourAverageEntry: intl.formatMessage({ defaultMessage: 'Your average entry' }),
-    dailyFundingRate: intl.formatMessage({ defaultMessage: 'Daily funding rate' }),
+    liquidationPrice: intl.formatMessage({ defaultMessage: 'Liquidation Price' }),
+    averageEntry: intl.formatMessage({ defaultMessage: 'Average Entry' }),
+    dailyFundingRate: intl.formatMessage({ defaultMessage: 'Daily Funding Rate' }),
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     sharePosition: intl.formatMessage({ defaultMessage: 'Share position' }),
     modify: intl.formatMessage({ defaultMessage: 'Modify' }),
@@ -58,6 +69,11 @@ export const usePositionManagerCopy = () => {
     withdraw: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
     market: intl.formatMessage({ defaultMessage: 'Market' }),
     liquidation: intl.formatMessage({ defaultMessage: 'Liquidation' }),
+    loadMore: intl.formatMessage({ defaultMessage: 'Load more' }),
+    fees: intl.formatMessage({ defaultMessage: 'Fees' }),
+    change: intl.formatMessage({ defaultMessage: 'Change' }),
+    executionPrice: intl.formatMessage({ defaultMessage: 'Execution Price' }),
+    date: intl.formatMessage({ defaultMessage: 'Date' }),
   }
 }
 
@@ -90,21 +106,65 @@ export const useOpenPositionTableData = () => {
   const { noValue } = usePositionManagerCopy()
   const positions = transformPositionDataToArray(positionData)
 
-  return positions.map((position) => {
-    const numSigFigs = AssetMetadata[position.asset]?.displayDecimals ?? 2
+  return positions
+    .map((position) => {
+      const numSigFigs = AssetMetadata[position.asset]?.displayDecimals ?? 2
 
-    return {
-      details: position.details,
-      asset: position.asset,
-      symbol: position.symbol,
-      ...getFormattedPositionDetails({ positionDetails: position.details, placeholderString: noValue, numSigFigs }),
-    }
-  })
+      return {
+        details: position.details,
+        asset: position.asset,
+        symbol: position.symbol,
+        ...getFormattedPositionDetails({ positionDetails: position.details, placeholderString: noValue, numSigFigs }),
+      }
+    })
+    .sort((a, b) => Big18Math.cmp(b.details?.nextNotional ?? 0n, a.details?.nextNotional ?? 0n))
 }
 
-export const usePnl = ({ asset, positionDetails }: { asset: SupportedAsset; positionDetails: PositionDetails }) => {
+export const usePositionHistoryTableData = () => {
+  const { noValue } = usePositionManagerCopy()
+  const {
+    data: positionHistory,
+    hasNextPage,
+    fetchNextPage,
+    isLoading,
+    isFetchingNextPage,
+  } = useUserChainPositionHistory(PositionSide.Taker)
+
+  const positions = (positionHistory?.pages.flatMap((page) => page?.positions).filter(notEmpty) ?? []).map(
+    (position) => {
+      const numSigFigs = AssetMetadata[position.asset]?.displayDecimals ?? 2
+      const symbol = AssetMetadata[position.asset]?.symbol ?? position.asset
+
+      const startingPosition = position.subPositions
+        ? position.subPositions[0].size + position.subPositions[0].delta
+        : 0n
+      return {
+        details: position,
+        asset: position.asset,
+        symbol: symbol,
+        ...getFormattedPositionDetails({ positionDetails: position, placeholderString: noValue, numSigFigs }),
+        position: position.subPositions ? formatBig18(startingPosition) : noValue,
+        notional: position.subPositions
+          ? formatBig18USDPrice(Big18Math.mul(startingPosition, position.subPositions[0].settlePrice))
+          : noValue,
+      }
+    },
+  )
+  return {
+    positions,
+    hasNextPage,
+    fetchNextPage,
+    isLoading,
+    isFetchingNextPage,
+  }
+}
+
+export const usePnl = ({ positionDetails, live }: { positionDetails: PositionDetails; live?: boolean }) => {
   const livePrices = useChainLivePrices()
   const { data: snapshots } = useChainAssetSnapshots()
+  const { asset } = positionDetails
+
+  if (!live) return calculatePnl(positionDetails)
   const productSnapshot = positionDetails?.direction ? snapshots?.[asset]?.[positionDetails.direction] : undefined
   let currentPriceDelta = getCurrentPriceDelta({ snapshots, livePrices, asset: asset })
 

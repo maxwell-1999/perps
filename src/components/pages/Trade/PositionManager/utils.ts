@@ -1,3 +1,5 @@
+import { Row } from 'react-table'
+
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { OrderDirection } from '@/constants/markets'
 import { AssetSnapshots, LivePrices, PositionDetails, UserCurrentPositions } from '@/hooks/markets'
@@ -7,10 +9,7 @@ import { FormattedPositionDetail, PositionStatus } from './constants'
 
 export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?: bigint) => {
   if (!positionDetails) return { pnl: '0', pnlPercentage: '0', isPnlPositive: false }
-  let pnl = Big18Math.sub(
-    Big18Math.sub(positionDetails?.currentCollateral ?? 0n, positionDetails?.startCollateral ?? 0n),
-    positionDetails?.deposits ?? 0n,
-  )
+  let pnl = positionDetails.pnl || 0n
 
   // If there is a new price from offchain sources, update PnL with the difference
   if (livePriceDelta && positionDetails?.nextPosition) {
@@ -19,9 +18,12 @@ export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?:
   }
   let pnlPercentage = '0'
   if (positionDetails?.startCollateral) {
-    pnlPercentage = formatBig18Percent(Big18Math.div(pnl, positionDetails?.startCollateral ?? 0n), {
-      numDecimals: 2,
-    })
+    pnlPercentage = formatBig18Percent(
+      Big18Math.div(pnl, (positionDetails?.startCollateral ?? 0n) + (positionDetails?.deposits ?? 0n)),
+      {
+        numDecimals: 2,
+      },
+    )
   }
   return {
     pnl: formatBig18USDPrice(pnl),
@@ -171,4 +173,17 @@ export const getFormattedPositionDetails = ({
   nextNotional: positionDetails ? formatBig18USDPrice(positionDetails?.nextNotional) : placeholderString,
   unformattedNotional: positionDetails ? formatBig18(positionDetails?.notional) : placeholderString,
   leverage: positionDetails ? formatBig18(positionDetails?.leverage) : placeholderString,
+  fees: positionDetails ? formatBig18USDPrice(positionDetails?.fees) : placeholderString,
 })
+
+export const numericColumnSort = (rowA: Row, rowB: Row, id: string) => {
+  const a = parseFloat(rowA.values[id])
+  const b = parseFloat(rowB.values[id])
+  if (a > b) {
+    return 1
+  }
+  if (b > a) {
+    return -1
+  }
+  return 0
+}

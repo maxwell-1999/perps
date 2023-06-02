@@ -4,7 +4,6 @@ import { useIntl } from 'react-intl'
 
 import { DataRow } from '@/components/design-system'
 import { breakpoints } from '@/components/design-system/theme/styles'
-import { SupportedAsset } from '@/constants/assets'
 import { PositionDetails } from '@/hooks/markets'
 
 import { usePnl, usePositionManagerCopy, useStyles } from '../hooks'
@@ -126,24 +125,18 @@ export const DesktopButtonContainer = styled(Flex)`
   }
 `
 
-export const PnlPositionDetail = ({
-  asset,
-  positionDetails,
-}: {
-  asset: SupportedAsset
-  positionDetails: PositionDetails
-}) => {
+export const PnlPositionDetail = ({ positionDetails }: { positionDetails: PositionDetails }) => {
   const copy = usePositionManagerCopy()
-  const { pnl, pnlPercentage, isPnlPositive } = usePnl({ asset, positionDetails })
+  const { pnl, pnlPercentage, isPnlPositive } = usePnl({ positionDetails, live: true })
   const { red, green } = useStyles()
   const pnlTextColor = isPnlPositive ? green : red
 
   return <ActivePositionDetail label={copy.pnl} value={pnlPercentage} valueSubheader={pnl} valueColor={pnlTextColor} />
 }
 
-export const PnlDataRow = ({ asset, positionDetails }: { asset: SupportedAsset; positionDetails: PositionDetails }) => {
+export const PnlDataRow = ({ positionDetails }: { positionDetails: PositionDetails }) => {
   const copy = usePositionManagerCopy()
-  const { pnl, pnlPercentage, isPnlPositive } = usePnl({ asset, positionDetails })
+  const { pnl, pnlPercentage, isPnlPositive } = usePnl({ positionDetails, live: true })
   const { red, green } = useStyles()
   const pnlTextColor = isPnlPositive ? green : red
 

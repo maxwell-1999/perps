@@ -1,11 +1,10 @@
-import { Box } from '@chakra-ui/react'
-
 import { useMarketContext } from '@/contexts/marketContext'
 
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@ds/Tabs'
 
 import AllPositions from './AllPositions'
 import CurrentPosition from './CurrentPosition'
+import HistoricalPositions from './HistoricalPositions'
 import { usePositionManagerCopy } from './hooks'
 
 function PositionManager() {
@@ -27,7 +26,7 @@ function PositionManager() {
           <AllPositions />
         </TabPanel>
         <TabPanel>
-          <Box padding={4}>{copy.history}</Box>
+          <HistoricalPositions />
         </TabPanel>
       </TabPanels>
     </Tabs>
