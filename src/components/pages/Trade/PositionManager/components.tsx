@@ -6,12 +6,15 @@ import {
   AccordionPanel,
   Box,
   Flex,
+  Link,
   Text,
 } from '@chakra-ui/react'
 
 import { AssetIconWithText } from '@/components/shared/components'
 import { AssetMetadata } from '@/constants/assets'
 import { OrderDirection } from '@/constants/markets'
+import { ExplorerURLs } from '@/constants/network'
+import { useChainId } from '@/hooks/network'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { formatDateRelative } from '@/utils/timeUtils'
 
@@ -83,16 +86,14 @@ const PositionTableRow = ({
       <Box>
         <AccordionButton textAlign="left" _expanded={{ borderBottom: `1px solid ${borderColor}` }}>
           <Box flex="2" display="flex">
-            <Flex
-              alignItems="center"
-              onClick={() => (onClick ? onClick(row) : null)}
-              _hover={{ textDecoration: onClick ? 'underline' : 'none' }}
-            >
-              <AssetIconWithText market={market} fontSize="15px" mr="10px" />
-              <Text fontSize="14px" color={directionColor}>
-                {row.details.direction}
-              </Text>
-            </Flex>
+            <Link onClick={() => (onClick ? onClick(row) : null)}>
+              <Flex alignItems="center">
+                <AssetIconWithText market={market} fontSize="15px" mr="10px" />
+                <Text fontSize="14px" color={directionColor}>
+                  {row.details.direction}
+                </Text>
+              </Flex>
+            </Link>
           </Box>
           <Box flex="1">
             <Flex flexDirection="column">
@@ -136,6 +137,7 @@ const PositionTableRow = ({
 }
 
 const SubPositionTable = (row: PositionTableData) => {
+  const chainId = useChainId()
   const { subheaderTextColor, red, green, borderColor } = useStyles()
   const copy = usePositionManagerCopy()
   const {
@@ -180,9 +182,15 @@ const SubPositionTable = (row: PositionTableData) => {
           borderBottom={i < subPositions.length - 1 ? `1px solid ${borderColor}` : ''}
         >
           <Box flex="1">
-            <Text textAlign="left" fontSize="13px" color={subheaderTextColor}>
+            <Link
+              href={`${ExplorerURLs[chainId]}/tx/${subPosition.transctionHash}`}
+              isExternal
+              textAlign="left"
+              fontSize="13px"
+              color={subheaderTextColor}
+            >
               {formatDateRelative(new Date(Number(subPosition.blockTimestamp * 1000n)))}
-            </Text>
+            </Link>
           </Box>
           <Box flex="1">
             <Flex flexDirection="column">

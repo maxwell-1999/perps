@@ -45,3 +45,11 @@ export const GraphUrls: { [chainId in SupportedChainId]: string } = {
   [goerli.id]: process.env.NEXT_PUBLIC_GRAPH_URL_GOERLI ?? '',
   [baseGoerli.id]: process.env.NEXT_PUBLIC_GRAPH_URL_BASE_GOERLI ?? '',
 }
+
+export const ExplorerURLs: { [chainId in SupportedChainId]: string } = {
+  [mainnet.id]: 'https://etherscan.io',
+  [goerli.id]: 'https://goerli.etherscan.io',
+  [arbitrum.id]: 'https://arbiscan.io',
+  [arbitrumGoerli.id]: 'https://goerli.arbiscan.io',
+  [baseGoerli.id]: 'https://goerli.basescan.org',
+}
