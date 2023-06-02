@@ -1,3 +1,5 @@
+import { Flex, Spinner } from '@chakra-ui/react'
+
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 
@@ -18,7 +20,7 @@ const dummyData = {
 
 function TradeContainer() {
   const { formState, setTradeFormState } = useTradeFormState()
-  const { selectedMarket, orderDirection, setOrderDirection } = useMarketContext()
+  const { selectedMarket, orderDirection, setOrderDirection, selectedMarketSnapshot } = useMarketContext()
 
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
 
@@ -40,13 +42,19 @@ function TradeContainer() {
   }
 
   const containerVariant = getContainerVariant(formState)
+  const product = selectedMarketSnapshot?.[orderDirection]
 
   return (
     <Container height="100%" minHeight="560px" p="0" variant={containerVariant}>
-      {formState === FormState.trade && (
-        <TradeForm orderDirection={orderDirection} setOrderDirection={setOrderDirection} />
+      {!product && (
+        <Flex height="100%" width="100%" justifyContent="center" alignItems="center">
+          <Spinner />
+        </Flex>
       )}
-      {formState === FormState.modify && (
+      {formState === FormState.trade && product && (
+        <TradeForm orderDirection={orderDirection} setOrderDirection={setOrderDirection} product={product} />
+      )}
+      {formState === FormState.modify && product && (
         <ModifyPositionForm
           onSubmit={handleModifyPosition}
           orderDirection={orderDirection}
@@ -54,10 +62,10 @@ function TradeContainer() {
           amount={dummyData.amount}
         />
       )}
-      {formState === FormState.close && (
+      {formState === FormState.close && product && (
         <ClosePositionForm onSubmit={handleClosePosition} positionSize={dummyData.positionSize} />
       )}
-      {formState === FormState.withdraw && <WithdrawForm onSubmit={handleWithdrawCollateral} />}
+      {formState === FormState.withdraw && product && <WithdrawForm onSubmit={handleWithdrawCollateral} />}
     </Container>
   )
 }

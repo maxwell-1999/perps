@@ -1,6 +1,6 @@
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from 'wagmi/chains'
 
-import Erc20ABI from '../../abi/Erc20.abi.json'
+import Erc20ABI from '../../abi/ERC20.abi.json'
 import MultiInvokerAbi from '../../abi/MultiInvoker.abi.json'
 
 export const multiInvokerContract = {
@@ -11,7 +11,7 @@ export const multiInvokerContract = {
     [arbitrumGoerli.id]: '0x86ccFAdd81433929e04e32C056A2eEFc08359B60',
     [baseGoerli.id]: '0x19890Cf5C9A0B8d2F71eB71347d126b6F7d78B76',
   },
-  abi: MultiInvokerAbi.abi,
+  abi: MultiInvokerAbi,
 }
 
 export const DSU = {

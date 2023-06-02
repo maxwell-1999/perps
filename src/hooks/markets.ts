@@ -899,21 +899,16 @@ export const useProductTransactions = (productAddress?: string) => {
     await refetchCollateral()
   }
 
-  const onModifyPosition = async (
-    currency: string,
-    collateralDelta: bigint,
-    positionSide: OpenPositionType,
-    positionDelta: bigint,
-  ) => {
+  const onModifyPosition = async (collateralDelta: bigint, positionSide: OpenPositionType, positionDelta: bigint) => {
     if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
       return
     }
 
     let collateralAction: InvokerAction = InvokerAction.NOOP
     if (collateralDelta > 0n) {
-      collateralAction = currency === 'USDC' ? InvokerAction.WRAP_AND_DEPOSIT : InvokerAction.DEPOSIT
+      collateralAction = InvokerAction.WRAP_AND_DEPOSIT
     } else if (collateralDelta > 0) {
-      collateralAction = currency === 'USDC' ? InvokerAction.WITHDRAW_AND_UNWRAP : InvokerAction.WITHDRAW
+      collateralAction = InvokerAction.WITHDRAW_AND_UNWRAP
     }
 
     let positionAction: InvokerAction = InvokerAction.NOOP

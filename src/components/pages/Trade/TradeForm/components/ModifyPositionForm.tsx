@@ -6,6 +6,7 @@ import { OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { useBalances } from '@/hooks/wallet'
+import { formatBig18USDPrice } from '@/utils/big18Utils'
 
 import { Button, IconButton } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
@@ -53,7 +54,7 @@ function ModifyPositionForm(props: ModifyPositionProps) {
           rightLabel={
             <FormLabel mr={0} mb={0}>
               <Text variant="label">
-                {balances?.usdcFormatted ?? copy.zeroUsd} {copy.max}
+                {formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd} {copy.max}
               </Text>
             </FormLabel>
           }

@@ -1,20 +1,20 @@
 import { Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { parseEther } from 'viem'
+import { useCallback, useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 
 import Toggle from '@/components/shared/Toggle'
-import { Currency } from '@/constants/assets'
 import { OpenPositionType, OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { useProductTransactions, useUserCollateral } from '@/hooks/markets'
 import { useBalances } from '@/hooks/wallet'
-import { Big18Math, formatBig18 } from '@/utils/big18Utils'
+import { Big18Math, formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
+
+import { IPerennialLens } from '@t/generated/LensAbi'
 
 import { useFormatPosition } from '../../PositionManager/hooks'
 import { formIds, orderDirections } from '../constants'
@@ -24,6 +24,7 @@ import {
   calculateAndUpdateCollateral,
   calculateAndUpdateLeverage,
   calculateAndUpdatePosition,
+  formatStringToBigint,
   getCollateralDifference,
   getLeverageDifference,
   getPositionDifference,
@@ -39,32 +40,33 @@ import { Form } from './styles'
 interface TradeFormProps {
   orderDirection: OrderDirection
   setOrderDirection: (orderDirection: OrderDirection) => void
+  product: IPerennialLens.ProductSnapshotStructOutput
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { orderDirection, setOrderDirection } = props
+  const { orderDirection, setOrderDirection, product } = props
+  const {
+    productAddress,
+    latestVersion: { price },
+    productInfo: { takerFee, symbol },
+  } = product
+  const prevProductAddress = usePrevious(productAddress)
+
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles()
   const copy = useTradeFormCopy()
   const { data: balances } = useBalances()
   const { setTradeFormState } = useTradeFormState()
   const { address } = useAccount()
   const prevAddress = usePrevious(address)
-
-  const { assetMetadata, selectedMarketSnapshot } = useMarketContext()
-
-  const product = selectedMarketSnapshot?.[orderDirection]
-  const price = product?.latestVersion?.price ?? 0n
-  const symbol = product?.productInfo?.symbol ?? ''
-  const takerFee = product?.productInfo?.takerFee ?? 0n
-  const prevProductAddress = usePrevious(product?.productAddress)
-  const { onApproveUSDC, onModifyPosition } = useProductTransactions(product?.productAddress)
+  const { assetMetadata } = useMarketContext()
+  const { onApproveUSDC, onModifyPosition } = useProductTransactions(productAddress)
 
   const position = useFormatPosition()
   const currentPositionAmount = position?.positionDetails?.position ?? 0n
   const currentCollateral = position?.positionDetails?.currentCollateral ?? 0n
   const isNewPosition = Big18Math.isZero(currentPositionAmount ?? 0n)
 
-  const { data: collateralData } = useUserCollateral(product?.productAddress)
+  const { data: collateralData } = useUserCollateral(productAddress)
 
   const initialInputs = useInitialInputs({
     userCollateral: position?.positionDetails?.currentCollateral ?? 0n,
@@ -80,29 +82,14 @@ function TradeForm(props: TradeFormProps) {
   const [leverage, setLeverage] = useState<string>(initialInputs.leverage)
   const [isLeverageFixed, setIsLeverageFixed] = useState(initialInputs.isLeverageFixed)
   const [updating, setUpdating] = useState<boolean>(isNewPosition)
-  const [currency, setCurrency] = useState<Currency>(initialInputs.currency)
   const prevUpdating = usePrevious(updating)
 
-  const positionAmount = useMemo(() => {
-    if (!positionAmountStr || positionAmountStr === '.') {
-      return 0n
-    } else {
-      return parseEther(positionAmountStr as `${number}`)
-    }
-  }, [positionAmountStr])
-
-  const collateralAmount = useMemo(() => {
-    if (!collateralAmountStr || collateralAmountStr === '.') {
-      return 0n
-    } else {
-      return parseEther(collateralAmountStr as `${number}`)
-    }
-  }, [collateralAmountStr])
+  const positionAmount = formatStringToBigint(positionAmountStr)
+  const collateralAmount = formatStringToBigint(collateralAmountStr)
 
   const resetInputs = useCallback(() => {
     if (!collateralHasInput) setCollateralAmount(initialInputs.collateralAmount) // If collateral is not modified, update it
     if (updating) return // Don't change values if updating
-    setCurrency(initialInputs.currency)
     setPositionAmount(initialInputs.positionAmount)
     setIsLeverageFixed(initialInputs.isLeverageFixed)
     setLeverage(initialInputs.leverage)
@@ -110,7 +97,7 @@ function TradeForm(props: TradeFormProps) {
   }, [initialInputs, updating, collateralHasInput])
 
   useEffect(() => {
-    if (prevProductAddress !== product?.productAddress) resetInputs()
+    if (prevProductAddress !== productAddress) resetInputs()
     // If going from discnnected to connected, reset updating state
     else if (!prevAddress && address) setUpdating(isNewPosition)
     else if (prevAddress !== address) resetInputs()
@@ -120,7 +107,7 @@ function TradeForm(props: TradeFormProps) {
   }, [
     address,
     prevAddress,
-    product?.productAddress,
+    productAddress,
     prevProductAddress,
     currentCollateral,
     collateralAmount,
@@ -200,7 +187,6 @@ function TradeForm(props: TradeFormProps) {
       collateral: {
         newCollateral: collateralAmountStr,
         difference: collateralDifference,
-        currency,
         isWithdrawingTotalBalance: Big18Math.isZero(collateralAmount),
         needsApproval: needsApproval({ collateralDifference, usdcAllowance }),
         requiresManualWrap: false,
@@ -276,7 +262,7 @@ function TradeForm(props: TradeFormProps) {
             rightLabel={
               <FormLabel mr={0} mb={0}>
                 <Text variant="label">
-                  {balances?.usdcFormatted ?? copy.zeroUsd} {copy.max}
+                  {formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd} {copy.max}
                 </Text>
               </FormLabel>
             }
@@ -286,8 +272,8 @@ function TradeForm(props: TradeFormProps) {
               updating
                 ? collateralAmountStr
                 : collateralAmount === 0n
-                ? '$0.00'
-                : `$${formatBig18(collateralAmount, { numSigFigs: 6 })}}`
+                ? '0.00'
+                : `${formatBig18(collateralAmount, { numSigFigs: 6 })}}`
             }
             onChange={onChangeCollateral}
           />

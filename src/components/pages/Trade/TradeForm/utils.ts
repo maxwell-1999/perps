@@ -161,3 +161,8 @@ export const needsApproval = ({
 export const calcPositionFee = (price: bigint, positionDelta: bigint, feeRate: bigint) => {
   return Big18Math.abs(Big18Math.mul(Big18Math.mul(price, positionDelta), feeRate))
 }
+
+export const formatStringToBigint = (value: string) => {
+  if (!value || value === '.') return 0n
+  return parseEther(value as `${number}`)
+}

@@ -28,12 +28,7 @@ interface AdjustmentModalProps {
   adjustment: Adjustment
   positionType: OpenPositionType
   onApproveUSDC: () => void
-  onModifyPosition: (
-    currency: string,
-    collateralDelta: bigint,
-    positionSide: OpenPositionType,
-    positionDelta: bigint,
-  ) => Promise<void>
+  onModifyPosition: (collateralDelta: bigint, positionSide: OpenPositionType, positionDelta: bigint) => Promise<void>
 }
 
 function AdjustPositionModal({
@@ -50,7 +45,7 @@ function AdjustPositionModal({
   const [approveUsdcLoading, setApproveUsdcLoading] = useState(false)
   const [orderTxLoading, setOrderTxLoading] = useState(false)
   const {
-    collateral: { difference: collateralDifference, currency, needsApproval },
+    collateral: { difference: collateralDifference, needsApproval },
     position: { difference: positionDifference },
   } = adjustment
   const requiresApproval = collateralDifference > 0n && needsApproval
@@ -71,7 +66,7 @@ function AdjustPositionModal({
   const handleSetOrder = async () => {
     setOrderTxLoading(true)
     try {
-      await onModifyPosition(currency, collateralDifference, positionType, positionDifference)
+      await onModifyPosition(collateralDifference, positionType, positionDifference)
       onClose()
     } catch (err) {
       console.error(err)

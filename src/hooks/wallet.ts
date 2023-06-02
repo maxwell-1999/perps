@@ -1,24 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { formatUnits } from 'viem'
 import { useAccount, useChainId } from 'wagmi'
 
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
 
 import { useDSU, useUSDC } from './contracts'
 import { useProvider } from './network'
-
-const formatUsdValue = (value: bigint) => {
-  return Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-    minimumSignificantDigits: 6,
-    maximumSignificantDigits: 6,
-    // @ts-ignore
-    roundingPriority: 'morePrecision',
-  }).format(Number(formatUnits(value, 6)))
-}
 
 export type Balances = {
   dsu: bigint
@@ -44,9 +30,7 @@ export const useBalances = () => {
 
       return {
         dsu: dsuBalance,
-        dsuFormatted: formatUsdValue(dsuBalance),
         usdc: usdcBalance,
-        usdcFormatted: formatUsdValue(usdcBalance),
       }
     },
   })

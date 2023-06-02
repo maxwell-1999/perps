@@ -1,6 +1,5 @@
 type CollateralDetails = {
   difference: bigint
-  currency: 'USDC' | 'DSU'
   isWithdrawingTotalBalance: boolean
   needsApproval: boolean
   requiresManualWrap: boolean

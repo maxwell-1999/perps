@@ -1,4 +1,4 @@
-import { FixedNumber, WeiPerEther } from 'ethers'
+import { FixedNumber, WeiPerEther, formatUnits } from 'ethers'
 
 export const formatBig18 = (
   value: bigint = 0n,
@@ -12,7 +12,13 @@ export const formatBig18 = (
 }
 
 // Formats an 18 decimal bigint as a USD price
-export const formatBig18USDPrice = (value: bigint = 0n, { compact = false }: { compact?: boolean } = {}) => {
+export const formatBig18USDPrice = (
+  value: bigint = 0n,
+  { compact = false, fromUsdc = false }: { compact?: boolean; fromUsdc?: boolean } = {},
+) => {
+  const valueToFormat = fromUsdc
+    ? Number(formatUnits(value, 6))
+    : Big18Math.divFixed(value, Big18Math.ONE).toUnsafeFloat()
   return Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -23,7 +29,7 @@ export const formatBig18USDPrice = (value: bigint = 0n, { compact = false }: { c
     maximumSignificantDigits: compact ? 2 : 6,
     // @ts-ignore
     roundingPriority: 'morePrecision',
-  }).format(Big18Math.divFixed(value, Big18Math.ONE).toUnsafeFloat())
+  }).format(valueToFormat)
 }
 
 // Formats an 18 decimal bigint as a USD price
