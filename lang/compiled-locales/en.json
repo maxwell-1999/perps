@@ -77,6 +77,12 @@
       "value": "You will receive..."
     }
   ],
+  "A6Mtvr": [
+    {
+      "type": 0,
+      "value": "Approve USDC"
+    }
+  ],
   "BY343C": [
     {
       "type": 0,
@@ -165,6 +171,18 @@
       "value": "Close position"
     }
   ],
+  "N2IrpM": [
+    {
+      "type": 0,
+      "value": "Confirm"
+    }
+  ],
+  "NTgwLi": [
+    {
+      "type": 0,
+      "value": "Place Order"
+    }
+  ],
   "OOk+VQ": [
     {
       "type": 0,
@@ -225,6 +243,12 @@
       "value": "Price impact"
     }
   ],
+  "WCaf5C": [
+    {
+      "type": 0,
+      "value": "Approve"
+    }
+  ],
   "XPD9S1": [
     {
       "type": 0,
@@ -241,6 +265,12 @@
     {
       "type": 0,
       "value": "$0.00"
+    }
+  ],
+  "ZaNKvA": [
+    {
+      "type": 0,
+      "value": "Open position"
     }
   ],
   "agOXPD": [

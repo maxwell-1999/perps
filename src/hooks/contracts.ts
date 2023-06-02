@@ -1,4 +1,3 @@
-import { Signer } from 'ethers'
 import { Address, getAddress } from 'viem'
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from 'wagmi/chains'
 
@@ -60,11 +59,11 @@ export const useUSDC = () => {
   return Erc20Abi__factory.connect(USDC.address[chainId], provider)
 }
 
-export const useMultiInvoker = (signer: Signer) => {
+export const useMultiInvoker = () => {
   const provider = useProvider()
   const chainId = useChainId()
 
-  return MultiInvokerAbi__factory.connect(multiInvokerContract.address[chainId], signer ? signer : provider)
+  return MultiInvokerAbi__factory.connect(multiInvokerContract.address[chainId], provider)
 }
 
 export const useController = () => {

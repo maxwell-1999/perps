@@ -1,5 +1,3 @@
-import { OpenPositionType } from '@/constants/markets'
-
 type CollateralDetails = {
   difference: bigint
   currency: 'USDC' | 'DSU'
@@ -29,20 +27,4 @@ export type Adjustment = {
 export enum AdjustmentType {
   Adjust,
   Create,
-}
-
-export enum Steps {
-  Approval,
-  Adjustment,
-}
-
-export type Callbacks = {
-  onApproveDSU: () => Promise<void>
-  onApproveUSDC: () => Promise<void>
-  onModifyPosition: (
-    currency: string,
-    collateralDelta: bigint,
-    positionSide: OpenPositionType,
-    positionDelta: bigint,
-  ) => Promise<void>
 }

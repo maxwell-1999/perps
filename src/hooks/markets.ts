@@ -3,24 +3,14 @@ import { multicall } from '@wagmi/core'
 import { ethers } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useCallback, useEffect, useState } from 'react'
-import { Address, getAddress, numberToHex, parseAbi, toHex, zeroAddress } from 'viem'
-<<<<<<< HEAD
-import { useAccount } from 'wagmi'
+import { Address, Hex, getAddress, numberToHex, parseAbi, toHex, zeroAddress } from 'viem'
+import { useAccount, useSendTransaction, useWalletClient } from 'wagmi'
+import { waitForTransaction } from 'wagmi/actions'
 import { goerli, mainnet } from 'wagmi/chains'
-=======
-import { useAccount, useWalletClient } from 'wagmi'
->>>>>>> 393946d (tradeform related hooks and utils, more integration..)
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { multiInvokerContract } from '@/constants/contracts'
-import {
-  ChainMarkets,
-  MaxUint256,
-  ONLY_INCLUDE,
-  OpenPositionType,
-  OrderDirection,
-  addressToAsset,
-} from '@/constants/markets'
+import { ChainMarkets, MaxUint256, OpenPositionType, OrderDirection, addressToAsset } from '@/constants/markets'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
 import { equal, notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
@@ -35,7 +25,7 @@ import { IPerennialLens, LensAbi } from '@t/generated/LensAbi'
 import { gql } from '@t/gql'
 import { GetAccountPositionsQuery } from '@t/gql/graphql'
 
-import { useCollateral, useController, useDSU, useLens, useMultiInvoker, useUSDC } from './contracts'
+import { useCollateral, useLens, useMultiInvoker, useUSDC } from './contracts'
 import { useChainId, useGraphClient, useWsProvider } from './network'
 import { usePyth } from './network'
 import { useBalances } from './wallet'
@@ -858,80 +848,54 @@ export const useUserCollateral = (productAddress?: string) => {
   const { address } = useAccount()
   const lensContract = useLens()
   const usdcContract = useUSDC()
-  const dsuContract = useDSU()
 
   return useQuery({
-    queryKey: ['productCollateral', chainId, productAddress, address],
+    queryKey: ['productCollateral', chainId, productAddress, address || ''],
     enabled: !!productAddress,
     queryFn: async () => {
       if (!address || !chainId || !productAddress) return
 
-      const [userCollateral, maintenance, usdcAllowance, dsuAllowance] = await Promise.all([
+      const [userCollateral, maintenance, usdcAllowance] = await Promise.all([
         await lensContract['collateral(address,address)'].staticCall(address, productAddress),
         await lensContract.maintenance(address, productAddress),
         await usdcContract.allowance(address, multiInvokerContract.address[chainId]),
-        await dsuContract.allowance(address, multiInvokerContract.address[chainId]),
       ])
 
       return {
         userCollateral,
         maintenance,
         usdcAllowance,
-        dsuAllowance,
       }
-    },
-  })
-}
-
-export const useProducts = () => {
-  const chainId = useChainId()
-  const controller = useController()
-  return useQuery({
-    queryKey: ['products', chainId],
-    queryFn: async () => {
-      if (!chainId) return []
-
-      if (ONLY_INCLUDE[chainId] && ONLY_INCLUDE[chainId].length) {
-        return ONLY_INCLUDE[chainId]
-      }
-      const filter = controller.filters.ProductCreated()
-      const events = await controller.queryFilter(filter)
-      const addresses = events.map((event) => event.args.product).map((address) => address.toLowerCase())
-
-      return addresses
     },
   })
 }
 
 export const useProductTransactions = (productAddress?: string) => {
+  const multiInvoker = useMultiInvoker()
   const chainId = useChainId()
-  const dsuContract = useDSU()
   const usdcContract = useUSDC()
   const { address } = useAccount()
-  // provide signer
-  const multiInvoker = useMultiInvoker(/* signer */)
+  const { sendTransactionAsync } = useSendTransaction()
+
+  const { data: walletClient } = useWalletClient()
 
   const { refetch: refetchCollateral } = useUserCollateral(productAddress)
   const { refetch: refetchCurrentPositions } = useUserCurrentPositions()
   const { refetch: refetchBalances } = useBalances()
   // TODO: whatever else needs to be refetched..
 
-  const onApproveDSU = async () => {
-    if (!address || !chainId || !signer || !SupportedChainIds.includes(chainId)) {
-      return
-    }
-
-    const res = await dsuContract.approve(multiInvokerContract.address[chainId], MaxUint256)
-    await res.wait()
-    await refetchCollateral()
-  }
-
   const onApproveUSDC = async () => {
-    if (!address || !signer || !chainId || !SupportedChainIds.includes(chainId)) {
+    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
       return
     }
-    const res = await usdcContract.approve(multiInvokerContract.address[chainId], MaxUint256)
-    await res.wait()
+    const txData = await usdcContract.approve.populateTransaction(multiInvokerContract.address[chainId], MaxUint256)
+    const receipt = await sendTransactionAsync({
+      chainId,
+      to: getAddress(txData.to),
+      data: txData.data as Hex,
+      account: walletClient?.account,
+    })
+    await waitForTransaction({ hash: receipt.hash })
     await refetchCollateral()
   }
 
@@ -941,7 +905,7 @@ export const useProductTransactions = (productAddress?: string) => {
     positionSide: OpenPositionType,
     positionDelta: bigint,
   ) => {
-    if (!address || !signer || !chainId || !SupportedChainIds.includes(chainId)) {
+    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
       return
     }
 
@@ -972,13 +936,17 @@ export const useProductTransactions = (productAddress?: string) => {
       }),
     ].filter(({ action }) => !Big18Math.eq(BigInt(action), 0n)) // Can i do this?
 
-    const invokerRes = await multiInvoker.invoke(orderedActions)
-    await invokerRes.wait()
+    const txData = await multiInvoker.invoke.populateTransaction(orderedActions)
+    const receipt = await sendTransactionAsync({
+      chainId,
+      to: getAddress(txData.to),
+      data: txData.data as Hex,
+      account: walletClient?.account,
+    })
+    await waitForTransaction({ hash: receipt.hash })
     await Promise.all([refetchBalances(), refetchCurrentPositions(), refetchCollateral()])
   }
-
   return {
-    onApproveDSU,
     onApproveUSDC,
     onModifyPosition,
   }

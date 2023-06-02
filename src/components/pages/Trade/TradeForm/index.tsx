@@ -22,12 +22,6 @@ function TradeContainer() {
 
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
 
-  const handleSubmitTrade = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // TODO: invalidate positions query
-    alert('order submitted')
-  }
-
   const handleModifyPosition = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     // TODO: invalidate positions query
@@ -50,12 +44,7 @@ function TradeContainer() {
   return (
     <Container height="100%" minHeight="560px" p="0" variant={containerVariant}>
       {formState === FormState.trade && (
-        <TradeForm
-          onSubmit={handleSubmitTrade}
-          orderDirection={orderDirection}
-          setOrderDirection={setOrderDirection}
-          amount={dummyData.amount}
-        />
+        <TradeForm orderDirection={orderDirection} setOrderDirection={setOrderDirection} />
       )}
       {formState === FormState.modify && (
         <ModifyPositionForm

@@ -11,15 +11,14 @@ import {
   Spinner,
   Text,
 } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { OpenPositionType } from '@/constants/markets'
 
 import { Button } from '@ds/Button'
 
-import { useTradeFormCopy } from '../../hooks'
-import { Adjustment, Callbacks } from './constants'
-import { useSteps } from './hooks'
+import { Adjustment } from './constants'
+import { useAdjustmentModalCopy } from './hooks'
 
 interface AdjustmentModalProps {
   isOpen: boolean
@@ -27,8 +26,14 @@ interface AdjustmentModalProps {
   onCancel: () => void
   title: string
   adjustment: Adjustment
-  callbacks: Callbacks
   positionType: OpenPositionType
+  onApproveUSDC: () => void
+  onModifyPosition: (
+    currency: string,
+    collateralDelta: bigint,
+    positionSide: OpenPositionType,
+    positionDelta: bigint,
+  ) => Promise<void>
 }
 
 function AdjustPositionModal({
@@ -37,33 +42,42 @@ function AdjustPositionModal({
   title,
   onCancel,
   adjustment,
-  callbacks,
+  onApproveUSDC,
+  onModifyPosition,
   positionType,
 }: AdjustmentModalProps) {
-  const copy = useTradeFormCopy()
-  const [currStep, setCurrStep] = useState(0)
-  const [currIsLoading, setCurrIsLoading] = useState(false)
-  const steps = useSteps(adjustment, callbacks, currStep, positionType, currIsLoading)
+  const copy = useAdjustmentModalCopy()
+  const [approveUsdcLoading, setApproveUsdcLoading] = useState(false)
+  const [orderTxLoading, setOrderTxLoading] = useState(false)
+  const {
+    collateral: { difference: collateralDifference, currency, needsApproval },
+    position: { difference: positionDifference },
+  } = adjustment
+  const requiresApproval = collateralDifference > 0n && needsApproval
+  const [spendApproved, setSpendApproved] = useState(!requiresApproval)
 
-  const onButtonClick = async (callback: () => Promise<void>) => {
-    setCurrIsLoading(true)
-
+  const handleApproveUSDC = async () => {
+    setApproveUsdcLoading(true)
     try {
-      await callback()
-    } catch (e) {
-      // error submitting tx, including if user rejects the tx
-      setCurrIsLoading(false)
-      return
+      await onApproveUSDC()
+      setSpendApproved(true)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setApproveUsdcLoading(false)
     }
-    setCurrStep(currStep + 1)
-    setCurrIsLoading(false)
   }
 
-  useEffect(() => {
-    if (currStep >= steps.length) {
+  const handleSetOrder = async () => {
+    setOrderTxLoading(true)
+    try {
+      await onModifyPosition(currency, collateralDifference, positionType, positionDifference)
       onClose()
+    } catch (err) {
+      console.error(err)
+      setOrderTxLoading(false)
     }
-  }, [steps, currStep, onClose])
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -72,25 +86,30 @@ function AdjustPositionModal({
         <ModalHeader>{title}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {steps.map(({ step, onClick, label, description }, i) => (
-            <Flex key={step}>
-              {steps.length > 1 && (
-                <Text fontWeight="bold">
-                  {i + 1}. {label}
-                </Text>
-              )}
+          <Flex direction="column" align="center" justify="center" py={8}>
+            {requiresApproval && (
+              <Flex>
+                <Text mr={2}>{copy.approve}</Text>
+                <Button
+                  isDisabled={spendApproved || approveUsdcLoading}
+                  label={approveUsdcLoading ? <Spinner size="sm" /> : copy.approveUSDC}
+                  onClick={handleApproveUSDC}
+                />
+              </Flex>
+            )}
+            <Flex>
+              <Text mr={2}>{copy.placeOrder}</Text>
               <Button
-                disabled={currStep !== i || currIsLoading}
-                onClick={() => onButtonClick(onClick)}
-                label={currStep === i && currIsLoading ? <Spinner size="sm" /> : <span>{description}</span>}
+                isDisabled={!spendApproved || orderTxLoading}
+                label={orderTxLoading ? <Spinner size="sm" /> : copy.confirm}
+                onClick={handleSetOrder}
               />
             </Flex>
-          ))}
+          </Flex>
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
             <Button variant="secondary" onClick={onCancel} label={copy.cancel} mr={1} />
-            <Button onClick={steps[currStep].onClick} label={copy.openPosition} />
           </ButtonGroup>
         </ModalFooter>
       </ModalContent>

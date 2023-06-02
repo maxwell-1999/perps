@@ -57,7 +57,7 @@ function TradeForm(props: TradeFormProps) {
   const symbol = product?.productInfo?.symbol ?? ''
   const takerFee = product?.productInfo?.takerFee ?? 0n
   const prevProductAddress = usePrevious(product?.productAddress)
-  const { onApproveDSU, onApproveUSDC, onModifyPosition } = useProductTransactions(product?.productAddress)
+  const { onApproveUSDC, onModifyPosition } = useProductTransactions(product?.productAddress)
 
   const position = useFormatPosition()
   const currentPositionAmount = position?.positionDetails?.position ?? 0n
@@ -194,7 +194,6 @@ function TradeForm(props: TradeFormProps) {
       newPositionAMount: positionAmount,
     })
 
-    const dsuAllowance = collateralData?.dsuAllowance ?? 0n
     const usdcAllowance = collateralData?.usdcAllowance ?? 0n
 
     setAdjustment({
@@ -203,7 +202,7 @@ function TradeForm(props: TradeFormProps) {
         difference: collateralDifference,
         currency,
         isWithdrawingTotalBalance: Big18Math.isZero(collateralAmount),
-        needsApproval: needsApproval({ collateralDifference, currency, dsuAllowance, usdcAllowance }),
+        needsApproval: needsApproval({ collateralDifference, usdcAllowance }),
         requiresManualWrap: false,
       },
       position: {
@@ -220,12 +219,6 @@ function TradeForm(props: TradeFormProps) {
     })
   }
 
-  const callbacks = {
-    onApproveDSU,
-    onApproveUSDC,
-    onModifyPosition,
-  }
-
   const closeAdjustmentModal = () => {
     setAdjustment(null)
     setUpdating(false)
@@ -240,10 +233,11 @@ function TradeForm(props: TradeFormProps) {
     <>
       {adjustment && (
         <AdjustPositionModal
-          callbacks={callbacks}
           isOpen={!!adjustment}
           onClose={closeAdjustmentModal}
           onCancel={cancelAdjustmentModal}
+          onApproveUSDC={onApproveUSDC}
+          onModifyPosition={onModifyPosition}
           title={'confirm'}
           adjustment={adjustment}
           positionType={OpenPositionType.taker}

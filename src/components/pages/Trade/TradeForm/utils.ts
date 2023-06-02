@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { formatEther, formatUnits, parseEther } from 'viem'
 
-import { Currency } from '@/constants/assets'
 import { Big18Math, formatBig18 } from '@/utils/big18Utils'
 
 export const calcLeverage = (price: bigint, position: bigint, collateral: bigint) => {
@@ -150,22 +149,13 @@ export const to18Decimals = (amount: bigint, fromDecimals = 6): bigint => {
 }
 
 export const needsApproval = ({
-  currency,
   collateralDifference,
   usdcAllowance,
-  dsuAllowance,
 }: {
-  currency: Currency
   collateralDifference: bigint
   usdcAllowance: bigint
-  dsuAllowance: bigint
 }) => {
-  return (
-    (currency === 'DSU' && dsuAllowance < collateralDifference) ||
-    Big18Math.isZero(dsuAllowance) ||
-    (currency === 'USDC' && to18Decimals(usdcAllowance) < collateralDifference) ||
-    Big18Math.isZero(usdcAllowance)
-  )
+  return to18Decimals(usdcAllowance) < collateralDifference || Big18Math.isZero(usdcAllowance)
 }
 
 export const calcPositionFee = (price: bigint, positionDelta: bigint, feeRate: bigint) => {
