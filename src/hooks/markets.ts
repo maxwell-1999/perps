@@ -12,6 +12,7 @@ import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { multiInvokerContract } from '@/constants/contracts'
 import { ChainMarkets, MaxUint256, OpenPositionType, OrderDirection, addressToAsset } from '@/constants/markets'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
+import { useMarketContext } from '@/contexts/marketContext'
 import { equal, notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
@@ -945,4 +946,56 @@ export const useProductTransactions = (productAddress?: string) => {
     onApproveUSDC,
     onModifyPosition,
   }
+}
+
+type CurrentPositionData = {
+  direction: OrderDirection | undefined
+  position: PositionDetails | undefined
+}
+
+export const useCurrentPosition = () => {
+  const { selectedMarket, orderDirection } = useMarketContext()
+  const { data: positions } = useUserCurrentPositions()
+
+  const noPositionData: CurrentPositionData = {
+    direction: undefined,
+    position: undefined,
+  }
+
+  if (!positions || !selectedMarket) return null
+  const market = positions[selectedMarket]
+
+  const longCollateral = market?.Long?.currentCollateral ?? 0n
+  const shortCollateral = market?.Short?.currentCollateral ?? 0n
+
+  const hasLongCollateral = !Big18Math.isZero(longCollateral)
+  const hasShortCollateral = !Big18Math.isZero(shortCollateral)
+  if (!hasLongCollateral && !hasShortCollateral) return noPositionData
+  const hasLongTaker = market?.Long?.side === 'taker'
+  const hasShortTaker = market?.Short?.side === 'taker'
+
+  if (!hasLongTaker && !hasShortTaker) return noPositionData
+  let direction: OrderDirection | undefined = undefined
+  let position: PositionDetails | undefined = undefined
+
+  if (orderDirection === OrderDirection.Long) {
+    if (hasLongCollateral && hasLongTaker) {
+      direction = OrderDirection.Long
+      position = market?.Long as PositionDetails
+    } else if (hasShortCollateral && hasShortTaker) {
+      direction = OrderDirection.Short
+      position = market?.Short as PositionDetails
+    }
+  } else {
+    if (hasShortCollateral && hasShortTaker) {
+      direction = OrderDirection.Short
+      position = market?.Short as PositionDetails
+    } else if (hasLongCollateral && hasLongTaker) {
+      direction = OrderDirection.Long
+      position = market?.Long as PositionDetails
+    }
+  }
+  if (!direction || !position) return noPositionData
+
+  return { direction, position }
 }

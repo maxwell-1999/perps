@@ -97,7 +97,7 @@ export const getContainerVariant = (formState: FormState) => {
 }
 
 type UseInitialInputs = {
-  userCollateral?: bigint
+  userCollateral: bigint
   amount: bigint
   price: bigint
   isNewPosition: boolean
@@ -105,12 +105,12 @@ type UseInitialInputs = {
 
 export const useInitialInputs = ({ userCollateral, amount, price, isNewPosition }: UseInitialInputs) =>
   useMemo(() => {
-    const formattedCollateral = formatEther(userCollateral ?? 0n)
+    const formattedCollateral = formatEther(userCollateral)
     const formattedAmount = formatEther(amount)
     return {
       currency: Currency.USDC,
-      positionAmount: formattedAmount === '0.0' ? '0' : formattedAmount,
       collateralAmount: formattedCollateral === '0.0' ? '0' : formattedCollateral,
+      positionAmount: formattedAmount === '0.0' ? '0' : formattedAmount,
       isLeverageFixed: false,
       leverage: calculateInitialLeverage({ isNewPosition, amount, currentCollateralAmount: userCollateral, price }),
     }

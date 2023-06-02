@@ -6,9 +6,9 @@ import Toggle from '@/components/shared/Toggle'
 import { OpenPositionType, OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { useProductTransactions, useUserCollateral } from '@/hooks/markets'
+import { PositionDetails, useProductTransactions, useUserCollateral } from '@/hooks/markets'
 import { useBalances } from '@/hooks/wallet'
-import { Big18Math, formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
+import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
@@ -16,7 +16,6 @@ import { Slider } from '@ds/Slider'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
 
-import { useFormatPosition } from '../../PositionManager/hooks'
 import { formIds, orderDirections } from '../constants'
 import { useInitialInputs, useStyles, useTradeFormCopy } from '../hooks'
 import {
@@ -41,10 +40,11 @@ interface TradeFormProps {
   orderDirection: OrderDirection
   setOrderDirection: (orderDirection: OrderDirection) => void
   product: IPerennialLens.ProductSnapshotStructOutput
+  position?: PositionDetails
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { orderDirection, setOrderDirection, product } = props
+  const { orderDirection, setOrderDirection, product, position } = props
   const {
     productAddress,
     latestVersion: { price },
@@ -61,17 +61,15 @@ function TradeForm(props: TradeFormProps) {
   const { assetMetadata } = useMarketContext()
   const { onApproveUSDC, onModifyPosition } = useProductTransactions(productAddress)
 
-  const position = useFormatPosition()
-  const currentPositionAmount = position?.positionDetails?.position ?? 0n
-  const currentCollateral = position?.positionDetails?.currentCollateral ?? 0n
+  const currentPositionAmount = position?.position ?? 0n
+  const currentCollateral = position?.currentCollateral ?? 0n
   const isNewPosition = Big18Math.isZero(currentPositionAmount ?? 0n)
 
   const { data: collateralData } = useUserCollateral(productAddress)
-
   const initialInputs = useInitialInputs({
-    userCollateral: position?.positionDetails?.currentCollateral ?? 0n,
+    userCollateral: currentCollateral,
     price: price ?? 0n,
-    amount: position?.positionDetails?.position ?? 0n,
+    amount: currentPositionAmount,
     isNewPosition,
   })
 
@@ -101,8 +99,6 @@ function TradeForm(props: TradeFormProps) {
     // If going from discnnected to connected, reset updating state
     else if (!prevAddress && address) setUpdating(isNewPosition)
     else if (prevAddress !== address) resetInputs()
-    else if (!Big18Math.eq(collateralAmount, currentCollateral))
-      resetInputs() // Update collateral field on price update
     else if (prevUpdating && !updating) resetInputs() // If going from updating -> not updating, reset
   }, [
     address,
@@ -268,13 +264,7 @@ function TradeForm(props: TradeFormProps) {
             }
             rightEl={<Pill text={assetMetadata.quoteCurrency} />}
             mb="12px"
-            value={
-              updating
-                ? collateralAmountStr
-                : collateralAmount === 0n
-                ? '0.00'
-                : `${formatBig18(collateralAmount, { numSigFigs: 6 })}}`
-            }
+            value={collateralAmountStr}
             onChange={onChangeCollateral}
           />
           <Input
