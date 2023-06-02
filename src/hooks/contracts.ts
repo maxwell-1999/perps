@@ -1,17 +1,11 @@
 import { Address, getAddress } from 'viem'
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from 'wagmi/chains'
 
-import { DSU, USDC, controllerContract, multiInvokerContract } from '@/constants/contracts'
+import { DSU, USDC, multiInvokerContract } from '@/constants/contracts'
 import { SupportedChainId } from '@/constants/network'
 import { useChainId, useProvider } from '@/hooks/network'
 
-import {
-  Controller_ImplAbi__factory,
-  Erc20Abi__factory,
-  ICollateralAbi__factory,
-  LensAbi__factory,
-  MultiInvokerAbi__factory,
-} from '@t/generated'
+import { Erc20Abi__factory, ICollateralAbi__factory, LensAbi__factory, MultiInvokerAbi__factory } from '@t/generated'
 
 type AddressMapping = { [chain in SupportedChainId]: Address }
 
@@ -64,11 +58,4 @@ export const useMultiInvoker = () => {
   const chainId = useChainId()
 
   return MultiInvokerAbi__factory.connect(multiInvokerContract.address[chainId], provider)
-}
-
-export const useController = () => {
-  const provider = useProvider()
-  const chainId = useChainId()
-
-  return Controller_ImplAbi__factory.connect(controllerContract.address[chainId], provider)
 }

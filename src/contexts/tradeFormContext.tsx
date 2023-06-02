@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 export enum FormState {
   trade = 'trade',
@@ -18,9 +18,9 @@ const TradeFormOverlayContext = createContext({
 export const TradeFormProvider = ({ children }: { children: React.ReactNode }) => {
   const [formState, _setTradeFormState] = useState(FormState.trade)
 
-  const setTradeFormState = useCallback((state: FormState) => {
+  const setTradeFormState = (state: FormState) => {
     _setTradeFormState(state)
-  }, [])
+  }
 
   return (
     <TradeFormOverlayContext.Provider value={{ formState, setTradeFormState }}>

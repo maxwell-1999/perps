@@ -1,6 +1,5 @@
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from 'wagmi/chains'
 
-import ControllerAbi from '../../abi/Controller_Impl.abi.json'
 import Erc20ABI from '../../abi/erc20.abi.json'
 import MultiInvokerAbi from '../../abi/multiInvoker.abi.json'
 
@@ -35,16 +34,4 @@ export const USDC = {
     [baseGoerli.id]: '0x7b4adf64b0d60ff97d672e473420203d52562a84',
   },
   abi: Erc20ABI,
-}
-
-export const controllerContract = {
-  address: {
-    // controller proxy address
-    [goerli.id]: '0x7c4ABBF7CB0C0BcB72917734B068Ed4D1AcdF8C5',
-    [mainnet.id]: '0x9df509186b6d3b7D033359f94c8b1BB5544d51b3',
-    [arbitrum.id]: '0xA59eF0208418559770a48D7ae4f260A28763167B',
-    [arbitrumGoerli.id]: '0x6cF1A4373ba7D10bC37fAeC4694807B626B7f161',
-    [baseGoerli.id]: '0x49bCb3e1b0bA6A68EE1f1941EB56Ac7F46B67e09',
-  },
-  abi: ControllerAbi.abi,
 }
