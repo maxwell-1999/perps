@@ -1,7 +1,7 @@
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from 'wagmi/chains'
 
-import Erc20ABI from '../../abi/erc20.abi.json'
-import MultiInvokerAbi from '../../abi/multiInvoker.abi.json'
+import Erc20ABI from '../../abi/Erc20.abi.json'
+import MultiInvokerAbi from '../../abi/MultiInvoker.abi.json'
 
 export const multiInvokerContract = {
   address: {
