@@ -76,7 +76,7 @@ const PositionTableRow = ({
   currentPosition: boolean
   onClick?: (row: PositionTableData) => void
 }) => {
-  const { green, red, borderColor } = useStyles()
+  const { green, red, borderColor, alpha5 } = useStyles()
   const market = AssetMetadata[row.asset]
   const directionColor = row.details.direction === OrderDirection.Long ? green : red
   const { pnl, pnlPercentage, isPnlPositive } = usePnl({ positionDetails: row.details, live: currentPosition })
@@ -84,7 +84,7 @@ const PositionTableRow = ({
   return (
     <AccordionItem borderBottom="none">
       <Box>
-        <AccordionButton textAlign="left" _expanded={{ borderBottom: `1px solid ${borderColor}` }}>
+        <AccordionButton textAlign="left" _expanded={{ borderBottom: `1px solid ${borderColor}`, background: alpha5 }}>
           <Box flex="2" display="flex">
             <Link
               onClick={() => (onClick ? onClick(row) : undefined)}

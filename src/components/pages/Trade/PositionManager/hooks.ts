@@ -33,11 +33,12 @@ export const useStyles = () => {
   const subheaderTextColor = useColorModeValue(theme.colors.brand.blackAlpha[50], theme.colors.brand.whiteAlpha[50])
   const alpha75 = useColorModeValue(theme.colors.brand.blackAlpha[75], theme.colors.brand.whiteAlpha[75])
   const alpha90 = useColorModeValue(theme.colors.brand.blackAlpha[90], theme.colors.brand.whiteAlpha[90])
+  const alpha5 = useColorModeValue(theme.colors.brand.blackAlpha[5], theme.colors.brand.whiteAlpha[5])
   // TODO: light color theme background
   const background = useColorModeValue(theme.colors.brand.blackSolid[5], theme.colors.brand.blackSolid[5])
   const green = theme.colors.brand.green
   const red = theme.colors.brand.red
-  return { borderColor, green, red, subheaderTextColor, alpha75, alpha90, background }
+  return { borderColor, green, red, subheaderTextColor, alpha75, alpha90, alpha5, background }
 }
 
 export const usePositionManagerCopy = () => {
