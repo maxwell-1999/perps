@@ -14,15 +14,22 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 18.16.0
 
-      - name: Install dependencies
-        run: yarn install
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-node-${{ matrix.node }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Install
+        run: yarn --frozen-lockfile
 
       - name: Generate types
         run: yarn gen:abi-typings && yarn gen:gql-typings
