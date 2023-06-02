@@ -10,8 +10,8 @@ const Container = defineStyleConfig({
     borderRadius: '6px',
     boxSizing: 'border-box',
     maxWidth: '100%',
-    px: '7px',
-    py: '7px',
+    px: 'var(--chakra-space-1)',
+    py: 'var(--chakra-space-1)',
   },
   variants: {
     transparent: (props: StyleFunctionProps) => ({

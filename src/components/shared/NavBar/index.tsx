@@ -13,7 +13,9 @@ import RedX from '@public/icons/red-x.svg'
 import Settings from '@public/icons/settings.svg'
 import Logo from '@public/logoTransparent.svg'
 import Link from 'next/link'
-import { useAccount, useDisconnect } from 'wagmi'
+import { useDisconnect } from 'wagmi'
+
+import { useAddress } from '@/hooks/network'
 
 import { Button, ButtonGroup, IconButton } from '@ds/Button'
 import { MobileDrawer } from '@ds/MobileDrawer'
@@ -26,7 +28,7 @@ import { MobileButtonLabel, Nav } from './styles'
 
 function NavBar() {
   const { disconnect } = useDisconnect()
-  const { address } = useAccount()
+  const { address } = useAddress()
   const isBase = useBreakpointValue({ base: true, md: false })
   const { isOpen, onOpen, onClose } = useDisclosure()
   const theme = useTheme()

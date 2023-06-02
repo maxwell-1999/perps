@@ -1,3 +1,5 @@
+import { formatDistanceToNowStrict } from 'date-fns'
+
 export const Hour = 60n * 60n
 export const Day = Hour * 24n
 export const Year = Day * 365n
@@ -10,4 +12,33 @@ export const last24hrBounds = () => {
   const from = Math.floor(yesterday.setUTCHours(yesterday.getUTCHours(), 0, 0, 0) / 1000)
 
   return { to, from }
+}
+
+export const formatDateRelative = (date: Date) => {
+  const formatted = formatDistanceToNowStrict(date, { addSuffix: true })
+
+  const shortFormMap: { [key: string]: string } = {
+    second: 's',
+    seconds: 's',
+
+    minute: 'm',
+    minutes: 'm',
+
+    hour: 'h',
+    hours: 'h',
+
+    day: 'd',
+    days: 'd',
+
+    month: 'mo',
+    months: 'mo',
+
+    year: 'yr',
+    years: 'yr',
+  }
+
+  return formatted.replace(
+    / (seconds|second|minutes|minute|hours|hour|days|day|months|month|years|year)/g,
+    (match) => shortFormMap[match.trim()],
+  )
 }

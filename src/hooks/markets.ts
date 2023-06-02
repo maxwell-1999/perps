@@ -24,10 +24,10 @@ import { last24hrBounds } from '@/utils/timeUtils'
 import { ICollateralAbi, IProductAbi__factory } from '@t/generated'
 import { IPerennialLens, LensAbi } from '@t/generated/LensAbi'
 import { gql } from '@t/gql'
-import { GetAccountPositionsQuery } from '@t/gql/graphql'
+import { GetAccountPositionsQuery, PositionSide } from '@t/gql/graphql'
 
 import { useCollateral, useLens, useMultiInvoker, useUSDC } from './contracts'
-import { useChainId, useGraphClient, useWsProvider } from './network'
+import { useAddress, useChainId, useGraphClient, useWsProvider } from './network'
 import { usePyth } from './network'
 import { useBalances } from './wallet'
 
@@ -140,7 +140,7 @@ export type UserCurrentPositions = {
 }
 export const useUserCurrentPositions = () => {
   const chainId = useChainId()
-  const { address } = useAccount()
+  const { address } = useAddress()
   const lens = useLens()
   const collateral = useCollateral()
   const graphClient = useGraphClient()
@@ -227,15 +227,15 @@ export const useUserCurrentPositions = () => {
 }
 
 const PositionHistoryPageSize = 3
-export const useUserChainPositionHistory = () => {
+export const useUserChainPositionHistory = (side: PositionSide) => {
   const chainId = useChainId()
   const graphClient = useGraphClient()
-  const { address } = useAccount()
+  const { address } = useAddress()
   const lens = useLens()
   const collateral = useCollateral()
 
   return useInfiniteQuery({
-    queryKey: ['userChainPositionHistory', chainId, address],
+    queryKey: ['userChainPositionHistory', chainId, side, address],
     enabled: !!address,
     queryFn: async ({ pageParam }) => {
       if (!address) return
@@ -247,9 +247,9 @@ export const useUserChainPositionHistory = () => {
         .flat()
 
       const query = gql(`
-        query getPreviousAccountPositions($account: Bytes!, $products: [Bytes!]!, $first: Int!, $skip: Int!) {
+        query getPreviousAccountPositions($account: Bytes!, $products: [Bytes!]!, $side: PositionSide!, $first: Int!, $skip: Int!) {
           positions: productAccountPositions(
-            where: { account: $account, product_in: $products, endBlock_gt: -1 }
+            where: { account: $account, product_in: $products, endBlock_gt: -1, side: $side }
             first: $first
             skip: $skip
             orderBy: endBlock
@@ -274,7 +274,8 @@ export const useUserChainPositionHistory = () => {
         account: address,
         products: markets,
         first: PositionHistoryPageSize,
-        skip: pageParam || 0,
+        skip: PositionHistoryPageSize * (pageParam || 0),
+        side,
       })
 
       const accountSnapshots = graphPositions.positions.map(async (graphPosition) => {
@@ -330,15 +331,15 @@ const fetchUserPositionDetails = async (
   if (!snapshot || !productSnapshot) return { asset, direction, currentCollateral: 0n }
   const { productAddress, collateral, pre, position, openInterest } = snapshot
   const nextNotional = Big18Math.abs(Big18Math.mul(size(next(pre, position)), productSnapshot.latestVersion.price))
-  const side = positionSide(next(pre, position))
+  let side = positionSide(next(pre, position))
 
   // If no graph position, return snapshot values
   if (!graphPosition) {
     return {
       asset,
       direction,
-      position: snapshot.position[side],
-      nextPosition: next(pre, position)[side],
+      position: side === 'maker' ? snapshot.position.maker : snapshot.position.taker,
+      nextPosition: side === 'maker' ? next(pre, position).maker : next(pre, position).taker,
       startCollateral: collateral,
       currentCollateral: collateral,
       averageEntry: productSnapshot.latestVersion.price,
@@ -349,7 +350,11 @@ const fetchUserPositionDetails = async (
       nextLeverage: collateral > 0n ? Big18Math.div(nextNotional, collateral) : 0n,
     }
   }
-  const { startBlock, depositAmount, fees, endBlock, lastUpdatedBlockNumber } = graphPosition
+  const { startBlock, depositAmount, fees, endBlock, lastUpdatedBlockNumber, valuePnl } = graphPosition
+  const closedPosition = BigInt(endBlock) > -1n
+  // If the graph position is available, use that to find side as this might be a historical position with no
+  // current position size
+  side = graphPosition.side
 
   const query = gql(`
     query getPositionChanges(
@@ -378,7 +383,7 @@ const fetchUserPositionDetails = async (
         account: $account,
         product: $product,
         blockNumber_gte: $startBlock,
-        blockNumber_lt: $endBlock,
+        blockNumber_lte: $endBlock,
       }, first: $first, skip: $skip, orderBy: blockNumber, orderDirection: asc) {
         version
         amount
@@ -404,7 +409,7 @@ const fetchUserPositionDetails = async (
         account: $account,
         product: $product,
         blockNumber_gte: $startBlock,
-        blockNumber_lt: $endBlock,
+        blockNumber_lte: $endBlock,
       }, first: $first, skip: $skip, orderBy: blockNumber, orderDirection: asc) {
         version
         amount
@@ -417,26 +422,34 @@ const fetchUserPositionDetails = async (
         account: $account,
         product: $product,
         blockNumber_gte: $startBlock,
-        blockNumber_lt: $endBlock,
+        blockNumber_lte: $endBlock,
       }) {
         fee
         transactionHash
         blockNumber
         blockTimestamp
       }
-      initialDeposits: deposits(where:{
+      deposits(where:{
         account: $account,
         product: $product,
-        blockNumber: $startBlock,
+        blockNumber_gte: $startBlock,
+        blockNumber_lte: $endBlock,
       }, first: $first, skip: $skip) {
         amount
+        transactionHash
+        blockNumber
+        blockTimestamp
       }
-      initialWithdrawals: withdrawals(where:{
+      withdrawals(where:{
         account: $account,
         product: $product,
-        blockNumber: $startBlock,
+        blockNumber_gte: $startBlock,
+        blockNumber_lte: $endBlock,
       }, first: $first, skip: $skip) {
         amount
+        transactionHash
+        blockNumber
+        blockTimestamp
       }
       meta: _meta {
         block {
@@ -452,15 +465,26 @@ const fetchUserPositionDetails = async (
       account: address,
       product: productAddress,
       startBlock,
-      endBlock: (BigInt(graphPosition.lastUpdatedBlockNumber) + 1n).toString(),
+      endBlock: closedPosition ? endBlock : (BigInt(graphPosition.lastUpdatedBlockNumber) + 1n).toString(),
       taker: side === 'taker',
       first: GraphDefaultPageSize,
       skip: page * GraphDefaultPageSize,
     })
   })
 
+  const collateralChanges = [
+    ...positionChanges.deposits.map((d) => ({ ...d, amount: BigInt(d.amount), blockNumber: BigInt(d.blockNumber) })),
+    ...positionChanges.withdrawals.map((w) => ({
+      ...w,
+      amount: -BigInt(w.amount),
+      blockNumber: BigInt(w.blockNumber),
+    })),
+  ]
+    .sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber))
+    .filter((c) => BigInt(c.blockNumber) > BigInt(startBlock))
+
   // Merge opens and closes, sorting by blockNumber
-  const changesMerged = (
+  const positionsChangesMerged = (
     side === 'taker'
       ? [
           ...positionChanges.takeOpeneds,
@@ -472,8 +496,24 @@ const fetchUserPositionDetails = async (
         ]
   ).sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber))
 
+  // Collateral at one block before the position was opened
+  const intialCollateral = await lens['collateral(address,address)'].staticCall(address, productAddress, {
+    blockTag: numberToHex(Number(startBlock) - 1),
+  })
+  const initialDeposits =
+    sum(
+      positionChanges.deposits.filter((d) => BigInt(d.blockNumber) === BigInt(startBlock)).map((d) => BigInt(d.amount)),
+    ) -
+    sum(
+      positionChanges.withdrawals
+        .filter((d) => BigInt(d.blockNumber) === BigInt(startBlock))
+        .map((d) => BigInt(d.amount)),
+    )
+
+  const startCollateral = intialCollateral + initialDeposits
+
   // Settle versions is change.version + 1 unless it is the latest version
-  const settleVersions = unique(changesMerged.map((c) => BigInt(c.version))).flatMap((v) => [v, v + 1n])
+  const settleVersions = unique(positionsChangesMerged.map((c) => BigInt(c.version))).flatMap((v) => [v, v + 1n])
 
   // Get all prices at the settle versions
   const valueAtVersionQuery = gql(`
@@ -572,9 +612,8 @@ const fetchUserPositionDetails = async (
 
   // Create a separate sub position for each position change to calculate the average entry price
   let currentPosition = 0n
-  let totalNotional = 0n
-  let totalSize = 0n
-  const subPositions = changesMerged.map((change, i) => {
+  let currentCollateral = startCollateral
+  const subPositions = positionsChangesMerged.map((change, i) => {
     const { version, amount } = change
     let settleVersion = BigInt(version) + 1n
     // If the settle version is ahead of currentVersion, set the settle version to the current version
@@ -583,11 +622,12 @@ const fetchUserPositionDetails = async (
     const settleValue =
       graphPosition.side === 'maker' ? settleVersionData?.makerValue ?? 0n : settleVersionData?.takerValue ?? 0n
 
-    const prevVersion = i === 0 ? 0n : BigInt(changesMerged[i - 1].version) + 1n
+    const prevVersion = i === 0 ? 0n : BigInt(positionsChangesMerged[i - 1].version) + 1n
     const prevVersionData = atVersions.get(prevVersion)
     const prevValue =
       graphPosition.side === 'maker' ? prevVersionData?.makerValue ?? 0n : prevVersionData?.takerValue ?? 0n
 
+    const [blockNumber, blockTimestamp] = [BigInt(change.blockNumber), BigInt(change.blockTimestamp)]
     const subPosition = {
       settleVersion,
       settleValue,
@@ -601,58 +641,34 @@ const fetchUserPositionDetails = async (
       delta: BigInt(amount),
       pnl: Big18Math.mul(currentPosition, settleValue - prevValue),
       fee: BigInt(change.fee),
-      blockNumber: BigInt(change.blockNumber),
-      blockTimestamp: BigInt(change.blockTimestamp),
+      collateral: currentCollateral,
+      blockNumber,
+      blockTimestamp,
       transctionHash: change.transactionHash,
+      collateralChanges: collateralChanges
+        .filter(
+          (c) =>
+            c.blockNumber <= blockNumber &&
+            (i > 0 ? c.blockNumber > BigInt(positionsChangesMerged[i - 1].blockNumber) : true),
+        )
+        .map((c) => c.amount),
     }
 
     currentPosition += subPosition.delta
-    totalNotional += Big18Math.mul(currentPosition, subPosition.settlePrice)
-    totalSize += currentPosition
+    currentCollateral += subPosition.pnl + sum(subPosition.collateralChanges)
     return subPosition
   })
 
-  if (currentPosition !== 0n) {
-    // If the position is still open, add a sub position for the last version to latest version
-    const settleValue = side === 'maker' ? currentValue.maker : currentValue.taker
-    const prevVersion = subPositions.at(-1)?.settleVersion ?? 0n
-    const prevValue = subPositions.at(-1)?.settleValue ?? 0n
-    const prevPrice = subPositions.at(-1)?.settlePrice ?? 0n
-
-    subPositions.push({
-      settleVersion: currentVersion.version,
-      settleValue,
-      settlePrice: Big18Math.abs(currentVersion.price),
-
-      prevVersion,
-      prevValue,
-      prevPrice,
-
-      size: currentPosition,
-      delta: 0n,
-      pnl: Big18Math.mul(currentPosition, settleValue - prevValue),
-      fee: 0n,
-      transctionHash: '',
-      blockNumber: 0n,
-      blockTimestamp: 0n,
-    })
-  }
-
   // Average Entry = Total Notional / Total Size
-  const averageEntry = Big18Math.div(totalNotional, totalSize)
-
-  // Collateral at one block before the position was opened
-  const startCollateral = await lens['collateral(address,address)'].staticCall(address, productAddress, {
-    blockTag: numberToHex(Number(startBlock) - 1),
-  })
-  const initialDeposits =
-    sum(positionChanges.initialDeposits.map((d) => BigInt(d.amount))) -
-    sum(positionChanges.initialWithdrawals.map((d) => BigInt(d.amount)))
+  const averageEntry = Big18Math.div(
+    sum(subPositions.filter((s) => s.delta > 0n).map((s) => Big18Math.mul(s.delta, s.settlePrice))),
+    sum(subPositions.filter((s) => s.delta > 0n).map((s) => s.delta)),
+  )
 
   let deposits = BigInt(depositAmount)
 
   // If this is the current position, pull values between graph head and chain head
-  if (BigInt(endBlock) === -1n) {
+  if (!closedPosition) {
     // Pull any deposits/withdrawals that have happened between graph syncs
     const [_deposits, _withdrawals] = await Promise.all([
       collateralContract.queryFilter(
@@ -673,9 +689,9 @@ const fetchUserPositionDetails = async (
     direction,
     product: productAddress,
     side,
-    position: position[side],
-    nextPosition: next(pre, position)[side],
-    startCollateral: startCollateral + initialDeposits,
+    position: side === 'maker' ? position.maker : position.taker,
+    nextPosition: side === 'maker' ? next(pre, position).maker : next(pre, position).taker,
+    startCollateral,
     currentCollateral: collateral,
     deposits,
     averageEntry,
@@ -684,10 +700,11 @@ const fetchUserPositionDetails = async (
     nextNotional,
     leverage: collateral > 0n ? Big18Math.div(size(openInterest), collateral) : 0n,
     nextLeverage: collateral > 0n ? Big18Math.div(nextNotional, collateral) : 0n,
-    fees,
+    fees: BigInt(fees),
     subPositions,
     liquidations: positionChanges.liquidations,
-    valuePnl: graphPosition.valuePnl,
+    pnl: closedPosition ? BigInt(valuePnl) : collateral - startCollateral - deposits,
+    collateralChanges,
   }
 }
 

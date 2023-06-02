@@ -89,6 +89,10 @@ export class Big18Math {
     return a <= b ? a : b
   }
 
+  public static cmp(a: bigint, b: bigint): number {
+    return a === b ? 0 : a < b ? -1 : 1
+  }
+
   public static fixedFrom(a: bigint): FixedNumber {
     return FixedNumber.fromValue(a, Big18Math.FIXED_DECIMALS, Big18Math.FIXED_WIDTH)
   }

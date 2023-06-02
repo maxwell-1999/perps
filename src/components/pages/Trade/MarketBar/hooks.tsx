@@ -24,8 +24,8 @@ export const useMarketBarCopy = () => {
     low: intl.formatMessage({ defaultMessage: '24h Low' }),
     high: intl.formatMessage({ defaultMessage: '24h High' }),
     volume: intl.formatMessage({ defaultMessage: '24h Volume' }),
-    openInterest: intl.formatMessage({ defaultMessage: 'Open Interest' }),
-    liquidity: intl.formatMessage({ defaultMessage: 'Liquidity' }),
+    openInterest: intl.formatMessage({ defaultMessage: 'Open Interest (L/S)' }),
+    liquidity: intl.formatMessage({ defaultMessage: 'Liquidity (L/S)' }),
   }
 }
 

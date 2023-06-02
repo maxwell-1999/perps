@@ -11,10 +11,22 @@
       "value": "Amount"
     }
   ],
+  "00LcfG": [
+    {
+      "type": 0,
+      "value": "Load more"
+    }
+  ],
   "3Bd9gC": [
     {
       "type": 0,
       "value": "All Positions"
+    }
+  ],
+  "3cJGM2": [
+    {
+      "type": 0,
+      "value": "Liquidity (L/S)"
     }
   ],
   "47FYwb": [
@@ -41,12 +53,6 @@
       "value": "Pricing"
     }
   ],
-  "5vASqA": [
-    {
-      "type": 0,
-      "value": "Daily funding rate"
-    }
-  ],
   "6JqZwg": [
     {
       "type": 0,
@@ -57,6 +63,12 @@
     {
       "type": 0,
       "value": "Perennial"
+    }
+  ],
+  "77wPcX": [
+    {
+      "type": 0,
+      "value": "Execution Price"
     }
   ],
   "8LaTBL": [
@@ -77,10 +89,22 @@
       "value": "You will receive..."
     }
   ],
+  "A3zdUJ": [
+    {
+      "type": 0,
+      "value": "Liquidation Price"
+    }
+  ],
   "A6Mtvr": [
     {
       "type": 0,
       "value": "Approve USDC"
+    }
+  ],
+  "AxhyVR": [
+    {
+      "type": 0,
+      "value": "Open Interest (L/S)"
     }
   ],
   "BY343C": [
@@ -195,10 +219,10 @@
       "value": "Liquidation"
     }
   ],
-  "PQiNnk": [
+  "P7PLVj": [
     {
       "type": 0,
-      "value": "Open Interest"
+      "value": "Date"
     }
   ],
   "QFNxVm": [
@@ -217,12 +241,6 @@
     {
       "type": 0,
       "value": "Collateral"
-    }
-  ],
-  "TmryQ6": [
-    {
-      "type": 0,
-      "value": "Your average entry"
     }
   ],
   "UwvPFx": [
@@ -291,12 +309,6 @@
       "value": "Liquidation price"
     }
   ],
-  "ctieLo": [
-    {
-      "type": 0,
-      "value": "Liquidity"
-    }
-  ],
   "d0Gd72": [
     {
       "type": 0,
@@ -363,6 +375,12 @@
       "value": "x"
     }
   ],
+  "pWaCcp": [
+    {
+      "type": 0,
+      "value": "Average Entry"
+    }
+  ],
   "pbpdV6": [
     {
       "type": 0,
@@ -377,6 +395,12 @@
     {
       "type": 0,
       "value": "x"
+    }
+  ],
+  "qZbedW": [
+    {
+      "type": 0,
+      "value": "Fees"
     }
   ],
   "rbrahO": [
@@ -401,6 +425,12 @@
     {
       "type": 0,
       "value": "--"
+    }
+  ],
+  "y7EKeV": [
+    {
+      "type": 0,
+      "value": "Daily Funding Rate"
     }
   ],
   "yR4V5C": [

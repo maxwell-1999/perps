@@ -42,6 +42,9 @@ const colors = {
       80: 'rgba(0, 0, 0, 0.8)',
       90: 'rgba(0, 0, 0, 0.9)',
     },
+    blackSolid: {
+      5: '#1A1A1A',
+    },
   },
 }
 
