@@ -4,7 +4,6 @@ import { ethers } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useCallback, useEffect, useState } from 'react'
 import { Address, getAddress, numberToHex, parseAbi, toHex, zeroAddress } from 'viem'
-import { useAccount } from 'wagmi'
 import { goerli, mainnet } from 'wagmi/chains'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
@@ -23,7 +22,7 @@ import { gql } from '@t/gql'
 import { GetAccountPositionsQuery, PositionSide } from '@t/gql/graphql'
 
 import { useCollateral, useLens } from './contracts'
-import { useChainId, useGraphClient, useWsProvider } from './network'
+import { useAddress, useChainId, useGraphClient, useWsProvider } from './network'
 import { usePyth } from './network'
 
 export type AssetSnapshots = {
@@ -135,7 +134,7 @@ export type UserCurrentPositions = {
 }
 export const useUserCurrentPositions = () => {
   const chainId = useChainId()
-  const { address } = useAccount()
+  const { address } = useAddress()
   const lens = useLens()
   const collateral = useCollateral()
   const graphClient = useGraphClient()
@@ -225,7 +224,7 @@ const PositionHistoryPageSize = 3
 export const useUserChainPositionHistory = (side: PositionSide) => {
   const chainId = useChainId()
   const graphClient = useGraphClient()
-  const { address } = useAccount()
+  const { address } = useAddress()
   const lens = useLens()
   const collateral = useCollateral()
 

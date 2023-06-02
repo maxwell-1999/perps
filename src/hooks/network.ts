@@ -1,10 +1,20 @@
 import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
 import { AlchemyProvider, JsonRpcProvider, WebSocketProvider } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
-import { useNetwork } from 'wagmi'
+import { useRouter } from 'next/router'
+import { getAddress } from 'viem'
+import { useNetwork, useAccount as useWagmiAccount } from 'wagmi'
 import { baseGoerli } from 'wagmi/chains'
 
 import { AlchemyActiveKey, DefaultChain, GraphUrls, SupportedChainId, isSupportedChain } from '@/constants/network'
+
+export const useAddress = () => {
+  const { address: wagmiAddress } = useWagmiAccount()
+  const { query } = useRouter()
+  const addressOverride = query.a ? (Array.isArray(query.a) ? getAddress(query.a[0]) : getAddress(query.a)) : undefined
+
+  return { address: addressOverride ?? wagmiAddress, overriding: !!addressOverride }
+}
 
 export const useChainId = () => {
   let { chain } = useNetwork()
