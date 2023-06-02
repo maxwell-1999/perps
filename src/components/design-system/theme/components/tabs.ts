@@ -13,6 +13,7 @@ const line = definePartsStyle((props) => ({
     paddingY: '6px',
     color: mode(colors.brand.blackAlpha[54], colors.brand.whiteAlpha[54])(props),
     _selected: {
+      zIndex: 1,
       borderBottom: `1px solid ${colors.brand.purple[300]}`,
       color: mode('black', 'white')(props),
     },
