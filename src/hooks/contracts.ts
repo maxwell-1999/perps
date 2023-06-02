@@ -5,7 +5,7 @@ import { DSU, USDC, multiInvokerContract } from '@/constants/contracts'
 import { SupportedChainId } from '@/constants/network'
 import { useChainId, useProvider } from '@/hooks/network'
 
-import { Erc20Abi__factory, ICollateralAbi__factory, LensAbi__factory, MultiInvokerAbi__factory } from '@t/generated'
+import { ERC20Abi__factory, ICollateralAbi__factory, LensAbi__factory, MultiInvokerAbi__factory } from '@t/generated'
 
 type AddressMapping = { [chain in SupportedChainId]: Address }
 
@@ -43,14 +43,14 @@ export const useDSU = () => {
   const provider = useProvider()
   const chainId = useChainId()
 
-  return Erc20Abi__factory.connect(DSU.address[chainId], provider)
+  return ERC20Abi__factory.connect(DSU.address[chainId], provider)
 }
 
 export const useUSDC = () => {
   const provider = useProvider()
   const chainId = useChainId()
 
-  return Erc20Abi__factory.connect(USDC.address[chainId], provider)
+  return ERC20Abi__factory.connect(USDC.address[chainId], provider)
 }
 
 export const useMultiInvoker = () => {
