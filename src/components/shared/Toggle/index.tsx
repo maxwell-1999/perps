@@ -1,11 +1,5 @@
 import { Button, ButtonGroup } from '@chakra-ui/react'
 
-interface ToggleProps<T = string> {
-  labels: [T, T]
-  activeLabel: T
-  onChange: (label: T) => void
-}
-
 function hideConnnectedBorder(index: number, side: 'right' | 'left') {
   if (index === 0 && side === 'right') {
     return 'none'
@@ -15,7 +9,14 @@ function hideConnnectedBorder(index: number, side: 'right' | 'left') {
   }
 }
 
-function Toggle<T extends string>({ labels, activeLabel, onChange }: ToggleProps<T>) {
+interface ToggleProps<T = string> {
+  labels: [T, T]
+  activeLabel: T
+  onChange: (label: T) => void
+  overrideValue?: T
+}
+
+function Toggle<T extends string>({ labels, activeLabel, onChange, overrideValue }: ToggleProps<T>) {
   const handleToggle = (label: T) => {
     if (label !== activeLabel) {
       onChange(label)
@@ -32,6 +33,8 @@ function Toggle<T extends string>({ labels, activeLabel, onChange }: ToggleProps
           onClick={() => handleToggle(label)}
           borderLeft={hideConnnectedBorder(index, 'left')}
           borderRight={hideConnnectedBorder(index, 'right')}
+          // disable the button if the overrideValue prop is present and does not match this label
+          isDisabled={overrideValue !== undefined && label !== overrideValue}
         >
           {label}
         </Button>

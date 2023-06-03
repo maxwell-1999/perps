@@ -26,12 +26,6 @@ function TradeContainer() {
 
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
 
-  const handleModifyPosition = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // TODO: invalidate positions query
-    alert('modify position')
-  }
-
   const handleClosePosition = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     // TODO: invalidate positions query
@@ -45,35 +39,32 @@ function TradeContainer() {
 
   const containerVariant = getContainerVariant(formState)
   const product = selectedMarketSnapshot?.[orderDirection]
-  const dataFetched = product && positionData
+  const showTradeForm = product && positionData && 'position' in positionData && !positionData.position
+  const showModifyForm =
+    formState !== FormState.close && product && positionData && 'position' in positionData && positionData.position
+  const showCloseForm =
+    formState === FormState.close && positionData && 'position' in positionData && positionData.position
 
   return (
     <Container height="100%" minHeight="560px" p="0" variant={containerVariant}>
-      {!dataFetched && (
+      {!product && (
         <Flex height="100%" width="100%" justifyContent="center" alignItems="center">
           <Spinner />
         </Flex>
       )}
-      {formState === FormState.trade && dataFetched && (
-        <TradeForm
+      {showTradeForm && (
+        <TradeForm orderDirection={orderDirection} setOrderDirection={setOrderDirection} product={product} />
+      )}
+      {showModifyForm && positionData && positionData.position && (
+        <ModifyPositionForm
           orderDirection={orderDirection}
           setOrderDirection={setOrderDirection}
           product={product}
           position={positionData.position}
         />
       )}
-      {formState === FormState.modify && dataFetched && (
-        <ModifyPositionForm
-          onSubmit={handleModifyPosition}
-          orderDirection={orderDirection}
-          setOrderDirection={setOrderDirection}
-          amount={dummyData.amount}
-        />
-      )}
-      {formState === FormState.close && dataFetched && (
-        <ClosePositionForm onSubmit={handleClosePosition} positionSize={dummyData.positionSize} />
-      )}
-      {formState === FormState.withdraw && dataFetched && <WithdrawForm onSubmit={handleWithdrawCollateral} />}
+      {showCloseForm && <ClosePositionForm onSubmit={handleClosePosition} positionSize={dummyData.positionSize} />}
+      {formState === FormState.withdraw && <WithdrawForm onSubmit={handleWithdrawCollateral} />}
     </Container>
   )
 }

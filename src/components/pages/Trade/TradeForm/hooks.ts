@@ -6,7 +6,14 @@ import { formatEther } from 'viem'
 import { Currency, SupportedAsset } from '@/constants/assets'
 import { FormState } from '@/contexts/tradeFormContext'
 
-import { calculateInitialLeverage } from './utils'
+import { Action, ActionTypes } from './reducer'
+import {
+  calculateAndUpdateCollateral,
+  calculateAndUpdateLeverage,
+  calculateAndUpdatePosition,
+  calculateInitialLeverage,
+  max18Decimals,
+} from './utils'
 
 type MarketChangeProps = {
   selectedMarket: SupportedAsset
@@ -115,3 +122,86 @@ export const useInitialInputs = ({ userCollateral, amount, price, isNewPosition 
       leverage: calculateInitialLeverage({ isNewPosition, amount, currentCollateralAmount: userCollateral, price }),
     }
   }, [userCollateral, amount, price, isNewPosition])
+
+// Define the types for the object argument
+interface OnChangeHandlersArgs {
+  dispatch: React.Dispatch<Action>
+  isLeverageFixed: boolean
+  leverage: string
+  collateralAmountStr: string
+  positionAmountStr: string
+  price: bigint
+}
+
+// Define the custom hook
+export const useOnChangeHandlers = ({
+  dispatch,
+  isLeverageFixed,
+  leverage,
+  collateralAmountStr,
+  positionAmountStr,
+  price,
+}: OnChangeHandlersArgs) => {
+  const onChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAmount = e.target.value
+    const validatedAmount = max18Decimals(newAmount)
+    dispatch({ type: ActionTypes.SET_POSITION_AMOUNT, payload: validatedAmount })
+
+    if (isLeverageFixed) {
+      const newCollateralAmt = calculateAndUpdateCollateral({ amount: validatedAmount, leverage, price })
+      dispatch({ type: ActionTypes.SET_COLLATERAL_AMOUNT, payload: newCollateralAmt })
+    } else {
+      const newLeverage = calculateAndUpdateLeverage({
+        amount: validatedAmount,
+        collateral: collateralAmountStr,
+        price,
+      })
+      dispatch({ type: ActionTypes.SET_LEVERAGE, payload: newLeverage })
+    }
+  }
+
+  const onChangeLeverage = (newLeverage: number) => {
+    const validatedLeverage = max18Decimals(`${newLeverage}`)
+    dispatch({ type: ActionTypes.SET_LEVERAGE, payload: validatedLeverage })
+    const newPosition = calculateAndUpdatePosition({
+      collateral: collateralAmountStr,
+      leverage: validatedLeverage,
+      price,
+    })
+    dispatch({ type: ActionTypes.SET_POSITION_AMOUNT, payload: newPosition })
+  }
+
+  const onChangeCollateral = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAmount = e.target.value
+    const validatedAmount = max18Decimals(newAmount)
+    dispatch({ type: ActionTypes.SET_COLLATERAL_AMOUNT, payload: validatedAmount })
+    dispatch({ type: ActionTypes.SET_COLLATERAL_HAS_INPUT, payload: true })
+
+    if (isLeverageFixed) {
+      const newPosition = calculateAndUpdatePosition({
+        collateral: collateralAmountStr,
+        leverage,
+        price,
+      })
+      dispatch({ type: ActionTypes.SET_POSITION_AMOUNT, payload: newPosition })
+    } else {
+      const newLeverage = calculateAndUpdateLeverage({
+        amount: positionAmountStr,
+        collateral: validatedAmount,
+        price,
+      })
+      dispatch({ type: ActionTypes.SET_LEVERAGE, payload: newLeverage })
+    }
+  }
+
+  return { onChangeAmount, onChangeLeverage, onChangeCollateral }
+}
+
+// const { onChangeAmount, onChangeLeverage, onChangeCollateral } = useOnChangeHandlers({
+//   dispatch,
+//   isLeverageFixed: state.isLeverageFixed,
+//   leverage: state.leverage,
+//   collateralAmountStr: state.collateralAmountStr,
+//   positionAmountStr: state.positionAmountStr,
+//   price: product.latestVersion.price
+// })

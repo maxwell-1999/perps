@@ -1,12 +1,12 @@
 import { Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useReducer } from 'react'
 import { useAccount } from 'wagmi'
 
 import Toggle from '@/components/shared/Toggle'
 import { OpenPositionType, OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails, useProductTransactions, useUserCollateral } from '@/hooks/markets'
+import { useProductTransactions, useUserCollateral } from '@/hooks/markets'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 
@@ -16,18 +16,15 @@ import { Slider } from '@ds/Slider'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
 
-import { formIds, orderDirections } from '../constants'
-import { useInitialInputs, useStyles, useTradeFormCopy } from '../hooks'
+import { TradeFormState, formIds, orderDirections } from '../constants'
+import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
+import { Action, ActionTypes, getInitialReduxState, reducer } from '../reducer'
 import {
   calcPositionFee,
-  calculateAndUpdateCollateral,
-  calculateAndUpdateLeverage,
-  calculateAndUpdatePosition,
   formatStringToBigint,
   getCollateralDifference,
   getLeverageDifference,
   getPositionDifference,
-  max18Decimals,
   needsApproval,
   usePrevious,
 } from '../utils'
@@ -40,11 +37,10 @@ interface TradeFormProps {
   orderDirection: OrderDirection
   setOrderDirection: (orderDirection: OrderDirection) => void
   product: IPerennialLens.ProductSnapshotStructOutput
-  position?: PositionDetails
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { orderDirection, setOrderDirection, product, position } = props
+  const { orderDirection, setOrderDirection, product } = props
   const {
     productAddress,
     latestVersion: { price },
@@ -61,114 +57,45 @@ function TradeForm(props: TradeFormProps) {
   const { assetMetadata } = useMarketContext()
   const { onApproveUSDC, onModifyPosition } = useProductTransactions(productAddress)
 
-  const currentPositionAmount = position?.position ?? 0n
-  const currentCollateral = position?.currentCollateral ?? 0n
-  const isNewPosition = Big18Math.isZero(currentPositionAmount ?? 0n)
-
   const { data: collateralData } = useUserCollateral(productAddress)
-  const initialInputs = useInitialInputs({
-    userCollateral: currentCollateral,
-    price: price ?? 0n,
-    amount: currentPositionAmount,
-    isNewPosition,
-  })
+  const currentCollateral = collateralData?.userCollateral ?? 0n
+  const currentPositionAmount = 0n
 
-  const [adjustment, setAdjustment] = useState<Adjustment | null>(null)
-  const [positionAmountStr, setPositionAmount] = useState<string>(initialInputs.positionAmount)
-  const [collateralAmountStr, setCollateralAmount] = useState<string>(initialInputs.collateralAmount)
-  const [collateralHasInput, setCollateralHasInput] = useState<boolean>(false)
-  const [leverage, setLeverage] = useState<string>(initialInputs.leverage)
-  const [isLeverageFixed, setIsLeverageFixed] = useState(initialInputs.isLeverageFixed)
-  const [updating, setUpdating] = useState<boolean>(isNewPosition)
+  const [state, dispatch] = useReducer<React.Reducer<TradeFormState, Action>>(reducer, getInitialReduxState())
+
+  const { updating, positionAmountStr, collateralAmountStr, leverage, isLeverageFixed, adjustment } = state
+
   const prevUpdating = usePrevious(updating)
 
   const positionAmount = formatStringToBigint(positionAmountStr)
   const collateralAmount = formatStringToBigint(collateralAmountStr)
 
   const resetInputs = useCallback(() => {
-    if (!collateralHasInput) setCollateralAmount(initialInputs.collateralAmount) // If collateral is not modified, update it
     if (updating) return // Don't change values if updating
-    setPositionAmount(initialInputs.positionAmount)
-    setIsLeverageFixed(initialInputs.isLeverageFixed)
-    setLeverage(initialInputs.leverage)
-    setCollateralHasInput(false)
-  }, [initialInputs, updating, collateralHasInput])
+    dispatch({ type: ActionTypes.RESET_FORM })
+  }, [updating])
 
   useEffect(() => {
     if (prevProductAddress !== productAddress) resetInputs()
     // If going from discnnected to connected, reset updating state
-    else if (!prevAddress && address) setUpdating(isNewPosition)
+    else if (!prevAddress && address) dispatch({ type: ActionTypes.SET_UPDATING, payload: false })
     else if (prevAddress !== address) resetInputs()
     else if (prevUpdating && !updating) resetInputs() // If going from updating -> not updating, reset
-  }, [
-    address,
-    prevAddress,
-    productAddress,
-    prevProductAddress,
-    currentCollateral,
-    collateralAmount,
-    prevUpdating,
-    updating,
-    isNewPosition,
-    resetInputs,
-  ])
+  }, [address, prevAddress, productAddress, prevProductAddress, collateralAmount, prevUpdating, updating, resetInputs])
 
-  const onChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newAmount = e.target.value
-    const validatedAmount = max18Decimals(newAmount)
-    setPositionAmount(validatedAmount)
-
-    if (isLeverageFixed) {
-      const newCollateralAmt = calculateAndUpdateCollateral({ amount: validatedAmount, leverage, price })
-      setCollateralAmount(newCollateralAmt)
-    } else {
-      const newLeverage = calculateAndUpdateLeverage({
-        amount: validatedAmount,
-        collateral: collateralAmountStr,
-        price,
-      })
-      setLeverage(newLeverage)
-    }
-  }
-
-  const onChangeLeverage = (newLeverage: number) => {
-    const validatedLeverage = max18Decimals(`${newLeverage}`)
-    setLeverage(validatedLeverage)
-    const newPosition = calculateAndUpdatePosition({
-      collateral: collateralAmountStr,
-      leverage: validatedLeverage,
-      price,
-    })
-    setPositionAmount(newPosition)
-  }
-
-  const onChangeCollateral = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newAmount = e.target.value
-    const validatedAmount = max18Decimals(newAmount)
-    setCollateralAmount(validatedAmount)
-    setCollateralHasInput(true)
-
-    if (isLeverageFixed) {
-      const newPosition = calculateAndUpdatePosition({
-        collateral: collateralAmountStr,
-        leverage,
-        price,
-      })
-      setPositionAmount(newPosition)
-    } else {
-      const newLeverage = calculateAndUpdateLeverage({
-        amount: positionAmountStr,
-        collateral: validatedAmount,
-        price,
-      })
-      setLeverage(newLeverage)
-    }
-  }
+  const { onChangeAmount, onChangeLeverage, onChangeCollateral } = useOnChangeHandlers({
+    dispatch,
+    isLeverageFixed,
+    leverage,
+    collateralAmountStr,
+    positionAmountStr,
+    price: product.latestVersion.price,
+  })
 
   const onConfirm = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const collateralDifference = getCollateralDifference(collateralAmount, currentCollateral)
-    const positionDifference = getPositionDifference(positionAmount, currentPositionAmount)
+    const positionDifference = getPositionDifference(positionAmount, 0n)
     const leverageDifference = getLeverageDifference({
       currentCollateral,
       price,
@@ -178,8 +105,7 @@ function TradeForm(props: TradeFormProps) {
     })
 
     const usdcAllowance = collateralData?.usdcAllowance ?? 0n
-
-    setAdjustment({
+    const adjustmentState: Adjustment = {
       collateral: {
         newCollateral: collateralAmountStr,
         difference: collateralDifference,
@@ -190,7 +116,7 @@ function TradeForm(props: TradeFormProps) {
       position: {
         newPosition: positionAmountStr,
         difference: positionDifference,
-        isNewPosition,
+        isNewPosition: true,
         isClosingPosition: Big18Math.isZero(positionAmount),
         symbol,
         fee: calcPositionFee(price, positionDifference, takerFee),
@@ -198,16 +124,17 @@ function TradeForm(props: TradeFormProps) {
       leverage: leverage ?? undefined,
       leverageDifference,
       adjustmentType: Big18Math.isZero(currentPositionAmount) ? AdjustmentType.Create : AdjustmentType.Adjust,
-    })
+    }
+    dispatch({ type: ActionTypes.SET_ADJUSTMENT, payload: adjustmentState })
   }
 
   const closeAdjustmentModal = () => {
-    setAdjustment(null)
-    setUpdating(false)
+    dispatch({ type: ActionTypes.SET_ADJUSTMENT, payload: null })
+    dispatch({ type: ActionTypes.SET_UPDATING, payload: false })
   }
 
   const cancelAdjustmentModal = () => {
-    setAdjustment(null)
+    dispatch({ type: ActionTypes.SET_ADJUSTMENT, payload: null })
     resetInputs()
   }
 
