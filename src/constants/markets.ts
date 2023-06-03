@@ -9,6 +9,11 @@ export enum OrderDirection {
   Short = 'Short',
 }
 
+export enum OpenPositionType {
+  maker = 'maker',
+  taker = 'taker',
+}
+
 export const ChainMarkets: {
   [chainId in SupportedChainId]: {
     [asset in SupportedAsset]?: { [OrderDirection.Long]?: Address; [OrderDirection.Short]?: Address }
@@ -75,3 +80,22 @@ export const addressToAsset = (address: Address) => {
     }
   }
 }
+
+export const ONLY_INCLUDE: { [chainId: number]: string[] | (`0x${string}` | undefined)[] } = {
+  [mainnet.id]: [
+    '0x60b24e58a46896724f8e2b18f18c801976d2b569'.toLowerCase(),
+    '0xdb60626ff6cdc9db07d3625a93d21ddf0f8a688c'.toLowerCase(),
+    '0xfed3e166330341e0305594b8c6e6598f9f4cbe9b'.toLowerCase(),
+  ],
+  [arbitrumGoerli.id]: Object.values(ChainMarkets[arbitrumGoerli.id])
+    .map((x) => [x.Long, x.Short])
+    .flat(),
+  [arbitrum.id]: Object.values(ChainMarkets[arbitrum.id])
+    .map((x) => [x.Long, x.Short])
+    .flat(),
+  [baseGoerli.id]: Object.values(ChainMarkets[baseGoerli.id])
+    .map((x) => [x.Long, x.Short])
+    .flat(),
+}
+
+export const MaxUint256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')

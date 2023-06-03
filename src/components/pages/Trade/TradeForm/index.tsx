@@ -1,5 +1,8 @@
+import { Flex, Spinner } from '@chakra-ui/react'
+
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
+import { useCurrentPosition } from '@/hooks/markets'
 
 import { Container } from '@ds/Container'
 
@@ -18,20 +21,10 @@ const dummyData = {
 
 function TradeContainer() {
   const { formState, setTradeFormState } = useTradeFormState()
-  const { selectedMarket, orderDirection, setOrderDirection } = useMarketContext()
+  const { selectedMarket, orderDirection, setOrderDirection, selectedMarketSnapshot } = useMarketContext()
+  const positionData = useCurrentPosition()
+
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
-
-  const handleSubmitTrade = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // TODO: invalidate positions query
-    alert('order submitted')
-  }
-
-  const handleModifyPosition = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // TODO: invalidate positions query
-    alert('modify position')
-  }
 
   const handleClosePosition = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -45,33 +38,33 @@ function TradeContainer() {
   }
 
   const containerVariant = getContainerVariant(formState)
+  const product = selectedMarketSnapshot?.[orderDirection]
+  const showTradeForm = product && positionData && 'position' in positionData && !positionData.position
+  const showModifyForm =
+    formState !== FormState.close && product && positionData && 'position' in positionData && positionData.position
+  const showCloseForm =
+    formState === FormState.close && positionData && 'position' in positionData && positionData.position
 
   return (
     <Container height="100%" minHeight="560px" p="0" variant={containerVariant}>
-      {formState === FormState.trade && (
-        <TradeForm
-          onSubmit={handleSubmitTrade}
-          orderDirection={orderDirection}
-          setOrderDirection={setOrderDirection}
-          availableCollateral={dummyData.collateral}
-          amount={dummyData.amount}
-        />
+      {!product && (
+        <Flex height="100%" width="100%" justifyContent="center" alignItems="center">
+          <Spinner />
+        </Flex>
       )}
-      {formState === FormState.modify && (
+      {showTradeForm && (
+        <TradeForm orderDirection={orderDirection} setOrderDirection={setOrderDirection} product={product} />
+      )}
+      {showModifyForm && positionData && positionData.position && (
         <ModifyPositionForm
-          onSubmit={handleModifyPosition}
           orderDirection={orderDirection}
           setOrderDirection={setOrderDirection}
-          availableCollateral={dummyData.collateral}
-          amount={dummyData.amount}
+          product={product}
+          position={positionData.position}
         />
       )}
-      {formState === FormState.close && (
-        <ClosePositionForm onSubmit={handleClosePosition} positionSize={dummyData.positionSize} />
-      )}
-      {formState === FormState.withdraw && (
-        <WithdrawForm onSubmit={handleWithdrawCollateral} collateral={dummyData.collateral} />
-      )}
+      {showCloseForm && <ClosePositionForm onSubmit={handleClosePosition} positionSize={dummyData.positionSize} />}
+      {formState === FormState.withdraw && <WithdrawForm onSubmit={handleWithdrawCollateral} />}
     </Container>
   )
 }

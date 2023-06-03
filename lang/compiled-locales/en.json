@@ -23,6 +23,12 @@
       "value": "All Positions"
     }
   ],
+  "3cJGM2": [
+    {
+      "type": 0,
+      "value": "Liquidity (L/S)"
+    }
+  ],
   "47FYwb": [
     {
       "type": 0,
@@ -45,12 +51,6 @@
     {
       "type": 0,
       "value": "Pricing"
-    }
-  ],
-  "5vASqA": [
-    {
-      "type": 0,
-      "value": "Daily funding rate"
     }
   ],
   "6JqZwg": [
@@ -87,6 +87,24 @@
     {
       "type": 0,
       "value": "You will receive..."
+    }
+  ],
+  "A3zdUJ": [
+    {
+      "type": 0,
+      "value": "Liquidation Price"
+    }
+  ],
+  "A6Mtvr": [
+    {
+      "type": 0,
+      "value": "Approve USDC"
+    }
+  ],
+  "AxhyVR": [
+    {
+      "type": 0,
+      "value": "Open Interest (L/S)"
     }
   ],
   "BY343C": [
@@ -177,16 +195,22 @@
       "value": "Close position"
     }
   ],
+  "N2IrpM": [
+    {
+      "type": 0,
+      "value": "Confirm"
+    }
+  ],
+  "NTgwLi": [
+    {
+      "type": 0,
+      "value": "Place Order"
+    }
+  ],
   "OOk+VQ": [
     {
       "type": 0,
       "value": "Modify position"
-    }
-  ],
-  "OiLWYo": [
-    {
-      "type": 0,
-      "value": "Avg. Entry"
     }
   ],
   "Oj4si1": [
@@ -199,12 +223,6 @@
     {
       "type": 0,
       "value": "Date"
-    }
-  ],
-  "PQiNnk": [
-    {
-      "type": 0,
-      "value": "Open Interest"
     }
   ],
   "QFNxVm": [
@@ -243,6 +261,12 @@
       "value": "Price impact"
     }
   ],
+  "WCaf5C": [
+    {
+      "type": 0,
+      "value": "Approve"
+    }
+  ],
   "XPD9S1": [
     {
       "type": 0,
@@ -253,6 +277,18 @@
     {
       "type": 0,
       "value": "24h Volume"
+    }
+  ],
+  "XviFuR": [
+    {
+      "type": 0,
+      "value": "$0.00"
+    }
+  ],
+  "ZaNKvA": [
+    {
+      "type": 0,
+      "value": "Open position"
     }
   ],
   "agOXPD": [
@@ -271,12 +307,6 @@
     {
       "type": 0,
       "value": "Liquidation price"
-    }
-  ],
-  "ctieLo": [
-    {
-      "type": 0,
-      "value": "Liquidity"
     }
   ],
   "d0Gd72": [
@@ -345,6 +375,12 @@
       "value": "x"
     }
   ],
+  "pWaCcp": [
+    {
+      "type": 0,
+      "value": "Average Entry"
+    }
+  ],
   "pbpdV6": [
     {
       "type": 0,
@@ -365,12 +401,6 @@
     {
       "type": 0,
       "value": "Fees"
-    }
-  ],
-  "qciRKk": [
-    {
-      "type": 0,
-      "value": "Average entry"
     }
   ],
   "rbrahO": [
@@ -395,6 +425,12 @@
     {
       "type": 0,
       "value": "--"
+    }
+  ],
+  "y7EKeV": [
+    {
+      "type": 0,
+      "value": "Daily Funding Rate"
     }
   ],
   "yR4V5C": [

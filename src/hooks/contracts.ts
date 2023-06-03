@@ -1,10 +1,11 @@
 import { Address, getAddress } from 'viem'
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from 'wagmi/chains'
 
+import { DSU, USDC, multiInvokerContract } from '@/constants/contracts'
 import { SupportedChainId } from '@/constants/network'
 import { useChainId, useProvider } from '@/hooks/network'
 
-import { ICollateralAbi__factory, LensAbi__factory } from '@t/generated'
+import { ERC20Abi__factory, ICollateralAbi__factory, LensAbi__factory, MultiInvokerAbi__factory } from '@t/generated'
 
 type AddressMapping = { [chain in SupportedChainId]: Address }
 
@@ -36,4 +37,25 @@ export const useCollateral = () => {
   const chainId = useChainId()
 
   return ICollateralAbi__factory.connect(addresses[chainId], provider)
+}
+
+export const useDSU = () => {
+  const provider = useProvider()
+  const chainId = useChainId()
+
+  return ERC20Abi__factory.connect(DSU.address[chainId], provider)
+}
+
+export const useUSDC = () => {
+  const provider = useProvider()
+  const chainId = useChainId()
+
+  return ERC20Abi__factory.connect(USDC.address[chainId], provider)
+}
+
+export const useMultiInvoker = () => {
+  const provider = useProvider()
+  const chainId = useChainId()
+
+  return MultiInvokerAbi__factory.connect(multiInvokerContract.address[chainId], provider)
 }
