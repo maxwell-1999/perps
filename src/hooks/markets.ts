@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import { multicall } from '@wagmi/core'
 import { ethers } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
@@ -745,15 +745,18 @@ export type LivePrices = Awaited<ReturnType<typeof useChainLivePrices>>
 
 export const useRefreshMarketDataOnPriceUpdates = () => {
   const chainId = useChainId()
+  const queryClient = useQueryClient()
   const [aggregators, setAggregators] = useState<string[]>([])
   const { data: products, isPreviousData } = useChainAssetSnapshots()
   const wsProvider = useWsProvider()
-  const { refetch: refetchAssetSnapshots } = useChainAssetSnapshots()
-  const { refetch: refetchUserCurrentPositions } = useUserCurrentPositions()
 
   const refresh = useCallback(
-    () => Promise.all([refetchAssetSnapshots(), refetchUserCurrentPositions()]),
-    [refetchAssetSnapshots, refetchUserCurrentPositions],
+    () =>
+      queryClient.invalidateQueries({
+        predicate: ({ queryKey }) =>
+          ['userCurrentPositions', 'assetSnapshots'].includes(queryKey.at(0) as string) && queryKey.includes(chainId),
+      }),
+    [queryClient, chainId],
   )
 
   useEffect(() => {
