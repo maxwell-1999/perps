@@ -1,17 +1,16 @@
 import { useColorModeValue, useTheme } from '@chakra-ui/react'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import { UseFormSetValue } from 'react-hook-form'
 import { useIntl } from 'react-intl'
-import { formatEther } from 'viem'
 
-import { Currency, SupportedAsset } from '@/constants/assets'
+import { SupportedAsset } from '@/constants/assets'
 import { FormState } from '@/contexts/tradeFormContext'
 
-import { Action, ActionTypes } from './reducer'
+import { FormNames } from './constants'
 import {
   calculateAndUpdateCollateral,
   calculateAndUpdateLeverage,
   calculateAndUpdatePosition,
-  calculateInitialLeverage,
   max18Decimals,
 } from './utils'
 
@@ -78,6 +77,7 @@ export function useTradeFormCopy() {
     }),
     zeroUsd: intl.formatMessage({ defaultMessage: '$0.00' }),
     openPosition: intl.formatMessage({ defaultMessage: 'Open position' }),
+    connectWallet: intl.formatMessage({ defaultMessage: 'Connect wallet' }),
   }
 }
 
@@ -90,118 +90,73 @@ export function useReceiptCopy() {
     tradingFee: intl.formatMessage({ defaultMessage: 'Trading fee' }),
   }
 }
-
-export const getContainerVariant = (formState: FormState) => {
-  switch (formState) {
-    case FormState.modify:
-      return 'active'
-    case FormState.close:
-    case FormState.withdraw:
-      return 'pink'
-    default:
-      return 'transparent'
-  }
-}
-
-type UseInitialInputs = {
-  userCollateral: bigint
-  amount: bigint
-  price: bigint
-  isNewPosition: boolean
-}
-
-export const useInitialInputs = ({ userCollateral, amount, price, isNewPosition }: UseInitialInputs) =>
-  useMemo(() => {
-    const formattedCollateral = formatEther(userCollateral)
-    const formattedAmount = formatEther(amount)
-    return {
-      currency: Currency.USDC,
-      collateralAmount: formattedCollateral === '0.0' ? '0' : formattedCollateral,
-      positionAmount: formattedAmount === '0.0' ? '0' : formattedAmount,
-      isLeverageFixed: false,
-      leverage: calculateInitialLeverage({ isNewPosition, amount, currentCollateralAmount: userCollateral, price }),
-    }
-  }, [userCollateral, amount, price, isNewPosition])
-
-// Define the types for the object argument
 interface OnChangeHandlersArgs {
-  dispatch: React.Dispatch<Action>
+  setValue: UseFormSetValue<{ amount: string; collateral: string; leverage: number }>
   isLeverageFixed: boolean
-  leverage: string
-  collateralAmountStr: string
-  positionAmountStr: string
+  leverage: number
+  collateral: string
+  amount: string
   price: bigint
 }
 
-// Define the custom hook
 export const useOnChangeHandlers = ({
-  dispatch,
+  setValue,
   isLeverageFixed,
   leverage,
-  collateralAmountStr,
-  positionAmountStr,
+  collateral,
+  amount,
   price,
 }: OnChangeHandlersArgs) => {
   const onChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newAmount = e.target.value
     const validatedAmount = max18Decimals(newAmount)
-    dispatch({ type: ActionTypes.SET_POSITION_AMOUNT, payload: validatedAmount })
+    setValue(FormNames.amount, validatedAmount)
 
     if (isLeverageFixed) {
-      const newCollateralAmt = calculateAndUpdateCollateral({ amount: validatedAmount, leverage, price })
-      dispatch({ type: ActionTypes.SET_COLLATERAL_AMOUNT, payload: newCollateralAmt })
+      const newCollateralAmt = calculateAndUpdateCollateral({ amount: validatedAmount, leverage: `${leverage}`, price })
+      setValue(FormNames.collateral, newCollateralAmt)
     } else {
       const newLeverage = calculateAndUpdateLeverage({
         amount: validatedAmount,
-        collateral: collateralAmountStr,
+        collateral,
         price,
       })
-      dispatch({ type: ActionTypes.SET_LEVERAGE, payload: newLeverage })
+      setValue(FormNames.leverage, parseFloat(newLeverage))
     }
   }
 
   const onChangeLeverage = (newLeverage: number) => {
     const validatedLeverage = max18Decimals(`${newLeverage}`)
-    dispatch({ type: ActionTypes.SET_LEVERAGE, payload: validatedLeverage })
+    setValue(FormNames.leverage, parseFloat(validatedLeverage))
     const newPosition = calculateAndUpdatePosition({
-      collateral: collateralAmountStr,
+      collateral,
       leverage: validatedLeverage,
       price,
     })
-    dispatch({ type: ActionTypes.SET_POSITION_AMOUNT, payload: newPosition })
+    setValue(FormNames.amount, newPosition)
   }
 
   const onChangeCollateral = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newAmount = e.target.value
     const validatedAmount = max18Decimals(newAmount)
-    dispatch({ type: ActionTypes.SET_COLLATERAL_AMOUNT, payload: validatedAmount })
-    dispatch({ type: ActionTypes.SET_COLLATERAL_HAS_INPUT, payload: true })
+    setValue(FormNames.collateral, validatedAmount)
 
     if (isLeverageFixed) {
       const newPosition = calculateAndUpdatePosition({
-        collateral: collateralAmountStr,
-        leverage,
+        collateral,
+        leverage: `${leverage}`,
         price,
       })
-      dispatch({ type: ActionTypes.SET_POSITION_AMOUNT, payload: newPosition })
+      setValue(FormNames.amount, newPosition)
     } else {
       const newLeverage = calculateAndUpdateLeverage({
-        amount: positionAmountStr,
+        amount,
         collateral: validatedAmount,
         price,
       })
-      dispatch({ type: ActionTypes.SET_LEVERAGE, payload: newLeverage })
+      setValue(FormNames.leverage, parseFloat(newLeverage))
     }
   }
 
   return { onChangeAmount, onChangeLeverage, onChangeCollateral }
 }
-
-// const { onChangeAmount, onChangeLeverage, onChangeCollateral } = useOnChangeHandlers({
-//   dispatch,
-//   isLeverageFixed: state.isLeverageFixed,
-//   leverage: state.leverage,
-//   collateralAmountStr: state.collateralAmountStr,
-//   positionAmountStr: state.positionAmountStr,
-//   price: product.latestVersion.price
-// })

@@ -1,4 +1,5 @@
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
+import { useForm } from 'react-hook-form'
 
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
@@ -22,6 +23,12 @@ function ClosePositionForm(props: ClosePositionFormProps) {
   const { assetMetadata } = useMarketContext()
   const copy = useTradeFormCopy()
   const { percentBtnBg } = useStyles()
+  const { control } = useForm({
+    defaultValues: {
+      amount: '',
+      receiveInput: '',
+    },
+  })
 
   return (
     <Form onSubmit={onSubmit}>
@@ -30,7 +37,6 @@ function ClosePositionForm(props: ClosePositionFormProps) {
         <Input
           type="number"
           id={formIds.closeAmount}
-          name={formIds.closeAmount}
           labelText={copy.amountToClose}
           placeholder="0.0000"
           rightLabel={
@@ -40,6 +46,8 @@ function ClosePositionForm(props: ClosePositionFormProps) {
               </Text>
             </FormLabel>
           }
+          control={control}
+          name="amount"
           rightEl={<Pill text={assetMetadata.baseCurrency} />}
           mb="12px"
         />
@@ -62,7 +70,6 @@ function ClosePositionForm(props: ClosePositionFormProps) {
         <Input
           type="number"
           id={formIds.receiveInput}
-          name={formIds.receiveInput}
           labelText={copy.youWillReceive}
           placeholder="0.0000"
           rightLabel={
@@ -72,6 +79,8 @@ function ClosePositionForm(props: ClosePositionFormProps) {
               </Text>
             </FormLabel>
           }
+          control={control}
+          name="receiveInput"
           rightEl={<Pill text={assetMetadata.quoteCurrency} />}
           mb="12px"
         />

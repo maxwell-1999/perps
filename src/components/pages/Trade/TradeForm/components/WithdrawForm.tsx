@@ -1,4 +1,5 @@
 import { ButtonGroup, Flex, FormLabel, Text } from '@chakra-ui/react'
+import { useForm } from 'react-hook-form'
 
 import { DataRow } from '@/components/design-system'
 import { useMarketContext } from '@/contexts/marketContext'
@@ -20,7 +21,11 @@ function WithdrawForm(props: WithDrawFormProps) {
   const { setTradeFormState } = useTradeFormState()
   const copy = useTradeFormCopy()
   const { assetMetadata } = useMarketContext()
-  // Todo: fetch collateral
+  const { control } = useForm({
+    defaultValues: {
+      withdrawAmount: '',
+    },
+  })
 
   return (
     <Form onSubmit={onSubmit}>
@@ -34,7 +39,6 @@ function WithdrawForm(props: WithDrawFormProps) {
         <Input
           type="number"
           id={formIds.withdrawAmount}
-          name={formIds.withdrawAmount}
           labelText={copy.youCanNowWithdraw}
           placeholder="0.0000"
           rightLabel={
@@ -45,6 +49,8 @@ function WithdrawForm(props: WithDrawFormProps) {
             </FormLabel>
           }
           rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+          name="withdrawAmount"
+          control={control}
           mb="12px"
         />
       </Flex>

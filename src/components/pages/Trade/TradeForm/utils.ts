@@ -21,15 +21,17 @@ export const calculateInitialLeverage = ({
   currentCollateralAmount,
   price,
 }: CalculateInitialLeverage) => {
-  if (!amount || !currentCollateralAmount || !price) return '0.0'
-  if (isNewPosition) return '2.0'
+  if (!amount || !currentCollateralAmount || !price) return 0
+  if (isNewPosition) return 2
 
   const formattedAmount = formatEther(amount) as `${number}`
   const parsedPositionAmount = parseEther(formattedAmount)
-  if (Big18Math.isZero(currentCollateralAmount)) return formatBig18(0n, { numSigFigs: 2, useGrouping: false })
+  if (Big18Math.isZero(currentCollateralAmount)) {
+    return parseFloat(formatBig18(0n, { numSigFigs: 2, useGrouping: false }))
+  }
 
   const leverage = calcLeverage(price, parsedPositionAmount, currentCollateralAmount)
-  return formatBig18(leverage, { numSigFigs: 2, useGrouping: false })
+  return parseFloat(formatBig18(leverage, { numSigFigs: 2, useGrouping: false }))
 }
 
 export const max18Decimals = (amount: string) => {
@@ -165,4 +167,28 @@ export const calcPositionFee = (price: bigint, positionDelta: bigint, feeRate: b
 export const formatStringToBigint = (value: string) => {
   if (!value || value === '.') return 0n
   return parseEther(value as `${number}`)
+}
+
+type InitialInputs = {
+  userCollateral?: bigint
+  amount?: bigint
+  price?: bigint
+  isNewPosition: boolean
+  isConnected: boolean
+}
+
+export const formatInitialInputs = ({ userCollateral, amount, price, isNewPosition, isConnected }: InitialInputs) => {
+  if (!userCollateral || !amount || !price || !isConnected)
+    return {
+      collateral: '',
+      amount: '',
+      leverage: 1,
+    }
+  const formattedCollateral = formatEther(userCollateral)
+  const formattedAmount = formatEther(amount)
+  return {
+    collateral: formattedCollateral === '0.0' ? '0' : formattedCollateral,
+    amount: formattedAmount === '0.0' ? '0' : formattedAmount,
+    leverage: calculateInitialLeverage({ isNewPosition, amount, currentCollateralAmount: userCollateral, price }),
+  }
 }
