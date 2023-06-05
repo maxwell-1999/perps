@@ -349,7 +349,7 @@ const fetchUserPositionDetails = async (
       nextLeverage: collateral > 0n ? Big18Math.div(nextNotional, collateral) : 0n,
     }
   }
-  const { startBlock, depositAmount, fees, endBlock, lastUpdatedBlockNumber, valuePnl } = graphPosition
+  const { startBlock, depositAmount, fees: _fees, endBlock, lastUpdatedBlockNumber, valuePnl } = graphPosition
   const closedPosition = BigInt(endBlock) > -1n
   // If the graph position is available, use that to find side as this might be a historical position with no
   // current position size
@@ -683,6 +683,7 @@ const fetchUserPositionDetails = async (
     deposits = deposits + sum(_deposits.map((d) => d.args.amount)) - sum(_withdrawals.map((d) => d.args.amount))
   }
 
+  const fees = BigInt(_fees)
   return {
     asset,
     direction,
@@ -699,10 +700,10 @@ const fetchUserPositionDetails = async (
     nextNotional,
     leverage: collateral > 0n ? Big18Math.div(size(openInterest), collateral) : 0n,
     nextLeverage: collateral > 0n ? Big18Math.div(nextNotional, collateral) : 0n,
-    fees: BigInt(fees),
+    fees,
     subPositions,
     liquidations: positionChanges.liquidations,
-    pnl: closedPosition ? BigInt(valuePnl) : collateral - startCollateral - deposits,
+    pnl: closedPosition ? BigInt(valuePnl) - fees : collateral - startCollateral - deposits,
     collateralChanges,
   }
 }
