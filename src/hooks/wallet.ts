@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAccount, useChainId } from 'wagmi'
 
+import { multiInvokerContract } from '@/constants/contracts'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
 
-import { useDSU, useUSDC } from './contracts'
+import { useUSDC } from './contracts'
 import { useProvider } from './network'
 
 export type Balances = {
@@ -17,7 +18,6 @@ export const useBalances = () => {
   const chainId = useChainId() as SupportedChainId
   const provider = useProvider()
   const { address } = useAccount()
-  const dsuContract = useDSU()
   const usdcContract = useUSDC()
 
   return useQuery({
@@ -25,12 +25,12 @@ export const useBalances = () => {
     enabled: !!address,
     queryFn: async () => {
       if (!address || !chainId || !provider || !SupportedChainIds.includes(chainId)) return
-      const dsuBalance = await dsuContract.balanceOf(address)
       const usdcBalance = await usdcContract.balanceOf(address)
+      const usdcAllowance = await usdcContract.allowance(address, multiInvokerContract.address[chainId])
 
       return {
-        dsu: dsuBalance,
         usdc: usdcBalance,
+        usdcAllowance,
       }
     },
   })

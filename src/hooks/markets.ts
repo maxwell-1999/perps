@@ -29,7 +29,6 @@ import { GetAccountPositionsQuery, PositionSide } from '@t/gql/graphql'
 import { useCollateral, useLens, useMultiInvoker, useUSDC } from './contracts'
 import { useAddress, useChainId, useGraphClient, useWsProvider } from './network'
 import { usePyth } from './network'
-import { useBalances } from './wallet'
 
 export type AssetSnapshots = {
   [key in SupportedAsset]?: {
@@ -864,46 +863,23 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
   }, [aggregators, refresh, wsProvider])
 }
 
-export const useUserCollateral = (productAddress?: string) => {
-  const chainId = useChainId()
-  const { address } = useAccount()
-  const lensContract = useLens()
-  const usdcContract = useUSDC()
-
-  return useQuery({
-    queryKey: ['productCollateral', chainId, productAddress, address || ''],
-    enabled: !!productAddress,
-    queryFn: async () => {
-      if (!address || !chainId || !productAddress) return
-
-      const [userCollateral, maintenance, usdcAllowance] = await Promise.all([
-        await lensContract['collateral(address,address)'].staticCall(address, productAddress),
-        await lensContract.maintenance(address, productAddress),
-        await usdcContract.allowance(address, multiInvokerContract.address[chainId]),
-      ])
-
-      return {
-        userCollateral,
-        maintenance,
-        usdcAllowance,
-      }
-    },
-  })
-}
-
 export const useProductTransactions = (productAddress?: string) => {
   const multiInvoker = useMultiInvoker()
   const chainId = useChainId()
   const usdcContract = useUSDC()
   const { address } = useAccount()
   const { sendTransactionAsync } = useSendTransaction()
-
   const { data: walletClient } = useWalletClient()
+  const queryClient = useQueryClient()
 
-  const { refetch: refetchCollateral } = useUserCollateral(productAddress)
-  const { refetch: refetchCurrentPositions } = useUserCurrentPositions()
-  const { refetch: refetchBalances } = useBalances()
-  // TODO: whatever else needs to be refetched..
+  const refresh = useCallback(
+    () =>
+      queryClient.invalidateQueries({
+        predicate: ({ queryKey }) =>
+          ['userCurrentPositions', 'balances'].includes(queryKey.at(0) as string) && queryKey.includes(chainId),
+      }),
+    [queryClient, chainId],
+  )
 
   const onApproveUSDC = async () => {
     if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
@@ -917,7 +893,6 @@ export const useProductTransactions = (productAddress?: string) => {
       account: walletClient?.account,
     })
     await waitForTransaction({ hash: receipt.hash })
-    await refetchCollateral()
   }
 
   const onModifyPosition = async (collateralDelta: bigint, positionSide: OpenPositionType, positionDelta: bigint) => {
@@ -960,7 +935,7 @@ export const useProductTransactions = (productAddress?: string) => {
       account: walletClient?.account,
     })
     await waitForTransaction({ hash: receipt.hash })
-    await Promise.all([refetchBalances(), refetchCurrentPositions(), refetchCollateral()])
+    await refresh()
   }
   return {
     onApproveUSDC,

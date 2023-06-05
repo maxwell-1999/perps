@@ -16,13 +16,15 @@ import {
   useColorModeValue,
   useTheme,
 } from '@chakra-ui/react'
+import { Control, useController } from 'react-hook-form'
 
 export interface InputProps extends ChakraInputProps {
   id: string
   labelText: string
+  name: string
+  control: Control<any>
   rightLabel?: React.ReactNode
   width?: FormControlProps['width']
-  errorMessage?: string
   helperText?: string
   isRequired?: boolean
   pattern?: string
@@ -33,9 +35,10 @@ export interface InputProps extends ChakraInputProps {
 export const Input: React.FC<InputProps> = ({
   id,
   labelText,
+  name,
+  control,
   rightLabel,
   width,
-  errorMessage,
   helperText,
   isRequired,
   pattern,
@@ -47,8 +50,16 @@ export const Input: React.FC<InputProps> = ({
   const color = useColorModeValue(theme.colors.brand.blackAlpha[50], theme.colors.brand.gray[100])
   const pr = rightEl ? { pr: '60px' } : {}
   const paddingProps = { ...pr }
+  const {
+    field: { ref, ...inputHandlers },
+    fieldState: { error },
+  } = useController({
+    name,
+    control,
+    rules: { required: isRequired },
+  })
   return (
-    <FormControl width={width} isInvalid={Boolean(errorMessage)}>
+    <FormControl width={width} isInvalid={Boolean(error)}>
       <Flex justifyContent="space-between" mb={2} px={1}>
         {labelText && (
           <FormLabel m={0} htmlFor={id}>
@@ -62,16 +73,18 @@ export const Input: React.FC<InputProps> = ({
         <ChakraInput
           id={id}
           variant="trade"
-          isInvalid={Boolean(errorMessage)}
+          isInvalid={Boolean(error)}
           isRequired={isRequired}
           pattern={pattern}
           {...paddingProps}
+          {...inputHandlers}
+          ref={ref}
           {...inputProps}
         />
         {rightEl && <InputRightElement pointerEvents="none">{rightEl}</InputRightElement>}
       </InputGroup>
       <Flex pt={0} pb={0} px={1}>
-        {errorMessage && <FormErrorMessage mt={1}>{errorMessage}</FormErrorMessage>}
+        {error && <FormErrorMessage mt={1}>{error.message}</FormErrorMessage>}
         {helperText && (
           <FormHelperText mt={1} color={color}>
             {helperText}

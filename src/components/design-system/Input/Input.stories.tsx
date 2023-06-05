@@ -26,14 +26,6 @@ export const Default: Story = {
   },
 }
 
-export const Error: Story = {
-  args: {
-    labelText: 'Collateral',
-    width: '50%',
-    errorMessage: 'Invalid Value ',
-  },
-}
-
 export const HelperText: Story = {
   args: {
     labelText: 'Collateral',

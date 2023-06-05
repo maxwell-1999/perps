@@ -1,12 +1,13 @@
-import { Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
-import { useCallback, useEffect, useReducer } from 'react'
+import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { useAccount } from 'wagmi'
 
 import Toggle from '@/components/shared/Toggle'
 import { OpenPositionType, OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { useProductTransactions, useUserCollateral } from '@/hooks/markets'
+import { PositionDetails, useProductTransactions } from '@/hooks/markets'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 
@@ -16,11 +17,11 @@ import { Slider } from '@ds/Slider'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
 
-import { TradeFormState, formIds, orderDirections } from '../constants'
+import { FormNames, formIds, orderDirections } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
-import { Action, ActionTypes, getInitialReduxState, reducer } from '../reducer'
 import {
   calcPositionFee,
+  formatInitialInputs,
   formatStringToBigint,
   getCollateralDifference,
   getLeverageDifference,
@@ -37,10 +38,11 @@ interface TradeFormProps {
   orderDirection: OrderDirection
   setOrderDirection: (orderDirection: OrderDirection) => void
   product: IPerennialLens.ProductSnapshotStructOutput
+  position?: PositionDetails
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { orderDirection, setOrderDirection, product } = props
+  const { orderDirection, setOrderDirection, product, position } = props
   const {
     productAddress,
     latestVersion: { price },
@@ -56,44 +58,81 @@ function TradeForm(props: TradeFormProps) {
   const prevAddress = usePrevious(address)
   const { assetMetadata } = useMarketContext()
   const { onApproveUSDC, onModifyPosition } = useProductTransactions(productAddress)
-
-  const { data: collateralData } = useUserCollateral(productAddress)
-  const currentCollateral = collateralData?.userCollateral ?? 0n
-  const currentPositionAmount = 0n
-
-  const [state, dispatch] = useReducer<React.Reducer<TradeFormState, Action>>(reducer, getInitialReduxState())
-
-  const { updating, positionAmountStr, collateralAmountStr, leverage, isLeverageFixed, adjustment } = state
-
+  const [adjustment, setAdjustment] = useState<Adjustment | null>(null)
+  const [updating, setUpdating] = useState(false)
   const prevUpdating = usePrevious(updating)
 
-  const positionAmount = formatStringToBigint(positionAmountStr)
-  const collateralAmount = formatStringToBigint(collateralAmountStr)
+  const hasPosition = !!position?.position && !!address
+  const positionOrderDirection = position?.direction
+  const currentPositionAmount = position?.position ?? 0n
+  const currentCollateral = position?.currentCollateral ?? 0n
+  const isNewPosition = Big18Math.isZero(currentPositionAmount)
+
+  const initialFormState = useMemo(
+    () =>
+      formatInitialInputs({
+        userCollateral: currentCollateral,
+        amount: currentPositionAmount,
+        price,
+        isNewPosition,
+        isConnected: !!address,
+      }),
+    [currentCollateral, currentPositionAmount, price, isNewPosition, address],
+  )
+
+  const {
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    reset,
+    formState: { dirtyFields },
+  } = useForm({
+    defaultValues: initialFormState,
+  })
+  // TODO: check why this isn't picking up the change on collateral.
+  // possibly because we're calling setValue rather than using the default onChange?
+  const collateralHasInput = dirtyFields.collateral
+
+  const collateral = watch(FormNames.collateral)
+  const amount = watch(FormNames.amount)
+  const leverage = watch(FormNames.leverage)
 
   const resetInputs = useCallback(() => {
-    if (updating) return // Don't change values if updating
-    dispatch({ type: ActionTypes.RESET_FORM })
-  }, [updating])
+    if (updating) return
+    reset({ ...initialFormState, collateral: collateralHasInput ? collateral : initialFormState.collateral })
+  }, [initialFormState, reset, updating, collateralHasInput, collateral])
 
   useEffect(() => {
-    if (prevProductAddress !== productAddress) resetInputs()
-    // If going from discnnected to connected, reset updating state
-    else if (!prevAddress && address) dispatch({ type: ActionTypes.SET_UPDATING, payload: false })
-    else if (prevAddress !== address) resetInputs()
-    else if (prevUpdating && !updating) resetInputs() // If going from updating -> not updating, reset
-  }, [address, prevAddress, productAddress, prevProductAddress, collateralAmount, prevUpdating, updating, resetInputs])
+    const userDisconnected = !address && !!prevAddress
+    const userConnected = !!address && !prevAddress
+    const changedProducts = productAddress !== prevProductAddress
+    const userSwitchedAcct = address !== prevAddress
+    const wasUpdating = prevUpdating && !updating
+
+    const resetRequired = userConnected || userDisconnected || changedProducts || userSwitchedAcct || wasUpdating
+
+    if (userConnected) {
+      setUpdating(false)
+    }
+    if (resetRequired) {
+      resetInputs()
+    }
+  }, [address, prevAddress, productAddress, prevProductAddress, collateral, prevUpdating, updating, resetInputs])
 
   const { onChangeAmount, onChangeLeverage, onChangeCollateral } = useOnChangeHandlers({
-    dispatch,
-    isLeverageFixed,
+    setValue,
+    isLeverageFixed: false,
     leverage,
-    collateralAmountStr,
-    positionAmountStr,
+    collateral,
+    amount,
     price: product.latestVersion.price,
   })
 
-  const onConfirm = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const onConfirm = ({ collateral, amount, leverage }: { collateral: string; amount: string; leverage: number }) => {
+    const positionAmount = formatStringToBigint(amount)
+    const collateralAmount = formatStringToBigint(collateral)
+
     const collateralDifference = getCollateralDifference(collateralAmount, currentCollateral)
     const positionDifference = getPositionDifference(positionAmount, 0n)
     const leverageDifference = getLeverageDifference({
@@ -104,38 +143,38 @@ function TradeForm(props: TradeFormProps) {
       newPositionAMount: positionAmount,
     })
 
-    const usdcAllowance = collateralData?.usdcAllowance ?? 0n
+    const usdcAllowance = balances?.usdcAllowance ?? 0n
     const adjustmentState: Adjustment = {
       collateral: {
-        newCollateral: collateralAmountStr,
+        newCollateral: collateral,
         difference: collateralDifference,
         isWithdrawingTotalBalance: Big18Math.isZero(collateralAmount),
         needsApproval: needsApproval({ collateralDifference, usdcAllowance }),
         requiresManualWrap: false,
       },
       position: {
-        newPosition: positionAmountStr,
+        newPosition: amount,
         difference: positionDifference,
         isNewPosition: true,
         isClosingPosition: Big18Math.isZero(positionAmount),
         symbol,
         fee: calcPositionFee(price, positionDifference, takerFee),
       },
-      leverage: leverage ?? undefined,
+      leverage: `${leverage}`,
       leverageDifference,
       adjustmentType: Big18Math.isZero(currentPositionAmount) ? AdjustmentType.Create : AdjustmentType.Adjust,
     }
-    dispatch({ type: ActionTypes.SET_ADJUSTMENT, payload: adjustmentState })
+    setAdjustment(adjustmentState)
   }
 
   const closeAdjustmentModal = () => {
-    dispatch({ type: ActionTypes.SET_ADJUSTMENT, payload: null })
-    dispatch({ type: ActionTypes.SET_UPDATING, payload: false })
+    setAdjustment(null)
+    setUpdating(false)
   }
 
   const cancelAdjustmentModal = () => {
-    dispatch({ type: ActionTypes.SET_ADJUSTMENT, payload: null })
-    resetInputs()
+    setAdjustment(null)
+    reset()
   }
 
   return (
@@ -152,27 +191,30 @@ function TradeForm(props: TradeFormProps) {
           positionType={OpenPositionType.taker}
         />
       )}
-      <Form onSubmit={onConfirm}>
+      <Form onSubmit={handleSubmit(onConfirm)}>
         <Flex flexDirection="column" p="16px">
           <Flex justifyContent="space-between" mb="14px">
-            <Text color={textColor}>{copy.trade}</Text>
-            <Button
-              variant="text"
-              label={copy.addCollateral}
-              p={0}
-              lineHeight={1}
-              height="initial"
-              fontSize="13px"
-              color={textBtnColor}
-              _hover={{ color: textBtnHoverColor }}
-              onClick={() => setTradeFormState(FormState.close)}
-            />
+            <Text color={textColor}>{hasPosition ? copy.modifyPosition : copy.trade}</Text>
+            {!!address && (
+              <Button
+                variant="text"
+                label={copy.addCollateral}
+                p={0}
+                lineHeight={1}
+                height="initial"
+                fontSize="13px"
+                color={textBtnColor}
+                _hover={{ color: textBtnHoverColor }}
+                onClick={() => setTradeFormState(FormState.close)}
+              />
+            )}
           </Flex>
           <Flex mb="14px">
             <Toggle<OrderDirection>
               labels={orderDirections}
-              activeLabel={orderDirection}
+              activeLabel={positionOrderDirection ? positionOrderDirection : orderDirection}
               onChange={setOrderDirection}
+              overrideValue={positionOrderDirection}
             />
           </Flex>
           <Input
@@ -191,7 +233,8 @@ function TradeForm(props: TradeFormProps) {
             }
             rightEl={<Pill text={assetMetadata.quoteCurrency} />}
             mb="12px"
-            value={collateralAmountStr}
+            control={control}
+            name={FormNames.collateral}
             onChange={onChangeCollateral}
           />
           <Input
@@ -207,7 +250,8 @@ function TradeForm(props: TradeFormProps) {
             }
             rightEl={<Pill text={assetMetadata.baseCurrency} />}
             mb="12px"
-            value={positionAmountStr}
+            control={control}
+            name={FormNames.amount}
             onChange={onChangeAmount}
           />
           {/* Default slider til we get designs */}
@@ -217,18 +261,26 @@ function TradeForm(props: TradeFormProps) {
             min={0}
             max={20}
             step={0.1}
-            value={parseFloat(leverage)}
-            onChange={onChangeLeverage}
             containerProps={{
               mb: 2,
             }}
             focusThumbOnChange={false}
+            control={control}
+            name={FormNames.leverage}
+            onChange={onChangeLeverage}
           />
         </Flex>
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
           <TradeReceipt mb="25px" px="3px" />
-          <Button type="submit" label={copy.placeTrade} />
+          {hasPosition ? (
+            <ButtonGroup>
+              <Button variant="transparent" label={copy.close} onClick={() => setTradeFormState(FormState.close)} />
+              <Button flex={1} label={copy.modifyPosition} type="submit" />
+            </ButtonGroup>
+          ) : (
+            <Button type="submit" isDisabled={!address} label={address ? copy.placeTrade : copy.connectWallet} />
+          )}
         </Flex>
       </Form>
     </>
