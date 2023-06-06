@@ -78,6 +78,8 @@ export function useTradeFormCopy() {
     zeroUsd: intl.formatMessage({ defaultMessage: '$0.00' }),
     openPosition: intl.formatMessage({ defaultMessage: 'Open position' }),
     connectWallet: intl.formatMessage({ defaultMessage: 'Connect wallet' }),
+    confirmOrder: intl.formatMessage({ defaultMessage: 'Confirm Order' }),
+    confirmChanges: intl.formatMessage({ defaultMessage: 'Confirm Changes' }),
   }
 }
 

@@ -44,6 +44,7 @@ const colors = {
     },
     blackSolid: {
       5: '#1A1A1A',
+      10: '#262626',
     },
   },
 }

@@ -8,5 +8,9 @@ export const useAdjustmentModalCopy = () => {
     placeOrder: intl.formatMessage({ defaultMessage: 'Place Order' }),
     confirm: intl.formatMessage({ defaultMessage: 'Confirm' }),
     cancel: intl.formatMessage({ defaultMessage: 'Cancel' }),
+    positionSize: intl.formatMessage({ defaultMessage: 'Size' }),
+    collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
+    leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
+    position: intl.formatMessage({ defaultMessage: 'Position' }),
   }
 }
