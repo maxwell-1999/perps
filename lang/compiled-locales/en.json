@@ -195,6 +195,12 @@
       "value": "Close position"
     }
   ],
+  "N0eaIb": [
+    {
+      "type": 0,
+      "value": "Confirm Changes"
+    }
+  ],
   "N2IrpM": [
     {
       "type": 0,
@@ -241,6 +247,12 @@
     {
       "type": 0,
       "value": "Collateral"
+    }
+  ],
+  "U6qGuO": [
+    {
+      "type": 0,
+      "value": "Position"
     }
   ],
   "UwvPFx": [
@@ -431,6 +443,12 @@
     {
       "type": 0,
       "value": "--"
+    }
+  ],
+  "wbWBPw": [
+    {
+      "type": 0,
+      "value": "Confirm Order"
     }
   ],
   "y7EKeV": [

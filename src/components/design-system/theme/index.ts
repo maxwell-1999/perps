@@ -7,6 +7,7 @@ import Container from './components/container'
 import Divider from './components/divider'
 import { Form, FormError } from './components/formControl'
 import Input from './components/input'
+import Modal from './components/modal'
 import Popover from './components/popover'
 import Tabs from './components/tabs'
 import Text from './components/text'
@@ -40,6 +41,7 @@ const theme = extendTheme({
     Tabs,
     Divider,
     Popover,
+    Modal,
   },
 })
 

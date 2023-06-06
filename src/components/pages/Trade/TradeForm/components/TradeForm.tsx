@@ -7,7 +7,7 @@ import Toggle from '@/components/shared/Toggle'
 import { OpenPositionType, OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails, useProductTransactions } from '@/hooks/markets'
+import { PositionDetails } from '@/hooks/markets'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 
@@ -17,20 +17,10 @@ import { Slider } from '@ds/Slider'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
 
-import { FormNames, formIds, orderDirections } from '../constants'
+import { FormNames, OrderValues, formIds, orderDirections } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
-import {
-  calcPositionFee,
-  formatInitialInputs,
-  formatStringToBigint,
-  getCollateralDifference,
-  getLeverageDifference,
-  getPositionDifference,
-  needsApproval,
-  usePrevious,
-} from '../utils'
+import { formatInitialInputs, usePrevious } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
-import { Adjustment, AdjustmentType } from './AdjustPositionModal/constants'
 import { TradeReceipt } from './Receipt'
 import { Form } from './styles'
 
@@ -46,7 +36,6 @@ function TradeForm(props: TradeFormProps) {
   const {
     productAddress,
     latestVersion: { price },
-    productInfo: { takerFee, symbol },
   } = product
   const prevProductAddress = usePrevious(productAddress)
 
@@ -57,14 +46,13 @@ function TradeForm(props: TradeFormProps) {
   const { address } = useAccount()
   const prevAddress = usePrevious(address)
   const { assetMetadata } = useMarketContext()
-  const { onApproveUSDC, onModifyPosition } = useProductTransactions(productAddress)
-  const [adjustment, setAdjustment] = useState<Adjustment | null>(null)
+  const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
   const [updating, setUpdating] = useState(false)
   const prevUpdating = usePrevious(updating)
 
-  const hasPosition = !!position?.position && !!address
+  const hasPosition = !!position?.nextPosition && !!address
   const positionOrderDirection = position?.direction
-  const currentPositionAmount = position?.position ?? 0n
+  const currentPositionAmount = position?.nextPosition ?? 0n
   const currentCollateral = position?.currentCollateral ?? 0n
   const isNewPosition = Big18Math.isZero(currentPositionAmount)
 
@@ -129,66 +117,33 @@ function TradeForm(props: TradeFormProps) {
     price: product.latestVersion.price,
   })
 
-  const onConfirm = ({ collateral, amount, leverage }: { collateral: string; amount: string; leverage: number }) => {
-    const positionAmount = formatStringToBigint(amount)
-    const collateralAmount = formatStringToBigint(collateral)
-
-    const collateralDifference = getCollateralDifference(collateralAmount, currentCollateral)
-    const positionDifference = getPositionDifference(positionAmount, 0n)
-    const leverageDifference = getLeverageDifference({
-      currentCollateral,
-      price,
-      currentPositionAmount,
-      newCollateralAmount: collateralAmount,
-      newPositionAMount: positionAmount,
-    })
-
-    const usdcAllowance = balances?.usdcAllowance ?? 0n
-    const adjustmentState: Adjustment = {
-      collateral: {
-        newCollateral: collateral,
-        difference: collateralDifference,
-        isWithdrawingTotalBalance: Big18Math.isZero(collateralAmount),
-        needsApproval: needsApproval({ collateralDifference, usdcAllowance }),
-        requiresManualWrap: false,
-      },
-      position: {
-        newPosition: amount,
-        difference: positionDifference,
-        isNewPosition: true,
-        isClosingPosition: Big18Math.isZero(positionAmount),
-        symbol,
-        fee: calcPositionFee(price, positionDifference, takerFee),
-      },
-      leverage: `${leverage}`,
-      leverageDifference,
-      adjustmentType: Big18Math.isZero(currentPositionAmount) ? AdjustmentType.Create : AdjustmentType.Adjust,
-    }
-    setAdjustment(adjustmentState)
+  const onConfirm = (orderData: { collateral: string; amount: string; leverage: number }) => {
+    setOrderValues(orderData)
   }
 
   const closeAdjustmentModal = () => {
-    setAdjustment(null)
+    setOrderValues(null)
     setUpdating(false)
   }
 
   const cancelAdjustmentModal = () => {
-    setAdjustment(null)
+    setOrderValues(null)
     reset()
   }
 
   return (
     <>
-      {adjustment && (
+      {orderValues && (
         <AdjustPositionModal
-          isOpen={!!adjustment}
+          isOpen={!!orderValues}
           onClose={closeAdjustmentModal}
           onCancel={cancelAdjustmentModal}
-          onApproveUSDC={onApproveUSDC}
-          onModifyPosition={onModifyPosition}
-          title={'confirm'}
-          adjustment={adjustment}
+          title={isNewPosition ? copy.confirmOrder : copy.confirmChanges}
           positionType={OpenPositionType.taker}
+          position={position}
+          product={product}
+          orderValues={orderValues}
+          usdcAllowance={balances?.usdcAllowance ?? 0n}
         />
       )}
       <Form onSubmit={handleSubmit(onConfirm)}>
