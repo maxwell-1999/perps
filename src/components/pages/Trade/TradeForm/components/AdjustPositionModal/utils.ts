@@ -13,7 +13,7 @@ import {
   getPositionDifference,
   needsApproval,
 } from '../../utils'
-import { Adjustment, AdjustmentType } from './constants'
+import { Adjustment } from './constants'
 
 export const getPositionChangeValues = ({ collateral, position, leverage, leverageDifference }: Adjustment) => {
   const newCollateral = parseEther(collateral.newCollateral as `${number}`)
@@ -63,7 +63,7 @@ export const createAdjustment = ({ orderValues, position, product, usdcAllowance
     price,
     currentPositionAmount,
     newCollateralAmount: collateralAmount,
-    newPositionAMount: positionAmount,
+    newPositionAmount: positionAmount,
   })
 
   const adjustment: Adjustment = {
@@ -72,7 +72,6 @@ export const createAdjustment = ({ orderValues, position, product, usdcAllowance
       difference: collateralDifference,
       isWithdrawingTotalBalance: Big18Math.isZero(collateralAmount),
       needsApproval: needsApproval({ collateralDifference, usdcAllowance }),
-      requiresManualWrap: false,
     },
     position: {
       newPosition: amount,
@@ -84,7 +83,6 @@ export const createAdjustment = ({ orderValues, position, product, usdcAllowance
     },
     leverage: `${leverage}`,
     leverageDifference,
-    adjustmentType: Big18Math.isZero(currentPositionAmount ?? 0n) ? AdjustmentType.Create : AdjustmentType.Adjust,
   }
 
   return adjustment

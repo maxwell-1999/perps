@@ -2,7 +2,6 @@ type CollateralDetails = {
   difference: bigint
   isWithdrawingTotalBalance: boolean
   needsApproval: boolean
-  requiresManualWrap: boolean
   newCollateral: string
 }
 
@@ -18,12 +17,6 @@ type PositionDetails = {
 export type Adjustment = {
   collateral: CollateralDetails
   position: PositionDetails
-  adjustmentType: AdjustmentType
   leverage?: string
   leverageDifference: bigint
-}
-
-export enum AdjustmentType {
-  Adjust,
-  Create,
 }

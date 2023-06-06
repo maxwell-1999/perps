@@ -131,18 +131,18 @@ export const getLeverageDifference = ({
   newCollateralAmount,
   price,
   currentPositionAmount,
-  newPositionAMount,
+  newPositionAmount,
 }: {
   currentCollateral: bigint
   newCollateralAmount: bigint
   price: bigint
   currentPositionAmount: bigint
-  newPositionAMount: bigint
+  newPositionAmount: bigint
 }): bigint => {
   if (!currentCollateral) return 0n
 
   const prevLev = calcLeverage(price, currentPositionAmount, currentCollateral)
-  const newLev = calcLeverage(price, newPositionAMount, newCollateralAmount)
+  const newLev = calcLeverage(price, newPositionAmount, newCollateralAmount)
   return Big18Math.sub(newLev, prevLev)
 }
 
