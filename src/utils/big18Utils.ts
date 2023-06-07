@@ -1,4 +1,4 @@
-import { FixedNumber, WeiPerEther, formatUnits } from 'ethers'
+import { FixedNumber, WeiPerEther, formatUnits, parseEther } from 'ethers'
 
 export const formatBig18 = (
   value: bigint = 0n,
@@ -95,5 +95,18 @@ export class Big18Math {
 
   public static fixedFrom(a: bigint): FixedNumber {
     return FixedNumber.fromValue(a, Big18Math.FIXED_DECIMALS, Big18Math.FIXED_WIDTH)
+  }
+
+  public static fromFloatString(a: string): bigint {
+    if (!a || a === '.') return 0n
+    return parseEther(a.replace(/','/g, '') as `${number}`)
+  }
+
+  public static toFloatString(a: bigint): string {
+    return formatUnits(a, Big18Math.FIXED_DECIMALS)
+  }
+
+  public static fromDecimals(amount: bigint, decimals: number): bigint {
+    return amount * 10n ** BigInt(Big18Math.FIXED_DECIMALS - decimals)
   }
 }

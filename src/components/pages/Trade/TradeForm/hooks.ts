@@ -8,10 +8,10 @@ import { FormState } from '@/contexts/tradeFormContext'
 
 import { FormNames } from './constants'
 import {
-  calculateAndUpdateCollateral,
-  calculateAndUpdateLeverage,
-  calculateAndUpdatePosition,
+  collateralFromAmountAndLeverage,
+  leverageFromAmountAndCollateral,
   max18Decimals,
+  positionFromCollateralAndLeverage,
 } from './utils'
 
 type MarketChangeProps = {
@@ -55,6 +55,7 @@ export function useTradeFormCopy() {
     max: intl.formatMessage({ defaultMessage: 'Max' }),
     addCollateral: intl.formatMessage({ defaultMessage: 'Add collateral' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
+    keepFixed: intl.formatMessage({ defaultMessage: 'Keep Fixed' }),
     placeTrade: intl.formatMessage({ defaultMessage: 'Place trade' }),
     close: intl.formatMessage({ defaultMessage: 'Close' }),
     modifyPosition: intl.formatMessage({ defaultMessage: 'Modify position' }),
@@ -94,69 +95,73 @@ export function useReceiptCopy() {
 }
 interface OnChangeHandlersArgs {
   setValue: UseFormSetValue<{ amount: string; collateral: string; leverage: number }>
-  isLeverageFixed: boolean
   leverage: number
   collateral: string
   amount: string
   price: bigint
+  leverageFixed: boolean
 }
 
 export const useOnChangeHandlers = ({
   setValue,
-  isLeverageFixed,
   leverage,
   collateral,
   amount,
   price,
+  leverageFixed,
 }: OnChangeHandlersArgs) => {
-  const onChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newAmount = e.target.value
-    const validatedAmount = max18Decimals(newAmount)
-    setValue(FormNames.amount, validatedAmount)
+  const setArgs = { shouldValidate: true }
 
-    if (isLeverageFixed) {
-      const newCollateralAmt = calculateAndUpdateCollateral({ amount: validatedAmount, leverage: `${leverage}`, price })
-      setValue(FormNames.collateral, newCollateralAmt)
+  const onChangeAmount = (newAmount: string) => {
+    const validatedAmount = max18Decimals(newAmount)
+    setValue(FormNames.amount, validatedAmount, { ...setArgs, shouldDirty: true })
+
+    if (leverageFixed) {
+      const newCollateralAmt = collateralFromAmountAndLeverage({
+        amount: validatedAmount,
+        leverage: `${leverage}`,
+        price,
+      })
+      setValue(FormNames.collateral, newCollateralAmt, setArgs)
     } else {
-      const newLeverage = calculateAndUpdateLeverage({
+      const newLeverage = leverageFromAmountAndCollateral({
         amount: validatedAmount,
         collateral,
         price,
       })
-      setValue(FormNames.leverage, parseFloat(newLeverage))
+      setValue(FormNames.leverage, parseFloat(newLeverage), setArgs)
     }
   }
 
   const onChangeLeverage = (newLeverage: number) => {
     const validatedLeverage = max18Decimals(`${newLeverage}`)
-    setValue(FormNames.leverage, parseFloat(validatedLeverage))
-    const newPosition = calculateAndUpdatePosition({
+    setValue(FormNames.leverage, parseFloat(validatedLeverage), { ...setArgs, shouldDirty: true })
+    const newPosition = positionFromCollateralAndLeverage({
       collateral,
       leverage: validatedLeverage,
       price,
     })
-    setValue(FormNames.amount, newPosition)
+    setValue(FormNames.amount, newPosition, setArgs)
   }
 
-  const onChangeCollateral = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newAmount = e.target.value
-    const validatedAmount = max18Decimals(newAmount)
-    setValue(FormNames.collateral, validatedAmount)
+  const onChangeCollateral = (newAmount: string) => {
+    const validatedCollateral = max18Decimals(newAmount)
+    setValue(FormNames.collateral, validatedCollateral, { ...setArgs, shouldDirty: true })
 
-    if (isLeverageFixed) {
-      const newPosition = calculateAndUpdatePosition({
-        collateral,
+    if (leverageFixed) {
+      const newPosition = positionFromCollateralAndLeverage({
+        collateral: validatedCollateral,
         leverage: `${leverage}`,
         price,
       })
-      setValue(FormNames.amount, newPosition)
+      setValue(FormNames.amount, newPosition, setArgs)
     } else {
-      const newLeverage = calculateAndUpdateLeverage({
+      const newLeverage = leverageFromAmountAndCollateral({
         amount,
-        collateral: validatedAmount,
+        collateral: validatedCollateral,
         price,
       })
-      setValue(FormNames.leverage, parseFloat(newLeverage))
+      setValue(FormNames.leverage, parseFloat(newLeverage), setArgs)
     }
   }
 

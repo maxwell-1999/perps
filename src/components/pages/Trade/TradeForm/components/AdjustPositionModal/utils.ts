@@ -6,11 +6,10 @@ import { Big18Math, formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
 import { IPerennialLens } from '@t/generated/LensAbi'
 
 import {
+  calcCollateralDifference,
+  calcLeverageDifference,
+  calcPositionDifference,
   calcPositionFee,
-  formatStringToBigint,
-  getCollateralDifference,
-  getLeverageDifference,
-  getPositionDifference,
   needsApproval,
 } from '../../utils'
 import { Adjustment } from './constants'
@@ -53,12 +52,12 @@ export const createAdjustment = ({ orderValues, position, product, usdcAllowance
   } = product
 
   const { amount, collateral, leverage } = orderValues
-  const positionAmount = formatStringToBigint(amount)
-  const collateralAmount = formatStringToBigint(collateral)
+  const positionAmount = Big18Math.fromFloatString(amount)
+  const collateralAmount = Big18Math.fromFloatString(collateral)
 
-  const collateralDifference = getCollateralDifference(collateralAmount, currentCollateral)
-  const positionDifference = getPositionDifference(positionAmount, currentPositionAmount)
-  const leverageDifference = getLeverageDifference({
+  const collateralDifference = calcCollateralDifference(collateralAmount, currentCollateral)
+  const positionDifference = calcPositionDifference(positionAmount, currentPositionAmount)
+  const leverageDifference = calcLeverageDifference({
     currentCollateral,
     price,
     currentPositionAmount,

@@ -12,13 +12,6 @@ import TradeForm from './components/TradeForm'
 import WithdrawForm from './components/WithdrawForm'
 import { useResetFormOnMarketChange } from './hooks'
 
-const dummyData = {
-  collateral: '0.000',
-  asset: 'ETH',
-  amount: '0.000',
-  positionSize: '20000',
-}
-
 function TradeContainer() {
   const { formState, setTradeFormState } = useTradeFormState()
   const { selectedMarket, orderDirection, setOrderDirection, selectedMarketSnapshot } = useMarketContext()
@@ -40,7 +33,7 @@ function TradeContainer() {
 
   const product = selectedMarketSnapshot?.[orderDirection]
   const positionDataLoaded = positionData && 'position' in positionData
-  const positionPresent = positionDataLoaded && !!positionData.position
+  const positionPresent = positionDataLoaded && positionData.position !== undefined
   const containerVariant =
     formState !== FormState.close && positionDataLoaded && positionPresent && address ? 'pink' : 'transparent'
 
@@ -68,8 +61,8 @@ function TradeContainer() {
           position={positionPresent ? positionData.position : undefined}
         />
       )}
-      {formState === FormState.close && positionPresent && (
-        <ClosePositionForm onSubmit={handleClosePosition} positionSize={dummyData.positionSize} />
+      {formState === FormState.close && positionPresent && positionData.position !== undefined && (
+        <ClosePositionForm onSubmit={handleClosePosition} position={positionData.position} product={product} />
       )}
       {formState === FormState.withdraw && <WithdrawForm onSubmit={handleWithdrawCollateral} />}
     </Container>

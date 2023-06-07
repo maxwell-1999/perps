@@ -17,6 +17,7 @@ export enum FormNames {
   collateral = 'collateral',
   amount = 'amount',
   leverage = 'leverage',
+  leverageFixed = 'leverageFixed',
 }
 
 export type OrderValues = {

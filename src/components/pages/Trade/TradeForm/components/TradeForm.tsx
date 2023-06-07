@@ -10,6 +10,7 @@ import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails } from '@/hooks/markets'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
+import { usePrevious } from '@/utils/hooks'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
@@ -19,7 +20,7 @@ import { IPerennialLens } from '@t/generated/LensAbi'
 
 import { FormNames, OrderValues, formIds, orderDirections } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
-import { formatInitialInputs, usePrevious } from '../utils'
+import { formatInitialInputs } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import { TradeReceipt } from './Receipt'
 import { Form } from './styles'
@@ -110,7 +111,7 @@ function TradeForm(props: TradeFormProps) {
 
   const { onChangeAmount, onChangeLeverage, onChangeCollateral } = useOnChangeHandlers({
     setValue,
-    isLeverageFixed: false,
+    leverageFixed: false,
     leverage,
     collateral,
     amount,
@@ -190,7 +191,7 @@ function TradeForm(props: TradeFormProps) {
             mb="12px"
             control={control}
             name={FormNames.collateral}
-            onChange={onChangeCollateral}
+            onChange={(e) => onChangeCollateral(e.target.value)}
           />
           <Input
             type="number"
@@ -207,7 +208,7 @@ function TradeForm(props: TradeFormProps) {
             mb="12px"
             control={control}
             name={FormNames.amount}
-            onChange={onChangeAmount}
+            onChange={(e) => onChangeAmount(e.target.value)}
           />
           {/* Default slider til we get designs */}
           <Slider

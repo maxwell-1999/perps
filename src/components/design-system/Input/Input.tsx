@@ -19,7 +19,6 @@ import {
 import { Control, useController } from 'react-hook-form'
 
 export interface InputProps extends ChakraInputProps {
-  id: string
   labelText: string
   name: string
   control: Control<any>

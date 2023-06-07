@@ -1,7 +1,4 @@
-import { useEffect, useRef } from 'react'
-import { formatEther, formatUnits, parseEther } from 'viem'
-
-import { Big18Math, formatBig18 } from '@/utils/big18Utils'
+import { Big18Math } from '@/utils/big18Utils'
 
 export const calcLeverage = (price: bigint, position: bigint, collateral: bigint) => {
   if (Big18Math.isZero(position) || Big18Math.isZero(collateral)) return 0n
@@ -24,14 +21,14 @@ export const calculateInitialLeverage = ({
   if (!amount || !currentCollateralAmount || !price) return 0
   if (isNewPosition) return 2
 
-  const formattedAmount = formatEther(amount) as `${number}`
-  const parsedPositionAmount = parseEther(formattedAmount)
+  const formattedAmount = Big18Math.toFloatString(amount)
+  const parsedPositionAmount = Big18Math.fromFloatString(formattedAmount)
   if (Big18Math.isZero(currentCollateralAmount)) {
-    return parseFloat(formatBig18(0n, { numSigFigs: 2, useGrouping: false }))
+    return parseFloat(Big18Math.toFloatString(0n))
   }
 
   const leverage = calcLeverage(price, parsedPositionAmount, currentCollateralAmount)
-  return parseFloat(formatBig18(leverage, { numSigFigs: 2, useGrouping: false }))
+  return parseFloat(Big18Math.toFloatString(leverage))
 }
 
 export const max18Decimals = (amount: string) => {
@@ -43,90 +40,68 @@ export const max18Decimals = (amount: string) => {
   return `${first}.${decimals.substring(0, 18)}`
 }
 
-const stripCommas = (numberValue: string) => {
-  return numberValue.replace(/','/g, '')
-}
-
-export const calculateAndUpdateCollateral = ({
+export const collateralFromAmountAndLeverage = ({
   amount,
   leverage,
   price,
 }: {
   amount: string
   leverage: string
-  price?: bigint
+  price: bigint
 }) => {
-  if (!amount || amount === '.' || !leverage || !price) return ''
-  const parsedLeverage = parseEther(stripCommas(leverage) as `${number}`)
+  const parsedLeverage = Big18Math.fromFloatString(leverage)
   if (Big18Math.isZero(parsedLeverage)) return ''
 
-  const parsedPositionAmount = parseEther(amount as `${number}`)
+  const parsedPositionAmount = Big18Math.fromFloatString(amount)
   const newCollateral = Big18Math.div(Big18Math.abs(Big18Math.mul(parsedPositionAmount, price)), parsedLeverage)
-  const newFormattedCollateral = formatBig18(newCollateral, { numSigFigs: 18 })
-  return newFormattedCollateral
+  return Big18Math.toFloatString(newCollateral)
 }
 
-export const calculateAndUpdateLeverage = ({
+export const leverageFromAmountAndCollateral = ({
   amount,
   collateral,
   price,
 }: {
-  amount?: string
-  collateral?: string
-  price?: bigint
+  amount: string
+  collateral: string
+  price: bigint
 }) => {
-  if (!amount || amount === '.' || !collateral || collateral === '.' || !price) {
-    return '0'
-  }
-  const parsedCollateralAmount = parseEther(collateral as `${number}`)
+  const parsedCollateralAmount = Big18Math.fromFloatString(collateral)
   if (Big18Math.isZero(parsedCollateralAmount)) {
-    return '0'
+    return ''
   }
 
-  const parsedPositionAmount = parseEther(amount as `${number}`)
+  const parsedPositionAmount = Big18Math.fromFloatString(amount)
   const newLeverage = calcLeverage(price, parsedPositionAmount, parsedCollateralAmount)
-  const formattedLeverage = formatBig18(newLeverage, { numSigFigs: 2 })
-  return formattedLeverage
+  return Big18Math.toFloatString(newLeverage)
 }
 
-export const calculateAndUpdatePosition = ({
+export const positionFromCollateralAndLeverage = ({
   collateral,
   leverage,
   price,
 }: {
   collateral: string
-  leverage: string | null
-  price?: bigint
+  leverage: string
+  price: bigint
 }) => {
-  if (!collateral || collateral === '.' || !leverage || leverage === '.' || !price) return ''
   if (Big18Math.isZero(price)) return ''
 
-  const parsedCollateralAmount = parseEther(collateral as `${number}`)
-  const parsedLeverage = parseEther(stripCommas(leverage) as `${number}`)
+  const parsedCollateralAmount = Big18Math.fromFloatString(collateral)
+  const parsedLeverage = Big18Math.fromFloatString(leverage)
   const newPosition = Big18Math.abs(Big18Math.div(Big18Math.mul(parsedLeverage, parsedCollateralAmount), price))
-  const newFormattedPosition = formatBig18(newPosition, { numSigFigs: 18 })
-  return newFormattedPosition
+  return Big18Math.toFloatString(newPosition)
 }
 
-export function usePrevious<T>(value: T) {
-  const ref = useRef<T>()
-
-  useEffect(() => {
-    ref.current = value
-  }, [value])
-
-  return ref.current
-}
-
-export const getCollateralDifference = (newCollateralAmount: bigint, currentCollateralAmount: bigint): bigint => {
+export const calcCollateralDifference = (newCollateralAmount: bigint, currentCollateralAmount: bigint): bigint => {
   return Big18Math.sub(newCollateralAmount, currentCollateralAmount)
 }
 
-export const getPositionDifference = (newPositionAmount: bigint, currentPositionAmount: bigint): bigint => {
+export const calcPositionDifference = (newPositionAmount: bigint, currentPositionAmount: bigint): bigint => {
   return Big18Math.sub(newPositionAmount, currentPositionAmount)
 }
 
-export const getLeverageDifference = ({
+export const calcLeverageDifference = ({
   currentCollateral,
   newCollateralAmount,
   price,
@@ -146,10 +121,6 @@ export const getLeverageDifference = ({
   return Big18Math.sub(newLev, prevLev)
 }
 
-export const to18Decimals = (amount: bigint, fromDecimals = 6): bigint => {
-  return parseEther(formatUnits(amount, fromDecimals) as `${number}`)
-}
-
 export const needsApproval = ({
   collateralDifference,
   usdcAllowance,
@@ -157,16 +128,11 @@ export const needsApproval = ({
   collateralDifference: bigint
   usdcAllowance: bigint
 }) => {
-  return to18Decimals(usdcAllowance) < collateralDifference || Big18Math.isZero(usdcAllowance)
+  return Big18Math.fromDecimals(usdcAllowance, 6) < collateralDifference || Big18Math.isZero(usdcAllowance)
 }
 
 export const calcPositionFee = (price: bigint, positionDelta: bigint, feeRate: bigint) => {
   return Big18Math.abs(Big18Math.mul(Big18Math.mul(price, positionDelta), feeRate))
-}
-
-export const formatStringToBigint = (value: string) => {
-  if (!value || value === '.') return 0n
-  return parseEther(value as `${number}`)
 }
 
 type InitialInputs = {
@@ -184,8 +150,8 @@ export const formatInitialInputs = ({ userCollateral, amount, price, isNewPositi
       amount: '',
       leverage: 1,
     }
-  const formattedCollateral = formatEther(userCollateral)
-  const formattedAmount = formatEther(amount)
+  const formattedCollateral = Big18Math.toFloatString(userCollateral)
+  const formattedAmount = Big18Math.toFloatString(amount)
   return {
     collateral: formattedCollateral === '0.0' ? '0' : formattedCollateral,
     amount: formattedAmount === '0.0' ? '0' : formattedAmount,
