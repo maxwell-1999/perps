@@ -57,7 +57,7 @@ export const Slider: React.FC<Props> = ({
         {rightLabel}
       </Flex>
       <Flex justifyContent="center">
-        <Flex flexDirection="column" width="96%">
+        <Flex flexDirection="column" width="94%">
           <Flex {...getRootProps()} cursor="pointer" w="100%" aria-label={ariaLabel}>
             <input {...inputProps} hidden />
             <Box
@@ -72,6 +72,7 @@ export const Slider: React.FC<Props> = ({
               boxSize={8}
               bgColor={colors.brand.gray[350]}
               p={2}
+              minWidth="36px"
               boxShadow="0px 4px 44px rgba(0, 0, 0, 0.2)"
               borderRadius="6px"
               _focusVisible={{
@@ -80,7 +81,9 @@ export const Slider: React.FC<Props> = ({
               {...getThumbProps()}
             >
               <Flex w="100%" h="100%" alignItems="center" justifyContent="center">
-                <Text fontSize="14px" fontWeight="bold">{`${state.value.toFixed(1)}x`}</Text>
+                <Text fontSize="14px" fontWeight="bold">
+                  {state.value.toFixed(1)}
+                </Text>
               </Flex>
             </Box>
           </Flex>
