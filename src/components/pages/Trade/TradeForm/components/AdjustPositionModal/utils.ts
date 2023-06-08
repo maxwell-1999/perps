@@ -1,12 +1,12 @@
-import { parseEther } from 'viem'
-
 import { PositionDetails } from '@/hooks/markets'
-import { Big18Math, formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
+import { Big18Math } from '@/utils/big18Utils'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
 
+import { OrderValues } from '../../constants'
 import {
   calcCollateralDifference,
+  calcLeverage,
   calcLeverageDifference,
   calcPositionDifference,
   calcPositionFee,
@@ -14,46 +14,33 @@ import {
 } from '../../utils'
 import { Adjustment } from './constants'
 
-export const getPositionChangeValues = ({ collateral, position, leverage, leverageDifference }: Adjustment) => {
-  const newCollateral = parseEther(collateral.newCollateral as `${number}`)
-  const prevCollateral = Big18Math.sub(newCollateral, collateral.difference)
-  const newPosition = parseEther(position.newPosition as `${number}`)
-  const prevPosition = Big18Math.sub(newPosition, position.difference)
-  const newLeverage = parseEther(leverage as `${number}`)
-  const prevLeverage = Big18Math.sub(newLeverage, leverageDifference)
-
-  return {
-    newCollateral: formatBig18USDPrice(newCollateral),
-    prevCollateral: formatBig18USDPrice(prevCollateral),
-    newLeverage: formatBig18(newLeverage),
-    prevLeverage: formatBig18(prevLeverage),
-    newPosition: formatBig18(newPosition, { numSigFigs: 6 }),
-    prevPosition: formatBig18(prevPosition, { numSigFigs: 6 }),
-  }
-}
-
 type CreateAdjustmentArgs = {
-  orderValues: {
-    collateral: string
-    amount: string
-    leverage: number
-  }
+  orderValues: OrderValues
   position?: PositionDetails
   product: IPerennialLens.ProductSnapshotStructOutput
   usdcAllowance: bigint
 }
 
-export const createAdjustment = ({ orderValues, position, product, usdcAllowance = 0n }: CreateAdjustmentArgs) => {
+export const createAdjustment = ({
+  orderValues,
+  position,
+  product,
+  usdcAllowance = 0n,
+}: CreateAdjustmentArgs): Adjustment => {
   const currentCollateral = position?.currentCollateral ?? 0n
   const currentPositionAmount = position?.nextPosition ?? 0n
+  const currentLeverage = position?.nextLeverage ?? 0n
+  const currentMaintenance = position?.maintenance ?? 0n
+
   const {
     latestVersion: { price },
-    productInfo: { takerFee, symbol },
+    productInfo: { takerFee },
   } = product
 
-  const { amount, collateral, leverage } = orderValues
-  const positionAmount = Big18Math.fromFloatString(amount)
-  const collateralAmount = Big18Math.fromFloatString(collateral)
+  const { amount, collateral, fullClose } = orderValues
+  const positionAmount = fullClose ? 0n : Big18Math.fromFloatString(amount)
+  const collateralAmount = fullClose ? 0n : Big18Math.fromFloatString(collateral)
+  const leverage = calcLeverage(price, positionAmount, collateralAmount)
 
   const collateralDifference = calcCollateralDifference(collateralAmount, currentCollateral)
   const positionDifference = calcPositionDifference(positionAmount, currentPositionAmount)
@@ -65,24 +52,25 @@ export const createAdjustment = ({ orderValues, position, product, usdcAllowance
     newPositionAmount: positionAmount,
   })
 
-  const adjustment: Adjustment = {
+  return {
     collateral: {
-      newCollateral: collateral,
+      prevCollateral: currentCollateral,
+      newCollateral: collateralAmount,
       difference: collateralDifference,
-      isWithdrawingTotalBalance: Big18Math.isZero(collateralAmount),
-      needsApproval: needsApproval({ collateralDifference, usdcAllowance }),
     },
     position: {
-      newPosition: amount,
+      prevPosition: currentPositionAmount,
+      newPosition: positionAmount,
       difference: positionDifference,
-      isNewPosition: true,
-      isClosingPosition: Big18Math.isZero(positionAmount),
-      symbol,
       fee: calcPositionFee(price, positionDifference, takerFee),
     },
-    leverage: `${leverage}`,
-    leverageDifference,
+    leverage: {
+      prevLeverage: currentLeverage,
+      newLeverage: leverage,
+      difference: leverageDifference,
+    },
+    needsApproval: needsApproval({ collateralDifference, usdcAllowance }),
+    fullClose: !!fullClose,
+    requiresTwoStep: currentMaintenance > collateralAmount,
   }
-
-  return adjustment
 }

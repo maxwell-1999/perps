@@ -328,7 +328,7 @@ const fetchUserPositionDetails = async (
   productSnapshot?: IPerennialLens.ProductSnapshotStructOutput,
 ) => {
   if (!snapshot || !productSnapshot) return { asset, direction, currentCollateral: 0n }
-  const { productAddress, collateral, pre, position, openInterest } = snapshot
+  const { productAddress, collateral, pre, position, openInterest, maintenance } = snapshot
   const nextNotional = Big18Math.abs(Big18Math.mul(size(next(pre, position)), productSnapshot.latestVersion.price))
   let side = positionSide(next(pre, position))
 
@@ -347,6 +347,7 @@ const fetchUserPositionDetails = async (
       nextNotional,
       leverage: collateral > 0n ? Big18Math.div(size(openInterest), collateral) : 0n,
       nextLeverage: collateral > 0n ? Big18Math.div(nextNotional, collateral) : 0n,
+      maintenance,
     }
   }
   const { startBlock, depositAmount, fees: _fees, endBlock, lastUpdatedBlockNumber, valuePnl } = graphPosition
@@ -705,6 +706,7 @@ const fetchUserPositionDetails = async (
     liquidations: positionChanges.liquidations,
     pnl: closedPosition ? BigInt(valuePnl) - fees : collateral - startCollateral - deposits,
     collateralChanges,
+    maintenance,
   }
 }
 
@@ -904,14 +906,14 @@ export const useProductTransactions = (productAddress?: string) => {
     let collateralAction: InvokerAction = InvokerAction.NOOP
     if (collateralDelta > 0n) {
       collateralAction = InvokerAction.WRAP_AND_DEPOSIT
-    } else if (collateralDelta > 0) {
+    } else if (collateralDelta < 0n) {
       collateralAction = InvokerAction.WITHDRAW_AND_UNWRAP
     }
 
     let positionAction: InvokerAction = InvokerAction.NOOP
     if (positionDelta > 0n) {
       positionAction = positionSide === 'maker' ? InvokerAction.OPEN_MAKE : InvokerAction.OPEN_TAKE
-    } else if (positionDelta > 0n) {
+    } else if (positionDelta < 0n) {
       positionAction = positionSide === 'maker' ? InvokerAction.CLOSE_MAKE : InvokerAction.CLOSE_TAKE
     }
 
@@ -926,7 +928,7 @@ export const useProductTransactions = (productAddress?: string) => {
         userAddress: address,
         position: Big18Math.abs(positionDelta),
       }),
-    ].filter(({ action }) => !Big18Math.eq(BigInt(action), 0n)) // Can i do this?
+    ].filter(({ action }) => !Big18Math.eq(BigInt(action), BigInt(InvokerAction.NOOP)))
 
     const txData = await multiInvoker.invoke.populateTransaction(orderedActions)
     const receipt = await sendTransactionAsync({

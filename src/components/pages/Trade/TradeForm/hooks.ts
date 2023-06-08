@@ -1,5 +1,5 @@
 import { useColorModeValue, useTheme } from '@chakra-ui/react'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import { useIntl } from 'react-intl'
 
@@ -102,6 +102,7 @@ interface OnChangeHandlersArgs {
   leverageFixed: boolean
 }
 
+const setArgs = { shouldValidate: true }
 export const useOnChangeHandlers = ({
   setValue,
   leverage,
@@ -110,60 +111,67 @@ export const useOnChangeHandlers = ({
   price,
   leverageFixed,
 }: OnChangeHandlersArgs) => {
-  const setArgs = { shouldValidate: true }
+  const onChangeAmount = useCallback(
+    (newAmount: string) => {
+      const validatedAmount = max18Decimals(newAmount)
+      setValue(FormNames.amount, validatedAmount, { ...setArgs, shouldDirty: true })
 
-  const onChangeAmount = (newAmount: string) => {
-    const validatedAmount = max18Decimals(newAmount)
-    setValue(FormNames.amount, validatedAmount, { ...setArgs, shouldDirty: true })
+      if (leverageFixed) {
+        const newCollateralAmt = collateralFromAmountAndLeverage({
+          amount: validatedAmount,
+          leverage: `${leverage}`,
+          price,
+        })
+        setValue(FormNames.collateral, newCollateralAmt, setArgs)
+      } else {
+        const newLeverage = leverageFromAmountAndCollateral({
+          amount: validatedAmount,
+          collateral,
+          price,
+        })
+        setValue(FormNames.leverage, parseFloat(newLeverage), setArgs)
+      }
+    },
+    [leverage, collateral, price, setValue, leverageFixed],
+  )
 
-    if (leverageFixed) {
-      const newCollateralAmt = collateralFromAmountAndLeverage({
-        amount: validatedAmount,
-        leverage: `${leverage}`,
-        price,
-      })
-      setValue(FormNames.collateral, newCollateralAmt, setArgs)
-    } else {
-      const newLeverage = leverageFromAmountAndCollateral({
-        amount: validatedAmount,
-        collateral,
-        price,
-      })
-      setValue(FormNames.leverage, parseFloat(newLeverage), setArgs)
-    }
-  }
-
-  const onChangeLeverage = (newLeverage: number) => {
-    const validatedLeverage = max18Decimals(`${newLeverage}`)
-    setValue(FormNames.leverage, parseFloat(validatedLeverage), { ...setArgs, shouldDirty: true })
-    const newPosition = positionFromCollateralAndLeverage({
-      collateral,
-      leverage: validatedLeverage,
-      price,
-    })
-    setValue(FormNames.amount, newPosition, setArgs)
-  }
-
-  const onChangeCollateral = (newAmount: string) => {
-    const validatedCollateral = max18Decimals(newAmount)
-    setValue(FormNames.collateral, validatedCollateral, { ...setArgs, shouldDirty: true })
-
-    if (leverageFixed) {
+  const onChangeLeverage = useCallback(
+    (newLeverage: number) => {
+      const validatedLeverage = max18Decimals(`${newLeverage}`)
+      setValue(FormNames.leverage, parseFloat(validatedLeverage), { ...setArgs, shouldDirty: true })
       const newPosition = positionFromCollateralAndLeverage({
-        collateral: validatedCollateral,
-        leverage: `${leverage}`,
+        collateral,
+        leverage: validatedLeverage,
         price,
       })
       setValue(FormNames.amount, newPosition, setArgs)
-    } else {
-      const newLeverage = leverageFromAmountAndCollateral({
-        amount,
-        collateral: validatedCollateral,
-        price,
-      })
-      setValue(FormNames.leverage, parseFloat(newLeverage), setArgs)
-    }
-  }
+    },
+    [collateral, price, setValue],
+  )
+
+  const onChangeCollateral = useCallback(
+    (newAmount: string) => {
+      const validatedCollateral = max18Decimals(newAmount)
+      setValue(FormNames.collateral, validatedCollateral, { ...setArgs, shouldDirty: true })
+
+      if (leverageFixed) {
+        const newPosition = positionFromCollateralAndLeverage({
+          collateral: validatedCollateral,
+          leverage: `${leverage}`,
+          price,
+        })
+        setValue(FormNames.amount, newPosition, setArgs)
+      } else {
+        const newLeverage = leverageFromAmountAndCollateral({
+          amount,
+          collateral: validatedCollateral,
+          price,
+        })
+        setValue(FormNames.leverage, parseFloat(newLeverage), setArgs)
+      }
+    },
+    [leverage, amount, price, setValue, leverageFixed],
+  )
 
   return { onChangeAmount, onChangeLeverage, onChangeCollateral }
 }

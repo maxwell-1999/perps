@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useAccount } from 'wagmi'
 
 import Toggle from '@/components/shared/Toggle'
+import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
@@ -26,6 +27,7 @@ import { TradeReceipt } from './Receipt'
 import { Form } from './styles'
 
 interface TradeFormProps {
+  asset: SupportedAsset
   orderDirection: OrderDirection
   setOrderDirection: (orderDirection: OrderDirection) => void
   product: IPerennialLens.ProductSnapshotStructOutput
@@ -118,7 +120,7 @@ function TradeForm(props: TradeFormProps) {
     price: product.latestVersion.price,
   })
 
-  const onConfirm = (orderData: { collateral: string; amount: string; leverage: number }) => {
+  const onConfirm = (orderData: { collateral: string; amount: string }) => {
     setOrderValues(orderData)
   }
 
@@ -141,6 +143,7 @@ function TradeForm(props: TradeFormProps) {
           onCancel={cancelAdjustmentModal}
           title={isNewPosition ? copy.confirmOrder : copy.confirmChanges}
           positionType={OpenPositionType.taker}
+          asset={props.asset}
           position={position}
           product={product}
           orderValues={orderValues}

@@ -1,22 +1,27 @@
 type CollateralDetails = {
+  prevCollateral: bigint
+  newCollateral: bigint
   difference: bigint
-  isWithdrawingTotalBalance: boolean
-  needsApproval: boolean
-  newCollateral: string
 }
 
 type PositionDetails = {
+  prevPosition: bigint
+  newPosition: bigint
   difference: bigint
-  isClosingPosition: boolean
-  isNewPosition: boolean
-  symbol: string
-  newPosition: string
   fee: bigint
+}
+
+type LeverageDetails = {
+  prevLeverage: bigint
+  newLeverage: bigint
+  difference: bigint
 }
 
 export type Adjustment = {
   collateral: CollateralDetails
   position: PositionDetails
-  leverage?: string
-  leverageDifference: bigint
+  leverage: LeverageDetails
+  needsApproval: boolean
+  fullClose: boolean
+  requiresTwoStep: boolean
 }

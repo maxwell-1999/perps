@@ -22,12 +22,15 @@ export const AssetIconWithText: React.FC<AssetIconWithTextProps> = ({ market, te
 interface FormattedBig18Props extends TextProps {
   value: bigint
   asset?: SupportedAsset
+  leverage?: boolean
 }
-export const FormattedBig18: React.FC<FormattedBig18Props> = ({ value, asset, ...props }) => (
+export const FormattedBig18: React.FC<FormattedBig18Props> = ({ value, asset, leverage, ...props }) => (
   <Text {...props}>
     {formatBig18(value)}
     {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
     {asset ? ' ' + AssetMetadata[asset].baseCurrency.toUpperCase() : null}
+    {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+    {leverage ? 'x' : null}
   </Text>
 )
 

@@ -12,5 +12,6 @@ export const useAdjustmentModalCopy = () => {
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
     position: intl.formatMessage({ defaultMessage: 'Position' }),
+    withdraw: intl.formatMessage({ defaultMessage: 'Withdraw' }),
   }
 }

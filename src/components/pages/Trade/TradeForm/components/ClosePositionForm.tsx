@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form'
 
 import { Slider } from '@/components/design-system'
 import { FormattedBig18, FormattedBig18USDPrice } from '@/components/shared/components'
+import { SupportedAsset } from '@/constants/assets'
+import { OpenPositionType } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails } from '@/hooks/markets'
@@ -14,23 +16,25 @@ import { Input, Pill } from '@ds/Input'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
 
-import { FormNames, buttonPercentValues } from '../constants'
+import { FormNames, OrderValues, buttonPercentValues } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
 import { calcPositionFee } from '../utils'
+import AdjustPositionModal from './AdjustPositionModal'
 import { TradeReceipt } from './Receipt'
 import { Form, FormOverlayHeader } from './styles'
 
 interface ClosePositionFormProps {
+  asset: SupportedAsset
   position: PositionDetails
   product: IPerennialLens.ProductSnapshotStructOutput
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
-function ClosePositionForm({ position, product, onSubmit }: ClosePositionFormProps) {
+function ClosePositionForm({ position, product, asset }: ClosePositionFormProps) {
   const { setTradeFormState } = useTradeFormState()
   const { assetMetadata } = useMarketContext()
   const copy = useTradeFormCopy()
   const { percentBtnBg } = useStyles()
+  const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
   const [modifyingCollateral, setModifyingCollateral] = useState(false)
 
   const {
@@ -39,7 +43,7 @@ function ClosePositionForm({ position, product, onSubmit }: ClosePositionFormPro
   } = product
   const { nextPosition, nextLeverage, currentCollateral } = position
 
-  const { control, watch, setValue } = useForm({
+  const { control, watch, setValue, handleSubmit } = useForm({
     defaultValues: {
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
@@ -78,6 +82,26 @@ function ClosePositionForm({ position, product, onSubmit }: ClosePositionFormPro
     collateralChangeHandler(value)
   }
 
+  const closeAdjustmentModal = () => {
+    setOrderValues(null)
+  }
+
+  const cancelAdjustmentModal = () => {
+    setOrderValues(null)
+  }
+
+  const onConfirm = (orderData: { collateral: string; amount: string }) => {
+    const fullClose = Big18Math.eq(Big18Math.fromFloatString(orderData.amount), nextPosition ?? 0n)
+
+    setOrderValues({
+      collateral: Big18Math.toFloatString(
+        fullClose ? 0n : Big18Math.sub(currentCollateral, Big18Math.fromFloatString(orderData.collateral)),
+      ),
+      amount: Big18Math.toFloatString(Big18Math.sub(nextPosition ?? 0n, Big18Math.fromFloatString(orderData.amount))),
+      fullClose,
+    })
+  }
+
   const closeFee = amount ? calcPositionFee(Big18Math.fromFloatString(amount), price, takerFee) : 0n
   // Amount of collateral received after close fee
   const collateralAfterFee = collateral ? Big18Math.sub(Big18Math.fromFloatString(collateral), closeFee) : undefined
@@ -87,91 +111,107 @@ function ClosePositionForm({ position, product, onSubmit }: ClosePositionFormPro
     : undefined
 
   return (
-    <Form onSubmit={onSubmit}>
-      <FormOverlayHeader title={copy.closePosition} onClose={() => setTradeFormState(FormState.trade)} />
-      <Flex flexDirection="column" px="16px" mb="12px">
-        <Input
-          type="number"
-          name={FormNames.amount}
-          labelText={copy.amountToClose}
-          placeholder="0.0000"
-          value={
-            modifyingCollateral ? (closeAmountAfterFee ? Big18Math.toFloatString(closeAmountAfterFee) : '') : amount
-          }
-          rightLabel={
-            <FormLabel mr={0} mb={0}>
-              <Text variant="label">
-                <FormattedBig18 value={nextPosition ?? 0n} asset={position.asset} as="span" /> {copy.max}
-              </Text>
-            </FormLabel>
-          }
-          control={control}
-          onChange={(e) => onChangeAmount(e.target.value)}
-          rightEl={<Pill text={assetMetadata.baseCurrency} />}
-          mb="12px"
+    <>
+      {orderValues && (
+        <AdjustPositionModal
+          isOpen={!!orderValues}
+          onClose={closeAdjustmentModal}
+          onCancel={cancelAdjustmentModal}
+          title={copy.closePosition}
+          positionType={OpenPositionType.taker}
+          asset={asset}
+          position={position}
+          product={product}
+          orderValues={orderValues}
+          usdcAllowance={0n}
         />
-        <Flex mb="12px">
-          {buttonPercentValues.map((value, index) => (
-            <Button
-              variant="transparent"
-              fontSize="12px"
-              bg={percentBtnBg}
-              key={value}
-              // eslint-disable-next-line formatjs/no-literal-string-in-jsx
-              label={`${value}%`}
-              mr={index === buttonPercentValues.length - 1 ? '0' : '8px'}
-              onClick={() => {
-                onPerecentClick(value)
-              }}
-            />
-          ))}
+      )}
+      <Form onSubmit={handleSubmit(onConfirm)}>
+        <FormOverlayHeader title={copy.closePosition} onClose={() => setTradeFormState(FormState.trade)} />
+        <Flex flexDirection="column" px="16px" mb="12px">
+          <Input
+            type="number"
+            name={FormNames.amount}
+            labelText={copy.amountToClose}
+            placeholder="0.0000"
+            value={
+              modifyingCollateral ? (closeAmountAfterFee ? Big18Math.toFloatString(closeAmountAfterFee) : '') : amount
+            }
+            rightLabel={
+              <FormLabel mr={0} mb={0}>
+                <Text variant="label">
+                  <FormattedBig18 value={nextPosition ?? 0n} asset={position.asset} as="span" /> {copy.max}
+                </Text>
+              </FormLabel>
+            }
+            control={control}
+            onChange={(e) => onChangeAmount(e.target.value)}
+            rightEl={<Pill text={assetMetadata.baseCurrency} />}
+            mb="12px"
+          />
+          <Flex mb="12px">
+            {buttonPercentValues.map((value, index) => (
+              <Button
+                variant="transparent"
+                fontSize="12px"
+                bg={percentBtnBg}
+                key={value}
+                // eslint-disable-next-line formatjs/no-literal-string-in-jsx
+                label={`${value}%`}
+                mr={index === buttonPercentValues.length - 1 ? '0' : '8px'}
+                onClick={() => {
+                  onPerecentClick(value)
+                }}
+              />
+            ))}
+          </Flex>
+          <Input
+            type="number"
+            name={FormNames.collateral}
+            labelText={copy.youWillReceive}
+            placeholder="0.0000"
+            value={
+              modifyingCollateral ? collateral : collateralAfterFee ? Big18Math.toFloatString(collateralAfterFee) : ''
+            }
+            control={control}
+            rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+            rightLabel={
+              <FormLabel mr={0} mb={0}>
+                <Text variant="label">
+                  <FormattedBig18USDPrice value={currentCollateral ?? 0n} as="span" mr={1} />
+                  {copy.max}
+                </Text>
+              </FormLabel>
+            }
+            onChange={(e) => onChangeCollateral(e.target.value)}
+            mb="12px"
+          />
+          {/* Default slider til we get designs */}
+          <Slider
+            label={copy.leverage}
+            ariaLabel="leverage-slider"
+            min={0}
+            max={20}
+            step={0.1}
+            containerProps={{
+              mb: 2,
+            }}
+            focusThumbOnChange={false}
+            control={control}
+            name={FormNames.leverage}
+            isDisabled
+          />
         </Flex>
-        <Input
-          type="number"
-          name={FormNames.collateral}
-          labelText={copy.youWillReceive}
-          placeholder="0.0000"
-          value={
-            modifyingCollateral ? collateral : collateralAfterFee ? Big18Math.toFloatString(collateralAfterFee) : ''
-          }
-          control={control}
-          rightEl={<Pill text={assetMetadata.quoteCurrency} />}
-          rightLabel={
-            <FormLabel mr={0} mb={0}>
-              <Text variant="label">
-                <FormattedBig18USDPrice value={currentCollateral ?? 0n} as="span" mr={1} />
-                {copy.max}
-              </Text>
-            </FormLabel>
-          }
-          onChange={(e) => onChangeCollateral(e.target.value)}
-          mb="12px"
-        />
-        {/* Default slider til we get designs */}
-        <Slider
-          label={copy.leverage}
-          ariaLabel="leverage-slider"
-          min={0}
-          max={20}
-          step={0.1}
-          containerProps={{
-            mb: 2,
-          }}
-          focusThumbOnChange={false}
-          control={control}
-          name={FormNames.leverage}
-          isDisabled
-        />
-      </Flex>
-      <Divider mt="auto" />
-      <Flex flexDirection="column" p="16px">
-        <TradeReceipt mb="25px" px="3px" hideEntry />
-        <ButtonGroup>
-          <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
-          <Button flex={1} label={copy.closePosition} type="submit" />
-        </ButtonGroup>
-      </Flex>
-    </Form>
+        <Divider mt="auto" />
+        <Flex flexDirection="column" p="16px">
+          <TradeReceipt mb="25px" px="3px" hideEntry />
+          <ButtonGroup>
+            <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
+            <Button flex={1} label={copy.closePosition} type="submit" />
+          </ButtonGroup>
+        </Flex>
+      </Form>
+    </>
   )
 }
 

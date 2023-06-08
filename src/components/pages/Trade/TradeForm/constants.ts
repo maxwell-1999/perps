@@ -23,5 +23,5 @@ export enum FormNames {
 export type OrderValues = {
   collateral: string
   amount: string
-  leverage: number
+  fullClose?: boolean
 }

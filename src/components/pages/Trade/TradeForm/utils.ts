@@ -5,6 +5,11 @@ export const calcLeverage = (price: bigint, position: bigint, collateral: bigint
   return Big18Math.div(Big18Math.mul(Big18Math.abs(price), position), collateral)
 }
 
+export const calcMaintenance = (price: bigint, position: bigint, maintenanceRate: bigint) => {
+  if (Big18Math.isZero(position)) return 0n
+  return Big18Math.mul(Big18Math.mul(Big18Math.abs(price), position), maintenanceRate)
+}
+
 type CalculateInitialLeverage = {
   isNewPosition: boolean
   amount?: bigint
@@ -128,7 +133,7 @@ export const needsApproval = ({
   collateralDifference: bigint
   usdcAllowance: bigint
 }) => {
-  return Big18Math.fromDecimals(usdcAllowance, 6) < collateralDifference || Big18Math.isZero(usdcAllowance)
+  return Big18Math.fromDecimals(usdcAllowance, 6) < collateralDifference
 }
 
 export const calcPositionFee = (price: bigint, positionDelta: bigint, feeRate: bigint) => {

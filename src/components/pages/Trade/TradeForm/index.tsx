@@ -1,4 +1,5 @@
 import { Flex, Spinner } from '@chakra-ui/react'
+import { useEffect } from 'react'
 import { useAccount } from 'wagmi'
 
 import { useMarketContext } from '@/contexts/marketContext'
@@ -20,12 +21,6 @@ function TradeContainer() {
 
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
 
-  const handleClosePosition = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // TODO: invalidate positions query
-    alert('close position')
-  }
-
   const handleWithdrawCollateral = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     alert('withdraw collateral')
@@ -34,6 +29,13 @@ function TradeContainer() {
   const product = selectedMarketSnapshot?.[orderDirection]
   const positionDataLoaded = positionData && 'position' in positionData
   const positionPresent = positionDataLoaded && positionData.position !== undefined
+  const positionOrderDirection = positionData?.position?.direction
+  useEffect(() => {
+    if (positionOrderDirection !== undefined && positionOrderDirection !== orderDirection) {
+      setOrderDirection(positionOrderDirection)
+    }
+  })
+
   const containerVariant =
     formState !== FormState.close && positionDataLoaded && positionPresent && address ? 'pink' : 'transparent'
 
@@ -55,6 +57,7 @@ function TradeContainer() {
       )}
       {formState !== FormState.close && (
         <TradeForm
+          asset={selectedMarket}
           orderDirection={orderDirection}
           setOrderDirection={setOrderDirection}
           product={product}
@@ -62,7 +65,7 @@ function TradeContainer() {
         />
       )}
       {formState === FormState.close && positionPresent && positionData.position !== undefined && (
-        <ClosePositionForm onSubmit={handleClosePosition} position={positionData.position} product={product} />
+        <ClosePositionForm asset={selectedMarket} position={positionData.position} product={product} />
       )}
       {formState === FormState.withdraw && <WithdrawForm onSubmit={handleWithdrawCollateral} />}
     </Container>
