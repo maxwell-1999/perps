@@ -213,7 +213,6 @@ function TradeForm(props: TradeFormProps) {
             name={FormNames.amount}
             onChange={(e) => onChangeAmount(e.target.value)}
           />
-          {/* Default slider til we get designs */}
           <Slider
             label={copy.leverage}
             ariaLabel="leverage-slider"
@@ -223,7 +222,6 @@ function TradeForm(props: TradeFormProps) {
             containerProps={{
               mb: 2,
             }}
-            focusThumbOnChange={false}
             control={control}
             name={FormNames.leverage}
             onChange={onChangeLeverage}

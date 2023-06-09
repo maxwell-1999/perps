@@ -231,6 +231,18 @@
       "value": "Date"
     }
   ],
+  "PK3Msb": [
+    {
+      "type": 0,
+      "value": "Keep Fixed"
+    }
+  ],
+  "PXAur5": [
+    {
+      "type": 0,
+      "value": "Withdraw"
+    }
+  ],
   "QFNxVm": [
     {
       "type": 0,
