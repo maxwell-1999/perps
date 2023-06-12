@@ -48,6 +48,7 @@ export class Big18Math {
   public static ZERO_FIXED = Big18Math.fixedFrom(Big18Math.ZERO)
   public static ONE = 1n * Big18Math.BASE
   public static ONE_FIXED = Big18Math.fixedFrom(Big18Math.ONE)
+  public static TWO = 2n * Big18Math.BASE
 
   public static mul(a: bigint, b: bigint): bigint {
     return (a * b) / this.BASE

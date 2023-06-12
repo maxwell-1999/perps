@@ -161,3 +161,13 @@ export const formatInitialInputs = ({ userCollateral, amount, price, isNewPositi
     leverage: calculateInitialLeverage({ isNewPosition, amount, currentCollateralAmount: userCollateral, price }),
   }
 }
+
+export const calcMaxLeverage = (maintenance?: bigint) => {
+  if (!maintenance) return 10
+  const maxLeverage = Big18Math.divFixed(Big18Math.ONE, maintenance)
+  const maxLeverageAsFloat = maxLeverage.toUnsafeFloat()
+  if (maxLeverageAsFloat > 20) {
+    return maxLeverage.divUnsafe(Big18Math.fixedFrom(Big18Math.TWO)).toUnsafeFloat()
+  }
+  return maxLeverageAsFloat
+}
