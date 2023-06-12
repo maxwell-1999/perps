@@ -136,14 +136,14 @@ function AdjustPositionModal({
     }
   }
 
-  const showWithdrawButton = isWithdrawing || requiresTwoStep
+  const showWithdrawButton = isWithdrawing || requiresTwoStep || step === 2
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered variant="confirmation">
       <ModalOverlay />
       <ModalContent>
         <ModalBody>
-          <Flex direction="column" maxWidth="280px">
+          <Flex direction="column" maxWidth="350px">
             <Text fontSize="18px" mb={1}>
               {isWithdrawing ? copy.confirmWithdrawTitle : title}
             </Text>
@@ -208,7 +208,6 @@ function AdjustPositionModal({
             <Button variant="secondary" onClick={onCancel} label={copy.cancel} mr={1} width="100%" />
             {needsApproval && (
               <Button
-                variant="outline"
                 isDisabled={step !== 0 || approveUsdcLoading}
                 label={approveUsdcLoading ? <Spinner size="sm" /> : copy.approveUSDC}
                 onClick={handleApproveUSDC}
@@ -217,7 +216,6 @@ function AdjustPositionModal({
             )}
             {!isWithdrawing && (
               <Button
-                variant="outline"
                 isDisabled={step !== 1 || orderTxLoading}
                 label={
                   orderTxLoading ? <Spinner size="sm" /> : requiresTwoStep ? copy.confirmCloseTitle : copy.placeOrder
