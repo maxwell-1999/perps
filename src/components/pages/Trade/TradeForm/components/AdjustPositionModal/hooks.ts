@@ -18,7 +18,7 @@ export const useAdjustmentModalCopy = () => {
     withdraw: intl.formatMessage({ defaultMessage: 'Withdraw' }),
     signTransactionTitle: intl.formatMessage({ defaultMessage: 'Sign transaction' }),
     signTransactionBody: intl.formatMessage({
-      defaultMessage: 'Post your trade to the order book',
+      defaultMessage: 'Place your trade.',
     }),
     withdrawStepTitle: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
     withdrawStepBody: intl.formatMessage({

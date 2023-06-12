@@ -137,6 +137,7 @@ function AdjustPositionModal({
   }
 
   const showWithdrawButton = isWithdrawing || requiresTwoStep || step === 2
+  const showSettlementStep = requiresTwoStep || isSettlementCompleted
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered variant="confirmation">
@@ -181,7 +182,7 @@ function AdjustPositionModal({
                 />
               </>
             )}
-            {requiresTwoStep && (
+            {showSettlementStep && (
               <AdjustmentStep
                 title={copy.awaitSettlementTitle}
                 description={copy.awaitSettlementBody}
