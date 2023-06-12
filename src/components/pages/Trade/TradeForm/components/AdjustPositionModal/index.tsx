@@ -210,7 +210,7 @@ function AdjustPositionModal({
             {needsApproval && (
               <Button
                 variant="outline"
-                isDisabled={step !== 0}
+                isDisabled={step !== 0 || approveUsdcLoading}
                 label={approveUsdcLoading ? <Spinner size="sm" /> : copy.approveUSDC}
                 onClick={handleApproveUSDC}
                 width="100%"
@@ -219,7 +219,7 @@ function AdjustPositionModal({
             {!isWithdrawing && (
               <Button
                 variant="outline"
-                isDisabled={step !== 1}
+                isDisabled={step !== 1 || orderTxLoading}
                 label={orderTxLoading ? <Spinner size="sm" /> : fullClose ? copy.confirmCloseTitle : copy.placeOrder}
                 onClick={handleSetOrder}
                 width="100%"
@@ -228,7 +228,7 @@ function AdjustPositionModal({
             {showWithdrawButton && (
               <Button
                 variant="outline"
-                isDisabled={(step !== 2 && !isWithdrawing) || awaitingSettlement}
+                isDisabled={(step !== 2 && !isWithdrawing) || awaitingSettlement || withdrawCollateralLoading}
                 label={withdrawCollateralLoading ? <Spinner size="sm" /> : copy.withdraw}
                 onClick={handleWithdrawCollateral}
                 width="100%"

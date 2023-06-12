@@ -146,7 +146,7 @@ export const AdjustmentStep: React.FC<AdjustmentStepProps> = ({ title, descripti
       >
         {isCompleted ? (
           <Flex height="20px" width="20px">
-            <CheckMark height="20px" width="20px" />
+            <CheckMark />
           </Flex>
         ) : isLoading ? (
           <Spinner
