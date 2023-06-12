@@ -102,6 +102,10 @@ const Button: ComponentStyleConfig = {
         borderBottom: 'none',
       },
     }),
+    outline: (props: StyleFunctionProps) => ({
+      border: `1px solid ${mode(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])(props)}`,
+      color: mode(colors.brand.blackAlpha[80], colors.brand.whiteAlpha[80])(props),
+    }),
   },
 }
 

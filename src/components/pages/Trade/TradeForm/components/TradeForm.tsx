@@ -166,6 +166,8 @@ function TradeForm(props: TradeFormProps) {
     [collateral, amount, currentCollateral, currentPositionAmount],
   )
 
+  const disableTradeBtn = !positionDelta.positionDelta && !positionDelta.collateralDelta
+
   return (
     <>
       {orderValues && (
@@ -262,13 +264,17 @@ function TradeForm(props: TradeFormProps) {
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
           <TradeReceipt mb="25px" px="3px" product={product} positionDelta={positionDelta} positionDetails={position} />
-          {positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
+          {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
             <ButtonGroup>
               <Button variant="transparent" label={copy.close} onClick={() => setTradeFormState(FormState.close)} />
-              <Button flex={1} label={copy.modifyPosition} type="submit" />
+              <Button flex={1} label={copy.modifyPosition} type="submit" isDisabled={disableTradeBtn} />
             </ButtonGroup>
           ) : (
-            <Button type="submit" isDisabled={!address} label={address ? copy.placeTrade : copy.connectWallet} />
+            <Button
+              type="submit"
+              isDisabled={!address || disableTradeBtn}
+              label={address ? copy.placeTrade : copy.connectWallet}
+            />
           )}
         </Flex>
       </Form>
