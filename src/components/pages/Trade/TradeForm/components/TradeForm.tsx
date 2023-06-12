@@ -21,7 +21,7 @@ import { IPerennialLens } from '@t/generated/LensAbi'
 
 import { FormNames, OrderValues, orderDirections } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
-import { formatInitialInputs } from '../utils'
+import { calcMaxLeverage, formatInitialInputs } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import { TradeReceipt } from './Receipt'
 import { Form } from './styles'
@@ -39,7 +39,9 @@ function TradeForm(props: TradeFormProps) {
   const {
     productAddress,
     latestVersion: { price },
+    maintenance,
   } = product
+
   const prevProductAddress = usePrevious(productAddress)
 
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles()
@@ -59,6 +61,7 @@ function TradeForm(props: TradeFormProps) {
   const currentPositionAmount = position?.nextPosition ?? 0n
   const currentCollateral = position?.currentCollateral ?? 0n
   const isNewPosition = Big18Math.isZero(currentPositionAmount)
+  const maxLeverage = useMemo(() => calcMaxLeverage(maintenance), [maintenance])
 
   const initialFormState = useMemo(
     () =>
@@ -246,7 +249,7 @@ function TradeForm(props: TradeFormProps) {
             label={copy.leverage}
             ariaLabel="leverage-slider"
             min={0}
-            max={20}
+            max={maxLeverage}
             step={0.1}
             containerProps={{
               mb: 2,
