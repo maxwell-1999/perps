@@ -80,8 +80,7 @@ function AdjustPositionModal({
     requiresTwoStep,
   } = adjustment
   const positionSettled = position && position.position === position.nextPosition
-  const isWithdrawing =
-    position?.status === PositionStatus.closed && orderValues.amount === '0' && orderValues.collateral === '0'
+  const isWithdrawing = position?.status === PositionStatus.closed && newCollateral === 0n && newPosition === 0n
 
   const [step, setStep] = useState(needsApproval ? 0 : 1)
 
