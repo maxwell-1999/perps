@@ -11,6 +11,12 @@
       "value": "Amount"
     }
   ],
+  "/Waagm": [
+    {
+      "type": 0,
+      "value": "Confirm Close"
+    }
+  ],
   "00LcfG": [
     {
       "type": 0,
@@ -41,6 +47,12 @@
       "value": "You will receive a transaction request in your wallet upon clicking the button above."
     }
   ],
+  "57py5T": [
+    {
+      "type": 0,
+      "value": "Funding Rate (1h)"
+    }
+  ],
   "5SRJp1": [
     {
       "type": 0,
@@ -53,10 +65,10 @@
       "value": "Pricing"
     }
   ],
-  "6JqZwg": [
+  "6KmFRm": [
     {
       "type": 0,
-      "value": "Entry / Exit"
+      "value": "Confirm Withdrawal"
     }
   ],
   "6aiQC7": [
@@ -65,10 +77,22 @@
       "value": "Perennial"
     }
   ],
+  "73CDRG": [
+    {
+      "type": 0,
+      "value": "Est. Entry"
+    }
+  ],
   "77wPcX": [
     {
       "type": 0,
       "value": "Execution Price"
+    }
+  ],
+  "7xpfuy": [
+    {
+      "type": 0,
+      "value": "Side"
     }
   ],
   "8LaTBL": [
@@ -81,6 +105,12 @@
     {
       "type": 0,
       "value": "Trade"
+    }
+  ],
+  "97+Dzc": [
+    {
+      "type": 0,
+      "value": "Remove USD from your position"
     }
   ],
   "9hIQHG": [
@@ -261,6 +291,18 @@
       "value": "Collateral"
     }
   ],
+  "ST22qo": [
+    {
+      "type": 0,
+      "value": "Est. Exit"
+    }
+  ],
+  "TTreub": [
+    {
+      "type": 0,
+      "value": "Await Settlement"
+    }
+  ],
   "U6qGuO": [
     {
       "type": 0,
@@ -321,6 +363,12 @@
       "value": "Open position"
     }
   ],
+  "a8vnMh": [
+    {
+      "type": 0,
+      "value": "Please check your wallet, and confirm the following requests."
+    }
+  ],
   "agOXPD": [
     {
       "type": 0,
@@ -363,6 +411,18 @@
       "value": "Closing"
     }
   ],
+  "hgLyEq": [
+    {
+      "type": 0,
+      "value": "Sign transaction"
+    }
+  ],
+  "jUkNmx": [
+    {
+      "type": 0,
+      "value": "Post your trade to the order book"
+    }
+  ],
   "juU558": [
     {
       "type": 0,
@@ -399,6 +459,12 @@
       "value": "Please specify how much you would like to withdraw from the pool now that you have reduced your position size."
     }
   ],
+  "oipx5c": [
+    {
+      "type": 0,
+      "value": "Remove collateral"
+    }
+  ],
   "pKvURI": [
     {
       "type": 0,
@@ -433,6 +499,12 @@
       "value": "Fees"
     }
   ],
+  "qzBjEP": [
+    {
+      "type": 0,
+      "value": "Withdraw Collateral"
+    }
+  ],
   "rbrahO": [
     {
       "type": 0,
@@ -457,6 +529,18 @@
       "value": "--"
     }
   ],
+  "wHzwL2": [
+    {
+      "type": 0,
+      "value": "Please check your wallet, and confirm the following request to close your trade."
+    }
+  ],
+  "wTQgO8": [
+    {
+      "type": 0,
+      "value": "Approve funds to trade on Perennial."
+    }
+  ],
   "wbWBPw": [
     {
       "type": 0,
@@ -479,6 +563,12 @@
     {
       "type": 0,
       "value": "Share position"
+    }
+  ],
+  "zdYebZ": [
+    {
+      "type": 0,
+      "value": "Once your trade has settled you may withdraw your funds."
     }
   ]
 }

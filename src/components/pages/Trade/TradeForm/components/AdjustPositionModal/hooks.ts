@@ -8,10 +8,38 @@ export const useAdjustmentModalCopy = () => {
     placeOrder: intl.formatMessage({ defaultMessage: 'Place Order' }),
     confirm: intl.formatMessage({ defaultMessage: 'Confirm' }),
     cancel: intl.formatMessage({ defaultMessage: 'Cancel' }),
+    side: intl.formatMessage({ defaultMessage: 'Side' }),
+    long: intl.formatMessage({ defaultMessage: 'Long' }),
+    short: intl.formatMessage({ defaultMessage: 'Short' }),
     positionSize: intl.formatMessage({ defaultMessage: 'Size' }),
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
     position: intl.formatMessage({ defaultMessage: 'Position' }),
     withdraw: intl.formatMessage({ defaultMessage: 'Withdraw' }),
+    signTransactionTitle: intl.formatMessage({ defaultMessage: 'Sign transaction' }),
+    signTransactionBody: intl.formatMessage({
+      defaultMessage: 'Post your trade to the order book',
+    }),
+    withdrawStepTitle: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
+    withdrawStepBody: intl.formatMessage({
+      defaultMessage: 'Remove USD from your position',
+    }),
+    withdrawDetailTitle: intl.formatMessage({ defaultMessage: 'Remove collateral' }),
+    confirmCloseTitle: intl.formatMessage({ defaultMessage: 'Confirm Close' }),
+    confirmCloseBody: intl.formatMessage({
+      defaultMessage: 'Please check your wallet, and confirm the following request to close your trade.',
+    }),
+    awaitSettlementTitle: intl.formatMessage({ defaultMessage: 'Await Settlement' }),
+    awaitSettlementBody: intl.formatMessage({
+      defaultMessage: 'Once your trade has settled you may withdraw your funds.',
+    }),
+    confirmWithdrawTitle: intl.formatMessage({ defaultMessage: 'Confirm Withdrawal' }),
+    approveUsdcTitle: intl.formatMessage({ defaultMessage: 'Approve USDC' }),
+    approveUsdcBody: intl.formatMessage({
+      defaultMessage: 'Approve funds to trade on Perennial.',
+    }),
+    approveRequests: intl.formatMessage({
+      defaultMessage: 'Please check your wallet, and confirm the following requests.',
+    }),
   }
 }
