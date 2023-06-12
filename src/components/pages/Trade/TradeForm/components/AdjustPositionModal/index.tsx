@@ -78,7 +78,6 @@ function AdjustPositionModal({
     leverage: { prevLeverage, newLeverage },
     needsApproval,
     requiresTwoStep,
-    fullClose,
   } = adjustment
   const positionSettled = position && position.position === position.nextPosition
   const isWithdrawing =
@@ -137,7 +136,7 @@ function AdjustPositionModal({
     }
   }
 
-  const showWithdrawButton = isWithdrawing || fullClose
+  const showWithdrawButton = isWithdrawing || requiresTwoStep
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered variant="confirmation">
@@ -161,8 +160,8 @@ function AdjustPositionModal({
             )}
             {!isWithdrawing ? (
               <AdjustmentStep
-                title={fullClose ? copy.confirmCloseTitle : copy.signTransactionTitle}
-                description={fullClose ? copy.confirmCloseBody : copy.signTransactionBody}
+                title={requiresTwoStep ? copy.confirmCloseTitle : copy.signTransactionTitle}
+                description={requiresTwoStep ? copy.confirmCloseBody : copy.signTransactionBody}
                 isLoading={orderTxLoading}
                 isCompleted={isTransactionCompleted}
               />
@@ -182,7 +181,7 @@ function AdjustPositionModal({
                 />
               </>
             )}
-            {fullClose && (
+            {requiresTwoStep && (
               <AdjustmentStep
                 title={copy.awaitSettlementTitle}
                 description={copy.awaitSettlementBody}
@@ -220,7 +219,9 @@ function AdjustPositionModal({
               <Button
                 variant="outline"
                 isDisabled={step !== 1 || orderTxLoading}
-                label={orderTxLoading ? <Spinner size="sm" /> : fullClose ? copy.confirmCloseTitle : copy.placeOrder}
+                label={
+                  orderTxLoading ? <Spinner size="sm" /> : requiresTwoStep ? copy.confirmCloseTitle : copy.placeOrder
+                }
                 onClick={handleSetOrder}
                 width="100%"
               />
