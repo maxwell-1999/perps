@@ -18,14 +18,7 @@ import { Day } from '@/utils/timeUtils'
 
 import { PositionSide } from '@t/gql/graphql'
 
-import {
-  calculatePnl,
-  getCurrentPriceDelta,
-  getFormattedPositionDetails,
-  getPositionStatus,
-  transformPositionDataToArray,
-  unpackPosition,
-} from './utils'
+import { calculatePnl, getCurrentPriceDelta, getFormattedPositionDetails, transformPositionDataToArray } from './utils'
 
 export const useStyles = () => {
   const theme = useTheme()
@@ -67,7 +60,7 @@ export const usePositionManagerCopy = () => {
     x: intl.formatMessage({ defaultMessage: 'x' }),
     noValue: intl.formatMessage({ defaultMessage: '--' }),
     direction: intl.formatMessage({ defaultMessage: 'Direction' }),
-    withdraw: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
+    withdraw: intl.formatMessage({ defaultMessage: 'Withdraw Collateral' }),
     market: intl.formatMessage({ defaultMessage: 'Market' }),
     liquidation: intl.formatMessage({ defaultMessage: 'Liquidation' }),
     loadMore: intl.formatMessage({ defaultMessage: 'Load more' }),
@@ -79,14 +72,11 @@ export const usePositionManagerCopy = () => {
 }
 
 export const useFormatPosition = () => {
-  const { assetMetadata, selectedMarket, orderDirection } = useMarketContext()
-  const { data: snapshots } = useChainAssetSnapshots()
+  const { assetMetadata, selectedMarket, orderDirection, selectedMarketSnapshot } = useMarketContext()
   const { data: positions } = useUserCurrentPositions()
   const { noValue, long, short } = usePositionManagerCopy()
-  const position = unpackPosition({ positions, selectedMarket, orderDirection })
-  const positionStatus = getPositionStatus(position?.details)
+  const position = positions?.[selectedMarket]?.[orderDirection]
   const numSigFigs = assetMetadata.displayDecimals
-  const selectedMarketSnapshot = snapshots?.[selectedMarket]
 
   const fundingRate =
     position?.direction === OrderDirection.Long
@@ -94,11 +84,12 @@ export const useFormatPosition = () => {
       : selectedMarketSnapshot?.Short?.rate
 
   return {
-    positionDetails: position?.details,
-    status: positionStatus,
-    direction: position ? (position.direction === OrderDirection.Long ? long : short) : noValue,
-    dailyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Day, { numDecimals: 4 }) : noValue,
-    ...getFormattedPositionDetails({ positionDetails: position?.details, placeholderString: noValue, numSigFigs }),
+    positionDetails: position,
+    formattedValues: {
+      direction: position ? (position.direction === OrderDirection.Long ? long : short) : noValue,
+      dailyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Day, { numDecimals: 4 }) : noValue,
+      ...getFormattedPositionDetails({ positionDetails: position, placeholderString: noValue, numSigFigs }),
+    },
   }
 }
 

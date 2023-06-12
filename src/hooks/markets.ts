@@ -10,15 +10,21 @@ import { goerli, mainnet } from 'wagmi/chains'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { multiInvokerContract } from '@/constants/contracts'
-import { ChainMarkets, MaxUint256, OpenPositionType, OrderDirection, addressToAsset } from '@/constants/markets'
+import {
+  ChainMarkets,
+  MaxUint256,
+  OpenPositionType,
+  OrderDirection,
+  PositionStatus,
+  addressToAsset,
+} from '@/constants/markets'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
-import { useMarketContext } from '@/contexts/marketContext'
 import { equal, notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
 import { InvokerAction, buildInvokerAction } from '@/utils/multiinvoker'
 import { ethersResultToPOJO } from '@/utils/objectUtils'
-import { calcLiquidationPrice, next, side as positionSide, size } from '@/utils/positionUtils'
+import { calcLiquidationPrice, next, side as positionSide, positionStatus, size } from '@/utils/positionUtils'
 import { last24hrBounds } from '@/utils/timeUtils'
 
 import { ICollateralAbi, IProductAbi__factory } from '@t/generated'
@@ -327,18 +333,20 @@ const fetchUserPositionDetails = async (
   graphPosition?: GetAccountPositionsQuery['positions'][0],
   productSnapshot?: IPerennialLens.ProductSnapshotStructOutput,
 ) => {
-  if (!snapshot || !productSnapshot) return { asset, direction, currentCollateral: 0n }
+  if (!snapshot || !productSnapshot) return { asset, direction, currentCollateral: 0n, status: PositionStatus.resolved }
   const { productAddress, collateral, pre, position, openInterest, maintenance } = snapshot
   const nextNotional = Big18Math.abs(Big18Math.mul(size(next(pre, position)), productSnapshot.latestVersion.price))
   let side = positionSide(next(pre, position))
 
   // If no graph position, return snapshot values
   if (!graphPosition) {
+    const positionSize = side === 'maker' ? snapshot.position.maker : snapshot.position.taker
+    const nextPositionSize = side === 'maker' ? next(pre, position).maker : next(pre, position).taker
     return {
       asset,
       direction,
-      position: side === 'maker' ? snapshot.position.maker : snapshot.position.taker,
-      nextPosition: side === 'maker' ? next(pre, position).maker : next(pre, position).taker,
+      position: positionSize,
+      nextPosition: nextPositionSize,
       startCollateral: collateral,
       currentCollateral: collateral,
       averageEntry: productSnapshot.latestVersion.price,
@@ -348,6 +356,7 @@ const fetchUserPositionDetails = async (
       leverage: collateral > 0n ? Big18Math.div(size(openInterest), collateral) : 0n,
       nextLeverage: collateral > 0n ? Big18Math.div(nextNotional, collateral) : 0n,
       maintenance,
+      status: positionStatus(positionSize, nextPositionSize, collateral),
     }
   }
   const { startBlock, depositAmount, fees: _fees, endBlock, lastUpdatedBlockNumber, valuePnl } = graphPosition
@@ -685,13 +694,15 @@ const fetchUserPositionDetails = async (
   }
 
   const fees = BigInt(_fees)
+  const positionSize = side === 'maker' ? position.maker : position.taker
+  const nextPositionSize = side === 'maker' ? next(pre, position).maker : next(pre, position).taker
   return {
     asset,
     direction,
     product: productAddress,
     side,
-    position: side === 'maker' ? position.maker : position.taker,
-    nextPosition: side === 'maker' ? next(pre, position).maker : next(pre, position).taker,
+    position: positionSize,
+    nextPosition: nextPositionSize,
     startCollateral,
     currentCollateral: collateral,
     deposits,
@@ -707,6 +718,7 @@ const fetchUserPositionDetails = async (
     pnl: closedPosition ? BigInt(valuePnl) - fees : collateral - startCollateral - deposits,
     collateralChanges,
     maintenance,
+    status: positionStatus(positionSize, nextPositionSize, collateral),
   }
 }
 
@@ -944,56 +956,4 @@ export const useProductTransactions = (productAddress?: string) => {
     onApproveUSDC,
     onModifyPosition,
   }
-}
-
-type CurrentPositionData = {
-  direction: OrderDirection | undefined
-  position: PositionDetails | undefined
-}
-
-export const useCurrentPosition = () => {
-  const { selectedMarket, orderDirection } = useMarketContext()
-  const { data: positions } = useUserCurrentPositions()
-
-  const noPositionData: CurrentPositionData = {
-    direction: undefined,
-    position: undefined,
-  }
-
-  if (!positions || !selectedMarket) return null
-  const market = positions[selectedMarket]
-
-  const longCollateral = market?.Long?.currentCollateral ?? 0n
-  const shortCollateral = market?.Short?.currentCollateral ?? 0n
-
-  const hasLongCollateral = !Big18Math.isZero(longCollateral)
-  const hasShortCollateral = !Big18Math.isZero(shortCollateral)
-  if (!hasLongCollateral && !hasShortCollateral) return noPositionData
-  const hasLongTaker = market?.Long?.side === 'taker'
-  const hasShortTaker = market?.Short?.side === 'taker'
-
-  if (!hasLongTaker && !hasShortTaker) return noPositionData
-  let direction: OrderDirection | undefined = undefined
-  let position: PositionDetails | undefined = undefined
-
-  if (orderDirection === OrderDirection.Long) {
-    if (hasLongCollateral && hasLongTaker) {
-      direction = OrderDirection.Long
-      position = market?.Long as PositionDetails
-    } else if (hasShortCollateral && hasShortTaker) {
-      direction = OrderDirection.Short
-      position = market?.Short as PositionDetails
-    }
-  } else {
-    if (hasShortCollateral && hasShortTaker) {
-      direction = OrderDirection.Short
-      position = market?.Short as PositionDetails
-    } else if (hasLongCollateral && hasLongTaker) {
-      direction = OrderDirection.Long
-      position = market?.Long as PositionDetails
-    }
-  }
-  if (!direction || !position) return noPositionData
-
-  return { direction, position }
 }

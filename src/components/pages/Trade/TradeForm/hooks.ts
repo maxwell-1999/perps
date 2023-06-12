@@ -66,7 +66,7 @@ export function useTradeFormCopy() {
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     amount: intl.formatMessage({ defaultMessage: 'Amount' }),
     withdrawFunds: intl.formatMessage({ defaultMessage: 'Withdraw funds' }),
-    withdrawCollateral: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
+    withdrawCollateral: intl.formatMessage({ defaultMessage: 'Withdraw Collateral' }),
     withdrawBodyText: intl.formatMessage({
       defaultMessage:
         'Please specify how much you would like to withdraw from the pool now that you have reduced your position size.',
@@ -87,10 +87,12 @@ export function useTradeFormCopy() {
 export function useReceiptCopy() {
   const intl = useIntl()
   return {
-    entryExit: intl.formatMessage({ defaultMessage: 'Entry / Exit' }),
+    estEntry: intl.formatMessage({ defaultMessage: 'Est. Entry' }),
+    estExit: intl.formatMessage({ defaultMessage: 'Est. Exit' }),
     priceImpact: intl.formatMessage({ defaultMessage: 'Price impact' }),
     liquidationPrice: intl.formatMessage({ defaultMessage: 'Liquidation price' }),
     tradingFee: intl.formatMessage({ defaultMessage: 'Trading fee' }),
+    hourlyFundingRate: intl.formatMessage({ defaultMessage: 'Funding Rate (1h)' }),
   }
 }
 interface OnChangeHandlersArgs {
@@ -102,7 +104,7 @@ interface OnChangeHandlersArgs {
   leverageFixed: boolean
 }
 
-const setArgs = { shouldValidate: true }
+const setArgs = { shouldValidate: true, shouldDirty: true }
 export const useOnChangeHandlers = ({
   setValue,
   leverage,
@@ -114,7 +116,7 @@ export const useOnChangeHandlers = ({
   const onChangeAmount = useCallback(
     (newAmount: string) => {
       const validatedAmount = max18Decimals(newAmount)
-      setValue(FormNames.amount, validatedAmount, { ...setArgs, shouldDirty: true })
+      setValue(FormNames.amount, validatedAmount, setArgs)
 
       if (leverageFixed) {
         const newCollateralAmt = collateralFromAmountAndLeverage({
@@ -138,7 +140,7 @@ export const useOnChangeHandlers = ({
   const onChangeLeverage = useCallback(
     (newLeverage: number) => {
       const validatedLeverage = max18Decimals(`${newLeverage}`)
-      setValue(FormNames.leverage, parseFloat(validatedLeverage), { ...setArgs, shouldDirty: true })
+      setValue(FormNames.leverage, parseFloat(validatedLeverage), setArgs)
       const newPosition = positionFromCollateralAndLeverage({
         collateral,
         leverage: validatedLeverage,
@@ -152,7 +154,7 @@ export const useOnChangeHandlers = ({
   const onChangeCollateral = useCallback(
     (newAmount: string) => {
       const validatedCollateral = max18Decimals(newAmount)
-      setValue(FormNames.collateral, validatedCollateral, { ...setArgs, shouldDirty: true })
+      setValue(FormNames.collateral, validatedCollateral, setArgs)
 
       if (leverageFixed) {
         const newPosition = positionFromCollateralAndLeverage({

@@ -2,44 +2,41 @@ import { Flex, Spinner } from '@chakra-ui/react'
 import { useEffect } from 'react'
 import { useAccount } from 'wagmi'
 
+import { OrderDirection, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { useCurrentPosition } from '@/hooks/markets'
+import { useUserCurrentPositions } from '@/hooks/markets'
 
 import { Container } from '@ds/Container'
 
 import ClosePositionForm from './components/ClosePositionForm'
 import TradeForm from './components/TradeForm'
-import WithdrawForm from './components/WithdrawForm'
 import { useResetFormOnMarketChange } from './hooks'
+
+const Long = OrderDirection.Long
+const Short = OrderDirection.Short
 
 function TradeContainer() {
   const { formState, setTradeFormState } = useTradeFormState()
   const { selectedMarket, orderDirection, setOrderDirection, selectedMarketSnapshot } = useMarketContext()
-  const positionData = useCurrentPosition()
+  const { data: positions, isInitialLoading: positionsLoading } = useUserCurrentPositions()
   const { address } = useAccount()
 
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
 
-  const handleWithdrawCollateral = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    alert('withdraw collateral')
-  }
-
   const product = selectedMarketSnapshot?.[orderDirection]
-  const positionDataLoaded = positionData && 'position' in positionData
-  const positionPresent = positionDataLoaded && positionData.position !== undefined
-  const positionOrderDirection = positionData?.position?.direction
+  const position = positions?.[selectedMarket]?.[orderDirection]
+  const oppositeSidePosition = positions?.[selectedMarket]?.[orderDirection === Long ? Short : Long]
+
   useEffect(() => {
-    if (positionOrderDirection !== undefined && positionOrderDirection !== orderDirection) {
-      setOrderDirection(positionOrderDirection)
-    }
-  })
+    if (position?.status === PositionStatus.resolved && oppositeSidePosition?.status !== PositionStatus.resolved)
+      setOrderDirection(orderDirection === Long ? OrderDirection.Short : OrderDirection.Long)
+  }, [orderDirection, position, oppositeSidePosition, setOrderDirection])
 
   const containerVariant =
-    formState !== FormState.close && positionDataLoaded && positionPresent && address ? 'pink' : 'transparent'
+    formState !== FormState.close && position && position.status !== PositionStatus.resolved ? 'pink' : 'transparent'
 
-  if (!product || (address && !positionDataLoaded)) {
+  if (!product || (address && positionsLoading)) {
     return (
       <Container height="100%" minHeight="560px" p="0" variant={containerVariant}>
         <Flex height="100%" width="100%" justifyContent="center" alignItems="center">
@@ -48,6 +45,7 @@ function TradeContainer() {
       </Container>
     )
   }
+
   return (
     <Container height="100%" minHeight="560px" p="0" variant={containerVariant}>
       {!product && (
@@ -61,13 +59,12 @@ function TradeContainer() {
           orderDirection={orderDirection}
           setOrderDirection={setOrderDirection}
           product={product}
-          position={positionPresent ? positionData.position : undefined}
+          position={position?.side === 'taker' ? position : undefined}
         />
       )}
-      {formState === FormState.close && positionPresent && positionData.position !== undefined && (
-        <ClosePositionForm asset={selectedMarket} position={positionData.position} product={product} />
+      {formState === FormState.close && position && (
+        <ClosePositionForm asset={selectedMarket} position={position} product={product} />
       )}
-      {formState === FormState.withdraw && <WithdrawForm onSubmit={handleWithdrawCollateral} />}
     </Container>
   )
 }

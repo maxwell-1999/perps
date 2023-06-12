@@ -1,5 +1,5 @@
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Slider } from '@/components/design-system'
@@ -84,11 +84,19 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
 
   const closeAdjustmentModal = () => {
     setOrderValues(null)
+    setTradeFormState(FormState.trade)
   }
 
   const cancelAdjustmentModal = () => {
     setOrderValues(null)
   }
+
+  const positionDelta = useMemo(() => {
+    return {
+      collateralDelta: -Big18Math.fromFloatString(collateral),
+      positionDelta: -Big18Math.fromFloatString(amount),
+    }
+  }, [collateral, amount])
 
   const onConfirm = (orderData: { collateral: string; amount: string }) => {
     const fullClose = Big18Math.eq(Big18Math.fromFloatString(orderData.amount), nextPosition ?? 0n)
@@ -202,7 +210,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
         </Flex>
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
-          <TradeReceipt mb="25px" px="3px" hideEntry />
+          <TradeReceipt mb="25px" px="3px" product={product} positionDetails={position} positionDelta={positionDelta} />
           <ButtonGroup>
             <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
             <Button flex={1} label={copy.closePosition} type="submit" />

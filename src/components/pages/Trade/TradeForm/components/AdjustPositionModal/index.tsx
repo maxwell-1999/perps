@@ -90,11 +90,11 @@ function AdjustPositionModal({
     setApproveUsdcLoading(true)
     try {
       await onApproveUSDC()
+      setStep(1)
     } catch (err) {
       console.error(err)
     } finally {
       setApproveUsdcLoading(false)
-      setStep(1)
     }
   }
 
@@ -105,12 +105,12 @@ function AdjustPositionModal({
       const collateralModification = requiresTwoStep ? 0n : collateralDifference
       await onModifyPosition(collateralModification, positionType, positionDifference)
       if (!requiresTwoStep) onClose()
+      else setAwaitingSettlement(true)
+      setStep(2)
     } catch (err) {
       console.error(err)
     } finally {
-      setStep(2)
       setOrderTxLoading(false)
-      if (requiresTwoStep) setAwaitingSettlement(true)
     }
   }
 

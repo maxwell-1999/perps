@@ -59,32 +59,48 @@ const MarketContext = createContext<MarketContextType>({
 export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId()
   const [selectedMarket, _setSelectedMarket] = useState<SupportedAsset>(SupportedAsset.eth)
-  const [orderDirection, setOrderDirection] = useState<OrderDirection>(OrderDirection.Long)
+  const [orderDirection, _setOrderDirection] = useState<OrderDirection>(OrderDirection.Long)
   const [activePositionTab, setActivePositionTab] = useState<PositionsTab>(PositionsTab.current)
 
   const { data: snapshots } = useChainAssetSnapshots()
+
   useRefreshMarketDataOnPriceUpdates()
 
   useEffect(() => {
     // check query params first
     const urlParams = new URLSearchParams(window.location.search)
     const marketFromParams = urlParams.get('market')?.toLowerCase()
+    const directionFromParams = urlParams.get('direction')?.toLowerCase()
 
     if (marketFromParams && Object.keys(SupportedAsset).includes(marketFromParams)) {
       _setSelectedMarket(marketFromParams as SupportedAsset)
     } else {
-      // TODO: local storage key will include chain ID when we get there
-      const marketFromLocalStorage = localStorage.getItem('market')
+      const marketFromLocalStorage = localStorage.getItem(`${chainId}_market`)
 
       if (marketFromLocalStorage && Object.keys(SupportedAsset).includes(marketFromLocalStorage)) {
         _setSelectedMarket(marketFromLocalStorage as SupportedAsset)
       }
     }
-  }, [])
+
+    if (directionFromParams && Object.keys(OrderDirection).includes(directionFromParams)) {
+      _setOrderDirection(directionFromParams as OrderDirection)
+    } else {
+      const directionFromLocalStorage = localStorage.getItem(`${chainId}_orderDirection`)
+
+      if (directionFromLocalStorage && Object.keys(OrderDirection).includes(directionFromLocalStorage)) {
+        _setOrderDirection(directionFromLocalStorage as OrderDirection)
+      }
+    }
+  }, [chainId])
 
   const setSelectedMarket = (asset: SupportedAsset) => {
-    localStorage.setItem('market', asset)
+    localStorage.setItem(`${chainId}_market`, asset)
     _setSelectedMarket(asset)
+  }
+
+  const setOrderDirection = (orderDirection: OrderDirection) => {
+    localStorage.setItem(`${chainId}_orderDirection`, orderDirection)
+    _setOrderDirection(orderDirection)
   }
 
   return (

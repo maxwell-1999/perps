@@ -3,7 +3,7 @@ import ClosePositionIcon from '@public/icons/closePositionIcon.svg'
 import React from 'react'
 
 import { AssetIconWithText } from '@/components/shared/components'
-import { OrderDirection } from '@/constants/markets'
+import { OrderDirection, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails } from '@/hooks/markets'
@@ -11,7 +11,6 @@ import { PositionDetails } from '@/hooks/markets'
 import { Button } from '@ds/Button'
 import { DataRow } from '@ds/DataRow'
 
-import { PositionStatus } from '../constants'
 import { useFormatPosition, usePositionManagerCopy, useStyles } from '../hooks'
 import {
   ActivePositionDetail,
@@ -33,21 +32,20 @@ function CurrentPosition() {
   const { borderColor, green, red, alpha75, subheaderTextColor } = useStyles()
   const { assetMetadata } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
+  const { positionDetails, formattedValues } = useFormatPosition()
   const {
     direction,
+    dailyFunding,
     currentCollateral,
-    position,
     nextPosition,
     averageEntry,
     liquidationPrice,
     nextNotional,
     leverage,
-    dailyFunding,
-    status,
-    positionDetails,
-  } = useFormatPosition()
+  } = formattedValues
+  const status = positionDetails?.status ?? PositionStatus.resolved
 
-  const hasPosition = position !== noValue || nextPosition !== noValue
+  const hasPosition = status !== PositionStatus.resolved
   const directionTextColor = direction === OrderDirection.Long ? green : red
   const isOpenPosition =
     status === PositionStatus.open ||
@@ -56,7 +54,6 @@ function CurrentPosition() {
     status === PositionStatus.opening
   const isTransitionPosition =
     status === PositionStatus.pricing || status === PositionStatus.opening || status === PositionStatus.closing
-  const isClosedPosition = status === PositionStatus.closed
   const statusColor = isOpenPosition ? (isTransitionPosition ? 'goldenRod' : green) : 'darkGray'
 
   const statusLabel = copy[status]
@@ -113,9 +110,6 @@ function CurrentPosition() {
                     onClick={() => setTradeFormState(FormState.close)}
                   />
                 </ButtonGroup>
-              )}
-              {isClosedPosition && (
-                <Button size="sm" label={copy.withdraw} onClick={() => setTradeFormState(FormState.withdraw)} />
               )}
             </Flex>
           )}
@@ -196,9 +190,6 @@ function CurrentPosition() {
                   onClick={() => setTradeFormState(FormState.close)}
                 />
               </ButtonGroup>
-            )}
-            {isClosedPosition && (
-              <Button size="sm" label={copy.withdraw} onClick={() => setTradeFormState(FormState.withdraw)} />
             )}
           </DesktopButtonContainer>
         )}

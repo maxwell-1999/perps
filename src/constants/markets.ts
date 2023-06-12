@@ -14,6 +14,15 @@ export enum OpenPositionType {
   taker = 'taker',
 }
 
+export enum PositionStatus {
+  open = 'open',
+  closed = 'closed',
+  opening = 'opening',
+  closing = 'closing',
+  pricing = 'pricing',
+  resolved = 'noValue',
+}
+
 export const ChainMarkets: {
   [chainId in SupportedChainId]: {
     [asset in SupportedAsset]?: { [OrderDirection.Long]?: Address; [OrderDirection.Short]?: Address }

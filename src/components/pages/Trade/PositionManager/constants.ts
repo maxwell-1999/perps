@@ -1,15 +1,6 @@
 import { SupportedAsset } from '@/constants/assets'
 import { PositionDetails } from '@/hooks/markets'
 
-export enum PositionStatus {
-  open = 'open',
-  closed = 'closed',
-  opening = 'opening',
-  closing = 'closing',
-  pricing = 'pricing',
-  resolved = 'noValue',
-}
-
 export type FormattedPositionDetail = {
   asset: SupportedAsset
   symbol: string

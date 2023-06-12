@@ -1,11 +1,10 @@
 import { Row } from 'react-table'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import { OrderDirection } from '@/constants/markets'
 import { AssetSnapshots, LivePrices, PositionDetails, UserCurrentPositions } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 
-import { FormattedPositionDetail, PositionStatus } from './constants'
+import { FormattedPositionDetail } from './constants'
 
 export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?: bigint) => {
   if (!positionDetails) return { pnl: '0', pnlPercentage: '0', isPnlPositive: false }
@@ -30,83 +29,6 @@ export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?:
     pnlPercentage,
     isPnlPositive: pnl > 0n,
   }
-}
-
-export const unpackPosition = ({
-  positions,
-  selectedMarket,
-  orderDirection,
-}: {
-  positions?: UserCurrentPositions
-  selectedMarket: SupportedAsset
-  orderDirection: OrderDirection
-}): { direction: OrderDirection; details: PositionDetails } | null => {
-  if (!positions) return null
-  const position = positions[selectedMarket]
-
-  const longCollateral = position?.Long?.currentCollateral ?? 0n
-  const shortCollateral = position?.Short?.currentCollateral ?? 0n
-
-  const hasLongCollateral = !Big18Math.isZero(longCollateral)
-  const hasShortCollateral = !Big18Math.isZero(shortCollateral)
-
-  if (!hasLongCollateral && !hasShortCollateral) return null
-
-  const hasLongTaker = position?.Long?.side === 'taker'
-  const hasShortTaker = position?.Short?.side === 'taker'
-
-  if (!hasLongTaker && !hasShortTaker) return null
-
-  let direction: OrderDirection | undefined = undefined
-  let details: PositionDetails | undefined = undefined
-
-  if (orderDirection === OrderDirection.Long) {
-    if (hasLongCollateral && hasLongTaker) {
-      direction = OrderDirection.Long
-      details = position?.Long as PositionDetails
-    } else if (hasShortCollateral && hasShortTaker) {
-      direction = OrderDirection.Short
-      details = position?.Short as PositionDetails
-    }
-  } else {
-    if (hasShortCollateral && hasShortTaker) {
-      direction = OrderDirection.Short
-      details = position?.Short as PositionDetails
-    } else if (hasLongCollateral && hasLongTaker) {
-      direction = OrderDirection.Long
-      details = position?.Long as PositionDetails
-    }
-  }
-
-  if (!direction || !details) return null
-
-  return { direction, details }
-}
-
-export const getPositionStatus = (positionDetails?: PositionDetails) => {
-  if (!positionDetails) {
-    return PositionStatus.resolved
-  }
-  const nextPosition = positionDetails?.nextPosition ?? 0n
-  const position = positionDetails?.position ?? 0n
-  const currentCollateral = positionDetails?.currentCollateral ?? 0n
-
-  if (Big18Math.isZero(nextPosition) && !Big18Math.isZero(position)) {
-    return PositionStatus.closing
-  }
-  if (Big18Math.isZero(nextPosition) && Big18Math.isZero(position) && !Big18Math.isZero(currentCollateral)) {
-    return PositionStatus.closed
-  }
-  if (!Big18Math.isZero(nextPosition) && Big18Math.isZero(position)) {
-    return PositionStatus.opening
-  }
-  if (!Big18Math.isZero(nextPosition) && !Big18Math.isZero(position) && !Big18Math.eq(nextPosition, position)) {
-    return PositionStatus.pricing
-  }
-  if (!Big18Math.isZero(nextPosition) && !Big18Math.isZero(position)) {
-    return PositionStatus.open
-  }
-  return PositionStatus.resolved
 }
 
 export const transformPositionDataToArray = (userPositions?: UserCurrentPositions) => {

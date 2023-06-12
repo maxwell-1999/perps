@@ -1,4 +1,7 @@
+import { PositionStatus } from '@/constants/markets'
+
 import { IPerennialLens, PositionStructOutput, PrePositionStructOutput } from '@t/generated/LensAbi'
+import { PositionSide } from '@t/gql/graphql'
 
 import { Big18Math } from './big18Utils'
 
@@ -13,9 +16,9 @@ export function size(pos: PositionStructOutput) {
   return pos.maker || pos.taker || 0n
 }
 
-export function side(pos?: PositionStructOutput) {
-  if (pos && pos.maker > 0n) return 'maker'
-  return 'taker'
+export function side(pos?: PositionStructOutput): PositionSide {
+  if (pos && pos.maker > 0n) return PositionSide.Maker
+  return PositionSide.Taker
 }
 
 export function add(a: PositionStructOutput, b: PositionStructOutput) {
@@ -121,4 +124,23 @@ export const calcLiquidationPriceLong = (
   denominator = Big18Math.mul(denominator, userPosition)
 
   return Big18Math.abs(Big18Math.div(numerator, denominator))
+}
+
+export const positionStatus = (position: bigint, nextPosition: bigint, collateral: bigint) => {
+  if (Big18Math.isZero(nextPosition) && !Big18Math.isZero(position)) {
+    return PositionStatus.closing
+  }
+  if (Big18Math.isZero(nextPosition) && Big18Math.isZero(position) && !Big18Math.isZero(collateral)) {
+    return PositionStatus.closed
+  }
+  if (!Big18Math.isZero(nextPosition) && Big18Math.isZero(position)) {
+    return PositionStatus.opening
+  }
+  if (!Big18Math.isZero(nextPosition) && !Big18Math.isZero(position) && !Big18Math.eq(nextPosition, position)) {
+    return PositionStatus.pricing
+  }
+  if (!Big18Math.isZero(nextPosition) && !Big18Math.isZero(position)) {
+    return PositionStatus.open
+  }
+  return PositionStatus.resolved
 }
