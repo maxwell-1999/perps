@@ -7,11 +7,12 @@ import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails } from '@/hooks/markets'
+import { PositionDetails, useProtocolSnapshot } from '@/hooks/markets'
 import { useAddress } from '@/hooks/network'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 import { usePrevious } from '@/utils/hooks'
+import { next } from '@/utils/positionUtils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
@@ -25,6 +26,7 @@ import { calcMaxLeverage, formatInitialInputs } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import { TradeReceipt } from './Receipt'
 import { Form } from './styles'
+import { useCollateralValidators, useLeverageValidators, usePositionValidators } from './validatorHooks'
 
 interface TradeFormProps {
   asset: SupportedAsset
@@ -40,6 +42,7 @@ function TradeForm(props: TradeFormProps) {
     productAddress,
     latestVersion: { price },
     maintenance,
+    pre: globalPre,
   } = product
 
   const prevProductAddress = usePrevious(productAddress)
@@ -47,6 +50,7 @@ function TradeForm(props: TradeFormProps) {
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles()
   const copy = useTradeFormCopy()
   const { data: balances } = useBalances()
+  const { data: protocolSnapshot } = useProtocolSnapshot()
   const { setTradeFormState } = useTradeFormState()
   const { address } = useAddress()
   const prevAddress = usePrevious(address)
@@ -62,6 +66,7 @@ function TradeForm(props: TradeFormProps) {
   const currentCollateral = position?.currentCollateral ?? 0n
   const isNewPosition = Big18Math.isZero(currentPositionAmount)
   const maxLeverage = useMemo(() => calcMaxLeverage(maintenance), [maintenance])
+  const userMaintenance = position?.maintenance ?? 0n
 
   const initialFormState = useMemo(
     () =>
@@ -81,7 +86,7 @@ function TradeForm(props: TradeFormProps) {
     watch,
     setValue,
     reset,
-    formState: { dirtyFields },
+    formState: { dirtyFields, errors },
   } = useForm({
     defaultValues: initialFormState,
   })
@@ -166,7 +171,20 @@ function TradeForm(props: TradeFormProps) {
     [collateral, amount, currentCollateral, currentPositionAmount],
   )
 
-  const disableTradeBtn = !positionDelta.positionDelta && !positionDelta.collateralDelta
+  const hasFormErrors = Object.keys(errors).length > 0
+  const disableTradeBtn = (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors
+
+  const collateralValidators = useCollateralValidators({
+    usdcBalance: balances?.usdc ?? 0n,
+    requiredMaintenance: userMaintenance ?? 0n,
+    minCollateral: protocolSnapshot?.minCollateral ?? 0n,
+  })
+  const amountValidators = usePositionValidators({
+    liquidity: next(globalPre, product.position).maker,
+  })
+  const leverageValidators = useLeverageValidators({
+    maxLeverage,
+  })
 
   return (
     <>
@@ -230,6 +248,7 @@ function TradeForm(props: TradeFormProps) {
             control={control}
             name={FormNames.collateral}
             onChange={(e) => onChangeCollateral(e.target.value)}
+            validate={collateralValidators}
           />
           <Input
             type="number"
@@ -246,6 +265,7 @@ function TradeForm(props: TradeFormProps) {
             control={control}
             name={FormNames.amount}
             onChange={(e) => onChangeAmount(e.target.value)}
+            validate={amountValidators}
           />
           <Slider
             label={copy.leverage}
@@ -259,6 +279,7 @@ function TradeForm(props: TradeFormProps) {
             control={control}
             name={FormNames.leverage}
             onChange={onChangeLeverage}
+            validate={leverageValidators}
           />
         </Flex>
         <Divider mt="auto" />

@@ -78,6 +78,19 @@ export const useChainAssetSnapshots = () => {
   })
 }
 
+export const useProtocolSnapshot = () => {
+  const chainId = useChainId()
+  const lens = useLens()
+
+  return useQuery({
+    queryKey: ['protocolSnapshot', chainId],
+    enabled: !!chainId,
+    queryFn: async () => {
+      return lens['snapshot()'].staticCall()
+    },
+  })
+}
+
 export const useAsset24hrData = (asset: SupportedAsset) => {
   const chainId = useChainId()
   const graphClient = useGraphClient()
