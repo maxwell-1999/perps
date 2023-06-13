@@ -1,8 +1,10 @@
 import { createAuthenticationAdapter } from '@rainbow-me/rainbowkit'
+import { debounce } from 'lodash'
 import { SiweMessage } from 'siwe'
 import { Address } from 'viem'
 
 import { TosBackendURL, jwtKey } from '@/constants/auth'
+import { AuthStatus } from '@/contexts/authStatusContext'
 
 export const getJwt = (address: string) => localStorage.getItem(jwtKey(address))
 
@@ -10,40 +12,45 @@ export const setJwt = (address: string, jwt: string) => localStorage.setItem(jwt
 
 export const removeJwt = (address: string) => localStorage.removeItem(jwtKey(address))
 
-export const login = async ({
-  address,
-  setAuthStatus,
-  disconnect,
-}: {
-  address: string
-  setAuthStatus: (status: string) => void
-  disconnect: () => void
-}) => {
-  const jwt = getJwt(address)
-  if (!jwt) {
-    setAuthStatus('unauthenticated')
-    return
-  }
+export const login = debounce(
+  async ({
+    address,
+    setAuthStatus,
+    disconnect,
+  }: {
+    address: string
+    setAuthStatus: (status: AuthStatus) => void
+    disconnect: () => void
+  }) => {
+    const jwt = getJwt(address)
+    if (!jwt) {
+      setAuthStatus('unauthenticated')
+      disconnect()
+      return
+    }
 
-  try {
-    const loginRes = await fetch(`${TosBackendURL}/siwe/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${jwt}`,
-      },
-      body: JSON.stringify({ address }),
-    })
+    try {
+      const loginRes = await fetch(`${TosBackendURL}/siwe/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwt}`,
+        },
+        body: JSON.stringify({ address }),
+      })
 
-    if (!loginRes.ok) throw new Error('Login failed')
+      if (!loginRes.ok) throw new Error('Login failed')
 
-    setAuthStatus('authenticated')
-  } catch {
-    setAuthStatus('unauthenticated')
-    disconnect()
-    removeJwt(address)
-  }
-}
+      setAuthStatus('authenticated')
+    } catch {
+      setAuthStatus('unauthenticated')
+      disconnect()
+      removeJwt(address)
+    }
+  },
+  500,
+  { leading: true, trailing: false },
+)
 
 export const createAuthAdapter = ({ address, onVerify }: { address?: Address; onVerify: () => void }) => {
   let nonceJWT: string | null = null

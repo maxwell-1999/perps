@@ -69,7 +69,7 @@ const ConnectWalletInner: React.FC<ConnectWalletInnerProps> = ({
     // If the address is connected but ToS has not been accepted, disconnect them
     if (address && !tosAccepted) disconnect()
     // If the modal is no longer open and the connected address is not authed, disconnect them
-    if (address && authStatus !== 'authenticated' && !modalOpen) disconnect()
+    if (address && authStatus === 'unauthenticated' && !modalOpen) disconnect()
   }, [address, authStatus, modalOpen, tosAccepted, disconnect])
 
   const onClickConnect = () => {

@@ -12,9 +12,10 @@ import { WagmiConfig, useAccount, useDisconnect } from 'wagmi'
 
 import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
-import { AuthStatus, AuthStatusProvider, useAuthStatus } from '@/contexts/authStatusContext'
+import { AuthStatusProvider, StartingAuthStatus, useAuthStatus } from '@/contexts/authStatusContext'
 import '@/styles/globals.css'
-import { createAuthAdapter, login } from '@/utils/authUtils'
+import { createAuthAdapter, getJwt, login } from '@/utils/authUtils'
+import { usePrevious } from '@/utils/hooks'
 
 import theme from '@ds/theme'
 
@@ -35,17 +36,24 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
   const { authStatus, setAuthStatus } = useAuthStatus()
   const { disconnect } = useDisconnect()
   const { address } = useAccount({
-    onDisconnect: () => setAuthStatus('unauthenticated'),
+    onDisconnect: () => {
+      queryClient.resetQueries()
+      setAuthStatus(StartingAuthStatus)
+    },
   })
+  const prevAddress = usePrevious(address)
 
   const loginUser = useCallback(() => {
-    if (address) login({ address, setAuthStatus: (status: string) => setAuthStatus(status as AuthStatus), disconnect })
+    if (address) login({ address, setAuthStatus, disconnect })
   }, [address, setAuthStatus, disconnect])
 
-  // When the address changes, try login the user
   useEffect(() => {
-    if (authStatus === 'loading') loginUser()
-  }, [authStatus, loginUser])
+    // If the address changes and there is a JWT for the new address, try logging in, otherwise set the auth status to unauthenticated
+    if (address && address !== prevAddress) {
+      if (!!getJwt(address)) loginUser()
+      else setAuthStatus(StartingAuthStatus)
+    }
+  }, [address, prevAddress, setAuthStatus, loginUser])
 
   const authAdapter = useMemo(
     () =>
