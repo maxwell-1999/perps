@@ -118,6 +118,8 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
     ? Big18Math.add(Big18Math.fromFloatString(amount), Big18Math.div(closeFee, price))
     : undefined
 
+  const disableCloseBtn = !positionDelta.positionDelta && !positionDelta.collateralDelta
+
   return (
     <>
       {orderValues && (
@@ -213,7 +215,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
           <TradeReceipt mb="25px" px="3px" product={product} positionDetails={position} positionDelta={positionDelta} />
           <ButtonGroup>
             <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
-            <Button flex={1} label={copy.closePosition} type="submit" />
+            <Button flex={1} label={copy.closePosition} type="submit" isDisabled={disableCloseBtn} />
           </ButtonGroup>
         </Flex>
       </Form>
