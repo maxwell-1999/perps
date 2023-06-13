@@ -10,6 +10,7 @@ import { IntlProvider } from 'react-intl'
 // eslint-disable-next-line no-restricted-imports
 import { WagmiConfig, useAccount, useDisconnect } from 'wagmi'
 
+import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
 import { AuthStatus, AuthStatusProvider, useAuthStatus } from '@/contexts/authStatusContext'
 import '@/styles/globals.css'
@@ -56,7 +57,7 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
   )
 
   return (
-    <RainbowKitAuthenticationProvider adapter={authAdapter} status={authStatus}>
+    <RainbowKitAuthenticationProvider enabled={!LocalDev} adapter={authAdapter} status={authStatus}>
       <RainbowKitProvider chains={chains} theme={darkTheme()} modalSize="compact">
         <ChakraProvider theme={theme}>
           <CSSReset />

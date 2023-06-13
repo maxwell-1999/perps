@@ -1,6 +1,8 @@
 import { AuthenticationStatus } from '@rainbow-me/rainbowkit'
 import { createContext, useContext, useState } from 'react'
 
+import { LocalDev } from '@/constants/auth'
+
 export type AuthStatus = AuthenticationStatus
 
 const AuthStatusOverlayContext = createContext({
@@ -15,7 +17,7 @@ const AuthStatusOverlayContext = createContext({
 })
 
 export const AuthStatusProvider = ({ children }: { children: React.ReactNode }) => {
-  const [authStatus, setAuthStatus] = useState<AuthStatus>('loading')
+  const [authStatus, setAuthStatus] = useState<AuthStatus>(LocalDev ? 'authenticated' : 'loading')
   const [tosAccepted, _setTosAccepted] = useState<boolean>(() => {
     return typeof window !== 'undefined' && localStorage.getItem('tos_accepted') === 'true'
   })

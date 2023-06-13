@@ -7,3 +7,8 @@ export const TosBackendURL = process.env.NEXT_PUBLIC_TOS_API
 export const jwtKey = (address: string) => {
   return `jwt_${address}`
 }
+
+export const LocalDev =
+  process.env.NODE_ENV === 'development' &&
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
