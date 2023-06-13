@@ -1,11 +1,11 @@
 import { Flex, Spinner } from '@chakra-ui/react'
 import { useEffect } from 'react'
-import { useAccount } from 'wagmi'
 
 import { OrderDirection, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { useUserCurrentPositions } from '@/hooks/markets'
+import { useAddress } from '@/hooks/network'
 
 import { Container } from '@ds/Container'
 
@@ -20,7 +20,7 @@ function TradeContainer() {
   const { formState, setTradeFormState } = useTradeFormState()
   const { selectedMarket, orderDirection, setOrderDirection, selectedMarketSnapshot } = useMarketContext()
   const { data: positions, isInitialLoading: positionsLoading } = useUserCurrentPositions()
-  const { address } = useAccount()
+  const { address } = useAddress()
 
   useResetFormOnMarketChange({ setTradeFormState, selectedMarket, formState })
 

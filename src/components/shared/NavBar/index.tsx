@@ -9,13 +9,8 @@ import {
   useTheme,
 } from '@chakra-ui/react'
 import BurgerMenu from '@public/icons/burger.svg'
-import RedX from '@public/icons/red-x.svg'
-import Settings from '@public/icons/settings.svg'
 import Logo from '@public/logoTransparent.svg'
 import Link from 'next/link'
-import { useDisconnect } from 'wagmi'
-
-import { useAddress } from '@/hooks/network'
 
 import { Button, ButtonGroup, IconButton } from '@ds/Button'
 import { MobileDrawer } from '@ds/MobileDrawer'
@@ -27,8 +22,6 @@ import { useNavCopy } from './hooks'
 import { MobileButtonLabel, Nav } from './styles'
 
 function NavBar() {
-  const { disconnect } = useDisconnect()
-  const { address } = useAddress()
   const isBase = useBreakpointValue({ base: true, md: false })
   const { isOpen, onOpen, onClose } = useDisclosure()
   const theme = useTheme()
@@ -71,10 +64,6 @@ function NavBar() {
       </Flex>
       <ButtonGroup>
         <ConnectWalletButton />
-        {!isBase && <IconButton aria-label={copy.settings} icon={<Settings />} mr={1} />}
-        {Boolean(address) && !isBase && (
-          <IconButton aria-label={copy.close} icon={<RedX />} onClick={() => disconnect()} />
-        )}
       </ButtonGroup>
     </Nav>
   )

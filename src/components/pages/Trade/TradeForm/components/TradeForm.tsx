@@ -1,7 +1,6 @@
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useAccount } from 'wagmi'
 
 import Toggle from '@/components/shared/Toggle'
 import { SupportedAsset } from '@/constants/assets'
@@ -9,6 +8,7 @@ import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/ma
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails } from '@/hooks/markets'
+import { useAddress } from '@/hooks/network'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 import { usePrevious } from '@/utils/hooks'
@@ -48,7 +48,7 @@ function TradeForm(props: TradeFormProps) {
   const copy = useTradeFormCopy()
   const { data: balances } = useBalances()
   const { setTradeFormState } = useTradeFormState()
-  const { address } = useAccount()
+  const { address } = useAddress()
   const prevAddress = usePrevious(address)
   const { assetMetadata } = useMarketContext()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)

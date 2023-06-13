@@ -36,6 +36,18 @@ module.exports = {
       },
     ],
     'formatjs/no-id': 'error',
+    'no-restricted-imports': [
+      'error',
+      {
+        paths: [
+          {
+            name: 'wagmi',
+            importNames: ['useAccount'],
+            message: 'Please use useAddress to correctly handle overriding addresses.',
+          },
+        ],
+      },
+    ],
   },
   overrides: [
     {

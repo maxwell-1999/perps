@@ -9,12 +9,24 @@ const nextConfig = {
   experimental: {
     swcPlugins: [['@formatjs/swc-plugin-experimental', {}]],
   },
-  webpack(config) {
+  webpack(config, { isServer }) {
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
       use: ['@svgr/webpack'],
     })
+
+    if (!isServer) {
+      config.resolve = {
+        ...config.resolve,
+        fallback: {
+          // fixes siwe dependencies
+          net: false,
+          tls: false,
+          fs: false,
+        },
+      }
+    }
 
     return config
   },

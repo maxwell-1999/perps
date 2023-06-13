@@ -4,6 +4,7 @@ import { ethers } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useCallback, useEffect, useState } from 'react'
 import { Address, Hex, getAddress, numberToHex, parseAbi, toHex, zeroAddress } from 'viem'
+// eslint-disable-next-line no-restricted-imports
 import { useAccount, useSendTransaction, useWalletClient } from 'wagmi'
 import { waitForTransaction } from 'wagmi/actions'
 import { goerli, mainnet } from 'wagmi/chains'

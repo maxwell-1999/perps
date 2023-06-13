@@ -3,6 +3,7 @@ import { AlchemyProvider, JsonRpcProvider, WebSocketProvider } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useRouter } from 'next/router'
 import { getAddress } from 'viem'
+// eslint-disable-next-line no-restricted-imports
 import { useNetwork, useAccount as useWagmiAccount } from 'wagmi'
 import { baseGoerli } from 'wagmi/chains'
 
@@ -20,7 +21,7 @@ export const useChainId = () => {
   let { chain } = useNetwork()
   chain = chain ?? DefaultChain
 
-  if (chain === undefined || !isSupportedChain(chain)) throw new Error('Invalid chain')
+  if (chain === undefined || !isSupportedChain(chain)) return DefaultChain.id
 
   return chain.id as SupportedChainId
 }
