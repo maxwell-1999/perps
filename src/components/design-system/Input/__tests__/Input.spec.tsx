@@ -35,21 +35,6 @@ describe('Input Component', () => {
     expect(screen.getByText('Test Label')).toBeInTheDocument()
   })
 
-  it('renders the helper text correctly', () => {
-    render(
-      <MockForm>
-        {(methods) => <Input {...defaultProps} control={methods.control} helperText="Test Helper Text" />}
-      </MockForm>,
-    )
-    expect(screen.getByText('Test Helper Text')).toBeInTheDocument()
-  })
-
-  // it('renders the error message when provided', () => {
-  //   const errorMessage = 'Test Error Message'
-  //   render(<Input {...defaultProps} errorMessage={errorMessage} />)
-  //   expect(screen.getByText(errorMessage)).toBeInTheDocument()
-  // })
-
   it('sets the input as required when isRequired is true', () => {
     render(<MockForm>{(methods) => <Input {...defaultProps} control={methods.control} isRequired />}</MockForm>)
     expect(screen.getByTestId(testId)).toBeRequired()

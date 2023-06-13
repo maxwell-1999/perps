@@ -137,6 +137,12 @@
       "value": "Open Interest (L/S)"
     }
   ],
+  "B2R6X1": [
+    {
+      "type": 0,
+      "value": "Collateral is below minimum requirement."
+    }
+  ],
   "BY343C": [
     {
       "type": 0,
@@ -171,6 +177,12 @@
     {
       "type": 0,
       "value": "Closed"
+    }
+  ],
+  "FzCAmu": [
+    {
+      "type": 0,
+      "value": "Collateral is below maintenance requirement."
     }
   ],
   "GCY0dr": [
@@ -321,6 +333,12 @@
       "value": "Connect wallet"
     }
   ],
+  "VplG8G": [
+    {
+      "type": 0,
+      "value": "Insufficent collateral available."
+    }
+  ],
   "W6nSYE": [
     {
       "type": 0,
@@ -367,6 +385,12 @@
     {
       "type": 0,
       "value": "Please check your wallet, and confirm the following requests."
+    }
+  ],
+  "aYqugF": [
+    {
+      "type": 0,
+      "value": "Maximum leverage exceeded."
     }
   ],
   "agOXPD": [
@@ -417,12 +441,6 @@
       "value": "Sign transaction"
     }
   ],
-  "jUkNmx": [
-    {
-      "type": 0,
-      "value": "Post your trade to the order book"
-    }
-  ],
   "juU558": [
     {
       "type": 0,
@@ -445,6 +463,12 @@
     {
       "type": 0,
       "value": "24h Low"
+    }
+  ],
+  "mDNzLd": [
+    {
+      "type": 0,
+      "value": "Place your trade."
     }
   ],
   "npb5FN": [
@@ -569,6 +593,12 @@
     {
       "type": 0,
       "value": "Once your trade has settled you may withdraw your funds."
+    }
+  ],
+  "zgtPjR": [
+    {
+      "type": 0,
+      "value": "Order size exceeds the available liquidity."
     }
   ]
 }

@@ -73,7 +73,7 @@ export const leverageFromAmountAndCollateral = ({
 }) => {
   const parsedCollateralAmount = Big18Math.fromFloatString(collateral)
   if (Big18Math.isZero(parsedCollateralAmount)) {
-    return ''
+    return '0'
   }
 
   const parsedPositionAmount = Big18Math.fromFloatString(amount)

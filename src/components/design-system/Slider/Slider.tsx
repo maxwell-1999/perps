@@ -1,7 +1,7 @@
 /* eslint-disable formatjs/no-literal-string-in-jsx */
 import { Box, Flex, FlexProps, Text, useColorModeValue, useSlider } from '@chakra-ui/react'
 import React from 'react'
-import { Control, useController } from 'react-hook-form'
+import { Control, Validate, useController } from 'react-hook-form'
 
 import colors from '@ds/theme/colors'
 
@@ -17,6 +17,7 @@ export interface Props {
   isDisabled?: boolean
   containerProps?: FlexProps
   onChange?: (value: number) => void
+  validate?: Validate<any, any> | Record<string, Validate<any, any>> | undefined
 }
 
 export const Slider: React.FC<Props> = ({
@@ -31,10 +32,15 @@ export const Slider: React.FC<Props> = ({
   containerProps,
   onChange,
   isDisabled,
+  validate,
 }) => {
-  const { field } = useController({
+  const {
+    field,
+    fieldState: { error },
+  } = useController({
     name,
     control,
+    rules: { validate },
   })
 
   const { state, getInputProps, getThumbProps, getRootProps, getTrackProps } = useSlider({
@@ -94,6 +100,11 @@ export const Slider: React.FC<Props> = ({
           </Flex>
         </Flex>
       </Flex>
+      {error && (
+        <Text pl={1} fontSize="11px" color="red.300">
+          {error.message}
+        </Text>
+      )}
     </Flex>
   )
 }
