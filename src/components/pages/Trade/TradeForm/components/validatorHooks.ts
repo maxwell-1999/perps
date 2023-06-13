@@ -29,7 +29,7 @@ export function useCollateralValidators({
     return (value: string) => {
       const inputValue = Big18Math.fromFloatString(value)
       const balance = Big18Math.fromDecimals(usdcBalance, 6)
-      if (inputValue >= balance) {
+      if (inputValue > balance) {
         return copy.insufficientFunds
       }
       return true
@@ -39,10 +39,10 @@ export function useCollateralValidators({
   const minValidator = useMemo(() => {
     return (value: string) => {
       const inputValue = Big18Math.fromFloatString(value)
-      if (inputValue <= requiredMaintenance) {
+      if (inputValue < requiredMaintenance) {
         return copy.belowMaintenance
       }
-      if (inputValue <= minCollateral) {
+      if (inputValue < minCollateral) {
         return copy.belowMinCollateral
       }
       return true
@@ -61,7 +61,7 @@ export function usePositionValidators({ liquidity }: { liquidity: bigint }) {
   const maxValidator = useMemo(() => {
     return (value: string) => {
       const inputValue = Big18Math.fromFloatString(value)
-      if (inputValue >= liquidity) {
+      if (inputValue > liquidity) {
         return copy.insufficientLiquidity
       }
       return true
@@ -78,7 +78,7 @@ export function useLeverageValidators({ maxLeverage }: { maxLeverage: number }) 
 
   const maxValidator = useMemo(() => {
     return (value: number) => {
-      if (value >= maxLeverage) {
+      if (value > maxLeverage) {
         return copy.maxLeverage
       }
       return true
