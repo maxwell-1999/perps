@@ -40,13 +40,21 @@ export default function MarketBar() {
           </PriceContainer>
           <DividerStyled orientation="vertical" />
           <MobileMarketContainer mr={0} maxWidth="90px" overflowX="auto" overflowY="hidden">
-            <Stat label={copy.change} value={formattedValues.change} valueColor={colors.brand.green} />
+            <Stat
+              label={copy.change}
+              value={formattedValues.change}
+              valueColor={formattedValues.changeIsNegative ? colors.brand.red : colors.brand.green}
+            />
           </MobileMarketContainer>
         </Flex>
       </ResponsiveFlex>
       <DesktopContainer>
         <MarketContainer>
-          <Stat label={copy.change} value={formattedValues.change} valueColor={colors.brand.green} />
+          <Stat
+            label={copy.change}
+            value={formattedValues.change}
+            valueColor={formattedValues.changeIsNegative ? colors.brand.red : colors.brand.green}
+          />
         </MarketContainer>
         <MarketContainer>
           <Stat label={copy.hourlyFunding} value={formattedValues.hourlyFunding} />

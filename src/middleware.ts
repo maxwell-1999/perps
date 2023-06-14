@@ -7,8 +7,7 @@ export function middleware(request: NextRequest) {
   const res = NextResponse.rewrite(request.nextUrl)
   const path = request.nextUrl.pathname
   if (path === '/') return NextResponse.redirect(request.nextUrl.origin + '/trade')
-  if (country) {
-    res.cookies.set(GeolocationCookie, country)
-  }
+
+  res.cookies.set(GeolocationCookie, country || 'unknown')
   return res
 }

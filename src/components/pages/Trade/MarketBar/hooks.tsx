@@ -48,7 +48,8 @@ export const useFormattedMarketBarValues = () => {
 
   return {
     price: formatBig18USDPrice(currentPrice),
-    change: formatBig18Percent(Big18Math.div(change, BigInt(dailyData?.start?.at(0)?.price || 1))),
+    change: formatBig18Percent(Big18Math.abs(Big18Math.div(change, BigInt(dailyData?.start?.at(0)?.price || 1)))),
+    changeIsNegative: change < 0n,
     hourlyFunding: `${formatBig18Percent(longRate, { numDecimals: 4 })} / ${formatBig18Percent(shortRate, {
       numDecimals: 4,
     })}`,

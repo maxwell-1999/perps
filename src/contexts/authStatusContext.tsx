@@ -1,7 +1,11 @@
 import { AuthenticationStatus } from '@rainbow-me/rainbowkit'
-import { createContext, useContext, useState } from 'react'
+import { getCookie } from 'cookies-next'
+import { createContext, useContext, useMemo, useState } from 'react'
 
-import { LocalDev } from '@/constants/auth'
+import { LocalDev, RestrictedCountries } from '@/constants/auth'
+import { GeolocationCookie } from '@/constants/cookies'
+import { isTestnet } from '@/constants/network'
+import { useChainId } from '@/hooks/network'
 
 export type AuthStatus = AuthenticationStatus
 
@@ -11,6 +15,7 @@ const AuthStatusOverlayContext = createContext({
   setTosAccepted: (tosAccepted: boolean) => {
     tosAccepted
   },
+  geoblocked: false,
   authStatus: StartingAuthStatus as AuthStatus,
   setAuthStatus: (status: AuthStatus) => {
     status
@@ -18,7 +23,12 @@ const AuthStatusOverlayContext = createContext({
 })
 
 export const AuthStatusProvider = ({ children }: { children: React.ReactNode }) => {
+  const chainId = useChainId()
   const [authStatus, setAuthStatus] = useState<AuthStatus>(StartingAuthStatus)
+  const [_geoblocked] = useState<boolean>(() => {
+    if (LocalDev) return false
+    return RestrictedCountries.includes(getCookie(GeolocationCookie)?.toString() ?? '')
+  })
   const [tosAccepted, _setTosAccepted] = useState<boolean>(() => {
     return typeof window !== 'undefined' && localStorage.getItem('tos_accepted') === 'true'
   })
@@ -28,8 +38,10 @@ export const AuthStatusProvider = ({ children }: { children: React.ReactNode }) 
     _setTosAccepted(tosAccepted)
   }
 
+  const geoblocked = useMemo(() => (isTestnet(chainId) ? false : _geoblocked), [chainId, _geoblocked])
+
   return (
-    <AuthStatusOverlayContext.Provider value={{ authStatus, setAuthStatus, tosAccepted, setTosAccepted }}>
+    <AuthStatusOverlayContext.Provider value={{ authStatus, setAuthStatus, tosAccepted, setTosAccepted, geoblocked }}>
       {children}
     </AuthStatusOverlayContext.Provider>
   )

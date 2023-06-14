@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Slider } from '@/components/design-system'
+import { TxButton } from '@/components/shared/TxButton'
 import { FormattedBig18, FormattedBig18USDPrice } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType } from '@/constants/markets'
@@ -237,7 +238,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
           <TradeReceipt mb="25px" px="3px" product={product} positionDetails={position} positionDelta={positionDelta} />
           <ButtonGroup>
             <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
-            <Button flex={1} label={copy.closePosition} type="submit" isDisabled={disableCloseBtn} />
+            <TxButton flex={1} label={copy.closePosition} type="submit" isDisabled={disableCloseBtn} overrideLabel />
           </ButtonGroup>
         </Flex>
       </Form>

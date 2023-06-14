@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import Toggle from '@/components/shared/Toggle'
+import { TxButton } from '@/components/shared/TxButton'
 import { FormattedBig18USDPrice } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/markets'
@@ -202,7 +203,7 @@ function TradeForm(props: TradeFormProps) {
               {hasPosition && positionStatus !== PositionStatus.closed ? copy.modifyPosition : copy.trade}
             </Text>
             {!!address && positionStatus === PositionStatus.closed && (
-              <Button
+              <TxButton
                 variant="text"
                 label={copy.withdrawCollateral}
                 p={0}
@@ -296,13 +297,14 @@ function TradeForm(props: TradeFormProps) {
                 label={copy.closePosition}
                 onClick={() => setTradeFormState(FormState.close)}
               />
-              <Button flex={1} label={copy.modifyPosition} type="submit" isDisabled={disableTradeBtn} />
+              <TxButton flex={1} label={copy.modifyPosition} type="submit" isDisabled={disableTradeBtn} overrideLabel />
             </ButtonGroup>
           ) : (
-            <Button
+            <TxButton
               type="submit"
-              isDisabled={!address || disableTradeBtn}
+              isDisabled={disableTradeBtn}
               label={address ? copy.placeTrade : copy.connectWallet}
+              overrideLabel
             />
           )}
         </Flex>

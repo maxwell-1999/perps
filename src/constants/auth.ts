@@ -12,3 +12,17 @@ export const LocalDev =
   process.env.NODE_ENV === 'development' &&
   typeof window !== 'undefined' &&
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+
+export const RestrictedCountries = [
+  'US', // united states
+  'BY', // belarus
+  'CU', // cuba
+  'IR', // iran
+  'IQ', // iraq
+  'CI', // cote d'ivoire
+  'LR', // liberia
+  'KP', // north korea
+  'SD', // sudan
+  'SY', // syria
+  'ZW', // zimbabwe
+]
