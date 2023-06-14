@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic'
 
 import { EarnLayout, HeaderGridItem, VaultDetailGridItem, VaultSelectGridItem } from '@/components/layout/EarnLayout'
 
+import VaultEmptyState from './VaultDetail'
 import VaultSelect from './VaultSelect'
 
 const NavBar = dynamic(() => import('@/components/shared/NavBar'), {
@@ -11,7 +12,6 @@ const NavBar = dynamic(() => import('@/components/shared/NavBar'), {
 
 export default function Earn() {
   const isBase = useBreakpointValue({ base: true, md: false })
-  const VAULT_DETAIL = 'Vault Detail'
   return (
     <EarnLayout>
       <HeaderGridItem>
@@ -23,7 +23,7 @@ export default function Earn() {
         </VaultSelectGridItem>
       )}
       <VaultDetailGridItem>
-        <div>{VAULT_DETAIL}</div>
+        <VaultEmptyState />
       </VaultDetailGridItem>
     </EarnLayout>
   )

@@ -1,4 +1,10 @@
 {
+  "+PUp2/": [
+    {
+      "type": 0,
+      "value": "Liquidity provided to Perennial is autonomously provisioned, taking the other side against traders in exchange for funding."
+    }
+  ],
   "+vVZ/G": [
     {
       "type": 0,
@@ -41,6 +47,12 @@
       "value": "Cancel"
     }
   ],
+  "50q5ua": [
+    {
+      "type": 0,
+      "value": "Description of value proposition goes here"
+    }
+  ],
   "57jKwu": [
     {
       "type": 0,
@@ -51,12 +63,6 @@
     {
       "type": 0,
       "value": "Funding Rate (1h)"
-    }
-  ],
-  "5SRJp1": [
-    {
-      "type": 0,
-      "value": "Amount to close..."
     }
   ],
   "5Wwopw": [
@@ -113,12 +119,6 @@
       "value": "Remove USD from your position"
     }
   ],
-  "9hIQHG": [
-    {
-      "type": 0,
-      "value": "You will receive..."
-    }
-  ],
   "A3zdUJ": [
     {
       "type": 0,
@@ -161,6 +161,18 @@
       "value": "Add collateral"
     }
   ],
+  "CC0wl2": [
+    {
+      "type": 0,
+      "value": "Select vault to continue"
+    }
+  ],
+  "CjybUk": [
+    {
+      "type": 0,
+      "value": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin non felis fermentum, faucibus nisi in, posuere ligula."
+    }
+  ],
   "D3idYv": [
     {
       "type": 0,
@@ -177,6 +189,12 @@
     {
       "type": 0,
       "value": "P&L"
+    }
+  ],
+  "FIMqSt": [
+    {
+      "type": 0,
+      "value": "Chain"
     }
   ],
   "Fv1ZSz": [
@@ -207,6 +225,12 @@
       "value": "title"
     }
   ],
+  "IXw0x/": [
+    {
+      "type": 0,
+      "value": "Earn with"
+    }
+  ],
   "JfG49w": [
     {
       "type": 0,
@@ -235,6 +259,12 @@
     {
       "type": 0,
       "value": "Withdraw funds"
+    }
+  ],
+  "LcrGBK": [
+    {
+      "type": 0,
+      "value": "Feature Title"
     }
   ],
   "LzlMDx": [
@@ -319,6 +349,16 @@
       "value": "You will get..."
     }
   ],
+  "RGllsm": [
+    {
+      "type": 1,
+      "value": "apy"
+    },
+    {
+      "type": 0,
+      "value": "%"
+    }
+  ],
   "RoqJiX": [
     {
       "type": 0,
@@ -341,6 +381,12 @@
     {
       "type": 0,
       "value": "Position"
+    }
+  ],
+  "UVXZLq": [
+    {
+      "type": 0,
+      "value": "Collateral (after fees)"
     }
   ],
   "UwvPFx": [
@@ -421,6 +467,12 @@
       "value": "Size"
     }
   ],
+  "bHUwuP": [
+    {
+      "type": 0,
+      "value": "App Not Available"
+    }
+  ],
   "bYFLPY": [
     {
       "type": 0,
@@ -431,6 +483,12 @@
     {
       "type": 0,
       "value": "Liquidation price"
+    }
+  ],
+  "cg1VJ2": [
+    {
+      "type": 0,
+      "value": "Connect Wallet"
     }
   ],
   "d0Gd72": [
@@ -467,6 +525,12 @@
     {
       "type": 0,
       "value": "to view details"
+    }
+  ],
+  "jm/spn": [
+    {
+      "type": 0,
+      "value": "Reset"
     }
   ],
   "juU558": [
@@ -523,6 +587,12 @@
       "value": "Remove collateral"
     }
   ],
+  "pAmAEL": [
+    {
+      "type": 0,
+      "value": "TESTNET"
+    }
+  ],
   "pKvURI": [
     {
       "type": 0,
@@ -567,6 +637,12 @@
     {
       "type": 0,
       "value": "Close"
+    }
+  ],
+  "s2zphO": [
+    {
+      "type": 0,
+      "value": "Vaults"
     }
   ],
   "sxIVr5": [
