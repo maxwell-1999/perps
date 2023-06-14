@@ -201,7 +201,7 @@ function TradeForm(props: TradeFormProps) {
         />
       )}
       <Form onSubmit={handleSubmit(onConfirm)}>
-        <Flex flexDirection="column" p="16px">
+        <Flex flexDirection="column" p="16px" pb="8px">
           <Flex justifyContent="space-between" mb="14px">
             <Text color={textColor}>
               {hasPosition && positionStatus !== PositionStatus.closed ? copy.modifyPosition : copy.trade}
@@ -284,25 +284,24 @@ function TradeForm(props: TradeFormProps) {
             min={0}
             max={maxLeverage}
             step={0.1}
-            containerProps={{
-              mb: 2,
-            }}
             control={control}
             name={FormNames.leverage}
             onChange={onChangeLeverage}
             validate={!!address ? leverageValidators : {}}
           />
-          {Object.keys(dirtyFields).length > 0 && (
-            <IconButton
-              ml="auto"
-              justifyContent="flex-end"
-              size="sm"
-              variant="text"
-              icon={<RepeatIcon />}
-              onClick={resetInputs}
-              aria-label={copy.reset}
-            />
-          )}
+          <Flex height={6} width="100%" justifyContent="flex-end" px={2}>
+            {Object.keys(dirtyFields).length > 0 && (
+              <IconButton
+                ml="auto"
+                justifyContent="flex-end"
+                height="100%"
+                variant="text"
+                icon={<RepeatIcon />}
+                onClick={resetInputs}
+                aria-label={copy.reset}
+              />
+            )}
+          </Flex>
         </Flex>
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
