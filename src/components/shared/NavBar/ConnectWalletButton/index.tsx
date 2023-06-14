@@ -1,11 +1,12 @@
-import { useBreakpointValue } from '@chakra-ui/react'
+import { WarningIcon } from '@chakra-ui/icons'
+import { Box, Image, Text, useBreakpointValue, useTheme } from '@chakra-ui/react'
 import RedX from '@public/icons/red-x.svg'
-import Settings from '@public/icons/settings.svg'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useEffect, useState } from 'react'
 import { useDisconnect } from 'wagmi'
 
 import ToSModal from '@/components/ToSModal'
+import { isSupportedChain, isTestnet } from '@/constants/network'
 import { useAuthStatus } from '@/contexts/authStatusContext'
 import { useAddress } from '@/hooks/network'
 
@@ -25,17 +26,28 @@ const ConnectWalletButton: React.FC = () => {
 
   return (
     <ConnectButton.Custom>
-      {({ openConnectModal, openAccountModal, authenticationStatus, chain, mounted, account, connectModalOpen }) => {
+      {({
+        openConnectModal,
+        openAccountModal,
+        openChainModal,
+        authenticationStatus,
+        chain,
+        mounted,
+        account,
+        connectModalOpen,
+      }) => {
         const ready = mounted && authenticationStatus !== 'loading'
         const accountConnected =
           ready && account && chain && (!authenticationStatus || authenticationStatus === 'authenticated')
 
         return (
           <ConnectWalletInner
+            chain={chain}
             accountConnected={!!accountConnected}
             modalOpen={connectModalOpen}
             openAccountModal={openAccountModal}
             openConnectModal={openConnectModal}
+            openChainModal={openChainModal}
             displayName={account?.displayName || ''}
           />
         )
@@ -45,22 +57,36 @@ const ConnectWalletButton: React.FC = () => {
 }
 
 interface ConnectWalletInnerProps {
+  chain?: {
+    hasIcon: boolean
+    iconUrl?: string
+    iconBackground?: string
+    id: number
+    name?: string
+    unsupported?: boolean
+  }
   accountConnected: boolean
   modalOpen: boolean
   openAccountModal: () => void
   openConnectModal: () => void
+  openChainModal: () => void
   displayName: string
 }
 const ConnectWalletInner: React.FC<ConnectWalletInnerProps> = ({
+  chain,
   accountConnected,
   modalOpen,
   openAccountModal,
   openConnectModal,
+  openChainModal,
   displayName,
 }: ConnectWalletInnerProps) => {
+  const { colors } = useTheme()
   const [showTosModal, setShowTosModal] = useState(false)
-  const { connect, settings, close } = useNavCopy()
+  const { connect, chain: chainCopy, close, testnet: testnetCopy } = useNavCopy()
   const isBase = useBreakpointValue({ base: true, md: false })
+  const supported = isSupportedChain(chain?.id)
+  const testnet = isTestnet(chain?.id)
   const { disconnect } = useDisconnect()
   const { address } = useAddress()
   const { authStatus, tosAccepted, setTosAccepted } = useAuthStatus()
@@ -103,7 +129,27 @@ const ConnectWalletInner: React.FC<ConnectWalletInnerProps> = ({
           onClick={onClickConnect}
           variant="transparent"
         />
-        {accountConnected && !isBase && <IconButton aria-label={settings} icon={<Settings />} mr={1} />}
+        {accountConnected && !isBase && (
+          <Box position="relative">
+            <IconButton
+              aria-label={chainCopy}
+              icon={
+                supported ? (
+                  <Image src={chain?.iconUrl || ''} alt={chain?.name || 'Connected Chain'} />
+                ) : (
+                  <WarningIcon color={colors.brand.red} />
+                )
+              }
+              mr={1}
+              onClick={openChainModal}
+            />
+            {testnet && (
+              <Text position="absolute" fontSize="xx-small" top={0}>
+                {testnetCopy}
+              </Text>
+            )}
+          </Box>
+        )}
         {accountConnected && !isBase && <IconButton aria-label={close} icon={<RedX />} onClick={() => disconnect()} />}
       </ButtonGroup>
     </>

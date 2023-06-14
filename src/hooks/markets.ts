@@ -801,7 +801,7 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
       let aggregatorAddresses: Address[] = []
 
       // If mainnet or goerli, use registry
-      if (mainnet.id === chainId || goerli.id === chainId) {
+      if (mainnet.id === chainId) {
         const registryLookup = await Promise.all(
           productOracles.map(async (p) => {
             const [base, quote, registry] = await multicall({
@@ -842,7 +842,11 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
           })),
         })
       } else {
-        const aggregatorAbi = parseAbi(['function aggregator() view returns (address)'])
+        // Some goerli products use a legacy oracle which uses 'feed' instead of 'aggregator'
+        const aggregatorAbi = parseAbi([
+          'function aggregator() view returns (address)',
+          'function feed() view returns (address)',
+        ])
 
         // Feed Oracle -> Proxy
         const proxyAddresses = await multicall({
@@ -851,7 +855,7 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
           contracts: productOracles.map((p) => ({
             address: getAddress(p),
             abi: aggregatorAbi,
-            functionName: 'aggregator',
+            functionName: goerli.id === chainId ? 'feed' : 'aggregator',
           })),
         })
 

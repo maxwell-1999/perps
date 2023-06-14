@@ -21,7 +21,7 @@ export const useChainId = () => {
   let { chain } = useNetwork()
   chain = chain ?? DefaultChain
 
-  if (chain === undefined || !isSupportedChain(chain)) return DefaultChain.id
+  if (chain === undefined || !isSupportedChain(chain.id)) return DefaultChain.id
 
   return chain.id as SupportedChainId
 }

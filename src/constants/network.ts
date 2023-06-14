@@ -1,5 +1,5 @@
 import { getDefaultWallets } from '@rainbow-me/rainbowkit'
-import { Chain, arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from '@wagmi/chains'
+import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from '@wagmi/chains'
 import { configureChains, createConfig } from 'wagmi'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { publicProvider } from 'wagmi/providers/public'
@@ -15,16 +15,21 @@ export const AlchemyActiveKey = AlchemyProdKeys[Math.floor(Math.random() * Alche
 
 export const SupportedChainIds = [arbitrum.id, mainnet.id, arbitrumGoerli.id, goerli.id, baseGoerli.id] as const
 export type SupportedChainId = (typeof SupportedChainIds)[number]
+export const isSupportedChain = (chainId?: number) =>
+  chainId !== undefined && SupportedChainIds.includes(chainId as SupportedChainId)
+export const isTestnet = (chainId?: number) =>
+  chainId === goerli.id || chainId === arbitrumGoerli.id || chainId === baseGoerli.id
 
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
   [arbitrum, mainnet, goerli, arbitrumGoerli, baseGoerli],
   [alchemyProvider({ apiKey: AlchemyActiveKey }), publicProvider()],
 )
+export const mainnetChains = chains.filter((c) => !isTestnet(c.id))
 
 const { connectors } = getDefaultWallets({
   appName: 'Perennial Interface V2',
   projectId: WalletConnectProjectId,
-  chains,
+  chains: mainnetChains, // Only pass in mainnet chains to clean up the select modal. Testnets will still work
 })
 
 export const wagmiConfig = createConfig({
@@ -35,8 +40,6 @@ export const wagmiConfig = createConfig({
 })
 
 export const DefaultChain = chains[0]
-export const isSupportedChain = (chain?: Chain) =>
-  chain !== undefined && SupportedChainIds.includes(chain.id as SupportedChainId)
 
 export const GraphUrls: { [chainId in SupportedChainId]: string } = {
   [arbitrum.id]: process.env.NEXT_PUBLIC_GRAPH_URL_ARBITRUM ?? '',

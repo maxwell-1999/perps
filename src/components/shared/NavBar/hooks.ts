@@ -9,5 +9,7 @@ export const useNavCopy = () => {
     close: intl.formatMessage({ defaultMessage: 'Close' }),
     home: intl.formatMessage({ defaultMessage: 'Home' }),
     connect: intl.formatMessage({ defaultMessage: 'Connect' }),
+    chain: intl.formatMessage({ defaultMessage: 'Chain' }),
+    testnet: intl.formatMessage({ defaultMessage: 'TESTNET' }),
   }
 }
