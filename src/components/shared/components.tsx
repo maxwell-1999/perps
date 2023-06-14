@@ -6,14 +6,15 @@ import { formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
 
 interface AssetIconWithTextProps extends FlexProps {
   market: AssetMetadata[SupportedAsset]
-  text?: string
-  fontSize?: string
+  text?: string | React.ReactNode
+  textProps?: TextProps
+  size?: 'sm' | 'md'
 }
 
-export const AssetIconWithText: React.FC<AssetIconWithTextProps> = ({ market, text, fontSize = '16px', ...props }) => (
+export const AssetIconWithText: React.FC<AssetIconWithTextProps> = ({ market, text, size, textProps, ...props }) => (
   <Flex alignItems="center" {...props}>
-    <Image src={market.icon} height={25} width={25} alt={market.name} />
-    <Text ml={2} fontSize={fontSize}>
+    <Image src={market.icon} height={size === 'sm' ? 16 : 25} width={size === 'sm' ? 16 : 25} alt={market.name} />
+    <Text ml={2} fontSize="16px" {...textProps}>
       {text ? text : market.symbol}
     </Text>
   </Flex>
