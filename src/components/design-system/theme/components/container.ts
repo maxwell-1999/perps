@@ -28,6 +28,13 @@ const Container = defineStyleConfig({
       bg: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
       border: `1px solid ${colors.brand.purple.alpha}`,
     }),
+    vaultCard: (props: StyleFunctionProps) => ({
+      px: 0,
+      py: 0,
+      bg: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
+      border: `1px solid ${mode(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])(props)}`,
+      borderRadius: '9px',
+    }),
   },
   defaultProps: {
     variant: 'transparent',

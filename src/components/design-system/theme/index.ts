@@ -9,6 +9,7 @@ import { Form, FormError } from './components/formControl'
 import Input from './components/input'
 import Modal from './components/modal'
 import Popover from './components/popover'
+import Progress from './components/progress'
 import Tabs from './components/tabs'
 import Text from './components/text'
 import styles, { breakpoints } from './styles'
@@ -42,6 +43,7 @@ const theme = extendTheme({
     Divider,
     Popover,
     Modal,
+    Progress,
   },
 })
 

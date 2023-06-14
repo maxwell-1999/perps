@@ -243,6 +243,22 @@
       "value": "Close position"
     }
   ],
+  "MBEMi3": [
+    {
+      "type": 1,
+      "value": "progressbarCollateral"
+    },
+    {
+      "type": 0,
+      "value": "%"
+    }
+  ],
+  "MLTKb6": [
+    {
+      "type": 0,
+      "value": "APY"
+    }
+  ],
   "N0eaIb": [
     {
       "type": 0,
@@ -447,6 +463,12 @@
       "value": "Sign transaction"
     }
   ],
+  "iv4B8O": [
+    {
+      "type": 0,
+      "value": "to view details"
+    }
+  ],
   "juU558": [
     {
       "type": 0,
@@ -469,6 +491,12 @@
     {
       "type": 0,
       "value": "24h Low"
+    }
+  ],
+  "ljjcTc": [
+    {
+      "type": 0,
+      "value": "of capacity"
     }
   ],
   "mDNzLd": [
@@ -581,6 +609,12 @@
     {
       "type": 0,
       "value": "Confirm Order"
+    }
+  ],
+  "wv+okM": [
+    {
+      "type": 0,
+      "value": "Select vault"
     }
   ],
   "y7EKeV": [
