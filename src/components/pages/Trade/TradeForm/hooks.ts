@@ -57,7 +57,6 @@ export function useTradeFormCopy() {
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
     keepFixed: intl.formatMessage({ defaultMessage: 'Keep Fixed' }),
     placeTrade: intl.formatMessage({ defaultMessage: 'Place trade' }),
-    close: intl.formatMessage({ defaultMessage: 'Close' }),
     modifyPosition: intl.formatMessage({ defaultMessage: 'Modify position' }),
     cancel: intl.formatMessage({ defaultMessage: 'Cancel' }),
     closePosition: intl.formatMessage({ defaultMessage: 'Close position' }),
@@ -80,6 +79,7 @@ export function useTradeFormCopy() {
     connectWallet: intl.formatMessage({ defaultMessage: 'Connect wallet' }),
     confirmOrder: intl.formatMessage({ defaultMessage: 'Confirm Order' }),
     confirmChanges: intl.formatMessage({ defaultMessage: 'Confirm Changes' }),
+    reset: intl.formatMessage({ defaultMessage: 'Reset' }),
   }
 }
 

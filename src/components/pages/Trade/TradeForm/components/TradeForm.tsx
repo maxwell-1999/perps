@@ -1,3 +1,4 @@
+import { RepeatIcon } from '@chakra-ui/icons'
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -15,7 +16,7 @@ import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 import { usePrevious } from '@/utils/hooks'
 import { next } from '@/utils/positionUtils'
 
-import { Button } from '@ds/Button'
+import { Button, IconButton } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
 
@@ -57,8 +58,6 @@ function TradeForm(props: TradeFormProps) {
   const prevAddress = usePrevious(address)
   const { assetMetadata } = useMarketContext()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
-  const [updating, setUpdating] = useState(false)
-  const prevUpdating = usePrevious(updating)
   const positionStatus = position?.status ?? PositionStatus.resolved
 
   const hasPosition = positionStatus !== PositionStatus.resolved
@@ -99,22 +98,17 @@ function TradeForm(props: TradeFormProps) {
   const leverage = watch(FormNames.leverage)
 
   const resetInputs = useCallback(() => {
-    if (updating) return
     reset({ ...initialFormState })
-  }, [initialFormState, reset, updating])
+  }, [initialFormState, reset])
 
   useEffect(() => {
     const userDisconnected = !address && !!prevAddress
     const userConnected = !!address && !prevAddress
     const changedProducts = productAddress !== prevProductAddress
     const userSwitchedAcct = address !== prevAddress
-    const wasUpdating = prevUpdating && !updating
 
-    const resetRequired = userConnected || userDisconnected || changedProducts || userSwitchedAcct || wasUpdating
+    const resetRequired = userConnected || userDisconnected || changedProducts || userSwitchedAcct
 
-    if (userConnected) {
-      setUpdating(false)
-    }
     if (resetRequired) {
       resetInputs()
     }
@@ -128,8 +122,6 @@ function TradeForm(props: TradeFormProps) {
     prevAddress,
     productAddress,
     prevProductAddress,
-    prevUpdating,
-    updating,
     collateralHasInput,
     initialFormState.collateral,
     collateral,
@@ -156,7 +148,6 @@ function TradeForm(props: TradeFormProps) {
 
   const closeAdjustmentModal = () => {
     setOrderValues(null)
-    setUpdating(false)
   }
 
   const cancelAdjustmentModal = () => {
@@ -283,13 +274,28 @@ function TradeForm(props: TradeFormProps) {
             onChange={onChangeLeverage}
             validate={!!address ? leverageValidators : {}}
           />
+          {!disableTradeBtn && (
+            <IconButton
+              ml="auto"
+              justifyContent="flex-end"
+              size="sm"
+              variant="text"
+              icon={<RepeatIcon />}
+              onClick={resetInputs}
+              aria-label={copy.reset}
+            />
+          )}
         </Flex>
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
           <TradeReceipt mb="25px" px="3px" product={product} positionDelta={positionDelta} positionDetails={position} />
           {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
             <ButtonGroup>
-              <Button variant="transparent" label={copy.close} onClick={() => setTradeFormState(FormState.close)} />
+              <Button
+                variant="transparent"
+                label={copy.closePosition}
+                onClick={() => setTradeFormState(FormState.close)}
+              />
               <Button flex={1} label={copy.modifyPosition} type="submit" isDisabled={disableTradeBtn} />
             </ButtonGroup>
           ) : (

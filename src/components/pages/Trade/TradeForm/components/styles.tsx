@@ -25,7 +25,7 @@ export const FormOverlayHeader = ({ title, onClose }: { title: string; onClose: 
       borderBottom={`1px dashed ${dashedBorderColor}`}
     >
       <Text fontSize="17px">{title}</Text>
-      <IconButton variant="text" icon={<CloseX />} aria-label={copy.close} onClick={onClose} />
+      <IconButton variant="text" icon={<CloseX />} aria-label={copy.closePosition} onClick={onClose} />
     </Flex>
   )
 }
