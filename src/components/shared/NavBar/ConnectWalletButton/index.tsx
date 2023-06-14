@@ -9,6 +9,7 @@ import ToSModal from '@/components/ToSModal'
 import { isSupportedChain, isTestnet } from '@/constants/network'
 import { useAuthStatus } from '@/contexts/authStatusContext'
 import { useAddress } from '@/hooks/network'
+import { usePrevious } from '@/utils/hooks'
 
 import { Button, ButtonGroup, IconButton } from '@ds/Button'
 
@@ -90,13 +91,14 @@ const ConnectWalletInner: React.FC<ConnectWalletInnerProps> = ({
   const { disconnect } = useDisconnect()
   const { address } = useAddress()
   const { authStatus, tosAccepted, setTosAccepted } = useAuthStatus()
+  const prevModalOpen = usePrevious(modalOpen)
 
   useEffect(() => {
     // If the address is connected but ToS has not been accepted, disconnect them
     if (address && !tosAccepted) disconnect()
     // If the modal is no longer open and the connected address is not authed, disconnect them
-    if (address && authStatus === 'unauthenticated' && !modalOpen) disconnect()
-  }, [address, authStatus, modalOpen, tosAccepted, disconnect])
+    if (address && authStatus === 'unauthenticated' && prevModalOpen && !modalOpen) disconnect()
+  }, [address, authStatus, modalOpen, prevModalOpen, tosAccepted, disconnect])
 
   const onClickConnect = () => {
     if (!tosAccepted) {

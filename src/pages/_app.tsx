@@ -36,9 +36,14 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
   const { authStatus, setAuthStatus } = useAuthStatus()
   const { disconnect } = useDisconnect()
   const { address } = useAccount({
-    onDisconnect: () => {
+    onConnect: ({ address }) => {
+      if (address && !!getJwt(address)) loginUser()
+      else setAuthStatus(StartingAuthStatus)
       queryClient.resetQueries()
+    },
+    onDisconnect: () => {
       setAuthStatus(StartingAuthStatus)
+      queryClient.resetQueries()
     },
   })
   const prevAddress = usePrevious(address)
@@ -49,9 +54,10 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
 
   useEffect(() => {
     // If the address changes and there is a JWT for the new address, try logging in, otherwise set the auth status to unauthenticated
-    if (address && address !== prevAddress) {
+    if (prevAddress && address && address !== prevAddress) {
       if (!!getJwt(address)) loginUser()
       else setAuthStatus(StartingAuthStatus)
+      queryClient.resetQueries()
     }
   }, [address, prevAddress, setAuthStatus, loginUser])
 
