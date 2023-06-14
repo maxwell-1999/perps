@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import Toggle from '@/components/shared/Toggle'
+import { FormattedBig18USDPrice } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
@@ -185,6 +186,7 @@ function TradeForm(props: TradeFormProps) {
   const leverageValidators = useLeverageValidators({
     maxLeverage,
   })
+  const notional = Big18Math.mul(Big18Math.fromFloatString(amount), Big18Math.abs(price))
 
   return (
     <>
@@ -256,7 +258,7 @@ function TradeForm(props: TradeFormProps) {
             placeholder="0.0000"
             rightLabel={
               <FormLabel mr={0} mb={0}>
-                <Text variant="label">{copy.max}</Text>
+                <FormattedBig18USDPrice variant="label" value={notional} />
               </FormLabel>
             }
             rightEl={<Pill text={assetMetadata.baseCurrency} />}
