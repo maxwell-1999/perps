@@ -119,7 +119,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
     })
   }
 
-  const maxCollateralToClose = (currentCollateral ?? 0n) - calcPositionFee(nextPosition ?? 0n, price, takerFee)
+  const maxCollateralToClose = (currentCollateral ?? 0n) - calcPositionFee(price, nextPosition ?? 0n, takerFee)
   const closeFee = amount ? calcPositionFee(Big18Math.fromFloatString(amount), price, takerFee) : 0n
   // Amount of collateral received after close fee
   const collateralAfterFee = collateral ? Big18Math.sub(Big18Math.fromFloatString(collateral), closeFee) : undefined
