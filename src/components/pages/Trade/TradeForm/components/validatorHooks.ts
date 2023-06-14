@@ -124,11 +124,11 @@ export function useCloseCollateralValidator({
   const maxValidator = useMemo(() => {
     return (value: string, formValues: TradeFormValues) => {
       const inputValue = Big18Math.fromFloatString(value)
-      if (inputValue > currentCollateral) {
+      const fullClose = Big18Math.eq(Big18Math.fromFloatString(formValues.amount), nextPosition ?? 0n)
+      if (!fullClose && inputValue > currentCollateral) {
         return copy.insufficientCollateral
       }
       const remainingCollateral = Big18Math.sub(currentCollateral, inputValue)
-      const fullClose = Big18Math.eq(Big18Math.fromFloatString(formValues.amount), nextPosition ?? 0n)
       if (!fullClose && !Big18Math.isZero(remainingCollateral) && remainingCollateral < minCollateral) {
         return copy.belowMinCollateral
       }

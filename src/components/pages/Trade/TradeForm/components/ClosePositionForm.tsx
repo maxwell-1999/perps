@@ -181,7 +181,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             validate={amountValidator}
             isRequired
           />
-          <Flex mb="12px">
+          <Flex mb="12px" justifyContent="space-between">
             {buttonPercentValues.map((value, index) => (
               <Button
                 variant="transparent"
