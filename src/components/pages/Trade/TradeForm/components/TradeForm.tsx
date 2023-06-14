@@ -289,7 +289,7 @@ function TradeForm(props: TradeFormProps) {
             onChange={onChangeLeverage}
             validate={!!address ? leverageValidators : {}}
           />
-          <Flex height={6} width="100%" justifyContent="flex-end" px={2}>
+          <Flex height={6} width="100%" justifyContent="flex-end" px={2} mt={2}>
             {Object.keys(dirtyFields).length > 0 && (
               <IconButton
                 ml="auto"
