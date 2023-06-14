@@ -5,6 +5,8 @@ import { Control, Validate, useController } from 'react-hook-form'
 
 import colors from '@ds/theme/colors'
 
+import { Button } from '../Button'
+
 export interface Props {
   min: number
   max: number
@@ -43,7 +45,7 @@ export const Slider: React.FC<Props> = ({
     rules: { validate },
   })
 
-  const { state, getInputProps, getThumbProps, getRootProps, getTrackProps } = useSlider({
+  const { state, actions, getInputProps, getThumbProps, getRootProps, getTrackProps } = useSlider({
     min,
     max,
     step,
@@ -55,6 +57,13 @@ export const Slider: React.FC<Props> = ({
 
   const inputProps = getInputProps({ value: field.value })
   const textColor = useColorModeValue(colors.brand.blackAlpha[30], colors.brand.whiteAlpha[30])
+  const borderColor = useColorModeValue(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])
+
+  const thumbProps = getThumbProps()
+  // Hack to center the thumb correctly when the value is not min or max
+  if (thumbProps.style?.left && field.value > min && field.value < max) {
+    thumbProps.style.left = thumbProps.style.left.toString().replace('18px', '22px')
+  }
 
   return (
     <Flex flexDirection="column" {...containerProps}>
@@ -82,9 +91,9 @@ export const Slider: React.FC<Props> = ({
               boxShadow="0px 4px 44px rgba(0, 0, 0, 0.2)"
               borderRadius="6px"
               _focusVisible={{
-                outline: 'none',
+                outline: `1px solid ${borderColor}`,
               }}
-              {...getThumbProps()}
+              {...thumbProps}
             >
               <Flex w="100%" h="100%" alignItems="center" justifyContent="center">
                 <Text fontSize="14px" fontWeight="bold">
@@ -94,9 +103,27 @@ export const Slider: React.FC<Props> = ({
             </Box>
           </Flex>
           <Flex justifyContent="space-between">
-            <Text size="13px" color={textColor}>{`${min}x`}</Text>
-            <Text size="13px" color={textColor}>{`${min + (max - min) / 2}x`}</Text>
-            <Text size="13px" color={textColor}>{`${max}x`}</Text>
+            <Button
+              variant="text"
+              size="13px"
+              onClick={() => actions.stepTo(min)}
+              color={textColor}
+              label={`${min}x`}
+            />
+            <Button
+              variant="text"
+              size="13px"
+              onClick={() => actions.stepTo(min + (max - min) / 2)}
+              color={textColor}
+              label={`${min + (max - min) / 2}x`}
+            />
+            <Button
+              variant="text"
+              size="13px"
+              onClick={() => actions.stepTo(max)}
+              color={textColor}
+              label={`${max}x`}
+            />
           </Flex>
         </Flex>
       </Flex>

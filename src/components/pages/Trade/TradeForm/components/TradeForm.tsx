@@ -156,6 +156,10 @@ function TradeForm(props: TradeFormProps) {
     reset()
   }
 
+  const onClickMaxCollateral = () => {
+    onChangeCollateral(Big18Math.toFloatString(Big18Math.fromDecimals(balances?.usdc ?? 0n, 6)))
+  }
+
   const positionDelta = useMemo(
     () => ({
       collateralDelta: Big18Math.fromFloatString(collateral) - currentCollateral,
@@ -231,9 +235,22 @@ function TradeForm(props: TradeFormProps) {
             placeholder="0.0000"
             rightLabel={
               <FormLabel mr={0} mb={0}>
-                <Text variant="label">
-                  {formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd} {copy.max}
-                </Text>
+                {!!address && (
+                  <Flex gap={1}>
+                    <Text variant="label">
+                      {formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd}
+                    </Text>
+                    <Button
+                      variant="text"
+                      padding={0}
+                      height="unset"
+                      label={copy.max}
+                      size="xs"
+                      textDecoration="underline"
+                      onClick={onClickMaxCollateral}
+                    />
+                  </Flex>
+                )}
               </FormLabel>
             }
             rightEl={<Pill text={assetMetadata.quoteCurrency} />}
@@ -250,7 +267,7 @@ function TradeForm(props: TradeFormProps) {
             placeholder="0.0000"
             rightLabel={
               <FormLabel mr={0} mb={0}>
-                <FormattedBig18USDPrice variant="label" value={notional} />
+                {notional > 0n && <FormattedBig18USDPrice variant="label" value={notional} />}
               </FormLabel>
             }
             rightEl={<Pill text={assetMetadata.baseCurrency} />}

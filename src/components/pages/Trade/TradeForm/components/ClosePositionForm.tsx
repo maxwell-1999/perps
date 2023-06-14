@@ -170,7 +170,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             rightLabel={
               <FormLabel mr={0} mb={0}>
                 <Text variant="label">
-                  <FormattedBig18 value={nextPosition ?? 0n} asset={position.asset} as="span" /> {copy.max}
+                  <FormattedBig18 value={nextPosition ?? 0n} asset={position.asset} as="span" />
                 </Text>
               </FormLabel>
             }
@@ -208,10 +208,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             rightEl={<Pill text={assetMetadata.quoteCurrency} />}
             rightLabel={
               <FormLabel mr={0} mb={0}>
-                <Text variant="label">
-                  <FormattedBig18USDPrice value={maxCollateralToClose ?? 0n} as="span" mr={1} />
-                  {copy.max}
-                </Text>
+                <FormattedBig18USDPrice variant="label" value={maxCollateralToClose ?? 0n} />
               </FormLabel>
             }
             onChange={(e) => onChangeCollateral(e.target.value)}
