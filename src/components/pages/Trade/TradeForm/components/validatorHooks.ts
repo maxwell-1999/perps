@@ -3,6 +3,8 @@ import { useIntl } from 'react-intl'
 
 import { Big18Math } from '@/utils/big18Utils'
 
+import { TradeFormValues } from '../hooks'
+
 function useErrorMessages() {
   const intl = useIntl()
   return {
@@ -11,6 +13,8 @@ function useErrorMessages() {
     belowMinCollateral: intl.formatMessage({ defaultMessage: 'Collateral is below minimum requirement.' }),
     insufficientLiquidity: intl.formatMessage({ defaultMessage: 'Order size exceeds the available liquidity.' }),
     maxLeverage: intl.formatMessage({ defaultMessage: 'Maximum leverage exceeded.' }),
+    insufficientPosition: intl.formatMessage({ defaultMessage: 'Value exceeds position amount.' }),
+    insufficientCollateral: intl.formatMessage({ defaultMessage: 'Value exceeds collateral amount.' }),
   }
 }
 
@@ -88,4 +92,49 @@ export function useLeverageValidators({ maxLeverage }: { maxLeverage: number }) 
   return {
     max: maxValidator,
   }
+}
+
+export function useCloseAmountValidator({ quantity }: { quantity: bigint }) {
+  const copy = useErrorMessages()
+
+  const maxValidator = useMemo(() => {
+    return (value: string) => {
+      const inputValue = Big18Math.fromFloatString(value)
+      if (inputValue > quantity) {
+        return copy.insufficientPosition
+      }
+      return true
+    }
+  }, [quantity, copy.insufficientPosition])
+
+  return { max: maxValidator }
+}
+
+export function useCloseCollateralValidator({
+  currentCollateral,
+  minCollateral,
+  nextPosition,
+}: {
+  currentCollateral: bigint
+  minCollateral: bigint
+  nextPosition: bigint
+}) {
+  const copy = useErrorMessages()
+
+  const maxValidator = useMemo(() => {
+    return (value: string, formValues: TradeFormValues) => {
+      const inputValue = Big18Math.fromFloatString(value)
+      if (inputValue > currentCollateral) {
+        return copy.insufficientCollateral
+      }
+      const remainingCollateral = Big18Math.sub(currentCollateral, inputValue)
+      const fullClose = Big18Math.eq(Big18Math.fromFloatString(formValues.amount), nextPosition ?? 0n)
+      if (!fullClose && !Big18Math.isZero(remainingCollateral) && remainingCollateral < minCollateral) {
+        return copy.belowMinCollateral
+      }
+      return true
+    }
+  }, [minCollateral, currentCollateral, nextPosition, copy.insufficientCollateral, copy.belowMinCollateral])
+
+  return { max: maxValidator }
 }

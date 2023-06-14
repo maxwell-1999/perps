@@ -143,6 +143,12 @@
       "value": "Collateral is below minimum requirement."
     }
   ],
+  "BEYwLY": [
+    {
+      "type": 0,
+      "value": "Value exceeds position amount."
+    }
+  ],
   "BY343C": [
     {
       "type": 0,
@@ -551,6 +557,12 @@
     {
       "type": 0,
       "value": "--"
+    }
+  ],
+  "unMqAW": [
+    {
+      "type": 0,
+      "value": "Value exceeds collateral amount."
     }
   ],
   "wHzwL2": [

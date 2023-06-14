@@ -61,8 +61,7 @@ export function useTradeFormCopy() {
     modifyPosition: intl.formatMessage({ defaultMessage: 'Modify position' }),
     cancel: intl.formatMessage({ defaultMessage: 'Cancel' }),
     closePosition: intl.formatMessage({ defaultMessage: 'Close position' }),
-    amountToClose: intl.formatMessage({ defaultMessage: 'Amount to close...' }),
-    youWillReceive: intl.formatMessage({ defaultMessage: 'You will receive...' }),
+    collateralAfterFees: intl.formatMessage({ defaultMessage: 'Collateral (after fees)' }),
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     amount: intl.formatMessage({ defaultMessage: 'Amount' }),
     withdrawFunds: intl.formatMessage({ defaultMessage: 'Withdraw funds' }),
@@ -95,8 +94,10 @@ export function useReceiptCopy() {
     hourlyFundingRate: intl.formatMessage({ defaultMessage: 'Funding Rate (1h)' }),
   }
 }
+
+export type TradeFormValues = { amount: string; collateral: string; leverage: number }
 interface OnChangeHandlersArgs {
-  setValue: UseFormSetValue<{ amount: string; collateral: string; leverage: number }>
+  setValue: UseFormSetValue<TradeFormValues>
   leverage: number
   collateral: string
   amount: string
@@ -105,6 +106,9 @@ interface OnChangeHandlersArgs {
 }
 
 const setArgs = { shouldValidate: true, shouldDirty: true }
+
+const numbersOnlyRegex = /^\d*\.?\d*$/
+
 export const useOnChangeHandlers = ({
   setValue,
   leverage,
@@ -115,6 +119,7 @@ export const useOnChangeHandlers = ({
 }: OnChangeHandlersArgs) => {
   const onChangeAmount = useCallback(
     (newAmount: string) => {
+      if (!numbersOnlyRegex.test(newAmount)) return
       const validatedAmount = max18Decimals(newAmount)
       setValue(FormNames.amount, validatedAmount, setArgs)
 
@@ -153,6 +158,7 @@ export const useOnChangeHandlers = ({
 
   const onChangeCollateral = useCallback(
     (newAmount: string) => {
+      if (!numbersOnlyRegex.test(newAmount)) return
       const validatedCollateral = max18Decimals(newAmount)
       setValue(FormNames.collateral, validatedCollateral, setArgs)
 

@@ -120,7 +120,7 @@ function TradeForm(props: TradeFormProps) {
 
     const collateralChanged = initialFormState.collateral !== collateral
     if (!collateralHasInput && collateralChanged) {
-      setValue(FormNames.collateral, initialFormState.collateral)
+      setValue(FormNames.collateral, initialFormState.collateral, { shouldValidate: true })
     }
   }, [
     address,
@@ -231,7 +231,6 @@ function TradeForm(props: TradeFormProps) {
             />
           </Flex>
           <Input
-            type="number"
             key={FormNames.collateral}
             labelText={copy.collateral}
             title={copy.collateral}
@@ -248,10 +247,10 @@ function TradeForm(props: TradeFormProps) {
             control={control}
             name={FormNames.collateral}
             onChange={(e) => onChangeCollateral(e.target.value)}
-            validate={collateralValidators}
+            validate={!!address ? collateralValidators : {}}
+            isRequired={!!address}
           />
           <Input
-            type="number"
             key={FormNames.amount}
             labelText={copy.amount}
             placeholder="0.0000"
@@ -265,7 +264,8 @@ function TradeForm(props: TradeFormProps) {
             control={control}
             name={FormNames.amount}
             onChange={(e) => onChangeAmount(e.target.value)}
-            validate={amountValidators}
+            validate={!!address ? amountValidators : {}}
+            isRequired={!!address}
           />
           <Slider
             label={copy.leverage}
@@ -279,7 +279,7 @@ function TradeForm(props: TradeFormProps) {
             control={control}
             name={FormNames.leverage}
             onChange={onChangeLeverage}
-            validate={leverageValidators}
+            validate={!!address ? leverageValidators : {}}
           />
         </Flex>
         <Divider mt="auto" />

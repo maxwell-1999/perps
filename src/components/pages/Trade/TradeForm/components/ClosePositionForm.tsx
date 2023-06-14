@@ -8,7 +8,7 @@ import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails } from '@/hooks/markets'
+import { PositionDetails, useProtocolSnapshot } from '@/hooks/markets'
 import { Big18Math } from '@/utils/big18Utils'
 
 import { Button } from '@ds/Button'
@@ -22,6 +22,7 @@ import { calcPositionFee } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import { TradeReceipt } from './Receipt'
 import { Form, FormOverlayHeader } from './styles'
+import { useCloseAmountValidator, useCloseCollateralValidator } from './validatorHooks'
 
 interface ClosePositionFormProps {
   asset: SupportedAsset
@@ -36,6 +37,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
   const { percentBtnBg } = useStyles()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
   const [modifyingCollateral, setModifyingCollateral] = useState(false)
+  const { data: protocolSnapshot } = useProtocolSnapshot()
 
   const {
     productInfo: { takerFee },
@@ -43,7 +45,13 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
   } = product
   const { nextPosition, nextLeverage, currentCollateral } = position
 
-  const { control, watch, setValue, handleSubmit } = useForm({
+  const {
+    control,
+    watch,
+    setValue,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
@@ -110,6 +118,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
     })
   }
 
+  const maxCollateralToClose = (currentCollateral ?? 0n) - calcPositionFee(nextPosition ?? 0n, price, takerFee)
   const closeFee = amount ? calcPositionFee(Big18Math.fromFloatString(amount), price, takerFee) : 0n
   // Amount of collateral received after close fee
   const collateralAfterFee = collateral ? Big18Math.sub(Big18Math.fromFloatString(collateral), closeFee) : undefined
@@ -118,7 +127,18 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
     ? Big18Math.add(Big18Math.fromFloatString(amount), Big18Math.div(closeFee, price))
     : undefined
 
-  const disableCloseBtn = !positionDelta.positionDelta && !positionDelta.collateralDelta
+  const hasFormErrors = Object.keys(errors).length > 0
+  const disableCloseBtn = (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors
+
+  const amountValidator = useCloseAmountValidator({
+    quantity: nextPosition ?? 0n,
+  })
+
+  const collateralValidator = useCloseCollateralValidator({
+    currentCollateral: currentCollateral ?? 0n,
+    minCollateral: protocolSnapshot?.minCollateral ?? 0n,
+    nextPosition: nextPosition ?? 0n,
+  })
 
   return (
     <>
@@ -140,9 +160,8 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
         <FormOverlayHeader title={copy.closePosition} onClose={() => setTradeFormState(FormState.trade)} />
         <Flex flexDirection="column" px="16px" mb="12px">
           <Input
-            type="number"
             name={FormNames.amount}
-            labelText={copy.amountToClose}
+            labelText={copy.amount}
             placeholder="0.0000"
             value={
               modifyingCollateral ? (closeAmountAfterFee ? Big18Math.toFloatString(closeAmountAfterFee) : '') : amount
@@ -158,6 +177,8 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             onChange={(e) => onChangeAmount(e.target.value)}
             rightEl={<Pill text={assetMetadata.baseCurrency} />}
             mb="12px"
+            validate={amountValidator}
+            isRequired
           />
           <Flex mb="12px">
             {buttonPercentValues.map((value, index) => (
@@ -176,9 +197,8 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             ))}
           </Flex>
           <Input
-            type="number"
             name={FormNames.collateral}
-            labelText={copy.youWillReceive}
+            labelText={copy.collateralAfterFees}
             placeholder="0.0000"
             value={
               modifyingCollateral ? collateral : collateralAfterFee ? Big18Math.toFloatString(collateralAfterFee) : ''
@@ -188,13 +208,15 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             rightLabel={
               <FormLabel mr={0} mb={0}>
                 <Text variant="label">
-                  <FormattedBig18USDPrice value={currentCollateral ?? 0n} as="span" mr={1} />
+                  <FormattedBig18USDPrice value={maxCollateralToClose ?? 0n} as="span" mr={1} />
                   {copy.max}
                 </Text>
               </FormLabel>
             }
             onChange={(e) => onChangeCollateral(e.target.value)}
             mb="12px"
+            validate={collateralValidator}
+            isRequired
           />
           <Slider
             label={copy.leverage}
