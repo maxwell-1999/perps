@@ -166,20 +166,12 @@ function AdjustPositionModal({
                 isCompleted={isTransactionCompleted}
               />
             ) : (
-              <>
-                <AdjustmentStep
-                  title={copy.withdrawStepTitle}
-                  description={copy.withdrawStepBody}
-                  isLoading={withdrawCollateralLoading}
-                  isCompleted={isSettlementCompleted}
-                />
-                <TransferDetail
-                  title={copy.withdrawDetailTitle}
-                  action={copy.withdraw}
-                  detail={formatBig18USDPrice(prevCollateral)}
-                  color={colors.brand.purple[240]}
-                />
-              </>
+              <AdjustmentStep
+                title={copy.withdrawStepTitle}
+                description={copy.withdrawStepBody}
+                isLoading={withdrawCollateralLoading}
+                isCompleted={isSettlementCompleted}
+              />
             )}
             {showSettlementStep && (
               <AdjustmentStep
@@ -189,7 +181,7 @@ function AdjustPositionModal({
                 isCompleted={isSettlementCompleted}
               />
             )}
-            {!isWithdrawing && (
+            {!isWithdrawing ? (
               <PositionInfo
                 newPosition={newPosition}
                 newCollateral={newCollateral}
@@ -199,6 +191,14 @@ function AdjustPositionModal({
                 prevLeverage={prevLeverage}
                 asset={asset}
                 orderDirection={orderDirection}
+                frozen
+              />
+            ) : (
+              <TransferDetail
+                title={copy.withdrawDetailTitle}
+                action={copy.withdraw}
+                detail={formatBig18USDPrice(prevCollateral)}
+                color={colors.brand.purple[240]}
               />
             )}
           </Flex>

@@ -1,6 +1,7 @@
 import { Box, Flex, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
 import CheckMark from '@public/icons/checkmark.svg'
 import RightArrow from '@public/icons/position-change-arrow.svg'
+import { memo } from 'react'
 
 import { FormattedBig18, FormattedBig18USDPrice } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/assets'
@@ -86,39 +87,41 @@ interface PositionInfoProps {
   asset: SupportedAsset
   isPrevious?: boolean
   orderDirection: OrderDirection
+  frozen: boolean
 }
 
-export function PositionInfo({
-  newCollateral,
-  newLeverage,
-  newPosition,
-  prevCollateral,
-  prevLeverage,
-  prevPosition,
-  asset,
-  orderDirection,
-}: PositionInfoProps) {
-  const copy = useAdjustmentModalCopy()
-  const isLong = orderDirection === OrderDirection.Long
-  const sideColor = isLong ? colors.brand.green : colors.brand.purple[240]
+export const PositionInfo = memo(
+  function PositionInfo({
+    newCollateral,
+    newLeverage,
+    newPosition,
+    prevCollateral,
+    prevLeverage,
+    prevPosition,
+    asset,
+    orderDirection,
+  }: PositionInfoProps) {
+    const copy = useAdjustmentModalCopy()
+    const isLong = orderDirection === OrderDirection.Long
+    const sideColor = isLong ? colors.brand.green : colors.brand.red
 
-  return (
-    <ModalDetailContainer>
-      <Flex flexDirection="column">
-        <Text variant="label" fontSize="12px" mb="5px">
-          {copy.side}
-        </Text>
-        <Text mb="5px" color={sideColor}>
-          {orderDirection === OrderDirection.Long ? copy.long : copy.short}
-        </Text>
-      </Flex>
+    return (
+      <ModalDetailContainer>
+        <Flex flexDirection="column" mb={2}>
+          <Text variant="label" fontSize="12px">
+            {copy.side}
+          </Text>
+          <Text color={sideColor}>{orderDirection === OrderDirection.Long ? copy.long : copy.short}</Text>
+        </Flex>
 
-      <PositionValueDisplay title={copy.positionSize} newValue={newPosition} prevValue={prevPosition} asset={asset} />
-      <PositionValueDisplay title={copy.collateral} newValue={newCollateral} prevValue={prevCollateral} usd />
-      <PositionValueDisplay title={copy.leverage} newValue={newLeverage} prevValue={prevLeverage} leverage isLast />
-    </ModalDetailContainer>
-  )
-}
+        <PositionValueDisplay title={copy.positionSize} newValue={newPosition} prevValue={prevPosition} asset={asset} />
+        <PositionValueDisplay title={copy.collateral} newValue={newCollateral} prevValue={prevCollateral} usd />
+        <PositionValueDisplay title={copy.leverage} newValue={newLeverage} prevValue={prevLeverage} leverage isLast />
+      </ModalDetailContainer>
+    )
+  },
+  ({ frozen: preFrozen }, { frozen }) => frozen && preFrozen, // Force no re-renders based on prop changes if marked as frozen
+)
 
 const StepIncomplete = () => (
   <Box height="16px" width="16px" borderRadius="full" border={`3px solid ${colors.brand.gray[100]}`} />
