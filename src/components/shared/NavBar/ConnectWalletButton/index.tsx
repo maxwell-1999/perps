@@ -146,7 +146,7 @@ const ConnectWalletInner: React.FC<ConnectWalletInnerProps> = ({
               onClick={openChainModal}
             />
             {testnet && (
-              <Text position="absolute" fontSize="xx-small" top={0}>
+              <Text position="absolute" fontSize="xx-small" top={0} width="100%" textAlign="center">
                 {testnetCopy}
               </Text>
             )}
