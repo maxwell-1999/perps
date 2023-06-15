@@ -98,6 +98,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
 
   const cancelAdjustmentModal = () => {
     setOrderValues(null)
+    setTradeFormState(FormState.trade)
   }
 
   const positionDelta = useMemo(() => {

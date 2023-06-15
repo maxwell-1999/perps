@@ -181,13 +181,14 @@ function CurrentPosition() {
           <DesktopButtonContainer>
             {isOpenPosition && (
               <ButtonGroup>
-                <Button size="sm" label={copy.modify} onClick={() => setTradeFormState(FormState.modify)} />
                 <Button
                   size="sm"
                   leftIcon={<ClosePositionIcon />}
                   variant="transparent"
                   label={copy.close}
                   onClick={() => setTradeFormState(FormState.close)}
+                  isLoading={status === PositionStatus.closing}
+                  loadingText={copy.closing}
                 />
               </ButtonGroup>
             )}

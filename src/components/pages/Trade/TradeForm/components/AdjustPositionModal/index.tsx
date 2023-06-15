@@ -82,7 +82,11 @@ function AdjustPositionModal({
   const positionSettled = position && position.position === position.nextPosition
   const isWithdrawing = position?.status === PositionStatus.closed && newCollateral === 0n && newPosition === 0n
 
-  const [step, setStep] = useState(needsApproval ? 0 : 1)
+  const [step, setStep] = useState(() => {
+    if (needsApproval) return 0
+    if (positionSettled && isWithdrawing) return 2
+    return 1
+  })
 
   useEffect(() => {
     if (positionSettled && awaitingSettlement) {

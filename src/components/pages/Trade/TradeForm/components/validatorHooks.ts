@@ -46,7 +46,7 @@ export function useCollateralValidators({
       if (inputValue < requiredMaintenance) {
         return copy.belowMaintenance
       }
-      if (inputValue < minCollateral) {
+      if (inputValue > 0n && inputValue < minCollateral) {
         return copy.belowMinCollateral
       }
       return true

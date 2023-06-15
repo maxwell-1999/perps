@@ -144,6 +144,7 @@ function TradeForm(props: TradeFormProps) {
   }
 
   const onWithdrawCollateral = () => {
+    onChangeCollateral('0')
     setOrderValues({ collateral: '0', amount: '0' })
   }
 
@@ -206,7 +207,7 @@ function TradeForm(props: TradeFormProps) {
             <Text color={textColor}>
               {hasPosition && positionStatus !== PositionStatus.closed ? copy.modifyPosition : copy.trade}
             </Text>
-            {!!address && positionStatus === PositionStatus.closed && (
+            {!!address && (positionStatus === PositionStatus.closed || positionStatus === PositionStatus.closing) && (
               <TxButton
                 variant="text"
                 label={copy.withdrawCollateral}
@@ -217,6 +218,8 @@ function TradeForm(props: TradeFormProps) {
                 color={textBtnColor}
                 _hover={{ color: textBtnHoverColor }}
                 onClick={onWithdrawCollateral}
+                isLoading={positionStatus === PositionStatus.closing}
+                loadingText={copy.withdrawCollateral}
               />
             )}
           </Flex>
