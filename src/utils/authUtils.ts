@@ -1,4 +1,5 @@
 import { createAuthenticationAdapter } from '@rainbow-me/rainbowkit'
+import { getCookie } from 'cookies-next'
 import { debounce } from 'lodash'
 import { SiweMessage } from 'siwe'
 import { Address } from 'viem'
@@ -12,6 +13,8 @@ export const setJwt = (address: string, jwt: string) => localStorage.setItem(jwt
 
 export const removeJwt = (address: string) => localStorage.removeItem(jwtKey(address))
 
+const getIPFromCookie = () => getCookie('perennial_user_ip')?.toString()
+
 export const login = debounce(
   async ({
     address,
@@ -22,6 +25,7 @@ export const login = debounce(
     setAuthStatus: (status: AuthStatus) => void
     disconnect: () => void
   }) => {
+    const ip = getIPFromCookie()
     const jwt = getJwt(address)
     if (!jwt) {
       setAuthStatus('unauthenticated')
@@ -36,7 +40,7 @@ export const login = debounce(
           'Content-Type': 'application/json',
           Authorization: `Bearer ${jwt}`,
         },
-        body: JSON.stringify({ address }),
+        body: JSON.stringify({ address, ip }),
       })
 
       if (!loginRes.ok) throw new Error('Login failed')
