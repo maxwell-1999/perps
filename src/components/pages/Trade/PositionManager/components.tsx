@@ -35,23 +35,26 @@ export const PositionTable = ({
   return (
     <Box>
       <Flex alignItems="center" justifyContent="center" py={1} px={4} position="sticky" top={0} background={background}>
-        <Text variant="label" flex="2">
+        <Text variant="label" flex="1">
+          {copy.opened}
+        </Text>
+        <Text variant="label" flex="3">
           {copy.market}
         </Text>
-        <Text variant="label" flex="1">
-          {copy.size}
+        <Text variant="label" flex="2">
+          {currentPosition ? copy.size : copy.openSize}
         </Text>
-        <Text variant="label" flex="1">
+        <Text variant="label" flex="2">
           {copy.pnl}
         </Text>
-        <Text variant="label" flex="1">
+        <Text variant="label" flex="2">
           {copy.averageEntry}
         </Text>
-        <Text variant="label" flex="1">
+        <Text variant="label" flex="2">
           {copy.fees}
         </Text>
         {currentPosition && (
-          <Text variant="label" flex="1">
+          <Text variant="label" flex="2">
             {copy.liquidationPrice}
           </Text>
         )}
@@ -85,7 +88,12 @@ const PositionTableRow = ({
     <AccordionItem borderBottom="none">
       <Box>
         <AccordionButton textAlign="left" _expanded={{ borderBottom: `1px solid ${borderColor}`, background: alpha5 }}>
-          <Box flex="2" display="flex">
+          <Box flex="1">
+            <Text fontSize="13px" variant="label">
+              {formatDateRelative(new Date(Number((row.details.subPositions?.[0].blockTimestamp ?? 0n) * 1000n)))}
+            </Text>
+          </Box>
+          <Box flex="3" display="flex">
             <Link
               onClick={() => (onClick ? onClick(row) : undefined)}
               _hover={!onClick ? { textDecoration: 'none' } : undefined}
@@ -98,7 +106,7 @@ const PositionTableRow = ({
               </Flex>
             </Link>
           </Box>
-          <Box flex="1">
+          <Box flex="2">
             <Flex flexDirection="column">
               <Text fontSize="13px">
                 {row.position} {row.asset.toUpperCase()}
@@ -108,7 +116,7 @@ const PositionTableRow = ({
               </Text>
             </Flex>
           </Box>
-          <Box flex="1">
+          <Box flex="2">
             <Flex flexDirection="column">
               <Text fontSize="13px" color={isPnlPositive ? green : red}>
                 {pnlPercentage}
@@ -118,14 +126,14 @@ const PositionTableRow = ({
               </Text>
             </Flex>
           </Box>
-          <Box flex="1">
+          <Box flex="2">
             <Text fontSize="13px">{row.averageEntry}</Text>
           </Box>
-          <Box flex="1">
+          <Box flex="2">
             <Text fontSize="13px">{row.fees}</Text>
           </Box>
           {currentPosition && (
-            <Box flex="1">
+            <Box flex="2">
               <Text fontSize="13px">{row.liquidationPrice}</Text>
             </Box>
           )}

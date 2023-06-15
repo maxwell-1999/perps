@@ -49,6 +49,7 @@ export const usePositionManagerCopy = () => {
     long: intl.formatMessage({ defaultMessage: 'Long' }),
     short: intl.formatMessage({ defaultMessage: 'Short' }),
     size: intl.formatMessage({ defaultMessage: 'Size' }),
+    openSize: intl.formatMessage({ defaultMessage: 'Open Size' }),
     pnl: intl.formatMessage({ defaultMessage: 'P&L' }),
     liquidationPrice: intl.formatMessage({ defaultMessage: 'Liquidation Price' }),
     averageEntry: intl.formatMessage({ defaultMessage: 'Average Entry' }),
@@ -68,6 +69,7 @@ export const usePositionManagerCopy = () => {
     change: intl.formatMessage({ defaultMessage: 'Change' }),
     executionPrice: intl.formatMessage({ defaultMessage: 'Execution Price' }),
     date: intl.formatMessage({ defaultMessage: 'Date' }),
+    opened: intl.formatMessage({ defaultMessage: 'Opened' }),
   }
 }
 
