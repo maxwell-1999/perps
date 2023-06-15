@@ -10,7 +10,7 @@ import { waitForTransaction } from 'wagmi/actions'
 import { goerli, mainnet } from 'wagmi/chains'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import { multiInvokerContract } from '@/constants/contracts'
+import { MultiInvokerAddresses } from '@/constants/contracts'
 import {
   ChainMarkets,
   MaxUint256,
@@ -918,7 +918,7 @@ export const useProductTransactions = (productAddress?: string) => {
     if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
       return
     }
-    const txData = await usdcContract.approve.populateTransaction(multiInvokerContract.address[chainId], MaxUint256)
+    const txData = await usdcContract.approve.populateTransaction(MultiInvokerAddresses[chainId], MaxUint256)
     const receipt = await sendTransactionAsync({
       chainId,
       to: getAddress(txData.to),

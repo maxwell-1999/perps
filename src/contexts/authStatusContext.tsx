@@ -6,6 +6,7 @@ import { LocalDev, RestrictedCountries } from '@/constants/auth'
 import { GeolocationCookie } from '@/constants/cookies'
 import { isTestnet } from '@/constants/network'
 import { useChainId } from '@/hooks/network'
+import { useIsSanctioned } from '@/hooks/wallet'
 
 export type AuthStatus = AuthenticationStatus
 
@@ -20,6 +21,7 @@ const AuthStatusOverlayContext = createContext({
   setAuthStatus: (status: AuthStatus) => {
     status
   },
+  sanctioned: false,
 })
 
 export const AuthStatusProvider = ({ children }: { children: React.ReactNode }) => {
@@ -39,9 +41,12 @@ export const AuthStatusProvider = ({ children }: { children: React.ReactNode }) 
   }
 
   const geoblocked = useMemo(() => (isTestnet(chainId) ? false : _geoblocked), [chainId, _geoblocked])
+  const { data: sanctioned } = useIsSanctioned()
 
   return (
-    <AuthStatusOverlayContext.Provider value={{ authStatus, setAuthStatus, tosAccepted, setTosAccepted, geoblocked }}>
+    <AuthStatusOverlayContext.Provider
+      value={{ authStatus, setAuthStatus, tosAccepted, setTosAccepted, geoblocked, sanctioned: Boolean(sanctioned) }}
+    >
       {children}
     </AuthStatusOverlayContext.Provider>
   )

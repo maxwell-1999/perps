@@ -10,6 +10,7 @@ import { IntlProvider } from 'react-intl'
 // eslint-disable-next-line no-restricted-imports
 import { WagmiConfig, useAccount, useDisconnect } from 'wagmi'
 
+import SanctionModal from '@/components/SanctionModal'
 import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
 import { AuthStatusProvider, StartingAuthStatus, useAuthStatus } from '@/contexts/authStatusContext'
@@ -33,7 +34,7 @@ const queryClient = new QueryClient({
 })
 
 const AppWithAuth = ({ Component, pageProps }: AppProps) => {
-  const { authStatus, setAuthStatus } = useAuthStatus()
+  const { authStatus, setAuthStatus, sanctioned } = useAuthStatus()
   const { disconnect } = useDisconnect()
   const { address } = useAccount({
     onConnect: ({ address }) => {
@@ -75,7 +76,7 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
       <RainbowKitProvider chains={chains} theme={darkTheme()} modalSize="compact">
         <ChakraProvider theme={theme}>
           <CSSReset />
-          <Component {...pageProps} />
+          {sanctioned ? <SanctionModal /> : <Component {...pageProps} />}
         </ChakraProvider>
       </RainbowKitProvider>
     </RainbowKitAuthenticationProvider>

@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { useChainId } from 'wagmi'
+import { parseAbi } from 'viem'
+import { mainnet, useChainId } from 'wagmi'
+import { readContract } from 'wagmi/actions'
 
-import { multiInvokerContract } from '@/constants/contracts'
+import { ChainalysisContractAddress, MultiInvokerAddresses } from '@/constants/contracts'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
 
 import { useUSDC } from './contracts'
@@ -26,12 +28,32 @@ export const useBalances = () => {
     queryFn: async () => {
       if (!address || !chainId || !provider || !SupportedChainIds.includes(chainId)) return
       const usdcBalance = await usdcContract.balanceOf(address)
-      const usdcAllowance = await usdcContract.allowance(address, multiInvokerContract.address[chainId])
+      const usdcAllowance = await usdcContract.allowance(address, MultiInvokerAddresses[chainId])
 
       return {
         usdc: usdcBalance,
         usdcAllowance,
       }
+    },
+  })
+}
+
+export const useIsSanctioned = () => {
+  const { address } = useAddress()
+
+  return useQuery({
+    queryKey: ['chainalysis_sanctioned', address],
+    enabled: !!address,
+    queryFn: async () => {
+      if (!address) return
+
+      return readContract({
+        address: ChainalysisContractAddress,
+        abi: parseAbi(['function isSanctioned(address) view returns (bool)']),
+        functionName: 'isSanctioned',
+        args: [address],
+        chainId: mainnet.id,
+      })
     },
   })
 }
