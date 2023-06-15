@@ -66,6 +66,10 @@ export class Big18Math {
     return a - b
   }
 
+  public static subFixed(a: bigint, b: bigint): FixedNumber {
+    return this.fixedFrom(a).subUnsafe(this.fixedFrom(b))
+  }
+
   public static divFixed(a: bigint, b: bigint): FixedNumber {
     return this.fixedFrom(a).divUnsafe(this.fixedFrom(b))
   }
