@@ -9,14 +9,15 @@ import { useNavCopy } from '../hooks'
 interface NavLinkProps {
   href: string
   label: string
+  external?: boolean
 }
 
-const NavLink: React.FC<NavLinkProps> = ({ href, label }) => {
+const NavLink: React.FC<NavLinkProps> = ({ href, label, external }) => {
   const { pathname } = useRouter()
   const isActive = pathname === href.toLowerCase()
 
   return (
-    <Link href={href} passHref>
+    <Link href={href} passHref target={external ? '_blank' : ''}>
       <Button label={label} variant={isActive ? 'transparent' : 'text'} p={3} />
     </Link>
   )
@@ -34,7 +35,7 @@ const LinkSwitcher: React.FC<LinkSwitcherProps> = ({ links }) => {
         <IconButton variant="invisible" aria-label={home} icon={<Logo />} mr={2} />
       </Link>
       {links.map((link) => (
-        <NavLink key={link.href} href={link.href} label={link.label} />
+        <NavLink key={link.href} href={link.href} label={link.label} external={!!link.external} />
       ))}
     </ButtonGroup>
   )
