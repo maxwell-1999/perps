@@ -143,7 +143,7 @@ function AdjustPositionModal({
   const showSettlementStep = requiresTwoStep || isSettlementCompleted
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered variant="confirmation">
+    <Modal isOpen={isOpen} onClose={onCancel} isCentered variant="confirmation">
       <ModalOverlay />
       <ModalContent>
         <ModalBody>
