@@ -144,3 +144,8 @@ export const positionStatus = (position: bigint, nextPosition: bigint, collatera
   }
   return PositionStatus.resolved
 }
+
+export const calcLeverage = (price: bigint, position: bigint, collateral: bigint) => {
+  if (Big18Math.isZero(position) || Big18Math.isZero(collateral)) return 0n
+  return Big18Math.div(Big18Math.mul(Big18Math.abs(price), position), collateral)
+}

@@ -1,9 +1,5 @@
 import { Big18Math } from '@/utils/big18Utils'
-
-export const calcLeverage = (price: bigint, position: bigint, collateral: bigint) => {
-  if (Big18Math.isZero(position) || Big18Math.isZero(collateral)) return 0n
-  return Big18Math.div(Big18Math.mul(Big18Math.abs(price), position), collateral)
-}
+import { calcLeverage } from '@/utils/positionUtils'
 
 export const calcMaintenance = (price: bigint, position: bigint, maintenanceRate: bigint) => {
   if (Big18Math.isZero(position)) return 0n

@@ -20,5 +20,14 @@ export const useVaultDetailCopy = () => {
     selectVaultToContinue: intl.formatMessage({
       defaultMessage: 'Select vault to continue',
     }),
+    viewing: intl.formatMessage({
+      defaultMessage: 'Viewing',
+    }),
+    assetsSupported: intl.formatMessage({
+      defaultMessage: 'Assets supported',
+    }),
+    riskExposure: intl.formatMessage({
+      defaultMessage: 'Risk (Exposure)',
+    }),
   }
 }

@@ -17,7 +17,7 @@ export default function VaultSelect() {
   const borderColor = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
   const titleSpanColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const chainId = useChainId()
-  const { vaultSnapshots, status } = useVaultContext()
+  const { vaultSnapshots, status, setSelectedVault } = useVaultContext()
   return (
     <Flex
       flexDirection="column"
@@ -55,6 +55,9 @@ export default function VaultSelect() {
                   key={`animate-${snapshot.address}`}
                 >
                   <VaultCard
+                    onClick={() => {
+                      setSelectedVault(`${i}`)
+                    }}
                     key={snapshot.address}
                     apy={feeAPR}
                     name={metadata.name}

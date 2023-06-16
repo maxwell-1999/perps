@@ -8,9 +8,9 @@ import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 
 import { Container } from '@ds/Container'
 
+import { formatValueForProgressBar } from '../../utils'
 import { useVaultSelectCopy } from '../hooks'
 import { CapacityRow, DescriptionRow, TitleRow } from './styles'
-import { formatValueForProgressBar } from './utils'
 
 interface VaultCardProps {
   apy: string
@@ -19,9 +19,10 @@ interface VaultCardProps {
   description: string
   collateral: bigint
   capacity: bigint
+  onClick: () => void
 }
 
-export default function VaultCard({ name, assets, apy, description, collateral, capacity }: VaultCardProps) {
+export default function VaultCard({ name, assets, apy, description, collateral, capacity, onClick }: VaultCardProps) {
   const intl = useIntl()
   const copy = useVaultSelectCopy()
   const grayTextColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
@@ -41,6 +42,7 @@ export default function VaultCard({ name, assets, apy, description, collateral, 
       mb={5}
       _hover={{ border: `1px solid ${hoverBorderColor}` }}
       cursor="pointer"
+      onClick={onClick}
     >
       <TitleRow borderBottom={cardBorder}>
         <Flex

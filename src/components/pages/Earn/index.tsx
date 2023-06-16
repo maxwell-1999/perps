@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { EarnLayout, HeaderGridItem, VaultDetailGridItem, VaultSelectGridItem } from '@/components/layout/EarnLayout'
 import { VaultProvider } from '@/contexts/vaultContext'
 
-import VaultEmptyState from './VaultDetail'
+import VaultDetail from './VaultDetail'
 import VaultSelect from './VaultSelect'
 
 const NavBar = dynamic(() => import('@/components/shared/NavBar'), {
@@ -26,7 +26,7 @@ export default function Earn() {
           </VaultSelectGridItem>
         )}
         <VaultDetailGridItem>
-          <VaultEmptyState />
+          <VaultDetail />
         </VaultDetailGridItem>
       </EarnLayout>
     </VaultProvider>

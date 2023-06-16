@@ -95,16 +95,17 @@ const vaultFetcher = async (
   }
 }
 
-export const useVaultUserSnapshot = (vaultType: PerennialVaultType) => {
+export const useVaultUserSnapshot = (vaultSymbol: VaultSymbol) => {
   const chainId = useChainId()
   const provider = useProvider()
   const { address } = useAddress()
+  const vaultType = vaultSymbol === VaultSymbol.PVA ? 'alpha' : 'bravo'
 
   return useQuery({
-    queryKey: ['vaultUserSnapshot', chainId, vaultType],
+    queryKey: ['vaultUserSnapshot', chainId, vaultSymbol],
     enabled: !!chainId && !!address,
     queryFn: async () => {
-      if (!address || !chainId) return
+      if (!address || !chainId || !vaultSymbol) return
       const vaultContract = getVaultForType(vaultType, chainId, provider)
       const depositsQuery = vaultContract.filters.Deposit(undefined, address)
       const claimsQuery = vaultContract.filters.Claim(undefined, address)
@@ -123,15 +124,15 @@ export const useVaultUserSnapshot = (vaultType: PerennialVaultType) => {
       const shortProduct = getProductContract(short, provider)
 
       const [, , , balance] = await Promise.all([
-        longProduct.settleAccount(vaultAddress),
-        shortProduct.settleAccount(vaultAddress),
+        longProduct['settleAccount'].staticCall(vaultAddress),
+        shortProduct['settleAccount'].staticCall(vaultAddress),
         trySync(vaultContract),
         vaultContract.balanceOf(address),
       ])
 
       const [, , , latestVersion, assets, claimable] = await Promise.all([
-        longProduct.settleAccount(vaultAddress),
-        shortProduct.settleAccount(vaultAddress),
+        longProduct['settleAccount'].staticCall(vaultAddress),
+        shortProduct['settleAccount'].staticCall(vaultAddress),
         trySync(vaultContract),
         longProduct['latestVersion()'].staticCall(),
         vaultContract.convertToAssets(balance),
@@ -410,8 +411,8 @@ const convertAssetsToShares = async ({
   const shortProduct = getProductContract(short, provider)
 
   const [, , , shares] = await Promise.all([
-    longProduct.settleAccount(vaultAddress),
-    shortProduct.settleAccount(vaultAddress),
+    longProduct['settleAccount'].staticCall(vaultAddress),
+    shortProduct['settleAccount'].staticCall(vaultAddress),
     trySync(vault),
     vault.convertToShares(assets),
   ])

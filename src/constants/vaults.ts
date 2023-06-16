@@ -61,10 +61,10 @@ export type VaultSnapshot = {
   totalAssets: bigint
   targetLeverage: bigint
   maxCollateral: bigint
-  longSnapshot: IPerennialLens.ProductSnapshotStruct
-  shortSnapshot: IPerennialLens.ProductSnapshotStruct
-  longUserSnapshot: IPerennialLens.UserProductSnapshotStruct
-  shortUserSnapshot: IPerennialLens.UserProductSnapshotStruct
+  longSnapshot: IPerennialLens.ProductSnapshotStructOutput
+  shortSnapshot: IPerennialLens.ProductSnapshotStructOutput
+  longUserSnapshot: IPerennialLens.UserProductSnapshotStructOutput
+  shortUserSnapshot: IPerennialLens.UserProductSnapshotStructOutput
   canSync: boolean
 }
 
