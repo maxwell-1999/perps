@@ -131,6 +131,12 @@
       "value": "Approve USDC"
     }
   ],
+  "ADKsID": [
+    {
+      "type": 0,
+      "value": "Opened"
+    }
+  ],
   "AxhyVR": [
     {
       "type": 0,
@@ -483,6 +489,12 @@
     {
       "type": 0,
       "value": "Liquidation price"
+    }
+  ],
+  "cRUfAq": [
+    {
+      "type": 0,
+      "value": "Open Size"
     }
   ],
   "cg1VJ2": [

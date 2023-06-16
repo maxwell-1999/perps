@@ -1,4 +1,5 @@
 import { arbitrum, arbitrumGoerli, baseGoerli } from '@wagmi/chains'
+import { parseEther } from 'viem'
 
 import { ClaimEvent, DepositEvent, RedemptionEvent } from '@t/generated/BalancedVaultAbi'
 import { IPerennialLens } from '@t/generated/LensAbi'
@@ -15,26 +16,45 @@ export const SupportedVaults: {
   [baseGoerli.id]: { alpha: true },
 }
 
+export enum VaultSymbol {
+  PVA = 'PVA',
+  PVB = 'PVB',
+}
+
 export const VaultMetadata: {
-  [chainId: number]: { [vault in PerennialVaultType]?: { name: string; assets: SupportedAsset[] } }
+  [chainId: number]: { [key in VaultSymbol]?: { name: string; assets: SupportedAsset[] } }
 } = {
   [arbitrumGoerli.id]: {
-    alpha: { name: 'Blue Chip', assets: [SupportedAsset.eth] },
-    bravo: { name: 'Arbitrum Ecosystem', assets: [SupportedAsset.link] },
+    [VaultSymbol.PVA]: { name: 'Blue Chip', assets: [SupportedAsset.eth] },
+    [VaultSymbol.PVB]: { name: 'Arbitrum Ecosystem', assets: [SupportedAsset.link] },
   },
   [arbitrum.id]: {
-    alpha: { name: 'Blue Chip', assets: [SupportedAsset.eth] },
-    bravo: { name: 'Arbitrum Ecosystem', assets: [SupportedAsset.arb] },
+    [VaultSymbol.PVA]: { name: 'Blue Chip', assets: [SupportedAsset.eth] },
+    [VaultSymbol.PVB]: { name: 'Arbitrum Ecosystem', assets: [SupportedAsset.arb] },
   },
   [baseGoerli.id]: {
-    alpha: { name: 'Blue Chip', assets: [SupportedAsset.eth] },
+    [VaultSymbol.PVA]: { name: 'Blue Chip', assets: [SupportedAsset.eth] },
+  },
+}
+
+export const FeeApr: { [chainId: number]: { [key in VaultSymbol]?: bigint } } = {
+  [arbitrum.id]: {
+    [VaultSymbol.PVA]: parseEther('0.1391'),
+    [VaultSymbol.PVB]: parseEther('0.1206'),
+  },
+  [arbitrumGoerli.id]: {
+    [VaultSymbol.PVA]: parseEther('0.1391'),
+    [VaultSymbol.PVB]: parseEther('0.1206'),
+  },
+  [baseGoerli.id]: {
+    [VaultSymbol.PVA]: parseEther('0.1391'),
   },
 }
 
 export type VaultSnapshot = {
   address: string
   name: string
-  symbol: string
+  symbol: VaultSymbol
   long: string
   short: string
   totalSupply: bigint

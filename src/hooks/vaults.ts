@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { BlockTag, Provider } from 'ethers'
+import { AlchemyProvider, BlockTag, JsonRpcProvider, Provider } from 'ethers'
 import { useCallback } from 'react'
 import { Hex, getAddress } from 'viem'
 import { useSendTransaction, useWalletClient } from 'wagmi'
@@ -8,12 +8,13 @@ import { waitForTransaction } from 'wagmi/actions'
 import { MultiInvokerAddresses } from '@/constants/contracts'
 import { MaxUint256 } from '@/constants/markets'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
-import { PerennialVaultType } from '@/constants/vaults'
+import { PerennialVaultType, VaultSymbol } from '@/constants/vaults'
+import { VaultSnapshot } from '@/constants/vaults'
 import { sum as sumArray } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { InvokerAction, buildInvokerAction } from '@/utils/multiinvoker'
 
-import { BalancedVaultAbi } from '@t/generated'
+import { BalancedVaultAbi, LensAbi } from '@t/generated'
 
 import { getProductContract, getVaultForType, useLens, useMultiInvoker, useUSDC } from './contracts'
 import { useAddress, useChainId, useProvider } from './network'
@@ -24,50 +25,74 @@ export const useVaultSnapshot = (vaultType: PerennialVaultType) => {
   const lens = useLens()
 
   return useQuery({
-    queryKey: ['vaultSnapshot', chainId, vaultType],
+    queryKey: ['vaultSnapshot', vaultType, chainId],
     enabled: !!chainId,
     refetchInterval: 10000,
-    queryFn: async () => {
-      const vaultContract = getVaultForType(vaultType, chainId, provider)
-      const [name, symbol, long, short, targetLeverage, maxCollateral, vaultAddress] = await Promise.all([
-        vaultContract.name(),
-        vaultContract.symbol(),
-        vaultContract.long(),
-        vaultContract.short(),
-        vaultContract.targetLeverage(),
-        vaultContract.maxCollateral(),
-        vaultContract.getAddress(),
-      ])
-
-      const [longSnapshot, shortSnapshot, longUserSnapshot, shortUserSnapshot, canSync, totalSupply, totalAssets] =
-        await Promise.all([
-          lens['snapshot(address)'].staticCall(long),
-          lens['snapshot(address)'].staticCall(short),
-          lens['snapshot(address,address)'].staticCall(vaultAddress, long),
-          lens['snapshot(address,address)'].staticCall(vaultAddress, short),
-          trySync(vaultContract),
-          vaultContract.totalSupply(),
-          vaultContract.totalAssets(),
-        ])
-
-      return {
-        address: vaultAddress,
-        name,
-        symbol,
-        long: long.toLowerCase(),
-        short: short.toLowerCase(),
-        totalSupply,
-        totalAssets,
-        targetLeverage,
-        maxCollateral,
-        longSnapshot,
-        shortSnapshot,
-        longUserSnapshot,
-        shortUserSnapshot,
-        canSync,
-      }
+    queryFn: () => {
+      return vaultFetcher(vaultType, chainId, provider, lens)
     },
   })
+}
+
+export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
+  const chainId = useChainId()
+  const provider = useProvider()
+  const lens = useLens()
+
+  return useQuery({
+    queryKey: ['vaultSnapshots', vaultTypes, chainId],
+    enabled: !!chainId,
+    refetchInterval: 10000,
+    queryFn: () => {
+      return Promise.all(vaultTypes.map((vaultType) => vaultFetcher(vaultType, chainId, provider, lens)))
+    },
+  })
+}
+
+const vaultFetcher = async (
+  vaultType: PerennialVaultType,
+  chainId: SupportedChainId,
+  provider: AlchemyProvider | JsonRpcProvider,
+  lens: LensAbi,
+): Promise<VaultSnapshot> => {
+  const vaultContract = getVaultForType(vaultType, chainId, provider)
+  const [name, symbol, long, short, targetLeverage, maxCollateral, vaultAddress] = await Promise.all([
+    vaultContract.name(),
+    vaultContract.symbol(),
+    vaultContract.long(),
+    vaultContract.short(),
+    vaultContract.targetLeverage(),
+    vaultContract.maxCollateral(),
+    vaultContract.getAddress(),
+  ])
+
+  const [longSnapshot, shortSnapshot, longUserSnapshot, shortUserSnapshot, canSync, totalSupply, totalAssets] =
+    await Promise.all([
+      lens['snapshot(address)'].staticCall(long),
+      lens['snapshot(address)'].staticCall(short),
+      lens['snapshot(address,address)'].staticCall(vaultAddress, long),
+      lens['snapshot(address,address)'].staticCall(vaultAddress, short),
+      trySync(vaultContract),
+      vaultContract.totalSupply(),
+      vaultContract.totalAssets(),
+    ])
+
+  return {
+    address: vaultAddress,
+    name,
+    symbol: symbol as VaultSymbol,
+    long: long.toLowerCase(),
+    short: short.toLowerCase(),
+    totalSupply,
+    totalAssets,
+    targetLeverage,
+    maxCollateral,
+    longSnapshot,
+    shortSnapshot,
+    longUserSnapshot,
+    shortUserSnapshot,
+    canSync,
+  }
 }
 
 export const useVaultUserSnapshot = (vaultType: PerennialVaultType) => {
