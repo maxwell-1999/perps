@@ -14,6 +14,7 @@ import SanctionModal from '@/components/SanctionModal'
 import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
 import { AuthStatusProvider, StartingAuthStatus, useAuthStatus } from '@/contexts/authStatusContext'
+import { useChainId } from '@/hooks/network'
 import '@/styles/globals.css'
 import { createAuthAdapter, getJwt, login } from '@/utils/authUtils'
 import { usePrevious } from '@/utils/hooks'
@@ -33,18 +34,32 @@ const queryClient = new QueryClient({
   },
 })
 
+const resetQueryCache = () => {
+  queryClient.removeQueries()
+  queryClient.resetQueries()
+}
+
 const AppWithAuth = ({ Component, pageProps }: AppProps) => {
+  const chainId = useChainId()
+  const prevChainId = usePrevious(chainId)
+  useEffect(() => {
+    if (prevChainId && chainId && prevChainId !== chainId) {
+      resetQueryCache()
+    }
+  }, [chainId, prevChainId])
+
   const { authStatus, setAuthStatus, sanctioned } = useAuthStatus()
   const { disconnect } = useDisconnect()
+
   const { address } = useAccount({
     onConnect: ({ address }) => {
       if (address && !!getJwt(address)) loginUser()
       else setAuthStatus(StartingAuthStatus)
-      queryClient.resetQueries()
+      resetQueryCache()
     },
     onDisconnect: () => {
       setAuthStatus(StartingAuthStatus)
-      queryClient.resetQueries()
+      resetQueryCache()
     },
   })
   const prevAddress = usePrevious(address)
