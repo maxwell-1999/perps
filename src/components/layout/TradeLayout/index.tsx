@@ -26,7 +26,7 @@ const largeScreenLayout = `
 const GridContainer = styled.div`
   display: grid;
   grid-gap: 15px;
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   padding: 1.2rem;
 

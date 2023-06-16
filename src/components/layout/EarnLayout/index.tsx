@@ -16,7 +16,7 @@ const desktopLayout = `
 
 const GridContainer = styled.div`
   display: grid;
-  min-height: 100vh;
+  min-height: 100dvh;
 
   grid-template-areas: ${mobileLayout};
   grid-template-columns: 1fr;
