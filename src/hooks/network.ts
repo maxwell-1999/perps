@@ -71,6 +71,4 @@ export const useGraphClient = () => {
 }
 
 const pythClient = new EvmPriceServiceConnection('https://xc-mainnet.pyth.network')
-export const usePyth = () => {
-  return pythClient
-}
+export const usePyth = () => pythClient

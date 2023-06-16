@@ -760,10 +760,6 @@ export const useChainLivePrices = () => {
         [feedToAsset['0x' + priceFeed.id]]: price ? BigInt(price) * 10n ** 10n : undefined,
       }))
     })
-
-    return () => {
-      pyth.unsubscribePriceFeedUpdates(feedIds)
-    }
   }, [markets, pyth])
 
   return prices

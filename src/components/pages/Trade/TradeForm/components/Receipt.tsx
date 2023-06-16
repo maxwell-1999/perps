@@ -1,7 +1,7 @@
 import { Flex, FlexProps } from '@chakra-ui/react'
 
 import { DataRow } from '@/components/design-system'
-import { PositionDetails } from '@/hooks/markets'
+import { PositionDetails, useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { calcLiquidationPrice, utilization } from '@/utils/positionUtils'
 import { Hour, Year } from '@/utils/timeUtils'
@@ -23,6 +23,7 @@ interface ReceiptProps {
 
 export function TradeReceipt({ product, positionDelta, positionDetails, ...props }: ReceiptProps & FlexProps) {
   const copy = useReceiptCopy()
+  const livePrices = useChainLivePrices()
 
   const {
     productInfo: { takerFee, utilizationCurve },
@@ -46,7 +47,12 @@ export function TradeReceipt({ product, positionDelta, positionDetails, ...props
   const close = positionDelta.positionDelta < 0n
   return (
     <Flex flexDirection="column" {...props}>
-      <DataRow label={!!close ? copy.estExit : copy.estEntry} value={formatBig18USDPrice(Big18Math.abs(price))} />
+      <DataRow
+        label={!!close ? copy.estExit : copy.estEntry}
+        value={formatBig18USDPrice(
+          Big18Math.abs(positionDetails?.asset ? livePrices[positionDetails?.asset] ?? price : price),
+        )}
+      />
       <DataRow label={copy.liquidationPrice} value={formatBig18USDPrice(liquidationPrice)} />
       <DataRow label={copy.tradingFee} value={formatBig18USDPrice(tradingFee)} />
       <DataRow label={copy.hourlyFundingRate} value={formatBig18Percent(fundingRate, { numDecimals: 4 })} />
