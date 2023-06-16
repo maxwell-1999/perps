@@ -14,7 +14,6 @@ import SanctionModal from '@/components/SanctionModal'
 import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
 import { AuthStatusProvider, StartingAuthStatus, useAuthStatus } from '@/contexts/authStatusContext'
-import { useChainId } from '@/hooks/network'
 import '@/styles/globals.css'
 import { createAuthAdapter, getJwt, login } from '@/utils/authUtils'
 import { usePrevious } from '@/utils/hooks'
@@ -28,26 +27,12 @@ import English from '../../lang/compiled-locales/en.json'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      keepPreviousData: true, // Keep previous data when fetching new data
       staleTime: Number(1n * Hour) * 1000, // 1 hour in ms
     },
   },
 })
 
-const resetQueryCache = () => {
-  queryClient.removeQueries()
-  queryClient.resetQueries()
-}
-
 const AppWithAuth = ({ Component, pageProps }: AppProps) => {
-  const chainId = useChainId()
-  const prevChainId = usePrevious(chainId)
-  useEffect(() => {
-    if (prevChainId && chainId && prevChainId !== chainId) {
-      resetQueryCache()
-    }
-  }, [chainId, prevChainId])
-
   const { authStatus, setAuthStatus, sanctioned } = useAuthStatus()
   const { disconnect } = useDisconnect()
 
@@ -55,11 +40,9 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
     onConnect: ({ address }) => {
       if (address && !!getJwt(address)) loginUser()
       else setAuthStatus(StartingAuthStatus)
-      resetQueryCache()
     },
     onDisconnect: () => {
       setAuthStatus(StartingAuthStatus)
-      resetQueryCache()
     },
   })
   const prevAddress = usePrevious(address)
@@ -73,7 +56,6 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
     if (prevAddress && address && address !== prevAddress) {
       if (!!getJwt(address)) loginUser()
       else setAuthStatus(StartingAuthStatus)
-      queryClient.resetQueries()
     }
   }, [address, prevAddress, setAuthStatus, loginUser])
 
