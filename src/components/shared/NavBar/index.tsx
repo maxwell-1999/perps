@@ -52,7 +52,7 @@ function NavBar() {
             >
               <Stack>
                 {links.map((link) => (
-                  <Link href={link.href} key={link.href} passHref>
+                  <Link href={link.href} key={link.href} passHref target={link.external ? '_blank' : ''}>
                     <Button label={<MobileButtonLabel label={link.label} />} variant="text" width="100%" />
                     <Box height="1px" width="100%" bg={linkUnderlineColor} mt={2} />
                   </Link>
