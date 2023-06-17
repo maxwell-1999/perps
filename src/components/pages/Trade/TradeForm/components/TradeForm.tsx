@@ -177,8 +177,9 @@ function TradeForm(props: TradeFormProps) {
     requiredMaintenance: userMaintenance ?? 0n,
     minCollateral: protocolSnapshot?.minCollateral ?? 0n,
   })
+  const globalNext = next(globalPre, product.position)
   const amountValidators = usePositionValidators({
-    liquidity: next(globalPre, product.position).maker,
+    liquidity: Big18Math.max(0n, globalNext.maker - globalNext.taker),
   })
   const leverageValidators = useLeverageValidators({
     maxLeverage,
