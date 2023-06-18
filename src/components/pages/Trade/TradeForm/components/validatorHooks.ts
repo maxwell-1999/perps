@@ -22,10 +22,12 @@ export function useCollateralValidators({
   usdcBalance,
   requiredMaintenance,
   minCollateral,
+  currentCollateral,
 }: {
   usdcBalance: bigint
   requiredMaintenance: bigint
   minCollateral: bigint
+  currentCollateral: bigint
 }) {
   const copy = useErrorMessages()
 
@@ -33,12 +35,12 @@ export function useCollateralValidators({
     return (value: string) => {
       const inputValue = Big18Math.fromFloatString(value)
       const balance = Big18Math.fromDecimals(usdcBalance, 6)
-      if (inputValue > balance) {
+      if (Big18Math.max(0n, inputValue - currentCollateral) > balance) {
         return copy.insufficientFunds
       }
       return true
     }
-  }, [usdcBalance, copy.insufficientFunds])
+  }, [usdcBalance, currentCollateral, copy.insufficientFunds])
 
   const minValidator = useMemo(() => {
     return (value: string) => {

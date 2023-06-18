@@ -158,7 +158,7 @@ function TradeForm(props: TradeFormProps) {
   }
 
   const onClickMaxCollateral = () => {
-    onChangeCollateral(Big18Math.toFloatString(Big18Math.fromDecimals(balances?.usdc ?? 0n, 6)))
+    onChangeCollateral(Big18Math.toFloatString(currentCollateral + Big18Math.fromDecimals(balances?.usdc ?? 0n, 6)))
   }
 
   const positionDelta = useMemo(
@@ -176,6 +176,7 @@ function TradeForm(props: TradeFormProps) {
     usdcBalance: balances?.usdc ?? 0n,
     requiredMaintenance: userMaintenance ?? 0n,
     minCollateral: protocolSnapshot?.minCollateral ?? 0n,
+    currentCollateral,
   })
   const globalNext = next(globalPre, product.position)
   const amountValidators = usePositionValidators({
