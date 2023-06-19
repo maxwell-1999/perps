@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { parseAbi } from 'viem'
-import { mainnet, useChainId } from 'wagmi'
+import { mainnet } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
 import { ChainalysisContractAddress, MultiInvokerAddresses } from '@/constants/contracts'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
+import { PerennialVaultType } from '@/constants/vaults'
 
-import { useUSDC } from './contracts'
-import { useAddress, useProvider } from './network'
+import { getVaultForType, useUSDC } from './contracts'
+import { useAddress, useChainId, useProvider } from './network'
 
 export type Balances = {
   dsu: bigint
@@ -54,6 +55,29 @@ export const useIsSanctioned = () => {
         args: [address],
         chainId: mainnet.id,
       })
+    },
+  })
+}
+
+export const useVaultAllowances = (vaultType: PerennialVaultType) => {
+  const chainId = useChainId()
+  const provider = useProvider()
+  const { address } = useAddress()
+  const usdcContract = useUSDC()
+
+  return useQuery({
+    queryKey: ['vaultAllowances', chainId, vaultType, address],
+    enabled: !!chainId && !!address,
+    queryFn: async () => {
+      if (!address || !chainId) return
+      const vaultContract = getVaultForType(vaultType, chainId, provider)
+
+      const [usdc, shares] = await Promise.all([
+        usdcContract.allowance(address, MultiInvokerAddresses[chainId]),
+        vaultContract.allowance(address, MultiInvokerAddresses[chainId]),
+      ])
+
+      return { usdc, shares }
     },
   })
 }

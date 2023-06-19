@@ -1,12 +1,12 @@
 import { PositionDetails } from '@/hooks/markets'
 import { Big18Math } from '@/utils/big18Utils'
+import { calcLeverage } from '@/utils/positionUtils'
 
 import { IPerennialLens } from '@t/generated/LensAbi'
 
 import { OrderValues } from '../../constants'
 import {
   calcCollateralDifference,
-  calcLeverage,
   calcLeverageDifference,
   calcPositionDifference,
   calcPositionFee,

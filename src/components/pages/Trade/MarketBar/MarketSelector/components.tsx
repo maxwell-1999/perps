@@ -1,6 +1,4 @@
 import { Flex, Text, useColorModeValue } from '@chakra-ui/react'
-import styled from '@emotion/styled'
-import Hamburger from '@public/icons/burger.svg'
 import Image from 'next/image'
 
 import colors from '@/components/design-system/theme/colors'
@@ -8,11 +6,6 @@ import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 
 import { Button } from '@ds/Button'
 
-// @ts-ignore
-export const HamburgerIcon = styled(Hamburger)`
-  color: ${colors.brand.whiteAlpha[50]};
-  height: 18px;
-`
 const AssetButtonLabel = ({
   name,
   symbol,

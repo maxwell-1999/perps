@@ -1,3 +1,4 @@
+import { HamburgerIcon } from '@chakra-ui/icons'
 import {
   Flex,
   Popover,
@@ -20,11 +21,11 @@ import { Button, IconButton } from '@ds/Button'
 import { Big18Math, formatBig18USDPrice } from '@utils/big18Utils'
 
 import { useSelectorCopy } from '../hooks'
-import { AssetButton, HamburgerIcon } from './components'
+import { AssetButton } from './components'
 
 function MarketSelector() {
   const { chainId, selectedMarket, setSelectedMarket, snapshots } = useMarketContext()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen, onOpen, onClose } = useDisclosure({ id: 'marketSelector' })
   const copy = useSelectorCopy()
 
   return (
@@ -41,7 +42,7 @@ function MarketSelector() {
         <Button
           label={<AssetIconWithText market={AssetMetadata[selectedMarket]} />}
           variant="pairSelector"
-          rightIcon={<HamburgerIcon />}
+          rightIcon={<HamburgerIcon height="20px" width="20px" />}
         />
       </PopoverTrigger>
       <PopoverContent>
