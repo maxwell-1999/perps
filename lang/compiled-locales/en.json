@@ -351,12 +351,6 @@
       "value": "%"
     }
   ],
-  "MLTKb6": [
-    {
-      "type": 0,
-      "value": "APY"
-    }
-  ],
   "N0eaIb": [
     {
       "type": 0,
@@ -373,6 +367,22 @@
     {
       "type": 0,
       "value": "Place Order"
+    }
+  ],
+  "No1uU6": [
+    {
+      "type": 0,
+      "value": "APR"
+    }
+  ],
+  "OGoI5F": [
+    {
+      "type": 1,
+      "value": "apr"
+    },
+    {
+      "type": 0,
+      "value": "%"
     }
   ],
   "OOk+VQ": [
@@ -415,16 +425,6 @@
     {
       "type": 0,
       "value": "You will get..."
-    }
-  ],
-  "RGllsm": [
-    {
-      "type": 1,
-      "value": "apy"
-    },
-    {
-      "type": 0,
-      "value": "%"
     }
   ],
   "RoqJiX": [

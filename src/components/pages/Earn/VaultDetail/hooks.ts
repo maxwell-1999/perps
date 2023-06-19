@@ -84,15 +84,9 @@ export const usePnl = ({
   return pnl
 }
 
-export const useExposure = ({
-  vault,
-  vaultUserSnapshot,
-}: {
-  vault?: VaultSnapshot
-  vaultUserSnapshot?: VaultUserSnapshot
-}) => {
+export const useExposure = ({ vault }: { vault?: VaultSnapshot; vaultUserSnapshot?: VaultUserSnapshot }) => {
   const exposureData = useMemo(() => {
-    if (!vault || !vaultUserSnapshot) {
+    if (!vault) {
       return
     }
 
@@ -113,7 +107,7 @@ export const useExposure = ({
 
     const exposure = Math.abs(Big18Math.fixedFrom(Big18Math.mul(leverage, delta)).toUnsafeFloat()) * 100
     return { exposure, isLongExposure }
-  }, [vault, vaultUserSnapshot])
+  }, [vault])
 
   return exposureData
 }

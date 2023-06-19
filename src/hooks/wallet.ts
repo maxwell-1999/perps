@@ -6,8 +6,9 @@ import { readContract } from 'wagmi/actions'
 import { ChainalysisContractAddress, MultiInvokerAddresses } from '@/constants/contracts'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
 import { PerennialVaultType } from '@/constants/vaults'
+import { getVaultForType } from '@/utils/contractUtils'
 
-import { getVaultForType, useUSDC } from './contracts'
+import { useUSDC } from './contracts'
 import { useAddress, useChainId, useProvider } from './network'
 
 export type Balances = {
@@ -31,9 +32,19 @@ export const useBalances = () => {
       const usdcBalance = await usdcContract.balanceOf(address)
       const usdcAllowance = await usdcContract.allowance(address, MultiInvokerAddresses[chainId])
 
+      const [alphaVaultAllowance, bravoVaultAllowance] = await Promise.all(
+        Object.values(PerennialVaultType).map((vaultType) => {
+          const vaultContract = getVaultForType(vaultType, chainId, provider)
+          if (!vaultContract) return Promise.resolve(null)
+          return vaultContract.allowance(address, MultiInvokerAddresses[chainId])
+        }),
+      )
+
       return {
         usdc: usdcBalance,
         usdcAllowance,
+        alphaVaultAllowance,
+        bravoVaultAllowance,
       }
     },
   })
@@ -55,29 +66,6 @@ export const useIsSanctioned = () => {
         args: [address],
         chainId: mainnet.id,
       })
-    },
-  })
-}
-
-export const useVaultAllowances = (vaultType: PerennialVaultType) => {
-  const chainId = useChainId()
-  const provider = useProvider()
-  const { address } = useAddress()
-  const usdcContract = useUSDC()
-
-  return useQuery({
-    queryKey: ['vaultAllowances', chainId, vaultType, address],
-    enabled: !!chainId && !!address,
-    queryFn: async () => {
-      if (!address || !chainId) return
-      const vaultContract = getVaultForType(vaultType, chainId, provider)
-
-      const [usdc, shares] = await Promise.all([
-        usdcContract.allowance(address, MultiInvokerAddresses[chainId]),
-        vaultContract.allowance(address, MultiInvokerAddresses[chainId]),
-      ])
-
-      return { usdc, shares }
     },
   })
 }

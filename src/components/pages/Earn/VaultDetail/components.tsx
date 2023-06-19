@@ -6,6 +6,7 @@ import { AssetIconWithText, FormattedBig18USDPrice } from '@/components/shared/c
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { MaxUint256 } from '@/constants/markets'
 import { VaultUserSnapshot } from '@/constants/vaults'
+import { useAddress } from '@/hooks/network'
 import { Big18Math } from '@/utils/big18Utils'
 
 import { Container } from '@ds/Container'
@@ -129,25 +130,25 @@ export const PositionCard = ({ vaultUserSnapshot, pnl }: { vaultUserSnapshot?: V
   const alpha80 = useColorModeValue(colors.brand.blackAlpha[80], colors.brand.whiteAlpha[80])
   const alpha50 = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const pnlColor = pnl && pnl > 0n ? colors.brand.green : colors.brand.red
-  if (!vaultUserSnapshot) {
+  const { address } = useAddress()
+  if (address && !vaultUserSnapshot) {
     return (
       <Container p={4} variant="vaultCard" bg="transparent" alignItems="center" justifyContent="center" height="130px">
         <Spinner size="sm" />
       </Container>
     )
   }
-  const { totalDeposit } = vaultUserSnapshot
-  const hasPosition = !Big18Math.isZero(totalDeposit)
+  const hasPosition = vaultUserSnapshot && !Big18Math.isZero(vaultUserSnapshot?.totalDeposit)
   return (
     <Container p={4} mb="22px" variant="vaultCard" bg={hasPosition ? alpha5 : 'transparent'}>
       <Flex flexDirection="column">
         <Text color={alpha80} fontSize="17px" mb={4}>
-          {hasPosition ? copy.position : copy.noPositionToShow}
+          {address && hasPosition ? copy.position : copy.noPositionToShow}
         </Text>
         <Flex flex={1} justifyContent="space-between" mb={4}>
           <Text color={alpha50}>{copy.value}</Text>
-          {hasPosition ? (
-            <FormattedBig18USDPrice value={totalDeposit} fontSize="16px" fontWeight={500} compact />
+          {address && hasPosition ? (
+            <FormattedBig18USDPrice value={vaultUserSnapshot.totalDeposit} fontSize="16px" fontWeight={500} compact />
           ) : (
             <Text color={alpha50}>{copy.noValue}</Text>
           )}

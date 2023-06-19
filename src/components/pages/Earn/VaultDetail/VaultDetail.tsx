@@ -31,7 +31,6 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
 
   const exposureData = useExposure({
     vault,
-    vaultUserSnapshot,
   })
   const pnl = usePnl({ vault, vaultUserSnapshot })
 
@@ -40,7 +39,7 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
   return (
     <Flex height="100%" width="100%" pt={10} px={14} bg={alpha5}>
       <Flex flexDirection="column" mr={isBase ? 0 : 9} width={isBase ? '100%' : '50%'}>
-        {isBase && <MobileVaultSelect />}
+        <MobileVaultSelect />
         <VaultDetailTitle
           name={metadata?.name ?? name}
           description="Some description of the vault can go here to let people know why they should deposit"

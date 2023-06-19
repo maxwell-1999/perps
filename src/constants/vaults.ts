@@ -7,7 +7,10 @@ import { TypedContractEvent, TypedEventLog } from '@t/generated/common'
 
 import { SupportedAsset } from './assets'
 
-export type PerennialVaultType = 'alpha' | 'bravo'
+export enum PerennialVaultType {
+  alpha = 'alpha',
+  bravo = 'bravo',
+}
 
 // Note: Currently if the user switches to a chain for which there is no supported vaults,
 // it'll throw an error unless defaults are provided. TODO: Handle this case.

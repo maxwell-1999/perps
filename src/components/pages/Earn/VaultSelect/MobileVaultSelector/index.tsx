@@ -10,6 +10,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
+import styled from '@emotion/styled'
 import { useIntl } from 'react-intl'
 
 import { FeeApr, VaultMetadata, VaultSnapshot } from '@/constants/vaults'
@@ -19,16 +20,29 @@ import { formatBig18 } from '@/utils/big18Utils'
 
 import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
+import { breakpoints } from '@ds/theme/styles'
 
 import { useVaultSelectCopy } from '../hooks'
+
+const SelectContainer = styled(Flex)`
+  width: 100%;
+  margin-bottom: 22px;
+  display: flex;
+
+  @media (min-width: ${breakpoints.md}) {
+    display: none;
+  }
+`
 
 export default function MobileVaultSelect() {
   const { vaultSnapshots, status, setSelectedVault, selectedVault } = useVaultContext()
   const { isOpen, onOpen, onClose } = useDisclosure({ id: 'vaultSelector' })
   const copy = useVaultSelectCopy()
 
+  const hasSelection = selectedVault && vaultSnapshots[selectedVault]
+
   return (
-    <Flex mb="22px" width="100%">
+    <SelectContainer>
       <Popover
         placement="bottom-start"
         variant="assetSelector"
@@ -42,7 +56,7 @@ export default function MobileVaultSelect() {
           <Button
             width="100%"
             height="50px"
-            label={selectedVault ? <SelectButtonLabel snapshot={vaultSnapshots[selectedVault]} /> : copy.selectVault}
+            label={hasSelection ? <SelectButtonLabel snapshot={vaultSnapshots[selectedVault]} /> : copy.selectVault}
             variant="pairSelector"
             rightIcon={<HamburgerIcon height="20px" width="20px" />}
           />
@@ -72,7 +86,7 @@ export default function MobileVaultSelect() {
           </PopoverBody>
         </PopoverContent>
       </Popover>
-    </Flex>
+    </SelectContainer>
   )
 }
 
@@ -83,9 +97,9 @@ const SelectButtonLabel = ({ snapshot }: { snapshot: VaultSnapshot }) => {
   const metadata = VaultMetadata[chainId][snapshot.symbol]
 
   const feeRate = FeeApr[chainId][snapshot.symbol] ?? 0n
-  const apy = formatBig18(feeRate * 100n, { numSigFigs: 4, minDecimals: 2 })
+  const apr = formatBig18(feeRate * 100n, { numSigFigs: 4, minDecimals: 2 })
 
-  const apyPercent = intl.formatMessage({ defaultMessage: '{apy}%' }, { apy })
+  const aprPercent = intl.formatMessage({ defaultMessage: '{apr}%' }, { apr })
   const textColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
 
   return (
@@ -93,9 +107,9 @@ const SelectButtonLabel = ({ snapshot }: { snapshot: VaultSnapshot }) => {
       <Text>{metadata ? metadata.name : snapshot.name}</Text>
       <Flex pl={2}>
         <Text mr={2} color={textColor}>
-          {copy.apy}
+          {copy.apr}
         </Text>
-        <Text color={colors.brand.green}>{apyPercent}</Text>
+        <Text color={colors.brand.green}>{aprPercent}</Text>
       </Flex>
     </Flex>
   )

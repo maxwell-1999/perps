@@ -17,7 +17,8 @@ import { ethersResultToPOJO } from '@/utils/objectUtils'
 
 import { BalancedVaultAbi, LensAbi } from '@t/generated'
 
-import { getProductContract, getVaultForType, useLens, useMultiInvoker, useUSDC } from './contracts'
+import { getProductContract, getVaultForType } from '../utils/contractUtils'
+import { useLens, useMultiInvoker, useUSDC } from './contracts'
 import { useAddress, useChainId, useProvider } from './network'
 
 export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
@@ -30,7 +31,12 @@ export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
     enabled: !!chainId,
     refetchInterval: 10000,
     queryFn: () => {
-      return Promise.all(vaultTypes.map((vaultType) => vaultFetcher(vaultType, chainId, provider, lens)))
+      if (!vaultTypes.length) {
+        return Promise.resolve([])
+      }
+      return Promise.all(vaultTypes.map((vaultType) => vaultFetcher(vaultType, chainId, provider, lens))).then(
+        (results) => results.filter((result): result is VaultSnapshot => result !== undefined),
+      )
     },
   })
 }
@@ -40,8 +46,11 @@ const vaultFetcher = async (
   chainId: SupportedChainId,
   provider: AlchemyProvider | JsonRpcProvider,
   lens: LensAbi,
-): Promise<VaultSnapshot> => {
+): Promise<VaultSnapshot | undefined> => {
   const vaultContract = getVaultForType(vaultType, chainId, provider)
+  if (!vaultContract) {
+    return Promise.resolve(undefined)
+  }
   const [name, symbol, long, short, targetLeverage, maxCollateral, vaultAddress] = await Promise.all([
     vaultContract.name(),
     vaultContract.symbol(),
@@ -85,14 +94,16 @@ export const useVaultUserSnapshot = (vaultSymbol: VaultSymbol) => {
   const chainId = useChainId()
   const provider = useProvider()
   const { address } = useAddress()
-  const vaultType = [VaultSymbol.PVA, VaultSymbol.ePBV].includes(vaultSymbol) ? 'alpha' : 'bravo'
+  const vaultType = [VaultSymbol.PVA, VaultSymbol.ePBV].includes(vaultSymbol)
+    ? PerennialVaultType.alpha
+    : PerennialVaultType.bravo
 
   return useQuery({
     queryKey: ['vaultUserSnapshot', chainId, vaultSymbol, address],
     enabled: !!chainId && !!address && !!vaultSymbol,
     queryFn: async (): Promise<VaultUserSnapshot | undefined> => {
-      if (!address || !chainId || !vaultSymbol) return
       const vaultContract = getVaultForType(vaultType, chainId, provider)
+      if (!address || !chainId || !vaultSymbol || !vaultContract) return
       const depositsQuery = vaultContract.filters.Deposit(undefined, address)
       const claimsQuery = vaultContract.filters.Claim(undefined, address)
       const redemptionsQuery = vaultContract.filters.Redemption(undefined, address)
@@ -222,11 +233,11 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
   }
 
   const onApproveShares = async () => {
-    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
+    const vaultContract = getVaultForType(vaultType, chainId, provider)
+    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
       return
     }
 
-    const vaultContract = getVaultForType(vaultType, chainId, provider)
     const txData = await vaultContract.approve.populateTransaction(MultiInvokerAddresses[chainId], MaxUint256)
     const receipt = await sendTransactionAsync({
       chainId,
@@ -239,11 +250,11 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
   }
 
   const onDeposit = async (amount: bigint) => {
-    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
+    const vaultContract = getVaultForType(vaultType, chainId, provider)
+    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
       return
     }
 
-    const vaultContract = getVaultForType(vaultType, chainId, provider)
     const vaultAddress = await vaultContract.getAddress()
 
     const actions = [
@@ -272,11 +283,11 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
   }
 
   const onRedeem = async (amount: bigint, { assets = true, max = false }) => {
-    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
+    const vaultContract = getVaultForType(vaultType, chainId, provider)
+    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
       return
     }
 
-    const vaultContract = getVaultForType(vaultType, chainId, provider)
     const vaultAddress = await vaultContract.getAddress()
     let vaultAmount = max ? await vaultContract.balanceOf(address) : amount
     if (assets) {
@@ -309,10 +320,10 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
   }
 
   const onClaim = async (unwrapAmount?: bigint) => {
-    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
+    const vaultContract = getVaultForType(vaultType, chainId, provider)
+    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
       return
     }
-    const vaultContract = getVaultForType(vaultType, chainId, provider)
     const vaultAddress = await vaultContract.getAddress()
 
     const actions = [
@@ -368,7 +379,9 @@ const convertAssetsToShares = async ({
   chainId: SupportedChainId
 }): Promise<bigint> => {
   const vault = getVaultForType(vaultType, chainId, provider)
-
+  if (!vault) {
+    return 0n
+  }
   const [long, short, vaultAddress] = await Promise.all([vault.long(), vault.short(), vault.getAddress()])
 
   const longProduct = getProductContract(long, provider)

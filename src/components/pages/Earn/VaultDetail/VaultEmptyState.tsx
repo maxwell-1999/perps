@@ -1,5 +1,5 @@
 import { ArrowBackIcon, InfoIcon } from '@chakra-ui/icons'
-import { Flex, Heading, Text, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
+import { Flex, Heading, Text, useColorModeValue } from '@chakra-ui/react'
 
 import colors from '@ds/theme/colors'
 
@@ -28,12 +28,11 @@ export default function VaultEmptyState() {
   const alpha40 = useColorModeValue(colors.brand.blackAlpha[40], colors.brand.whiteAlpha[40])
   const alpha50 = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const alpha80 = useColorModeValue(colors.brand.blackAlpha[80], colors.brand.whiteAlpha[80])
-  const isBase = useBreakpointValue({ base: true, md: false })
 
   return (
     <Flex height="100%" width="100%" p={5} justifyContent="center" alignItems="center">
       <Flex flexDirection="column" maxWidth="400px">
-        {isBase && <MobileVaultSelect />}
+        <MobileVaultSelect />
         <Heading mb={2} fontWeight={500} fontSize="30px">
           <Text as="span" mr={2} color={alpha50}>
             {copy.earnWith}
@@ -51,14 +50,12 @@ export default function VaultEmptyState() {
         <Text fontSize="13px" color={alpha50} mb={4}>
           {copy.liquidityDisclaimer}
         </Text>
-        {!isBase && (
-          <Flex alignItems="center" border={`1px solid ${alpha40}`} p={2} borderRadius="6px" alignSelf="flex-start">
-            <ArrowBackIcon color={alpha50} mr={2} />
-            <Text fontSize="13px" color={alpha50}>
-              {copy.selectVaultToContinue}
-            </Text>
-          </Flex>
-        )}
+        <Flex alignItems="center" border={`1px solid ${alpha40}`} p={2} borderRadius="6px" alignSelf="flex-start">
+          <ArrowBackIcon color={alpha50} mr={2} />
+          <Text fontSize="13px" color={alpha50}>
+            {copy.selectVaultToContinue}
+          </Text>
+        </Flex>
       </Flex>
     </Flex>
   )

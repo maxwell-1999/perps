@@ -13,7 +13,7 @@ import { useVaultSelectCopy } from '../hooks'
 import { CapacityRow, DescriptionRow, TitleRow } from './styles'
 
 interface VaultCardProps {
-  apy: string
+  apr: string
   name: string
   assets: SupportedAsset[]
   description: string
@@ -22,7 +22,7 @@ interface VaultCardProps {
   onClick: () => void
 }
 
-export default function VaultCard({ name, assets, apy, description, collateral, capacity, onClick }: VaultCardProps) {
+export default function VaultCard({ name, assets, apr, description, collateral, capacity, onClick }: VaultCardProps) {
   const intl = useIntl()
   const copy = useVaultSelectCopy()
   const grayTextColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
@@ -30,8 +30,7 @@ export default function VaultCard({ name, assets, apy, description, collateral, 
   const borderColor = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
   const hoverBorderColor = useColorModeValue(colors.brand.blackAlpha[40], colors.brand.whiteAlpha[40])
   const cardBorder = `1px solid ${borderColor}`
-  // placeholder apy
-  const apyPercent = intl.formatMessage({ defaultMessage: '{apy}%' }, { apy })
+  const aprPercent = intl.formatMessage({ defaultMessage: '{apr}%' }, { apr })
   const progressbarCollateral = formatValueForProgressBar(collateral, capacity)
   const progressPercent = intl.formatMessage({ defaultMessage: '{progressbarCollateral}%' }, { progressbarCollateral })
 
@@ -71,10 +70,10 @@ export default function VaultCard({ name, assets, apy, description, collateral, 
         </Flex>
         <Flex flexDirection="column" height="100%" justifyContent="center" alignItems="flex-end" pl={3}>
           <Text fontSize="20px" color={colors.brand.green}>
-            {apyPercent}
+            {aprPercent}
           </Text>
           <Text fontSize={'14px'} color={grayTextColor}>
-            {copy.apy}
+            {copy.apr}
           </Text>
         </Flex>
       </TitleRow>

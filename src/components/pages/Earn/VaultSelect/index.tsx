@@ -59,7 +59,7 @@ export default function VaultSelect() {
                       setSelectedVault(`${i}`)
                     }}
                     key={snapshot.address}
-                    apy={feeAPR}
+                    apr={feeAPR}
                     name={metadata.name}
                     assets={metadata.assets}
                     description="Some description of the vault can go here to let people know why they should deposit"
