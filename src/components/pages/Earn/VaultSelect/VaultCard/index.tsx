@@ -8,49 +8,72 @@ import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 
 import { Container } from '@ds/Container'
 
+import { formatValueForProgressBar } from '../../utils'
 import { useVaultSelectCopy } from '../hooks'
 import { CapacityRow, DescriptionRow, TitleRow } from './styles'
-import { formatValueForProgressBar } from './utils'
 
 interface VaultCardProps {
-  apy: string
+  apr: string
   name: string
-  asset: SupportedAsset
+  assets: SupportedAsset[]
   description: string
   collateral: bigint
   capacity: bigint
+  onClick: () => void
 }
 
-export default function VaultCard({ name, asset, apy, description, collateral, capacity }: VaultCardProps) {
+export default function VaultCard({ name, assets, apr, description, collateral, capacity, onClick }: VaultCardProps) {
   const intl = useIntl()
   const copy = useVaultSelectCopy()
   const grayTextColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const descriptionTextColor = useColorModeValue(colors.brand.blackAlpha[70], colors.brand.whiteAlpha[70])
   const borderColor = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
+  const hoverBorderColor = useColorModeValue(colors.brand.blackAlpha[40], colors.brand.whiteAlpha[40])
   const cardBorder = `1px solid ${borderColor}`
-  // placeholder apy
-  const apyPercent = intl.formatMessage({ defaultMessage: '{apy}%' }, { apy })
+  const aprPercent = intl.formatMessage({ defaultMessage: '{apr}%' }, { apr })
   const progressbarCollateral = formatValueForProgressBar(collateral, capacity)
   const progressPercent = intl.formatMessage({ defaultMessage: '{progressbarCollateral}%' }, { progressbarCollateral })
 
   return (
-    <Container variant="vaultCard" flexDirection="column" mb={5}>
+    <Container
+      variant="vaultCard"
+      flexDirection="column"
+      mb={5}
+      _hover={{ border: `1px solid ${hoverBorderColor}` }}
+      cursor="pointer"
+      onClick={onClick}
+    >
       <TitleRow borderBottom={cardBorder}>
-        <Flex flexDirection="column" borderRight={cardBorder} flex={1} height="100%" justifyContent="center">
-          <Text fontSize="20px">{name}</Text>
-          <AssetIconWithText
-            market={AssetMetadata[asset]}
-            text={asset.toUpperCase()}
-            size="sm"
-            textProps={{ fontSize: '14px', color: grayTextColor, fontWeight: 'bold' }}
-          />
+        <Flex
+          flexDirection="column"
+          borderRight={cardBorder}
+          flex={1}
+          height="100%"
+          justifyContent="center"
+          py={2}
+          pr={1}
+          width="59px"
+        >
+          <Text fontSize={name.length > 10 ? '16px' : '20px'}>{name}</Text>
+          <Flex overflowX="auto">
+            {assets.map((asset) => (
+              <AssetIconWithText
+                key={asset}
+                market={AssetMetadata[asset]}
+                text={asset.toUpperCase()}
+                size="sm"
+                textProps={{ fontSize: '14px', color: grayTextColor, fontWeight: 'bold' }}
+                mr={6}
+              />
+            ))}
+          </Flex>
         </Flex>
-        <Flex flexDirection="column" height="100%" justifyContent="center" alignItems="flex-end" pl={4}>
+        <Flex flexDirection="column" height="100%" justifyContent="center" alignItems="flex-end" pl={3}>
           <Text fontSize="20px" color={colors.brand.green}>
-            {apyPercent}
+            {aprPercent}
           </Text>
           <Text fontSize={'14px'} color={grayTextColor}>
-            {copy.apy}
+            {copy.apr}
           </Text>
         </Flex>
       </TitleRow>

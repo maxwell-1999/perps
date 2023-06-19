@@ -922,6 +922,7 @@ export const useProductTransactions = (productAddress?: string) => {
       account: walletClient?.account,
     })
     await waitForTransaction({ hash: receipt.hash })
+    await refresh()
   }
 
   const onModifyPosition = async (collateralDelta: bigint, positionSide: OpenPositionType, positionDelta: bigint) => {

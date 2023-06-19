@@ -1,3 +1,4 @@
+import { HamburgerIcon } from '@chakra-ui/icons'
 import {
   Box,
   Flex,
@@ -8,7 +9,6 @@ import {
   useDisclosure,
   useTheme,
 } from '@chakra-ui/react'
-import BurgerMenu from '@public/icons/burger.svg'
 import Logo from '@public/logoTransparent.svg'
 import Link from 'next/link'
 
@@ -36,7 +36,7 @@ function NavBar() {
           <LinkSwitcher links={links} />
         ) : (
           <>
-            <IconButton aria-label={copy.menu} icon={<BurgerMenu />} onClick={onOpen} />
+            <IconButton aria-label={copy.menu} icon={<HamburgerIcon height="20px" width="20px" />} onClick={onOpen} />
             <MobileDrawer
               isOpen={isOpen}
               placement="left"

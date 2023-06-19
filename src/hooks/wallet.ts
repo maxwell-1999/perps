@@ -1,13 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { parseAbi } from 'viem'
-import { mainnet, useChainId } from 'wagmi'
+import { mainnet } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
 import { ChainalysisContractAddress, MultiInvokerAddresses } from '@/constants/contracts'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
+import { PerennialVaultType } from '@/constants/vaults'
+import { getVaultForType } from '@/utils/contractUtils'
 
 import { useUSDC } from './contracts'
-import { useAddress, useProvider } from './network'
+import { useAddress, useChainId, useProvider } from './network'
 
 export type Balances = {
   dsu: bigint
@@ -30,9 +32,19 @@ export const useBalances = () => {
       const usdcBalance = await usdcContract.balanceOf(address)
       const usdcAllowance = await usdcContract.allowance(address, MultiInvokerAddresses[chainId])
 
+      const [alphaVaultAllowance, bravoVaultAllowance] = await Promise.all(
+        Object.values(PerennialVaultType).map((vaultType) => {
+          const vaultContract = getVaultForType(vaultType, chainId, provider)
+          if (!vaultContract) return Promise.resolve(null)
+          return vaultContract.allowance(address, MultiInvokerAddresses[chainId])
+        }),
+      )
+
       return {
         usdc: usdcBalance,
         usdcAllowance,
+        alphaVaultAllowance,
+        bravoVaultAllowance,
       }
     },
   })

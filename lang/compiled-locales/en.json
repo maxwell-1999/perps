@@ -29,6 +29,16 @@
       "value": "Load more"
     }
   ],
+  "0NQ9Tn": [
+    {
+      "type": 1,
+      "value": "remainder"
+    },
+    {
+      "type": 0,
+      "value": "% left"
+    }
+  ],
   "3Bd9gC": [
     {
       "type": 0,
@@ -51,6 +61,12 @@
     {
       "type": 0,
       "value": "Description of value proposition goes here"
+    }
+  ],
+  "56DzI+": [
+    {
+      "type": 0,
+      "value": "Capacity"
     }
   ],
   "57jKwu": [
@@ -101,6 +117,16 @@
       "value": "Side"
     }
   ],
+  "8K400D": [
+    {
+      "type": 1,
+      "value": "exposure"
+    },
+    {
+      "type": 0,
+      "value": "%"
+    }
+  ],
   "8LaTBL": [
     {
       "type": 0,
@@ -131,6 +157,12 @@
       "value": "Approve USDC"
     }
   ],
+  "ADKsID": [
+    {
+      "type": 0,
+      "value": "Opened"
+    }
+  ],
   "AxhyVR": [
     {
       "type": 0,
@@ -153,6 +185,12 @@
     {
       "type": 0,
       "value": "Change"
+    }
+  ],
+  "BosPH/": [
+    {
+      "type": 0,
+      "value": "Assets supported"
     }
   ],
   "C5rikK": [
@@ -179,6 +217,12 @@
       "value": "Settings"
     }
   ],
+  "DRhXM2": [
+    {
+      "type": 0,
+      "value": "$∞"
+    }
+  ],
   "DZ2Koj": [
     {
       "type": 0,
@@ -189,6 +233,12 @@
     {
       "type": 0,
       "value": "P&L"
+    }
+  ],
+  "F/BpPU": [
+    {
+      "type": 0,
+      "value": "Viewing"
     }
   ],
   "FIMqSt": [
@@ -213,6 +263,12 @@
     {
       "type": 0,
       "value": "Market"
+    }
+  ],
+  "GufXy5": [
+    {
+      "type": 0,
+      "value": "Value"
     }
   ],
   "HpDope": [
@@ -261,10 +317,22 @@
       "value": "Withdraw funds"
     }
   ],
+  "L6rzyM": [
+    {
+      "type": 0,
+      "value": "Current Exposure"
+    }
+  ],
   "LcrGBK": [
     {
       "type": 0,
       "value": "Feature Title"
+    }
+  ],
+  "LjNvmm": [
+    {
+      "type": 0,
+      "value": "Deposited"
     }
   ],
   "LzlMDx": [
@@ -283,12 +351,6 @@
       "value": "%"
     }
   ],
-  "MLTKb6": [
-    {
-      "type": 0,
-      "value": "APY"
-    }
-  ],
   "N0eaIb": [
     {
       "type": 0,
@@ -305,6 +367,22 @@
     {
       "type": 0,
       "value": "Place Order"
+    }
+  ],
+  "No1uU6": [
+    {
+      "type": 0,
+      "value": "APR"
+    }
+  ],
+  "OGoI5F": [
+    {
+      "type": 1,
+      "value": "apr"
+    },
+    {
+      "type": 0,
+      "value": "%"
     }
   ],
   "OOk+VQ": [
@@ -347,16 +425,6 @@
     {
       "type": 0,
       "value": "You will get..."
-    }
-  ],
-  "RGllsm": [
-    {
-      "type": 1,
-      "value": "apy"
-    },
-    {
-      "type": 0,
-      "value": "%"
     }
   ],
   "RoqJiX": [
@@ -485,6 +553,12 @@
       "value": "Liquidation price"
     }
   ],
+  "cRUfAq": [
+    {
+      "type": 0,
+      "value": "Open Size"
+    }
+  ],
   "cg1VJ2": [
     {
       "type": 0,
@@ -611,6 +685,12 @@
       "value": "Leverage"
     }
   ],
+  "pf7i8w": [
+    {
+      "type": 0,
+      "value": "No position to show"
+    }
+  ],
   "q//Tic": [
     {
       "type": 1,
@@ -619,6 +699,12 @@
     {
       "type": 0,
       "value": "x"
+    }
+  ],
+  "qLeB89": [
+    {
+      "type": 0,
+      "value": "——"
     }
   ],
   "qZbedW": [

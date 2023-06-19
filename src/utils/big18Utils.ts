@@ -2,11 +2,18 @@ import { FixedNumber, WeiPerEther, formatUnits, parseEther } from 'ethers'
 
 export const formatBig18 = (
   value: bigint = 0n,
-  { numSigFigs = 2, useGrouping = true }: { numSigFigs?: number; useGrouping?: boolean | undefined } = {},
+  {
+    numSigFigs = 2,
+    useGrouping = true,
+    minDecimals,
+  }: { numSigFigs?: number; useGrouping?: boolean | undefined; minDecimals?: number } = {},
 ) => {
   return Intl.NumberFormat('en-US', {
     minimumSignificantDigits: numSigFigs,
     maximumSignificantDigits: numSigFigs,
+    minimumFractionDigits: minDecimals,
+    maximumFractionDigits: minDecimals,
+
     useGrouping,
   }).format(Big18Math.divFixed(value, Big18Math.ONE).toUnsafeFloat())
 }
@@ -64,6 +71,10 @@ export class Big18Math {
 
   public static sub(a: bigint, b: bigint): bigint {
     return a - b
+  }
+
+  public static subFixed(a: bigint, b: bigint): FixedNumber {
+    return this.fixedFrom(a).subUnsafe(this.fixedFrom(b))
   }
 
   public static divFixed(a: bigint, b: bigint): FixedNumber {

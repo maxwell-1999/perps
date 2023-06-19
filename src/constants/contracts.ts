@@ -48,3 +48,14 @@ export const USDCAddresses: AddressMapping = {
 
 // Chainalysis contract address only exists on Eth Mainnet
 export const ChainalysisContractAddress = '0x40c57923924b5c5c5455c48d93317139addac8fb'
+
+export const BalancedVaultAlphaAddresses: Partial<AddressMapping> = {
+  [arbitrum.id]: getAddress('0x5A572B5fBBC43387B5eF8de2C4728A4108ef24a6'),
+  [arbitrumGoerli.id]: getAddress('0x1C521Cd674222699520613D599F5e54F272b9972'),
+  [baseGoerli.id]: getAddress('0x26F70E5fA46aD10DF9d43ba469cfAbC79B073a01'),
+}
+
+export const BalancedVaultBravoAddresses: Partial<AddressMapping> = {
+  [arbitrum.id]: getAddress('0x1960628db367281B1a186dD5B80B5dd6978F016F'),
+  [arbitrumGoerli.id]: getAddress('0xad3565680aEcEe27A39249D8c2D55dAc79BE5Ad0'),
+}
