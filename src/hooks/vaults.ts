@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { AlchemyProvider, BlockTag, JsonRpcProvider, Provider } from 'ethers'
+import { BlockTag, Provider } from 'ethers'
 import { useCallback } from 'react'
 import { Hex, getAddress } from 'viem'
 import { useSendTransaction, useWalletClient } from 'wagmi'
@@ -18,13 +18,14 @@ import { ethersResultToPOJO } from '@/utils/objectUtils'
 import { BalancedVaultAbi, LensAbi } from '@t/generated'
 
 import { getProductContract, getVaultForType } from '../utils/contractUtils'
-import { useLens, useMultiInvoker, useUSDC } from './contracts'
-import { useAddress, useChainId, useProvider } from './network'
+import { useLens, useMultiInvoker, useMulticallContract, useUSDC } from './contracts'
+import { useAddress, useChainId, useMulticallProvider } from './network'
 
 export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
   const chainId = useChainId()
-  const provider = useProvider()
-  const lens = useLens()
+  const provider = useMulticallProvider()
+  const _lens = useLens()
+  const lens = useMulticallContract(_lens)
 
   return useQuery({
     queryKey: ['vaultSnapshots', vaultTypes, chainId],
@@ -44,7 +45,7 @@ export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
 const vaultFetcher = async (
   vaultType: PerennialVaultType,
   chainId: SupportedChainId,
-  provider: AlchemyProvider | JsonRpcProvider,
+  provider: Provider,
   lens: LensAbi,
 ): Promise<VaultSnapshot | undefined> => {
   const vaultContract = getVaultForType(vaultType, chainId, provider)
@@ -92,7 +93,7 @@ const vaultFetcher = async (
 
 export const useVaultUserSnapshot = (vaultSymbol: VaultSymbol) => {
   const chainId = useChainId()
-  const provider = useProvider()
+  const provider = useMulticallProvider()
   const { address } = useAddress()
   const vaultType = [VaultSymbol.PVA, VaultSymbol.ePBV].includes(vaultSymbol)
     ? PerennialVaultType.alpha
@@ -198,7 +199,7 @@ export type VaultTransactions = {
 export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransactions => {
   const { address } = useAddress()
   const chainId = useChainId()
-  const provider = useProvider()
+  const provider = useMulticallProvider()
   const usdcContract = useUSDC()
   const multiInvoker = useMultiInvoker()
   const { data: walletClient } = useWalletClient()

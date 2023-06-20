@@ -31,6 +31,7 @@
     "@chakra-ui/react": "^2.5.5",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
+    "@premia/ethers-multicall": "^1.0.0-beta.13",
     "@pythnetwork/pyth-evm-js": "^1.16.1",
     "@rainbow-me/rainbowkit": "^1",
     "@tanstack/react-query": "^4.29.3",

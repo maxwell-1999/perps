@@ -1,3 +1,6 @@
+import { providers } from '@premia/ethers-multicall'
+import { BaseContract } from 'ethers'
+
 import {
   CollateralAddresses,
   DSUAddresses,
@@ -5,7 +8,7 @@ import {
   MultiInvokerAddresses,
   USDCAddresses,
 } from '@/constants/contracts'
-import { useChainId, useProvider } from '@/hooks/network'
+import { useChainId, useMulticallProvider, useProvider } from '@/hooks/network'
 
 import { ERC20Abi__factory, ICollateralAbi__factory, LensAbi__factory, MultiInvokerAbi__factory } from '@t/generated'
 
@@ -42,4 +45,9 @@ export const useMultiInvoker = () => {
   const chainId = useChainId()
 
   return MultiInvokerAbi__factory.connect(MultiInvokerAddresses[chainId], provider)
+}
+export function useMulticallContract<T extends BaseContract>(contract: T): T {
+  const provider = useMulticallProvider()
+  const multicallProvider = new providers.MulticallProvider(provider)
+  return contract.connect(multicallProvider) as T
 }

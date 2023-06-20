@@ -4132,6 +4132,11 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
+"@premia/ethers-multicall@^1.0.0-beta.13":
+  version "1.0.0-beta.13"
+  resolved "https://registry.yarnpkg.com/@premia/ethers-multicall/-/ethers-multicall-1.0.0-beta.13.tgz#c567b9b6226c7e8b5a2a512f4bd56c7dd98242f1"
+  integrity sha512-daOh3CWocWOxKkTk7XPJCecb5tc+6QKUFfhBoE8m30DF62jpRIbHUp/NKCbVJzdRGwGOZ2dDIP3xdzWdOGpTww==
+
 "@pythnetwork/price-service-client@*":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@pythnetwork/price-service-client/-/price-service-client-1.5.0.tgz#2b75a377a138dd91ac2a7c8a3796a730f306617c"
