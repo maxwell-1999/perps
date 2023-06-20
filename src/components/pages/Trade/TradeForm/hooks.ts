@@ -92,6 +92,8 @@ export function useReceiptCopy() {
     liquidationPrice: intl.formatMessage({ defaultMessage: 'Liquidation price' }),
     tradingFee: intl.formatMessage({ defaultMessage: 'Trading fee' }),
     hourlyFundingRate: intl.formatMessage({ defaultMessage: 'Funding Rate (1h)' }),
+    collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
+    leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
   }
 }
 

@@ -43,6 +43,7 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
     },
     onDisconnect: () => {
       setAuthStatus(StartingAuthStatus)
+      queryClient.invalidateQueries()
     },
   })
   const prevAddress = usePrevious(address)
@@ -56,6 +57,7 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
     if (prevAddress && address && address !== prevAddress) {
       if (!!getJwt(address)) loginUser()
       else setAuthStatus(StartingAuthStatus)
+      queryClient.invalidateQueries()
     }
   }, [address, prevAddress, setAuthStatus, loginUser])
 

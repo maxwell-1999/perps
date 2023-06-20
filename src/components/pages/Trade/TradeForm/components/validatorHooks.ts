@@ -4,6 +4,7 @@ import { useIntl } from 'react-intl'
 import { Big18Math } from '@/utils/big18Utils'
 
 import { TradeFormValues } from '../hooks'
+import { isFullClose } from '../utils'
 
 function useErrorMessages() {
   const intl = useIntl()
@@ -126,7 +127,7 @@ export function useCloseCollateralValidator({
   const maxValidator = useMemo(() => {
     return (value: string, formValues: TradeFormValues) => {
       const inputValue = Big18Math.fromFloatString(value)
-      const fullClose = Big18Math.eq(Big18Math.fromFloatString(formValues.amount), nextPosition ?? 0n)
+      const fullClose = isFullClose(formValues.amount, nextPosition ?? 0n)
       if (!fullClose && inputValue > currentCollateral) {
         return copy.insufficientCollateral
       }

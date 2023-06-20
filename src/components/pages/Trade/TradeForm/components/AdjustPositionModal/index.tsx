@@ -209,7 +209,6 @@ function AdjustPositionModal({
         </ModalBody>
         <ModalFooter justifyContent="initial">
           <VStack flex={1}>
-            <Button variant="secondary" onClick={onCancel} label={copy.cancel} width="100%" />
             {needsApproval && (
               <Button
                 variant={step !== 0 ? 'outline' : 'primary'}
@@ -239,6 +238,7 @@ function AdjustPositionModal({
                 width="100%"
               />
             )}
+            <Button variant="secondary" onClick={onCancel} label={copy.cancel} width="100%" />
           </VStack>
         </ModalFooter>
       </ModalContent>

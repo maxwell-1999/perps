@@ -167,3 +167,7 @@ export const calcMaxLeverage = (maintenance?: bigint) => {
   }
   return maxLeverageAsFloat
 }
+
+export const isFullClose = (closeAmount: string, currPosition: bigint) => {
+  return Big18Math.eq(Big18Math.fromFloatString(closeAmount), Big18Math.abs(currPosition))
+}

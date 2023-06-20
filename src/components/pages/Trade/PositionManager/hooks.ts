@@ -77,7 +77,9 @@ export const useFormatPosition = () => {
   const { assetMetadata, selectedMarket, orderDirection, selectedMarketSnapshot } = useMarketContext()
   const { data: positions } = useUserCurrentPositions()
   const { noValue, long, short } = usePositionManagerCopy()
-  const position = positions?.[selectedMarket]?.[orderDirection]
+  let position = positions?.[selectedMarket]?.[orderDirection]
+  // if this is a maker position, don't show it
+  if (position?.side === PositionSide.Maker) position = undefined
   const numSigFigs = assetMetadata.displayDecimals
 
   const fundingRate =
