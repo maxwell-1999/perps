@@ -144,8 +144,7 @@ function TradeForm(props: TradeFormProps) {
   }
 
   const onWithdrawCollateral = () => {
-    onChangeCollateral('0')
-    setOrderValues({ collateral: '0', amount: '0' })
+    setTradeFormState(FormState.withdraw)
   }
 
   const closeAdjustmentModal = () => {
@@ -201,6 +200,7 @@ function TradeForm(props: TradeFormProps) {
           product={product}
           orderValues={orderValues}
           usdcAllowance={balances?.usdcAllowance ?? 0n}
+          variant="adjust"
         />
       )}
       <Form onSubmit={handleSubmit(onConfirm)}>
@@ -209,7 +209,7 @@ function TradeForm(props: TradeFormProps) {
             <Text color={textColor}>
               {hasPosition && positionStatus !== PositionStatus.closed ? copy.modifyPosition : copy.trade}
             </Text>
-            {!!address && (positionStatus === PositionStatus.closed || positionStatus === PositionStatus.closing) && (
+            {!!address && hasPosition && (
               <TxButton
                 variant="text"
                 label={copy.withdrawCollateral}

@@ -11,6 +11,7 @@ import { Container } from '@ds/Container'
 
 import ClosePositionForm from './components/ClosePositionForm'
 import TradeForm from './components/TradeForm'
+import WithdrawCollateralForm from './components/WithdrawCollateralForm'
 import { useResetFormOnMarketChange } from './hooks'
 
 const Long = OrderDirection.Long
@@ -53,7 +54,7 @@ function TradeContainer() {
           <Spinner />
         </Flex>
       )}
-      {formState !== FormState.close && (
+      {[FormState.trade, FormState.modify].includes(formState) && (
         <TradeForm
           asset={selectedMarket}
           orderDirection={orderDirection}
@@ -64,6 +65,9 @@ function TradeContainer() {
       )}
       {formState === FormState.close && position && (
         <ClosePositionForm asset={selectedMarket} position={position} product={product} />
+      )}
+      {formState === FormState.withdraw && position && (
+        <WithdrawCollateralForm asset={selectedMarket} position={position} product={product} />
       )}
     </Container>
   )

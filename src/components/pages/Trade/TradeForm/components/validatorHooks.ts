@@ -117,10 +117,12 @@ export function useCloseCollateralValidator({
   currentCollateral,
   minCollateral,
   nextPosition,
+  requiredMaintenance,
 }: {
   currentCollateral: bigint
   minCollateral: bigint
   nextPosition: bigint
+  requiredMaintenance: bigint
 }) {
   const copy = useErrorMessages()
 
@@ -135,9 +137,20 @@ export function useCloseCollateralValidator({
       if (!fullClose && !Big18Math.isZero(remainingCollateral) && remainingCollateral < minCollateral) {
         return copy.belowMinCollateral
       }
+      if (remainingCollateral < requiredMaintenance) {
+        return copy.belowMaintenance
+      }
       return true
     }
-  }, [minCollateral, currentCollateral, nextPosition, copy.insufficientCollateral, copy.belowMinCollateral])
+  }, [
+    nextPosition,
+    currentCollateral,
+    minCollateral,
+    requiredMaintenance,
+    copy.insufficientCollateral,
+    copy.belowMinCollateral,
+    copy.belowMaintenance,
+  ])
 
   return { max: maxValidator }
 }

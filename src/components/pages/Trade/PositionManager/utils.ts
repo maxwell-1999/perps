@@ -17,12 +17,12 @@ export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?:
   }
   let pnlPercentage = '0'
   if (positionDetails?.startCollateral) {
-    pnlPercentage = formatBig18Percent(
-      Big18Math.div(pnl, (positionDetails?.startCollateral ?? 0n) + (positionDetails?.deposits ?? 0n)),
-      {
-        numDecimals: 2,
-      },
-    )
+    const deposits = positionDetails?.deposits ?? 0n
+    // Only add deposits to the denominator if there is a net positive deposit
+    const denominator = deposits > 0n ? positionDetails?.startCollateral + deposits : positionDetails?.startCollateral
+    pnlPercentage = formatBig18Percent(Big18Math.abs(Big18Math.div(pnl, denominator)), {
+      numDecimals: 2,
+    })
   }
   return {
     pnl: formatBig18USDPrice(pnl),

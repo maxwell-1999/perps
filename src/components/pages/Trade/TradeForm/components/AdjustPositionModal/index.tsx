@@ -15,7 +15,7 @@ import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { PositionDetails, useProductTransactions } from '@/hooks/markets'
-import { formatBig18USDPrice } from '@/utils/big18Utils'
+import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 
 import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
@@ -38,6 +38,7 @@ interface AdjustmentModalProps {
   usdcAllowance: bigint
   orderValues: OrderValues
   positionType: OpenPositionType
+  variant: 'close' | 'adjust' | 'withdraw'
 }
 
 function AdjustPositionModal({
@@ -51,6 +52,7 @@ function AdjustPositionModal({
   position,
   product,
   usdcAllowance,
+  variant,
 }: AdjustmentModalProps) {
   const copy = useAdjustmentModalCopy()
   const [approveUsdcLoading, setApproveUsdcLoading] = useState(false)
@@ -80,7 +82,8 @@ function AdjustPositionModal({
     requiresTwoStep,
   } = adjustment
   const positionSettled = position && position.position === position.nextPosition
-  const isWithdrawing = position?.status === PositionStatus.closed && newCollateral === 0n && newPosition === 0n
+  const isWithdrawing =
+    variant === 'withdraw' || (position?.status === PositionStatus.closed && newCollateral === 0n && newPosition === 0n)
 
   const [step, setStep] = useState(() => {
     if (needsApproval) return 0
@@ -201,7 +204,7 @@ function AdjustPositionModal({
               <TransferDetail
                 title={copy.withdrawDetailTitle}
                 action={copy.withdraw}
-                detail={formatBig18USDPrice(prevCollateral)}
+                detail={formatBig18USDPrice(Big18Math.abs(collateralDifference))}
                 color={colors.brand.purple[240]}
               />
             )}
