@@ -58,6 +58,7 @@ export default function VaultForm({
 
   const onSubmit = (formData: { amount: string }) => {
     setFormValues(formData)
+    reset()
   }
 
   const onClose = () => {
@@ -104,7 +105,6 @@ export default function VaultForm({
     <>
       {!!formValues && (
         <ConfirmationModal
-          isOpen={!!formValues}
           formValues={formValues}
           balances={balances}
           onClose={onClose}
@@ -183,7 +183,7 @@ export default function VaultForm({
           <TxButton
             type="submit"
             isDisabled={buttonDisabled}
-            label={vaultOption === VaultFormOption.Deposit ? copy.DepositToVault : copy.WithdrawFromVault}
+            label={vaultOption === VaultFormOption.Deposit ? copy.Deposit : copy.Withdraw}
           />
         </Form>
       </Container>

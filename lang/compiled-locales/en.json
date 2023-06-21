@@ -177,12 +177,6 @@
       "value": "Remove USD from your position"
     }
   ],
-  "9QhO8Z": [
-    {
-      "type": 0,
-      "value": "Deposit to vault"
-    }
-  ],
   "9yWVUm": [
     {
       "type": 0,
@@ -741,6 +735,20 @@
       "value": "Home"
     }
   ],
+  "gAKL9i": [
+    {
+      "type": 0,
+      "value": "Approve "
+    },
+    {
+      "type": 1,
+      "value": "dsuApprovalSuggestion"
+    },
+    {
+      "type": 0,
+      "value": " DSU to withdraw collateral"
+    }
+  ],
   "h3ShxL": [
     {
       "type": 0,
@@ -799,6 +807,16 @@
     {
       "type": 0,
       "value": "24h Low"
+    }
+  ],
+  "l2YsLb": [
+    {
+      "type": 1,
+      "value": "claimableBalance"
+    },
+    {
+      "type": 0,
+      "value": " available for withdrawal"
     }
   ],
   "ljjcTc": [

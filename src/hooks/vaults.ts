@@ -215,12 +215,11 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
   const refresh = useCallback(
     () =>
       queryClient.invalidateQueries({
-        queryKey: ['vaultAllowances', chainId, vaultType, address],
         predicate: ({ queryKey }) =>
-          ['vaultSnapshot', 'vaultUserSnapshot', 'vaultAllowances', 'balances'].includes(queryKey.at(0) as string) &&
+          ['vaultSnapshots', 'vaultUserSnapshot', 'vaultAllowances', 'balances'].includes(queryKey.at(0) as string) &&
           queryKey.includes(chainId),
       }),
-    [address, chainId, queryClient, vaultType],
+    [chainId, queryClient],
   )
 
   const onApproveUSDC = async () => {

@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
+import { parseEther } from 'viem'
 
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import { VaultSnapshot, VaultUserSnapshot } from '@/constants/vaults'
@@ -26,7 +27,6 @@ import { useVaultFormCopy } from './hooks'
 import { getRequiredApprovals } from './utils'
 
 interface ConfirmationModalProps {
-  isOpen: boolean
   onClose: () => void
   onCancel: () => void
   vaultOption: VaultFormOption
@@ -38,7 +38,6 @@ interface ConfirmationModalProps {
 }
 
 export default function ConfirmationModal({
-  isOpen,
   onClose,
   onCancel,
   vaultOption,
@@ -165,9 +164,12 @@ export default function ConfirmationModal({
   const requiresDSUApproval = requiredApprovals?.includes(RequiredApprovals.dsu)
   const hasClaimable = vaultUserSnapshot.claimable > 0n
   const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
+  const dsuApprovalSuggestion = formatBig18USDPrice(
+    Big18Math.add(parseEther('0.01'), vaultUserSnapshot.claimable ?? 0n),
+  )
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered variant="confirmation">
+    <Modal isOpen onClose={onClose} isCentered variant="confirmation">
       <ModalOverlay />
       <ModalContent>
         <ModalBody>
@@ -184,7 +186,7 @@ export default function ConfirmationModal({
                   <ModalStep
                     title={copy.approveUSDC}
                     description={copy.approveUSDCBody}
-                    isLoading={requiresUSDCApproval ? approveUSDCLoading : false}
+                    isLoading={approveUSDCLoading}
                     isCompleted={approveUSDCCompleted}
                   />
                 )}
@@ -227,7 +229,10 @@ export default function ConfirmationModal({
                 {requiresDSUApproval && (
                   <ModalStep
                     title={copy.approveDSU}
-                    description={copy.approveDSUBody}
+                    description={intl.formatMessage(
+                      { defaultMessage: 'Approve {dsuApprovalSuggestion} DSU to withdraw collateral' },
+                      { dsuApprovalSuggestion },
+                    )}
                     isLoading={approveDSULoading}
                     isCompleted={approveDSUCompleted}
                   />
@@ -269,15 +274,7 @@ export default function ConfirmationModal({
                   <Button
                     variant={approveUSDCCompleted ? 'outline' : 'primary'}
                     isDisabled={approveUSDCCompleted || approveUSDCLoading}
-                    label={
-                      approveUSDCCompleted ? (
-                        <Spinner size="sm" />
-                      ) : isDeposit ? (
-                        copy.approveUSDC
-                      ) : (
-                        copy.approveVaultDeposits
-                      )
-                    }
+                    label={approveUSDCLoading ? <Spinner size="sm" /> : copy.approveUSDC}
                     onClick={handleUSDCApproval}
                     width="100%"
                   />
@@ -285,7 +282,7 @@ export default function ConfirmationModal({
                 <Button
                   variant={requiresUSDCApproval && !approveUSDCCompleted ? 'outline' : 'primary'}
                   isDisabled={(requiresUSDCApproval && !approveUSDCCompleted) || depositLoading || depositCompleted}
-                  label={depositLoading ? <Spinner size="sm" /> : copy.DepositToVault}
+                  label={depositLoading ? <Spinner size="sm" /> : copy.Deposit}
                   onClick={handleDeposit}
                   width="100%"
                 />
@@ -332,8 +329,17 @@ export default function ConfirmationModal({
                   />
                 )}
                 <Button
-                  variant={(requiresDSUApproval && !approveDSUCompleted) || !hasClaimable ? 'outline' : 'primary'}
-                  isDisabled={(requiresDSUApproval && !approveDSUCompleted) || claimLoading || claimCompleted}
+                  variant={
+                    (requiresDSUApproval && !approveDSUCompleted) || !hasClaimable || !redemptionCompleted
+                      ? 'outline'
+                      : 'primary'
+                  }
+                  isDisabled={
+                    (requiresDSUApproval && !approveDSUCompleted) ||
+                    claimLoading ||
+                    claimCompleted ||
+                    !redemptionCompleted
+                  }
                   label={claimLoading ? <Spinner size="sm" /> : copy.claimShares}
                   onClick={handleClaim}
                   width="100%"

@@ -16,8 +16,6 @@ export function useVaultFormCopy() {
     Amount: intl.formatMessage({ defaultMessage: 'Amount' }),
     ChangeInValue: intl.formatMessage({ defaultMessage: 'Change in Value' }),
     ChangeInPnL: intl.formatMessage({ defaultMessage: 'Change in P&L' }),
-    DepositToVault: intl.formatMessage({ defaultMessage: 'Deposit to vault' }),
-    WithdrawFromVault: intl.formatMessage({ defaultMessage: 'Withdraw from vault' }),
     zeroUsd: intl.formatMessage({ defaultMessage: '$0.00' }),
     max: intl.formatMessage({ defaultMessage: 'Max' }),
     confirmDeposit: intl.formatMessage({ defaultMessage: 'Confirm deposit' }),
