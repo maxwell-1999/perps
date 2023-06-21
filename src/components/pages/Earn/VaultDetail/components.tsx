@@ -156,7 +156,7 @@ export const PositionCard = ({ vaultUserSnapshot, pnl }: { vaultUserSnapshot?: V
         <Flex flex={1} justifyContent="space-between" mb={4}>
           <Text color={alpha50}>{copy.value}</Text>
           {address && hasPosition ? (
-            <FormattedBig18USDPrice value={vaultUserSnapshot.totalDeposit} fontSize="16px" fontWeight={500} compact />
+            <FormattedBig18USDPrice value={vaultUserSnapshot.assets} fontSize="16px" fontWeight={500} compact />
           ) : (
             <Text color={alpha50}>{copy.noValue}</Text>
           )}
