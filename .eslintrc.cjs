@@ -10,6 +10,7 @@ module.exports = {
     'react/no-unescaped-entities': [0],
     '@next/next/no-img-element': [0],
     'no-unused-vars': 'off',
+    'no-console': ['error', { allow: ['warn', 'error'] }],
     '@typescript-eslint/no-inferrable-types': 'off',
     '@typescript-eslint/no-unused-vars': [
       'error',

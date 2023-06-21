@@ -279,7 +279,7 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
       await waitForTransaction({ hash: receipt.hash })
       await refresh()
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   }
 
@@ -316,7 +316,7 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
       await waitForTransaction({ hash: receipt.hash })
       await refresh()
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   }
 
@@ -355,7 +355,7 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
       await waitForTransaction({ hash: receipt.hash })
       await refresh()
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   }
 
@@ -407,7 +407,7 @@ const trySync = async (vault: BalancedVaultAbi, { blockTag }: { blockTag?: Block
     await vault.sync.staticCall({ blockTag })
     return true
   } catch (e) {
-    console.log(e)
+    console.error(e)
     return false
   }
 }
