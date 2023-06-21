@@ -46,6 +46,7 @@ export const useMultiInvoker = () => {
 
   return MultiInvokerAbi__factory.connect(MultiInvokerAddresses[chainId], provider)
 }
+
 export function useMulticallContract<T extends BaseContract>(contract: T): T {
   const provider = useMulticallProvider()
   const multicallProvider = new providers.MulticallProvider(provider)

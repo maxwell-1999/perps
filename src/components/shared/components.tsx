@@ -1,4 +1,5 @@
 import { Flex, FlexProps, Text, TextProps } from '@chakra-ui/react'
+import styled from '@emotion/styled'
 import Image from 'next/image'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
@@ -42,3 +43,10 @@ interface FormattedBig18USDPriceProps extends TextProps {
 export const FormattedBig18USDPrice: React.FC<FormattedBig18USDPriceProps> = ({ value, compact, ...props }) => (
   <Text {...props}>{formatBig18USDPrice(value, { compact: Boolean(compact) })}</Text>
 )
+
+export const Form = styled('form')`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+`

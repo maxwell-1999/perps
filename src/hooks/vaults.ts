@@ -18,7 +18,7 @@ import { ethersResultToPOJO } from '@/utils/objectUtils'
 import { BalancedVaultAbi, LensAbi } from '@t/generated'
 
 import { getProductContract, getVaultForType } from '../utils/contractUtils'
-import { useLens, useMultiInvoker, useMulticallContract, useUSDC } from './contracts'
+import { useDSU, useLens, useMultiInvoker, useMulticallContract, useUSDC } from './contracts'
 import { useAddress, useChainId, useMulticallProvider } from './network'
 
 export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
@@ -190,19 +190,24 @@ export const useVaultUserSnapshot = (vaultSymbol: VaultSymbol) => {
 
 export type VaultTransactions = {
   onApproveUSDC: () => Promise<void>
+  onApproveDSU: () => Promise<void>
   onApproveShares: () => Promise<void>
   onDeposit: (amount: bigint) => Promise<void>
   onRedeem: (amount: bigint, { assets, max }: { assets?: boolean; max?: boolean }) => Promise<void>
   onClaim: (unwrapAmount?: bigint) => Promise<void>
 }
 
-export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransactions => {
+export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransactions => {
   const { address } = useAddress()
   const chainId = useChainId()
   const provider = useMulticallProvider()
   const usdcContract = useUSDC()
+  const dsuContract = useDSU()
   const multiInvoker = useMultiInvoker()
   const { data: walletClient } = useWalletClient()
+  const vaultType = [VaultSymbol.PVA, VaultSymbol.ePBV].includes(vaultSymbol)
+    ? PerennialVaultType.alpha
+    : PerennialVaultType.bravo
 
   const queryClient = useQueryClient()
   const { sendTransactionAsync } = useSendTransaction()
@@ -223,6 +228,22 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
       return
     }
     const txData = await usdcContract.approve.populateTransaction(MultiInvokerAddresses[chainId], MaxUint256)
+    const receipt = await sendTransactionAsync({
+      chainId,
+      to: getAddress(txData.to),
+      data: txData.data as Hex,
+      account: walletClient?.account,
+    })
+    await waitForTransaction({ hash: receipt.hash })
+    await refresh()
+  }
+
+  const onApproveDSU = async () => {
+    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
+      return
+    }
+
+    const txData = await dsuContract.approve.populateTransaction(MultiInvokerAddresses[chainId], MaxUint256)
     const receipt = await sendTransactionAsync({
       chainId,
       to: getAddress(txData.to),
@@ -265,22 +286,17 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
         vaultAmount: amount,
       }),
     ]
-
-    try {
-      // Extra buffer to account to changes to underlying state
-      const gasLimit = await multiInvoker.invoke.estimateGas(actions)
-      const txData = await multiInvoker.invoke.populateTransaction(actions, { gasLimit: bufferGasLimit(gasLimit) })
-      const receipt = await sendTransactionAsync({
-        chainId,
-        to: getAddress(txData.to),
-        data: txData.data as Hex,
-        account: walletClient?.account,
-      })
-      await waitForTransaction({ hash: receipt.hash })
-      await refresh()
-    } catch (e) {
-      console.error(e)
-    }
+    // Extra buffer to account to changes to underlying state
+    const gasLimit = await multiInvoker.invoke.estimateGas(actions, { from: address })
+    const txData = await multiInvoker.invoke.populateTransaction(actions, { gasLimit: bufferGasLimit(gasLimit) })
+    const receipt = await sendTransactionAsync({
+      chainId,
+      to: getAddress(txData.to),
+      data: txData.data as Hex,
+      account: walletClient?.account,
+    })
+    await waitForTransaction({ hash: receipt.hash })
+    await refresh()
   }
 
   const onRedeem = async (amount: bigint, { assets = true, max = false }) => {
@@ -302,22 +318,17 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
         vaultAmount,
       }),
     ]
-
-    try {
-      // Extra buffer to account to changes to underlying state
-      const gasLimit = await multiInvoker.invoke.estimateGas(actions)
-      const txData = await multiInvoker.invoke.populateTransaction(actions, { gasLimit: bufferGasLimit(gasLimit) })
-      const receipt = await sendTransactionAsync({
-        chainId,
-        to: getAddress(txData.to),
-        data: txData.data as Hex,
-        account: walletClient?.account,
-      })
-      await waitForTransaction({ hash: receipt.hash })
-      await refresh()
-    } catch (e) {
-      console.error(e)
-    }
+    // Extra buffer to account to changes to underlying state
+    const gasLimit = await multiInvoker.invoke.estimateGas(actions, { from: address })
+    const txData = await multiInvoker.invoke.populateTransaction(actions, { gasLimit: bufferGasLimit(gasLimit) })
+    const receipt = await sendTransactionAsync({
+      chainId,
+      to: getAddress(txData.to),
+      data: txData.data as Hex,
+      account: walletClient?.account,
+    })
+    await waitForTransaction({ hash: receipt.hash })
+    await refresh()
   }
 
   const onClaim = async (unwrapAmount?: bigint) => {
@@ -342,25 +353,22 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
       )
     }
 
-    try {
-      // Extra buffer to account to changes to underlying state
-      const gasLimit = await multiInvoker.invoke.estimateGas(actions)
-      const txData = await multiInvoker.invoke.populateTransaction(actions, { gasLimit: bufferGasLimit(gasLimit) })
-      const receipt = await sendTransactionAsync({
-        chainId,
-        to: getAddress(txData.to),
-        data: txData.data as Hex,
-        account: walletClient?.account,
-      })
-      await waitForTransaction({ hash: receipt.hash })
-      await refresh()
-    } catch (e) {
-      console.error(e)
-    }
+    // Extra buffer to account to changes to underlying state
+    const gasLimit = await multiInvoker.invoke.estimateGas(actions, { from: address })
+    const txData = await multiInvoker.invoke.populateTransaction(actions, { gasLimit: bufferGasLimit(gasLimit) })
+    const receipt = await sendTransactionAsync({
+      chainId,
+      to: getAddress(txData.to),
+      data: txData.data as Hex,
+      account: walletClient?.account,
+    })
+    await waitForTransaction({ hash: receipt.hash })
+    await refresh()
   }
 
   return {
     onApproveUSDC,
+    onApproveDSU,
     onApproveShares,
     onDeposit,
     onRedeem,

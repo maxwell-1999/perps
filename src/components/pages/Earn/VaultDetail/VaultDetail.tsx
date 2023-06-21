@@ -1,6 +1,5 @@
 import { Flex, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
 
-import { Container } from '@/components/design-system'
 import { VaultMetadata, VaultSnapshot } from '@/constants/vaults'
 import { useChainId } from '@/hooks/network'
 import { useVaultUserSnapshot } from '@/hooks/vaults'
@@ -8,17 +7,9 @@ import { useVaultUserSnapshot } from '@/hooks/vaults'
 import colors from '@ds/theme/colors'
 
 import MobileVaultSelect from '../VaultSelect/MobileVaultSelector'
+import VaultForm from './VaultForm'
 import { CapactiyCard, PositionCard, RiskCard, SupportedAssetsSection, VaultDetailTitle } from './components'
 import { useExposure, usePnl } from './hooks'
-
-const TempVaultForm = () => {
-  const VAULT_FORM = 'vault form'
-  return (
-    <Container variant="vaultCard" mb="22px">
-      {VAULT_FORM}
-    </Container>
-  )
-}
 
 export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
   const chainId = useChainId()
@@ -28,6 +19,7 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
 
   const { data: vaultUserSnapshot } = useVaultUserSnapshot(symbol)
   const metadata = VaultMetadata[chainId][symbol]
+  const vaultName = metadata?.name ?? name
 
   const exposureData = useExposure({
     vault,
@@ -41,14 +33,14 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
       <Flex flexDirection="column" mr={isBase ? 0 : 9} width={isBase ? '100%' : '50%'}>
         <MobileVaultSelect />
         <VaultDetailTitle
-          name={metadata?.name ?? name}
+          name={vaultName}
           description="Some description of the vault can go here to let people know why they should deposit"
         />
         {metadata && <SupportedAssetsSection supportedAssets={metadata.assets} />}
         {isBase && (
           <>
             <PositionCard vaultUserSnapshot={vaultUserSnapshot} pnl={pnl} />
-            <TempVaultForm />
+            <VaultForm vaultSnapshot={vault} vaultName={vaultName} vaultUserSnapshot={vaultUserSnapshot} />
           </>
         )}
         <RiskCard exposure={exposureData?.exposure} isLong={exposureData?.isLongExposure} />
@@ -57,7 +49,7 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
       {!isBase && (
         <Flex flexDirection="column" width="50%" pt={7}>
           <PositionCard vaultUserSnapshot={vaultUserSnapshot} pnl={pnl} />
-          <TempVaultForm />
+          <VaultForm vaultSnapshot={vault} vaultName={vaultName} vaultUserSnapshot={vaultUserSnapshot} />
         </Flex>
       )}
     </Flex>

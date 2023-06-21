@@ -18,6 +18,7 @@ export default function VaultSelect() {
   const titleSpanColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const chainId = useChainId()
   const { vaultSnapshots, status, setSelectedVault } = useVaultContext()
+
   return (
     <Flex
       flexDirection="column"

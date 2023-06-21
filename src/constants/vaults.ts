@@ -12,21 +12,19 @@ export enum PerennialVaultType {
   bravo = 'bravo',
 }
 
-// Note: Currently if the user switches to a chain for which there is no supported vaults,
-// it'll throw an error unless defaults are provided. TODO: Handle this case.
-export const SupportedVaults: {
-  [chainId: number]: { [vault in PerennialVaultType]?: boolean }
-} = {
-  [mainnet.id]: { alpha: false, bravo: false },
-  [arbitrumGoerli.id]: { alpha: true, bravo: true },
-  [arbitrum.id]: { alpha: true, bravo: true },
-  [baseGoerli.id]: { alpha: true },
-}
-
 export enum VaultSymbol {
   PVA = 'PVA',
   PVB = 'PVB',
   ePBV = 'ePBV',
+}
+
+export const SupportedVaults: {
+  [chainId: number]: { [vault in PerennialVaultType]?: VaultSymbol | null }
+} = {
+  [mainnet.id]: { alpha: null, bravo: null },
+  [arbitrumGoerli.id]: { alpha: VaultSymbol.ePBV, bravo: VaultSymbol.PVB },
+  [arbitrum.id]: { alpha: VaultSymbol.PVA, bravo: VaultSymbol.PVB },
+  [baseGoerli.id]: { alpha: VaultSymbol.PVA, bravo: null },
 }
 
 export const VaultMetadata: {
@@ -46,11 +44,11 @@ export const VaultMetadata: {
 }
 
 export const FeeApr: { [chainId: number]: { [key in VaultSymbol]?: bigint } } = {
-  [arbitrum.id]: {
+  [arbitrumGoerli.id]: {
     [VaultSymbol.ePBV]: parseEther('0.1391'),
     [VaultSymbol.PVB]: parseEther('0.1206'),
   },
-  [arbitrumGoerli.id]: {
+  [arbitrum.id]: {
     [VaultSymbol.PVA]: parseEther('0.1391'),
     [VaultSymbol.PVB]: parseEther('0.1206'),
   },

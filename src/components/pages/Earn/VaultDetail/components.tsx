@@ -133,7 +133,15 @@ export const PositionCard = ({ vaultUserSnapshot, pnl }: { vaultUserSnapshot?: V
   const { address } = useAddress()
   if (address && !vaultUserSnapshot) {
     return (
-      <Container p={4} variant="vaultCard" bg="transparent" alignItems="center" justifyContent="center" height="130px">
+      <Container
+        p={4}
+        variant="vaultCard"
+        mb="22px"
+        bg="transparent"
+        alignItems="center"
+        justifyContent="center"
+        height="150px"
+      >
         <Spinner size="sm" />
       </Container>
     )

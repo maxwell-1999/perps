@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 
 import { TxButton } from '@/components/shared/TxButton'
 import { FormattedBig18USDPrice } from '@/components/shared/components'
+import { Form } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
@@ -21,7 +22,7 @@ import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
 import { isFullClose } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import { TradeReceipt } from './Receipt'
-import { Form, FormOverlayHeader } from './styles'
+import { FormOverlayHeader } from './styles'
 import { useCloseCollateralValidator } from './validatorHooks'
 
 interface WithdrawCollateralFormProps {
