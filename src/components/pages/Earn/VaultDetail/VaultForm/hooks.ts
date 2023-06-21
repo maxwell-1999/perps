@@ -3,6 +3,7 @@ import { UseFormSetValue } from 'react-hook-form'
 import { useIntl } from 'react-intl'
 
 import { Big18Math } from '@/utils/big18Utils'
+import { isNumbersOnly } from '@/utils/formUtils'
 
 import { FormNames, FormValues, VaultFormOption } from './constants'
 
@@ -84,13 +85,12 @@ export function useVaultFormValidators({
   return { max: maxValidator }
 }
 
-const numbersOnlyRegex = /^\d*\.?\d*$/
 const setArgs = { shouldValidate: true, shouldDirty: true }
 
 export const useOnAmountChange = (setValue: UseFormSetValue<FormValues>) =>
   useCallback(
     (newAmount: string) => {
-      if (!numbersOnlyRegex.test(newAmount)) return
+      if (!isNumbersOnly(newAmount)) return
       setValue(FormNames.amount, newAmount, setArgs)
     },
     [setValue],
