@@ -16,7 +16,7 @@ import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import { VaultSnapshot, VaultUserSnapshot } from '@/constants/vaults'
 import { useVaultTransactions } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
-import { Big18Math } from '@/utils/big18Utils'
+import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 
 import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
@@ -164,6 +164,7 @@ export default function ConfirmationModal({
   const requiresSharesApproval = requiredApprovals?.includes(RequiredApprovals.shares)
   const requiresDSUApproval = requiredApprovals?.includes(RequiredApprovals.dsu)
   const hasClaimable = vaultUserSnapshot.claimable > 0n
+  const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered variant="confirmation">
@@ -233,10 +234,14 @@ export default function ConfirmationModal({
                 )}
                 <ModalStep
                   title={copy.claimShares}
-                  description={intl.formatMessage(
-                    { defaultMessage: 'Claim funds from {vaultName} vault' },
-                    { vaultName },
-                  )}
+                  description={
+                    hasClaimable
+                      ? intl.formatMessage(
+                          { defaultMessage: '{claimableBalance} available for withdrawal' },
+                          { claimableBalance: formattedClaimableBalance },
+                        )
+                      : intl.formatMessage({ defaultMessage: 'Claim funds from {vaultName} vault' }, { vaultName })
+                  }
                   isLoading={claimLoading}
                   isCompleted={claimCompleted}
                 />
@@ -298,7 +303,9 @@ export default function ConfirmationModal({
                   />
                 )}
                 <Button
-                  variant={requiresSharesApproval && !approveSharesCompleted ? 'outline' : 'primary'}
+                  variant={
+                    (requiresSharesApproval && !approveSharesCompleted) || redemptionCompleted ? 'outline' : 'primary'
+                  }
                   isDisabled={
                     (requiresSharesApproval && !approveSharesCompleted) || redemptionLoading || redemptionCompleted
                   }
@@ -309,7 +316,9 @@ export default function ConfirmationModal({
                 {requiresDSUApproval && (
                   <Button
                     variant={
-                      approveDSUCompleted || (requiresDSUApproval && !approveDSUCompleted) ? 'outline' : 'primary'
+                      approveDSUCompleted || (requiresDSUApproval && approveDSUCompleted && !redemptionCompleted)
+                        ? 'outline'
+                        : 'primary'
                     }
                     isDisabled={
                       (requiresSharesApproval && !approveSharesCompleted) ||

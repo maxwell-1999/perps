@@ -94,7 +94,7 @@ export default function VaultForm({
 
   if (!vaultUserSnapshot || !vaultSnapshot) {
     return (
-      <Container variant="vaultCard" justifyContent="center" alignItems="center" mb="22px" width="372px" height="300px">
+      <Container variant="vaultCard" justifyContent="center" alignItems="center" mb="22px" width="100%" height="300px">
         <Spinner />
       </Container>
     )
