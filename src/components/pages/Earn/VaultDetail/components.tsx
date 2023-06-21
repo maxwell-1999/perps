@@ -146,7 +146,13 @@ export const PositionCard = ({ vaultUserSnapshot, pnl }: { vaultUserSnapshot?: V
       </Container>
     )
   }
-  const hasPosition = vaultUserSnapshot && !Big18Math.isZero(vaultUserSnapshot?.totalDeposit)
+
+  const assets = vaultUserSnapshot?.assets ?? 0n
+  const pendingDeposits = vaultUserSnapshot?.pendingDepositAmount ?? 0n
+  const pendingRedemption = vaultUserSnapshot?.pendingRedemptionAmount ?? 0n
+  const positionAmount = Big18Math.sub(Big18Math.add(assets, pendingDeposits), pendingRedemption)
+  const hasPosition = vaultUserSnapshot && !Big18Math.isZero(positionAmount)
+
   return (
     <Container p={4} mb="22px" variant="vaultCard" bg={hasPosition ? alpha5 : 'transparent'}>
       <Flex flexDirection="column">
@@ -156,7 +162,7 @@ export const PositionCard = ({ vaultUserSnapshot, pnl }: { vaultUserSnapshot?: V
         <Flex flex={1} justifyContent="space-between" mb={4}>
           <Text color={alpha50}>{copy.value}</Text>
           {address && hasPosition ? (
-            <FormattedBig18USDPrice value={vaultUserSnapshot.assets} fontSize="16px" fontWeight={500} compact />
+            <FormattedBig18USDPrice value={positionAmount} fontSize="16px" fontWeight={500} compact />
           ) : (
             <Text color={alpha50}>{copy.noValue}</Text>
           )}
