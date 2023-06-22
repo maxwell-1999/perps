@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl'
 
 import { SupportedAsset } from '@/constants/assets'
 import { FormState } from '@/contexts/tradeFormContext'
+import { isNumbersOnly } from '@/utils/formUtils'
 
 import { FormNames } from './constants'
 import {
@@ -109,8 +110,6 @@ interface OnChangeHandlersArgs {
 
 const setArgs = { shouldValidate: true, shouldDirty: true }
 
-const numbersOnlyRegex = /^\d*\.?\d*$/
-
 export const useOnChangeHandlers = ({
   setValue,
   leverage,
@@ -121,7 +120,7 @@ export const useOnChangeHandlers = ({
 }: OnChangeHandlersArgs) => {
   const onChangeAmount = useCallback(
     (newAmount: string) => {
-      if (!numbersOnlyRegex.test(newAmount)) return
+      if (!isNumbersOnly(newAmount)) return
       const validatedAmount = max18Decimals(newAmount)
       setValue(FormNames.amount, validatedAmount, setArgs)
 
@@ -160,7 +159,7 @@ export const useOnChangeHandlers = ({
 
   const onChangeCollateral = useCallback(
     (newAmount: string) => {
-      if (!numbersOnlyRegex.test(newAmount)) return
+      if (!isNumbersOnly(newAmount)) return
       const validatedCollateral = max18Decimals(newAmount)
       setValue(FormNames.collateral, validatedCollateral, setArgs)
 

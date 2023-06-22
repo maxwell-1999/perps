@@ -7,8 +7,9 @@ import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { MaxUint256 } from '@/constants/markets'
 import { VaultUserSnapshot } from '@/constants/vaults'
 import { useAddress } from '@/hooks/network'
-import { Big18Math } from '@/utils/big18Utils'
+import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 
+import { Button } from '@ds/Button'
 import { Container } from '@ds/Container'
 
 import { formatValueForProgressBar } from '../utils'
@@ -124,21 +125,44 @@ export const CapactiyCard = ({ collateral, capacity }: { collateral: bigint; cap
   )
 }
 
-export const PositionCard = ({ vaultUserSnapshot, pnl }: { vaultUserSnapshot?: VaultUserSnapshot; pnl?: bigint }) => {
+export const PositionCard = ({
+  vaultUserSnapshot,
+  pnl,
+  positionUpdating,
+}: {
+  vaultUserSnapshot?: VaultUserSnapshot
+  pnl?: bigint
+  positionUpdating: boolean
+}) => {
   const copy = useVaultDetailCopy()
   const alpha5 = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])
   const alpha80 = useColorModeValue(colors.brand.blackAlpha[80], colors.brand.whiteAlpha[80])
   const alpha50 = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
+  const updatingBgColor = useColorModeValue(colors.brand.whiteAlpha[50], colors.brand.blackAlpha[50])
   const pnlColor = pnl && pnl > 0n ? colors.brand.green : colors.brand.red
   const { address } = useAddress()
   if (address && !vaultUserSnapshot) {
     return (
-      <Container p={4} variant="vaultCard" bg="transparent" alignItems="center" justifyContent="center" height="130px">
+      <Container
+        p={4}
+        variant="vaultCard"
+        mb="22px"
+        bg="transparent"
+        alignItems="center"
+        justifyContent="center"
+        height="150px"
+      >
         <Spinner size="sm" />
       </Container>
     )
   }
-  const hasPosition = vaultUserSnapshot && !Big18Math.isZero(vaultUserSnapshot?.totalDeposit)
+
+  const assets = vaultUserSnapshot?.assets ?? 0n
+  const pendingDeposits = vaultUserSnapshot?.pendingDepositAmount ?? 0n
+  const pendingRedemption = vaultUserSnapshot?.pendingRedemptionAmount ?? 0n
+  const positionAmount = Big18Math.sub(Big18Math.add(assets, pendingDeposits), pendingRedemption)
+  const hasPosition = vaultUserSnapshot && !Big18Math.isZero(positionAmount)
+
   return (
     <Container p={4} mb="22px" variant="vaultCard" bg={hasPosition ? alpha5 : 'transparent'}>
       <Flex flexDirection="column">
@@ -148,18 +172,85 @@ export const PositionCard = ({ vaultUserSnapshot, pnl }: { vaultUserSnapshot?: V
         <Flex flex={1} justifyContent="space-between" mb={4}>
           <Text color={alpha50}>{copy.value}</Text>
           {address && hasPosition ? (
-            <FormattedBig18USDPrice value={vaultUserSnapshot.totalDeposit} fontSize="16px" fontWeight={500} compact />
+            <FormattedBig18USDPrice value={positionAmount} fontSize="16px" fontWeight={500} compact />
           ) : (
             <Text color={alpha50}>{copy.noValue}</Text>
           )}
         </Flex>
         <Flex flex={1} justifyContent="space-between" mb={4}>
           <Text color={alpha50}>{copy.pnl}</Text>
-          {!pnl ? (
+          {positionUpdating ? (
+            <Spinner size="sm" />
+          ) : !pnl ? (
             <Text color={alpha50}>{copy.noValue}</Text>
           ) : (
             <FormattedBig18USDPrice value={pnl} fontSize="16px" fontWeight={500} color={pnlColor} />
           )}
+        </Flex>
+        {positionUpdating && (
+          <Flex
+            bg={updatingBgColor}
+            flex={1}
+            py={2}
+            px={3}
+            justifyContent="space-between"
+            alignItems="center"
+            borderRadius="6px"
+          >
+            <Spinner size="sm" color={colors.brand.green} />
+            <Text variant="label" fontSize="14px">
+              {copy.positionUpdating}
+            </Text>
+          </Flex>
+        )}
+      </Flex>
+    </Container>
+  )
+}
+
+export const ClaimCard = ({
+  claimable,
+  vaultName,
+  setShowClaimModal,
+}: {
+  claimable: bigint
+  vaultName: string
+  setShowClaimModal: (show: boolean) => void
+}) => {
+  const intl = useIntl()
+  const copy = useVaultDetailCopy()
+  const alpha5 = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])
+  const formattedClaimable = formatBig18USDPrice(claimable)
+
+  const bodyText = intl.formatMessage(
+    {
+      defaultMessage:
+        'Please click this notification to finalize your withdrawal of {formattedClaimable} from the {vaultName} vault.',
+    },
+    { formattedClaimable, vaultName },
+  )
+
+  return (
+    <Container p={4} mb="22px" variant="vaultCard" bg={alpha5}>
+      <Flex flexDirection="column">
+        <Text mb={2} fontSize="16px">
+          {copy.yourWithdrawIsReady}
+        </Text>
+        <Text fontSize="14px" variant="label" mb={2}>
+          {bodyText}
+        </Text>
+        <Flex>
+          <Button
+            variant="text"
+            p={0}
+            height="initial"
+            onClick={() => setShowClaimModal(true)}
+            label={
+              <Text color={colors.brand.green} fontSize="14px">
+                {copy.confirmWithdraw}
+              </Text>
+            }
+          />
         </Flex>
       </Flex>
     </Container>

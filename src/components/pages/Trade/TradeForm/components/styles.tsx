@@ -1,15 +1,7 @@
 import { Flex, IconButton, Text } from '@chakra-ui/react'
-import styled from '@emotion/styled'
 import CloseX from '@public/icons/close-x.svg'
 
 import { useStyles, useTradeFormCopy } from '../hooks'
-
-export const Form = styled('form')`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-`
 
 export const FormOverlayHeader = ({ title, onClose }: { title: string; onClose: () => void }) => {
   const copy = useTradeFormCopy()

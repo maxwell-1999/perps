@@ -39,6 +39,12 @@
       "value": "% left"
     }
   ],
+  "12vECb": [
+    {
+      "type": 0,
+      "value": "Fully on-chain smart contracts deploy liquidity & adjust multiple positions, so you don’t have to."
+    }
+  ],
   "3Bd9gC": [
     {
       "type": 0,
@@ -57,10 +63,24 @@
       "value": "Cancel"
     }
   ],
-  "50q5ua": [
+  "4HP+t3": [
     {
       "type": 0,
-      "value": "Description of value proposition goes here"
+      "value": "Approve Vault Deposits"
+    }
+  ],
+  "4LacZK": [
+    {
+      "type": 0,
+      "value": "Claim funds from "
+    },
+    {
+      "type": 1,
+      "value": "vaultName"
+    },
+    {
+      "type": 0,
+      "value": " vault"
     }
   ],
   "56DzI+": [
@@ -99,6 +119,12 @@
       "value": "Perennial"
     }
   ],
+  "6cYAtm": [
+    {
+      "type": 0,
+      "value": "Insufficient funds"
+    }
+  ],
   "73CDRG": [
     {
       "type": 0,
@@ -115,6 +141,12 @@
     {
       "type": 0,
       "value": "Side"
+    }
+  ],
+  "83UPkQ": [
+    {
+      "type": 0,
+      "value": "Approve vault deposits for withdrawal"
     }
   ],
   "8K400D": [
@@ -143,6 +175,18 @@
     {
       "type": 0,
       "value": "Remove USD from your position"
+    }
+  ],
+  "99uM2G": [
+    {
+      "type": 0,
+      "value": "Capital Efficient"
+    }
+  ],
+  "9yWVUm": [
+    {
+      "type": 0,
+      "value": "Approve DSU to withdraw"
     }
   ],
   "A3zdUJ": [
@@ -181,6 +225,12 @@
       "value": "Value exceeds position amount."
     }
   ],
+  "BWAp9h": [
+    {
+      "type": 0,
+      "value": "Confirm withdraw"
+    }
+  ],
   "BY343C": [
     {
       "type": 0,
@@ -205,12 +255,6 @@
       "value": "Select vault to continue"
     }
   ],
-  "CjybUk": [
-    {
-      "type": 0,
-      "value": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin non felis fermentum, faucibus nisi in, posuere ligula."
-    }
-  ],
   "D3idYv": [
     {
       "type": 0,
@@ -229,16 +273,40 @@
       "value": "Direction"
     }
   ],
+  "DhpshX": [
+    {
+      "type": 0,
+      "value": "Approve DSU"
+    }
+  ],
   "Do29Mx": [
     {
       "type": 0,
       "value": "P&L"
     }
   ],
+  "E3NMR5": [
+    {
+      "type": 0,
+      "value": "Add to vault"
+    }
+  ],
+  "EUrnaL": [
+    {
+      "type": 0,
+      "value": "Delta-Hedged"
+    }
+  ],
   "F/BpPU": [
     {
       "type": 0,
       "value": "Viewing"
+    }
+  ],
+  "FC4JMf": [
+    {
+      "type": 0,
+      "value": "Position settlement"
     }
   ],
   "FIMqSt": [
@@ -265,6 +333,12 @@
       "value": "Market"
     }
   ],
+  "GG4xPq": [
+    {
+      "type": 0,
+      "value": "Please check your wallet, and confirm the following request to withdraw funds."
+    }
+  ],
   "GufXy5": [
     {
       "type": 0,
@@ -281,10 +355,30 @@
       "value": "title"
     }
   ],
+  "HrHmba": [
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " from "
+    },
+    {
+      "type": 1,
+      "value": "vaultName"
+    }
+  ],
   "IXw0x/": [
     {
       "type": 0,
       "value": "Earn with"
+    }
+  ],
+  "Ihrtg9": [
+    {
+      "type": 0,
+      "value": "Claim shares"
     }
   ],
   "JfG49w": [
@@ -323,10 +417,10 @@
       "value": "Current Exposure"
     }
   ],
-  "LcrGBK": [
+  "LPnWdG": [
     {
       "type": 0,
-      "value": "Feature Title"
+      "value": "Please check your wallet, and confirm the following request to deposit funds."
     }
   ],
   "LjNvmm": [
@@ -363,6 +457,20 @@
       "value": "Confirm"
     }
   ],
+  "NL2VMl": [
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "vaultName"
+    }
+  ],
   "NTgwLi": [
     {
       "type": 0,
@@ -385,16 +493,34 @@
       "value": "%"
     }
   ],
+  "OMkAQn": [
+    {
+      "type": 0,
+      "value": "Approve shares"
+    }
+  ],
   "OOk+VQ": [
     {
       "type": 0,
       "value": "Modify position"
     }
   ],
+  "OcJKLC": [
+    {
+      "type": 0,
+      "value": "Take advantage of the power of the Perennial protocol to get high utilization of capital."
+    }
+  ],
   "Oj4si1": [
     {
       "type": 0,
       "value": "Liquidation"
+    }
+  ],
+  "P0byqT": [
+    {
+      "type": 0,
+      "value": "Your position is being updated"
     }
   ],
   "P7PLVj": [
@@ -415,6 +541,18 @@
       "value": "Withdraw"
     }
   ],
+  "PfTJzG": [
+    {
+      "type": 0,
+      "value": "Approve funds for Perennial's vaults."
+    }
+  ],
+  "PyePDu": [
+    {
+      "type": 0,
+      "value": "Redeem shares"
+    }
+  ],
   "QFNxVm": [
     {
       "type": 0,
@@ -427,6 +565,34 @@
       "value": "You will get..."
     }
   ],
+  "QpKFvn": [
+    {
+      "type": 0,
+      "value": "Deploy liquidity to both long & short sides of the market, reducing net exposure."
+    }
+  ],
+  "Qt4oL6": [
+    {
+      "type": 0,
+      "value": "Please click this notification to finalize your withdrawal of "
+    },
+    {
+      "type": 1,
+      "value": "formattedClaimable"
+    },
+    {
+      "type": 0,
+      "value": " from the "
+    },
+    {
+      "type": 1,
+      "value": "vaultName"
+    },
+    {
+      "type": 0,
+      "value": " vault."
+    }
+  ],
   "RoqJiX": [
     {
       "type": 0,
@@ -437,6 +603,12 @@
     {
       "type": 0,
       "value": "Est. Exit"
+    }
+  ],
+  "Sr5R7d": [
+    {
+      "type": 0,
+      "value": "Autonomous"
     }
   ],
   "TTreub": [
@@ -469,6 +641,12 @@
       "value": "Connect wallet"
     }
   ],
+  "VD6zcW": [
+    {
+      "type": 0,
+      "value": "Vaults provide liquidity to Perennial markets, taking the other side of trades in exchange for funding & trading fees. See more here:"
+    }
+  ],
   "VplG8G": [
     {
       "type": 0,
@@ -491,6 +669,18 @@
     {
       "type": 0,
       "value": "Approve"
+    }
+  ],
+  "X8XIdK": [
+    {
+      "type": 0,
+      "value": "Change in P&L"
+    }
+  ],
+  "XLlpPq": [
+    {
+      "type": 0,
+      "value": "Insufficient shares"
     }
   ],
   "XPD9S1": [
@@ -521,6 +711,12 @@
     {
       "type": 0,
       "value": "Please check your wallet, and confirm the following requests."
+    }
+  ],
+  "aFX27t": [
+    {
+      "type": 0,
+      "value": "Once your position is settled, you may withdraw your funds"
     }
   ],
   "aYqugF": [
@@ -571,16 +767,76 @@
       "value": "Opening"
     }
   ],
+  "dIgBOz": [
+    {
+      "type": 0,
+      "value": "Deposit"
+    }
+  ],
   "djJp6c": [
     {
       "type": 0,
       "value": "History"
     }
   ],
+  "e9WF4L": [
+    {
+      "type": 0,
+      "value": "Add funds to "
+    },
+    {
+      "type": 1,
+      "value": "vaultName"
+    },
+    {
+      "type": 0,
+      "value": " vault"
+    }
+  ],
+  "eERi22": [
+    {
+      "type": 0,
+      "value": "Arbitrum Ecosystem Vaults (PVB) deploys liquidity to markets of Arbitrum ecosystem assets. Right now, this includes 2 pools: ARB-long & ARB-short."
+    }
+  ],
   "ejEGdx": [
     {
       "type": 0,
       "value": "Home"
+    }
+  ],
+  "g/yIqy": [
+    {
+      "type": 0,
+      "value": "Your withdraw is ready"
+    }
+  ],
+  "gAKL9i": [
+    {
+      "type": 0,
+      "value": "Approve "
+    },
+    {
+      "type": 1,
+      "value": "dsuApprovalSuggestion"
+    },
+    {
+      "type": 0,
+      "value": " DSU to withdraw collateral"
+    }
+  ],
+  "gf2bvu": [
+    {
+      "type": 0,
+      "value": "Approve at least "
+    },
+    {
+      "type": 1,
+      "value": "approximateShares"
+    },
+    {
+      "type": 0,
+      "value": " shares to redeem your funds"
     }
   ],
   "h3ShxL": [
@@ -595,6 +851,12 @@
       "value": "Sign transaction"
     }
   ],
+  "iXZuBN": [
+    {
+      "type": 0,
+      "value": "Blue Chip Vaults (PVA) deploys liquidity to markets of major crypto assets. Right now, this includes 2 pools: ETH-long & ETH-short."
+    }
+  ],
   "iv4B8O": [
     {
       "type": 0,
@@ -607,10 +869,22 @@
       "value": "Reset"
     }
   ],
+  "joSL3o": [
+    {
+      "type": 0,
+      "value": "Withdraw from vault"
+    }
+  ],
   "juU558": [
     {
       "type": 0,
       "value": "Short"
+    }
+  ],
+  "k6l9WM": [
+    {
+      "type": 0,
+      "value": "Approve shares for redemption"
     }
   ],
   "kkjl2v": [
@@ -629,6 +903,16 @@
     {
       "type": 0,
       "value": "24h Low"
+    }
+  ],
+  "l2YsLb": [
+    {
+      "type": 1,
+      "value": "claimableBalance"
+    },
+    {
+      "type": 0,
+      "value": " available for withdrawal"
     }
   ],
   "ljjcTc": [
@@ -659,6 +943,12 @@
     {
       "type": 0,
       "value": "Remove collateral"
+    }
+  ],
+  "p2+VKY": [
+    {
+      "type": 0,
+      "value": "Change in Value"
     }
   ],
   "pAmAEL": [
@@ -747,6 +1037,32 @@
     {
       "type": 0,
       "value": "--"
+    }
+  ],
+  "tsfX5f": [
+    {
+      "type": 0,
+      "value": "Confirm deposit"
+    }
+  ],
+  "uHK9pk": [
+    {
+      "type": 0,
+      "value": "Redeem funds from "
+    },
+    {
+      "type": 1,
+      "value": "vaultName"
+    },
+    {
+      "type": 0,
+      "value": " vault"
+    }
+  ],
+  "uhhVzY": [
+    {
+      "type": 0,
+      "value": "Deposit collateral"
     }
   ],
   "unMqAW": [

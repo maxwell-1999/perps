@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 
+import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
@@ -23,7 +24,7 @@ import colors from '@ds/theme/colors'
 import { IPerennialLens } from '@t/generated/LensAbi'
 
 import { OrderValues } from '../../constants'
-import { AdjustmentStep, PositionInfo, TransferDetail } from './components'
+import { PositionInfo } from './components'
 import { useAdjustmentModalCopy } from './hooks'
 import { createAdjustment } from './utils'
 
@@ -158,7 +159,7 @@ function AdjustPositionModal({
               {copy.approveRequests}
             </Text>
             {needsApproval && (
-              <AdjustmentStep
+              <ModalStep
                 title={copy.approveUsdcTitle}
                 description={copy.approveUsdcBody}
                 isLoading={needsApproval ? approveUsdcLoading : false}
@@ -166,14 +167,14 @@ function AdjustPositionModal({
               />
             )}
             {!isWithdrawing ? (
-              <AdjustmentStep
+              <ModalStep
                 title={requiresTwoStep ? copy.confirmCloseTitle : copy.signTransactionTitle}
                 description={requiresTwoStep ? copy.confirmCloseBody : copy.signTransactionBody}
                 isLoading={orderTxLoading}
                 isCompleted={isTransactionCompleted}
               />
             ) : (
-              <AdjustmentStep
+              <ModalStep
                 title={copy.withdrawStepTitle}
                 description={copy.withdrawStepBody}
                 isLoading={withdrawCollateralLoading}
@@ -181,7 +182,7 @@ function AdjustPositionModal({
               />
             )}
             {showSettlementStep && (
-              <AdjustmentStep
+              <ModalStep
                 title={copy.awaitSettlementTitle}
                 description={copy.awaitSettlementBody}
                 isLoading={awaitingSettlement}
@@ -201,7 +202,7 @@ function AdjustPositionModal({
                 frozen
               />
             ) : (
-              <TransferDetail
+              <ModalDetail
                 title={copy.withdrawDetailTitle}
                 action={copy.withdraw}
                 detail={formatBig18USDPrice(Big18Math.abs(collateralDifference))}
