@@ -101,6 +101,7 @@ export const useVaultUserSnapshot = (vaultSymbol: VaultSymbol) => {
 
   return useQuery({
     queryKey: ['vaultUserSnapshot', chainId, vaultSymbol, address],
+    refetchInterval: 10000,
     enabled: !!chainId && !!address && !!vaultSymbol,
     queryFn: async (): Promise<VaultUserSnapshot | undefined> => {
       const vaultContract = getVaultForType(vaultType, chainId, provider)

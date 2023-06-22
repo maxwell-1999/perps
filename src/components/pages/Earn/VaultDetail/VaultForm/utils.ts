@@ -1,4 +1,4 @@
-import { VaultSymbol } from '@/constants/vaults'
+import { VaultSnapshot, VaultSymbol, VaultUserSnapshot } from '@/constants/vaults'
 import { Balances } from '@/hooks/wallet'
 import { Big18Math } from '@/utils/big18Utils'
 
@@ -9,17 +9,17 @@ export const getRequiredApprovals = ({
   vaultSymbol,
   balances,
   vaultOption,
-  claimable,
-  totalSupply,
-  totalAssets,
+  isClaimOnly,
+  vaultSnapshot,
+  vaultUserSnapshot,
 }: {
   amount: bigint
   vaultSymbol: VaultSymbol
   balances: Balances
   vaultOption: VaultFormOption
-  claimable: bigint
-  totalSupply: bigint
-  totalAssets: bigint
+  isClaimOnly: boolean
+  vaultSnapshot: VaultSnapshot
+  vaultUserSnapshot: VaultUserSnapshot
 }): RequiredApprovals[] => {
   if (!balances) {
     return []
@@ -31,14 +31,41 @@ export const getRequiredApprovals = ({
     }
   }
   if (vaultOption === VaultFormOption.Withdraw) {
-    const approximateShares = Big18Math.div(Big18Math.mul(amount, totalSupply), totalAssets)
+    const requiresDSUApproval = vaultUserSnapshot.claimable > balances.dsuAllowance || amount > balances.dsuAllowance
+    const approximateShares = Big18Math.div(Big18Math.mul(amount, vaultSnapshot.totalSupply), vaultSnapshot.totalAssets)
     const sharesAllowance = balances.sharesAllowance[vaultSymbol] ?? 0n
-    if (approximateShares > sharesAllowance) {
+    const requiresSharesApproval = approximateShares > sharesAllowance
+
+    if (isClaimOnly) {
+      return requiresDSUApproval ? [RequiredApprovals.dsu] : []
+    }
+    if (requiresSharesApproval) {
       approvals.push(RequiredApprovals.shares)
     }
-    if (claimable > balances.dsuAllowance) {
+    if (requiresDSUApproval) {
       approvals.push(RequiredApprovals.dsu)
     }
   }
   return approvals
+}
+
+export const setAmountForConfirmation = ({
+  maxWithdrawal,
+  amount,
+  vaultUserSnapshot,
+  isClaimOnly,
+}: {
+  maxWithdrawal: boolean
+  amount: string
+  vaultUserSnapshot: VaultUserSnapshot
+  isClaimOnly: boolean
+}) => {
+  const { assets, claimable } = vaultUserSnapshot
+  if (isClaimOnly) {
+    return claimable
+  }
+  if (assets && maxWithdrawal) {
+    return assets
+  }
+  return Big18Math.fromFloatString(amount)
 }

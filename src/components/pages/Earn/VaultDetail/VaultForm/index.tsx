@@ -25,16 +25,23 @@ export default function VaultForm({
   vaultSnapshot,
   vaultName,
   vaultUserSnapshot,
+  showClaimModal,
+  setShowClaimModal,
+  positionUpdating,
 }: {
   vaultSnapshot: VaultSnapshot
   vaultName: string
   vaultUserSnapshot?: VaultUserSnapshot
+  showClaimModal: boolean
+  setShowClaimModal: (show: boolean) => void
+  positionUpdating: boolean
 }) {
   const copy = useVaultFormCopy()
   const { address } = useAddress()
   const { data: balances } = useBalances()
   const [formValues, setFormValues] = useState<FormValues | null>(null)
   const [vaultOption, setVaultOption] = useState<VaultFormOption>(VaultFormOption.Deposit)
+  const [maxWithdrawal, setMaxWithdrawal] = useState(false)
 
   const {
     handleSubmit,
@@ -53,6 +60,13 @@ export default function VaultForm({
     reset()
   }, [vaultOption, reset])
 
+  useEffect(() => {
+    if (showClaimModal) {
+      setVaultOption(VaultFormOption.Withdraw)
+      setFormValues({ [FormNames.amount]: '0' })
+    }
+  }, [showClaimModal])
+
   const onAmountChange = useOnAmountChange(setValue)
   const amount = watch(FormNames.amount)
 
@@ -63,10 +77,12 @@ export default function VaultForm({
 
   const onClose = () => {
     setFormValues(null)
+    setShowClaimModal(false)
   }
 
   const onCancel = () => {
     setFormValues(null)
+    setShowClaimModal(false)
     reset()
   }
 
@@ -75,6 +91,7 @@ export default function VaultForm({
   }
 
   const onClickMaxShares = () => {
+    setMaxWithdrawal(true)
     setValue(FormNames.amount, Big18Math.toFloatString(vaultUserSnapshot?.assets ?? 0n))
   }
 
@@ -89,13 +106,20 @@ export default function VaultForm({
     vaultFormOption: vaultOption,
   })
 
-  const buttonDisabled = Object.keys(errors).length > 0 || !amount
-
   const isDeposit = vaultOption === VaultFormOption.Deposit
+  const isClaimOnly =
+    showClaimModal ||
+    Boolean(
+      !isDeposit &&
+        vaultUserSnapshot &&
+        vaultUserSnapshot.assets === 0n &&
+        (vaultUserSnapshot.pendingRedemptionAmount !== 0n || vaultUserSnapshot.claimable !== 0n),
+    )
+  const buttonDisabled = Object.keys(errors).length > 0 || !amount || Number(amount) === 0
 
   if (!vaultUserSnapshot || !vaultSnapshot) {
     return (
-      <Container variant="vaultCard" justifyContent="center" alignItems="center" mb="22px" width="100%" height="300px">
+      <Container variant="vaultCard" justifyContent="center" alignItems="center" mb="22px" width="100%" height="270px">
         <Spinner />
       </Container>
     )
@@ -113,6 +137,9 @@ export default function VaultForm({
           vaultName={vaultName}
           vaultSnapshot={vaultSnapshot}
           vaultUserSnapshot={vaultUserSnapshot}
+          maxWithdrawal={maxWithdrawal}
+          isClaimOnly={isClaimOnly}
+          positionUpdating={positionUpdating}
         />
       )}
       <Container variant="vaultCard" mb="22px" py={5} px={4}>
@@ -178,7 +205,6 @@ export default function VaultForm({
                 )
               }
             />
-            <DataRow label={copy.ChangeInPnL} value={copy.noValue} />
           </Flex>
           <TxButton
             type="submit"

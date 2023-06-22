@@ -8,12 +8,14 @@ import { formatBig18 } from '@/utils/big18Utils'
 
 import colors from '@ds/theme/colors'
 
+import { useVaultDescription } from '../hooks'
 import VaultCard from './VaultCard'
 import { fadeIn } from './VaultCard/styles'
 import { useVaultSelectCopy } from './hooks'
 
 export default function VaultSelect() {
   const copy = useVaultSelectCopy()
+  const vaultDescription = useVaultDescription()
   const borderColor = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
   const titleSpanColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const chainId = useChainId()
@@ -63,7 +65,7 @@ export default function VaultSelect() {
                     apr={feeAPR}
                     name={metadata.name}
                     assets={metadata.assets}
-                    description="Some description of the vault can go here to let people know why they should deposit"
+                    description={vaultDescription[snapshot.symbol]}
                     collateral={snapshot.totalAssets}
                     capacity={snapshot.maxCollateral}
                   />

@@ -46,6 +46,10 @@ export function useVaultFormCopy() {
     insufficientShares: intl.formatMessage({ defaultMessage: 'Insufficient shares' }),
     approveDSU: intl.formatMessage({ defaultMessage: 'Approve DSU' }),
     approveDSUBody: intl.formatMessage({ defaultMessage: 'Approve DSU to withdraw' }),
+    positionUpdating: intl.formatMessage({ defaultMessage: 'Position settlement' }),
+    positionUpdatingBody: intl.formatMessage({
+      defaultMessage: 'Once your position is settled, you may withdraw your funds',
+    }),
   }
 }
 

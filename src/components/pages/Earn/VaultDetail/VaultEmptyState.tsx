@@ -43,9 +43,9 @@ export default function VaultEmptyState() {
           {copy.emptyStateSubhead}
         </Text>
         <Flex flexDirection="column" mb={4}>
-          <Feature title={copy.featureTitle} description={copy.featureDescription} />
-          <Feature title={copy.featureTitle} description={copy.featureDescription} />
-          <Feature title={copy.featureTitle} description={copy.featureDescription} isLast />
+          <Feature title={copy.autonomous} description={copy.autonomousBody} />
+          <Feature title={copy.deltaHedged} description={copy.deltaHedgedBody} />
+          <Feature title={copy.capitalEfficient} description={copy.capitalEfficientBody} isLast />
         </Flex>
         <Text fontSize="13px" color={alpha50} mb={4}>
           {copy.liquidityDisclaimer}

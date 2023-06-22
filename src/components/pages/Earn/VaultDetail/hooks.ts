@@ -13,11 +13,7 @@ export const useVaultDetailCopy = () => {
     vaults: intl.formatMessage({ defaultMessage: 'Vaults' }),
     emptyStateSubhead: intl.formatMessage({
       defaultMessage:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin non felis fermentum, faucibus nisi in, posuere ligula.',
-    }),
-    featureTitle: intl.formatMessage({ defaultMessage: 'Feature Title' }),
-    featureDescription: intl.formatMessage({
-      defaultMessage: 'Description of value proposition goes here',
+        'Vaults provide liquidity to Perennial markets, taking the other side of trades in exchange for funding & trading fees. See more here:',
     }),
     liquidityDisclaimer: intl.formatMessage({
       defaultMessage:
@@ -45,6 +41,26 @@ export const useVaultDetailCopy = () => {
     pnl: intl.formatMessage({ defaultMessage: 'P&L' }),
     noValue: intl.formatMessage({ defaultMessage: '——' }),
     infinite: intl.formatMessage({ defaultMessage: '$∞' }),
+    yourWithdrawIsReady: intl.formatMessage({ defaultMessage: 'Your withdraw is ready' }),
+    confirmWithdraw: intl.formatMessage({ defaultMessage: 'Confirm withdraw' }),
+    positionUpdating: intl.formatMessage({ defaultMessage: 'Your position is being updated' }),
+    autonomous: intl.formatMessage({ defaultMessage: 'Autonomous' }),
+    autonomousBody: intl.formatMessage({
+      defaultMessage:
+        'Fully on-chain smart contracts deploy liquidity & adjust multiple positions, so you don’t have to.',
+    }),
+    deltaHedged: intl.formatMessage({
+      defaultMessage: 'Delta-Hedged',
+    }),
+    deltaHedgedBody: intl.formatMessage({
+      defaultMessage: 'Deploy liquidity to both long & short sides of the market, reducing net exposure.',
+    }),
+    capitalEfficient: intl.formatMessage({
+      defaultMessage: 'Capital Efficient',
+    }),
+    capitalEfficientBody: intl.formatMessage({
+      defaultMessage: 'Take advantage of the power of the Perennial protocol to get high utilization of capital.',
+    }),
   }
 }
 
