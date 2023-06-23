@@ -23,6 +23,11 @@ export const isTestnet = (chainId?: number) =>
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
   [arbitrum, mainnet, goerli, arbitrumGoerli, baseGoerli],
   [alchemyProvider({ apiKey: AlchemyActiveKey }), publicProvider()],
+  {
+    batch: {
+      multicall: true,
+    },
+  },
 )
 export const mainnetChains = chains.filter((c) => !isTestnet(c.id))
 

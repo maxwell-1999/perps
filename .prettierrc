@@ -4,7 +4,7 @@
   "printWidth": 120,
   "tabWidth": 2,
   "trailingComma": "all",
-  "importOrder": ["^@/(.*)$", "^@ds/(.*)$", "^@utils/(.*)$", "^@t/(.*)$", "^[./]"],
+  "importOrder": ["^@/(.*)$", "^@ds/(.*)$", "^@utils/(.*)$", "^@abi/(.*)$", "^@t/(.*)$", "^[./]"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true
 }

@@ -1,4 +1,5 @@
-import { VaultSnapshot, VaultSymbol, VaultUserSnapshot } from '@/constants/vaults'
+import { VaultSymbol } from '@/constants/vaults'
+import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
 import { Big18Math } from '@/utils/big18Utils'
 

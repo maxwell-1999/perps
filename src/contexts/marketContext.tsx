@@ -8,7 +8,7 @@ import {
   AssetSnapshots,
   UserCurrentPositions,
   useChainAssetSnapshots,
-  useRefreshMarketDataOnPriceUpdates,
+  useRefreshKeysOnPriceUpdates,
 } from '@/hooks/markets'
 import { useChainId } from '@/hooks/network'
 
@@ -64,7 +64,7 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
 
   const { data: snapshots } = useChainAssetSnapshots()
 
-  useRefreshMarketDataOnPriceUpdates()
+  useRefreshKeysOnPriceUpdates()
 
   useEffect(() => {
     // check query params first

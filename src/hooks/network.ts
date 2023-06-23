@@ -1,4 +1,3 @@
-import { providers as MulticallProviders } from '@premia/ethers-multicall'
 import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
 import { AlchemyProvider, JsonRpcProvider, WebSocketProvider } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
@@ -59,18 +58,6 @@ export const useWsProvider = () => {
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return wsProviders.get(chainId)!
-}
-
-const multicallProviders = new Map<SupportedChainId, MulticallProviders.MulticallProvider>()
-export const useMulticallProvider = () => {
-  const chainId = useChainId()
-  const provider = useProvider()
-
-  if (!multicallProviders.has(chainId)) {
-    multicallProviders.set(chainId, new MulticallProviders.MulticallProvider(provider))
-  }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return multicallProviders.get(chainId)!
 }
 
 const graphClients = new Map<SupportedChainId, GraphQLClient>()

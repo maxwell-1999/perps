@@ -13,9 +13,10 @@ import {
 import styled from '@emotion/styled'
 import { useIntl } from 'react-intl'
 
-import { FeeApr, VaultMetadata, VaultSnapshot } from '@/constants/vaults'
+import { FeeApr, VaultMetadata } from '@/constants/vaults'
 import { useVaultContext } from '@/contexts/vaultContext'
 import { useChainId } from '@/hooks/network'
+import { VaultSnapshot } from '@/hooks/vaults'
 import { formatBig18 } from '@/utils/big18Utils'
 
 import { Button } from '@ds/Button'

@@ -14,8 +14,7 @@ import { useIntl } from 'react-intl'
 import { parseEther } from 'viem'
 
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
-import { VaultSnapshot, VaultUserSnapshot } from '@/constants/vaults'
-import { useVaultTransactions } from '@/hooks/vaults'
+import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
 import { Big18Math, formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
 

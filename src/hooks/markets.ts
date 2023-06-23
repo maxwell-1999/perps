@@ -1,12 +1,11 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
-import { multicall } from '@wagmi/core'
 import { ethers } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useCallback, useEffect, useState } from 'react'
 import { Address, Hex, getAddress, numberToHex, parseAbi, toHex, zeroAddress } from 'viem'
 // eslint-disable-next-line no-restricted-imports
 import { useAccount, useSendTransaction, useWalletClient } from 'wagmi'
-import { waitForTransaction } from 'wagmi/actions'
+import { multicall, waitForTransaction } from 'wagmi/actions'
 import { goerli, mainnet } from 'wagmi/chains'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
@@ -767,7 +766,7 @@ export const useChainLivePrices = () => {
 
 export type LivePrices = Awaited<ReturnType<typeof useChainLivePrices>>
 
-export const useRefreshMarketDataOnPriceUpdates = () => {
+export const useRefreshKeysOnPriceUpdates = (invalidKeys: string[] = ['userCurrentPositions', 'assetSnapshots']) => {
   const chainId = useChainId()
   const queryClient = useQueryClient()
   const [aggregators, setAggregators] = useState<string[]>([])
@@ -777,10 +776,9 @@ export const useRefreshMarketDataOnPriceUpdates = () => {
   const refresh = useCallback(
     () =>
       queryClient.invalidateQueries({
-        predicate: ({ queryKey }) =>
-          ['userCurrentPositions', 'assetSnapshots'].includes(queryKey.at(0) as string) && queryKey.includes(chainId),
+        predicate: ({ queryKey }) => invalidKeys.includes(queryKey.at(0) as string) && queryKey.includes(chainId),
       }),
-    [queryClient, chainId],
+    [invalidKeys, queryClient, chainId],
   )
 
   useEffect(() => {

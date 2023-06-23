@@ -19,7 +19,8 @@
       "@ds/*": ["./src/components/design-system/*"],
       "@utils/*": ["./src/utils/*"],
       "@public/*": ["./public/*"],
-      "@t/*": ["./types/*"]
+      "@t/*": ["./types/*"],
+      "@abi/*": ["./abi/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "./types/**/*"],

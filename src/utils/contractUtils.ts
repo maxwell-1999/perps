@@ -1,20 +1,28 @@
-import { Provider } from 'ethers'
+import { Address, WalletClient } from 'wagmi'
+import { getContract } from 'wagmi/actions'
 
 import { BalancedVaultAlphaAddresses, BalancedVaultBravoAddresses } from '@/constants/contracts'
 import { SupportedChainId } from '@/constants/network'
 import { PerennialVaultType } from '@/constants/vaults'
 
-import { BalancedVaultAbi__factory, IProductAbi__factory } from '@t/generated'
+import { BalancedVaultAbi } from '@abi/BalancedVault.abi'
+import { IProductAbi } from '@abi/IProduct.abi'
 
-export function getVaultForType(vaultType: PerennialVaultType, chainId: SupportedChainId, provider: Provider) {
+export function getVaultAddressForType(vaultType: PerennialVaultType, chainId: SupportedChainId) {
   switch (vaultType) {
     case 'alpha':
-      return BalancedVaultAbi__factory.connect(BalancedVaultAlphaAddresses[chainId] as string, provider)
+      return BalancedVaultAlphaAddresses[chainId]
     case 'bravo':
-      return BalancedVaultAbi__factory.connect(BalancedVaultBravoAddresses[chainId] as string, provider)
+      return BalancedVaultBravoAddresses[chainId]
   }
 }
 
-export function getProductContract(productAddress: string, provider: Provider) {
-  return IProductAbi__factory.connect(productAddress, provider)
+export function getVaultForType(vaultType: PerennialVaultType, chainId: SupportedChainId, signer?: WalletClient) {
+  const address = getVaultAddressForType(vaultType, chainId)
+  if (!address) return
+  return getContract({ abi: BalancedVaultAbi, address, walletClient: signer })
+}
+
+export function getProductContract(productAddress: Address, chainId: SupportedChainId) {
+  return getContract({ abi: IProductAbi, address: productAddress, chainId })
 }

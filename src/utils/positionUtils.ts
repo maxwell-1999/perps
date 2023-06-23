@@ -1,41 +1,42 @@
 import { PositionStatus } from '@/constants/markets'
 
-import { IPerennialLens, PositionStructOutput, PrePositionStructOutput } from '@t/generated/LensAbi'
+import { IPerennialLens } from '@t/generated/LensAbi'
 import { PositionSide } from '@t/gql/graphql'
+import { Position, PrePosition } from '@t/position'
 
 import { Big18Math } from './big18Utils'
 
-export function next(pre: PrePositionStructOutput, pos: PositionStructOutput) {
+export function next(pre: PrePosition, pos: Position) {
   return {
     maker: pos.maker + pre.openPosition.maker - pre.closePosition.maker,
     taker: pos.taker + pre.openPosition.taker - pre.closePosition.taker,
-  } as PositionStructOutput
+  }
 }
 
-export function size(pos: PositionStructOutput) {
+export function size(pos: Position) {
   return pos.maker || pos.taker || 0n
 }
 
-export function side(pos?: PositionStructOutput): PositionSide {
+export function side(pos?: Position): PositionSide {
   if (pos && pos.maker > 0n) return PositionSide.Maker
   return PositionSide.Taker
 }
 
-export function add(a: PositionStructOutput, b: PositionStructOutput) {
+export function add(a: Position, b: Position) {
   return {
     maker: a.maker + b.maker,
     taker: a.taker + b.taker,
-  } as PositionStructOutput
+  }
 }
 
-export function utilization(pre: PrePositionStructOutput, pos: PositionStructOutput) {
+export function utilization(pre: PrePosition, pos: Position) {
   const nextPosition = next(pre, pos)
   if (nextPosition.maker === 0n) return Big18Math.ONE
 
   return Big18Math.min(Big18Math.ONE, Big18Math.div(nextPosition.taker, nextPosition.maker))
 }
 
-export function socialization(pre: PrePositionStructOutput, pos: PositionStructOutput) {
+export function socialization(pre: PrePosition, pos: Position) {
   const nextPosition = next(pre, pos)
   if (nextPosition.taker === 0n) return Big18Math.ONE
 
@@ -45,9 +46,9 @@ export function socialization(pre: PrePositionStructOutput, pos: PositionStructO
 // LiquidationPrice = ((position * abs(price) + collateral) / (position * (1 + maintenanceRatio))
 export const calcLiquidationPrice = (
   product: IPerennialLens.ProductSnapshotStructOutput,
-  userPosition: PositionStructOutput,
+  userPosition: Position,
   collateral: bigint,
-  userPositionDelta?: PositionStructOutput,
+  userPositionDelta?: Position,
 ) => {
   if (!collateral || Big18Math.isZero(collateral) || !product.maintenance) return 0n
 
@@ -80,7 +81,7 @@ export const calcLiquidationPrice = (
 // LiquidationPrice = |(Collateral * Makers + Position * Takers * |Price|)/(Position * (Makers * Maintenance + Takers))|
 export const calcLiquidationPriceShort = (
   product: IPerennialLens.ProductSnapshotStructOutput,
-  productNextPosition: PositionStructOutput,
+  productNextPosition: Position,
   userPosition: bigint,
   collateral: bigint,
   taker: boolean,
@@ -104,7 +105,7 @@ export const calcLiquidationPriceShort = (
 // LiquidationPrice = |(Position * Takers * |Price| - Collateral * Makers) / (Position * (Makers * Maintenance - Takers))|
 export const calcLiquidationPriceLong = (
   product: IPerennialLens.ProductSnapshotStructOutput,
-  productNextPosition: PositionStructOutput,
+  productNextPosition: Position,
   userPosition: bigint,
   collateral: bigint,
   taker: boolean,
@@ -150,7 +151,7 @@ export const calcLeverage = (price: bigint, position: bigint, collateral: bigint
   return Big18Math.div(Big18Math.mul(Big18Math.abs(price), position), collateral)
 }
 
-export const calcExposure = (userPosition: bigint, globalPosition: PositionStructOutput) => {
+export const calcExposure = (userPosition: bigint, globalPosition: Position) => {
   if (Big18Math.isZero(globalPosition.maker)) return Big18Math.ZERO
 
   return Big18Math.div(Big18Math.mul(userPosition, globalPosition.taker), globalPosition.maker)

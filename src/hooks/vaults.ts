@@ -1,76 +1,82 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { BlockTag, Provider } from 'ethers'
 import { useCallback } from 'react'
-import { Hex, getAddress } from 'viem'
-import { useSendTransaction, useWalletClient } from 'wagmi'
-import { waitForTransaction } from 'wagmi/actions'
+import { Address, BlockNumber, Hex, getAbiItem, getAddress } from 'viem'
+import { PublicClient, usePublicClient, useSendTransaction, useWalletClient } from 'wagmi'
+import { GetContractResult, waitForTransaction } from 'wagmi/actions'
 
 import { MultiInvokerAddresses } from '@/constants/contracts'
 import { MaxUint256 } from '@/constants/markets'
 import { SupportedChainId, SupportedChainIds } from '@/constants/network'
-import { PerennialVaultType, VaultSymbol, VaultUserSnapshot } from '@/constants/vaults'
-import { VaultSnapshot } from '@/constants/vaults'
-import { sum as sumArray } from '@/utils/arrayUtils'
+import { PerennialVaultType, VaultSymbol } from '@/constants/vaults'
+import { notEmpty, sum as sumArray } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { InvokerAction, buildInvokerAction } from '@/utils/multiinvoker'
-import { ethersResultToPOJO } from '@/utils/objectUtils'
 
-import { BalancedVaultAbi, LensAbi } from '@t/generated'
+import { BalancedVaultAbi } from '@abi/BalancedVault.abi'
+import { LensProductSnapshotAbi, LensUserProductSnapshotAbi } from '@abi/Lens.abi'
 
-import { getProductContract, getVaultForType } from '../utils/contractUtils'
-import { useDSU, useLens, useMultiInvoker, useMulticallContract, useUSDC } from './contracts'
-import { useAddress, useChainId, useMulticallProvider } from './network'
+import { getProductContract, getVaultAddressForType, getVaultForType } from '../utils/contractUtils'
+import {
+  useDSU,
+  useLensProductSnapshotViem,
+  useLensUserProductSnapshotViem,
+  useMultiInvoker,
+  useUSDC,
+} from './contracts'
+import { useRefreshKeysOnPriceUpdates } from './markets'
+import { useAddress, useChainId } from './network'
 
 export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
   const chainId = useChainId()
-  const provider = useMulticallProvider()
-  const _lens = useLens()
-  const lens = useMulticallContract(_lens)
+  const lensProductSnapshot = useLensProductSnapshotViem()
+  const lensUserProductSnapshot = useLensUserProductSnapshotViem()
 
   return useQuery({
     queryKey: ['vaultSnapshots', vaultTypes, chainId],
     enabled: !!chainId,
-    refetchInterval: 10000,
-    queryFn: () => {
+    queryFn: async () => {
       if (!vaultTypes.length) {
-        return Promise.resolve([])
+        return []
       }
-      return Promise.all(vaultTypes.map((vaultType) => vaultFetcher(vaultType, chainId, provider, lens))).then(
-        (results) => results.filter((result): result is VaultSnapshot => result !== undefined),
+      const snapshots = await Promise.all(
+        vaultTypes.map((vaultType) => vaultFetcher(vaultType, chainId, lensProductSnapshot, lensUserProductSnapshot)),
       )
+
+      return snapshots.filter(notEmpty)
     },
   })
 }
 
+export type VaultSnapshot = Exclude<Awaited<ReturnType<typeof vaultFetcher>>, undefined>
 const vaultFetcher = async (
   vaultType: PerennialVaultType,
   chainId: SupportedChainId,
-  provider: Provider,
-  lens: LensAbi,
-): Promise<VaultSnapshot | undefined> => {
-  const vaultContract = getVaultForType(vaultType, chainId, provider)
-  if (!vaultContract) {
-    return Promise.resolve(undefined)
-  }
-  const [name, symbol, long, short, targetLeverage, maxCollateral, vaultAddress] = await Promise.all([
-    vaultContract.name(),
-    vaultContract.symbol(),
-    vaultContract.long(),
-    vaultContract.short(),
-    vaultContract.targetLeverage(),
-    vaultContract.maxCollateral(),
-    vaultContract.getAddress(),
+  lensProduct: GetContractResult<typeof LensProductSnapshotAbi>,
+  lensUserProduct: GetContractResult<typeof LensUserProductSnapshotAbi>,
+) => {
+  const vaultContract = getVaultForType(vaultType, chainId)
+  if (!vaultContract) return
+
+  const vaultAddress = vaultContract.address
+
+  const [name, symbol, long, short, targetLeverage, maxCollateral] = await Promise.all([
+    vaultContract.read.name(),
+    vaultContract.read.symbol(),
+    vaultContract.read.long(),
+    vaultContract.read.short(),
+    vaultContract.read.targetLeverage(),
+    vaultContract.read.maxCollateral(),
   ])
 
   const [longSnapshot, shortSnapshot, longUserSnapshot, shortUserSnapshot, canSync, totalSupply, totalAssets] =
     await Promise.all([
-      lens['snapshot(address)'].staticCall(long),
-      lens['snapshot(address)'].staticCall(short),
-      lens['snapshot(address,address)'].staticCall(vaultAddress, long),
-      lens['snapshot(address,address)'].staticCall(vaultAddress, short),
+      lensProduct.read.snapshot([long]),
+      lensProduct.read.snapshot([short]),
+      lensUserProduct.read.snapshot([vaultAddress, long]),
+      lensUserProduct.read.snapshot([vaultAddress, short]),
       trySync(vaultContract),
-      vaultContract.totalSupply(),
-      vaultContract.totalAssets(),
+      vaultContract.read.totalSupply(),
+      vaultContract.read.totalAssets(),
     ])
 
   return {
@@ -83,110 +89,142 @@ const vaultFetcher = async (
     totalAssets,
     targetLeverage,
     maxCollateral,
-    longSnapshot: ethersResultToPOJO(longSnapshot),
-    shortSnapshot: ethersResultToPOJO(shortSnapshot),
-    longUserSnapshot: ethersResultToPOJO(longUserSnapshot),
-    shortUserSnapshot: ethersResultToPOJO(shortUserSnapshot),
+    longSnapshot: longSnapshot,
+    shortSnapshot: shortSnapshot,
+    longUserSnapshot: longUserSnapshot,
+    shortUserSnapshot: shortUserSnapshot,
     canSync,
   }
 }
 
 export const useVaultUserSnapshot = (vaultSymbol: VaultSymbol) => {
   const chainId = useChainId()
-  const provider = useMulticallProvider()
+  const client = usePublicClient()
   const { address } = useAddress()
   const vaultType = [VaultSymbol.PVA, VaultSymbol.ePBV].includes(vaultSymbol)
     ? PerennialVaultType.alpha
     : PerennialVaultType.bravo
+  const vaultContract = getVaultForType(vaultType, chainId)
 
   return useQuery({
     queryKey: ['vaultUserSnapshot', chainId, vaultSymbol, address],
-    refetchInterval: 10000,
-    enabled: !!chainId && !!address && !!vaultSymbol,
-    queryFn: async (): Promise<VaultUserSnapshot | undefined> => {
-      const vaultContract = getVaultForType(vaultType, chainId, provider)
-      if (!address || !chainId || !vaultSymbol || !vaultContract) return
-      const depositsQuery = vaultContract.filters.Deposit(undefined, address)
-      const claimsQuery = vaultContract.filters.Claim(undefined, address)
-      const redemptionsQuery = vaultContract.filters.Redemption(undefined, address)
-
-      const [long, short, _deposits, _claims, _redemptions, vaultAddress] = await Promise.all([
-        vaultContract.long(),
-        vaultContract.short(),
-        vaultContract.queryFilter(depositsQuery),
-        vaultContract.queryFilter(claimsQuery),
-        vaultContract.queryFilter(redemptionsQuery),
-        vaultContract.getAddress(),
-      ])
-
-      const longProduct = getProductContract(long, provider)
-      const shortProduct = getProductContract(short, provider)
-
-      const [, , , balance] = await Promise.all([
-        longProduct['settleAccount'].staticCall(vaultAddress),
-        shortProduct['settleAccount'].staticCall(vaultAddress),
-        trySync(vaultContract),
-        vaultContract.balanceOf(address),
-      ])
-
-      const [, , , latestVersion, assets, claimable] = await Promise.all([
-        longProduct['settleAccount'].staticCall(vaultAddress),
-        shortProduct['settleAccount'].staticCall(vaultAddress),
-        trySync(vaultContract),
-        longProduct['latestVersion()'].staticCall(),
-        vaultContract.convertToAssets(balance),
-        vaultContract.unclaimed(address),
-      ])
-      const deposits = _deposits.sort((a, b) => Big18Math.subFixed(b.args.version, a.args.version).toUnsafeFloat())
-      const claims = _claims.sort((a, b) => b.blockNumber - a.blockNumber)
-      const redemptions = _redemptions.sort((a, b) =>
-        Big18Math.subFixed(b.args.version, a.args.version).toUnsafeFloat(),
-      )
-
-      let pendingRedemptionAmount = 0n
-      if (redemptions.length && redemptions[0].args.version >= latestVersion) {
-        pendingRedemptionAmount = redemptions[0].args.shares
-      }
-
-      let pendingDepositAmount = 0n
-      if (deposits.length && deposits[0].args.version >= latestVersion) {
-        pendingDepositAmount = deposits[0].args.assets
-      }
-
-      let currentPositionStartBlock = (deposits.at(-1)?.blockNumber || 0) - 1
-      for (const claim of claims) {
-        const [, balance] = await Promise.all([
-          trySync(vaultContract, { blockTag: claim.blockNumber }),
-          vaultContract.balanceOf(address, { blockTag: claim.blockNumber }),
-        ])
-        if (balance < BigInt(100)) {
-          // If less than 100 wei, consider it a new starting block
-          currentPositionStartBlock = claim.blockNumber
-          break
-        }
-      }
-
-      return {
-        balance,
-        assets,
-        claimable,
-        totalDeposit: sumArray(_deposits.map((e) => e.args.assets)),
-        totalClaim: sumArray(_claims.map((e) => e.args.assets)),
-        currentPositionDeposits: sumArray(
-          _deposits.filter((e) => e.blockNumber > currentPositionStartBlock).map((e) => e.args.assets),
-        ),
-        currentPositionClaims: sumArray(
-          _claims.filter((e) => e.blockNumber > currentPositionStartBlock).map((e) => e.args.assets),
-        ),
-        // Sort redemptions as most recent first
-        deposits,
-        claims,
-        redemptions,
-        pendingRedemptionAmount,
-        pendingDepositAmount,
-      }
+    enabled: !!chainId && !!address && !!vaultSymbol && !!vaultContract,
+    queryFn: async () => {
+      if (!address || !chainId || !vaultContract) return
+      return vaultUserFetcher(address, vaultContract, chainId, client)
     },
   })
+}
+
+export type VaultUserSnapshot = Awaited<ReturnType<typeof vaultUserFetcher>>
+const vaultUserFetcher = async (
+  address: Address,
+  vaultContract: GetContractResult<typeof BalancedVaultAbi>,
+  chainId: SupportedChainId,
+  client: PublicClient,
+) => {
+  const vaultAddress = vaultContract.address
+  const getLogsArgs = { account: address }
+  const [long, short, _deposits, _claims, _redemptions] = await Promise.all([
+    vaultContract.read.long(),
+    vaultContract.read.short(),
+    client.getLogs({
+      address: vaultAddress,
+      args: getLogsArgs,
+      fromBlock: 0n,
+      toBlock: 'latest',
+      strict: true,
+      event: getAbiItem({ abi: vaultContract.abi, name: 'Deposit' }),
+    }),
+    client.getLogs({
+      address: vaultAddress,
+      args: getLogsArgs,
+      fromBlock: 0n,
+      toBlock: 'latest',
+      strict: true,
+      event: getAbiItem({ abi: vaultContract.abi, name: 'Claim' }),
+    }),
+    client.getLogs({
+      address: vaultAddress,
+      args: getLogsArgs,
+      fromBlock: 0n,
+      toBlock: 'latest',
+      strict: true,
+      event: getAbiItem({ abi: vaultContract.abi, name: 'Redemption' }),
+    }),
+  ])
+
+  const longProduct = getProductContract(long, chainId)
+  const shortProduct = getProductContract(short, chainId)
+
+  const [, , , balance, claimable] = await Promise.all([
+    longProduct.read.settleAccount([vaultAddress]),
+    shortProduct.read.settleAccount([vaultAddress]),
+    trySync(vaultContract),
+    vaultContract.read.balanceOf([address]),
+    vaultContract.read.unclaimed([address]),
+  ])
+
+  const [, , , latestVersion, assets] = await Promise.all([
+    longProduct.read.settleAccount([vaultAddress]),
+    shortProduct.read.settleAccount([vaultAddress]),
+    trySync(vaultContract),
+    longProduct.read.latestVersion(),
+    vaultContract.read.convertToAssets([balance]),
+  ])
+
+  const deposits = _deposits.sort((a, b) => Big18Math.subFixed(b.args.version, a.args.version).toUnsafeFloat())
+  const claims = _claims.sort((a, b) => Big18Math.cmp(b.blockNumber ?? 0n, a.blockNumber ?? 0n))
+  const redemptions = _redemptions.sort((a, b) => Big18Math.subFixed(b.args.version, a.args.version).toUnsafeFloat())
+
+  let pendingRedemptionAmount = 0n
+  if (redemptions.length && redemptions[0].args.version >= latestVersion) {
+    pendingRedemptionAmount = redemptions[0].args.shares
+  }
+
+  let pendingDepositAmount = 0n
+  if (deposits.length && deposits[0].args.version >= latestVersion) {
+    pendingDepositAmount = deposits[0].args.assets
+  }
+
+  let currentPositionStartBlock = (deposits.at(-1)?.blockNumber || 0n) - 1n
+  for (const claim of claims) {
+    if (claim.blockNumber === null) continue
+    const [, balance] = await Promise.all([
+      trySync(vaultContract, { blockNumber: claim.blockNumber }),
+      vaultContract.read.balanceOf([address], { blockNumber: claim.blockNumber }),
+    ])
+    if (balance < 100n) {
+      // If less than 100 wei, consider it a new starting block
+      currentPositionStartBlock = claim.blockNumber
+      break
+    }
+  }
+
+  return {
+    balance,
+    assets,
+    claimable,
+    totalDeposit: sumArray(_deposits.map((e) => e.args.assets)),
+    totalClaim: sumArray(_claims.map((e) => e.args.assets)),
+    currentPositionDeposits: sumArray(
+      _deposits.filter((e) => e.blockNumber ?? 0n > currentPositionStartBlock).map((e) => e.args.assets),
+    ),
+    currentPositionClaims: sumArray(
+      _claims.filter((e) => e.blockNumber ?? 0n > currentPositionStartBlock).map((e) => e.args.assets),
+    ),
+    // Sort redemptions as most recent first
+    deposits,
+    claims,
+    redemptions,
+    pendingRedemptionAmount,
+    pendingDepositAmount,
+  }
+}
+
+export const useRefreshVaultsOnPriceUpdates = () => {
+  const keys = ['vaultSnapshots', 'vaultUserSnapshot']
+  useRefreshKeysOnPriceUpdates(keys)
 }
 
 export type VaultTransactions = {
@@ -197,11 +235,9 @@ export type VaultTransactions = {
   onRedeem: (amount: bigint, { assets, max }: { assets?: boolean; max?: boolean }) => Promise<void>
   onClaim: (unwrapAmount?: bigint) => Promise<void>
 }
-
 export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransactions => {
   const { address } = useAddress()
   const chainId = useChainId()
-  const provider = useMulticallProvider()
   const usdcContract = useUSDC()
   const dsuContract = useDSU()
   const multiInvoker = useMultiInvoker()
@@ -255,34 +291,23 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
   }
 
   const onApproveShares = async () => {
-    const vaultContract = getVaultForType(vaultType, chainId, provider)
-    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
-      return
-    }
+    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !walletClient) return
+    const vaultContract = getVaultForType(vaultType, chainId, walletClient)
+    if (!vaultContract) return
 
-    const txData = await vaultContract.approve.populateTransaction(MultiInvokerAddresses[chainId], MaxUint256)
-    const receipt = await sendTransactionAsync({
-      chainId,
-      to: getAddress(txData.to),
-      data: txData.data as Hex,
-      account: walletClient?.account,
-    })
-    await waitForTransaction({ hash: receipt.hash })
+    const receiptHash = await vaultContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256])
+    await waitForTransaction({ hash: receiptHash })
     await refresh()
   }
 
   const onDeposit = async (amount: bigint) => {
-    const vaultContract = getVaultForType(vaultType, chainId, provider)
-    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
-      return
-    }
-
-    const vaultAddress = await vaultContract.getAddress()
+    const vaultAddress = getVaultAddressForType(vaultType, chainId)
+    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultAddress) return
 
     const actions = [
       buildInvokerAction(InvokerAction.VAULT_WRAP_AND_DEPOSIT, {
         userAddress: address,
-        vaultAddress: vaultAddress,
+        vaultAddress,
         vaultAmount: amount,
       }),
     ]
@@ -300,21 +325,21 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
   }
 
   const onRedeem = async (amount: bigint, { assets = true, max = false }) => {
-    const vaultContract = getVaultForType(vaultType, chainId, provider)
+    const vaultContract = getVaultForType(vaultType, chainId)
     if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
       return
     }
+    const vaultAddress = vaultContract.address
 
-    const vaultAddress = await vaultContract.getAddress()
-    let vaultAmount = max ? await vaultContract.balanceOf(address) : amount
+    let vaultAmount = max ? await vaultContract.read.balanceOf([address]) : amount
     if (assets) {
-      vaultAmount = await convertAssetsToShares({ vaultType, provider, assets: amount, chainId })
+      vaultAmount = await convertAssetsToShares({ vaultType, assets: amount, chainId })
     }
 
     const actions = [
       buildInvokerAction(InvokerAction.VAULT_REDEEM, {
         userAddress: address,
-        vaultAddress: vaultAddress,
+        vaultAddress,
         vaultAmount,
       }),
     ]
@@ -332,11 +357,11 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
   }
 
   const onClaim = async (unwrapAmount?: bigint) => {
-    const vaultContract = getVaultForType(vaultType, chainId, provider)
+    const vaultContract = getVaultForType(vaultType, chainId)
     if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
       return
     }
-    const vaultAddress = await vaultContract.getAddress()
+    const vaultAddress = vaultContract.address
 
     const actions = [
       buildInvokerAction(InvokerAction.VAULT_CLAIM, {
@@ -378,29 +403,28 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
 
 const convertAssetsToShares = async ({
   vaultType,
-  provider,
   assets,
   chainId,
 }: {
   vaultType: PerennialVaultType
-  provider: Provider
   assets: bigint
   chainId: SupportedChainId
 }): Promise<bigint> => {
-  const vault = getVaultForType(vaultType, chainId, provider)
+  const vault = getVaultForType(vaultType, chainId)
   if (!vault) {
     return 0n
   }
-  const [long, short, vaultAddress] = await Promise.all([vault.long(), vault.short(), vault.getAddress()])
+  const vaultAddress = vault.address
+  const [long, short] = await Promise.all([vault.read.long(), vault.read.short()])
 
-  const longProduct = getProductContract(long, provider)
-  const shortProduct = getProductContract(short, provider)
+  const longProduct = getProductContract(long, chainId)
+  const shortProduct = getProductContract(short, chainId)
 
   const [, , , shares] = await Promise.all([
-    longProduct['settleAccount'].staticCall(vaultAddress),
-    shortProduct['settleAccount'].staticCall(vaultAddress),
+    longProduct.read.settleAccount([vaultAddress]),
+    shortProduct.read.settleAccount([vaultAddress]),
     trySync(vault),
-    vault.convertToShares(assets),
+    vault.read.convertToShares([assets]),
   ])
 
   return shares
@@ -410,9 +434,12 @@ const bufferGasLimit = (estimatedGas: bigint) => {
   return Big18Math.div(Big18Math.mul(estimatedGas, 3n), 2n)
 }
 
-const trySync = async (vault: BalancedVaultAbi, { blockTag }: { blockTag?: BlockTag } = {}) => {
+const trySync = async (
+  vault: GetContractResult<typeof BalancedVaultAbi>,
+  { blockNumber }: { blockNumber?: BlockNumber } = {},
+) => {
   try {
-    await vault.sync.staticCall({ blockTag })
+    await vault.read.sync({ blockNumber })
     return true
   } catch (e) {
     console.error(e)

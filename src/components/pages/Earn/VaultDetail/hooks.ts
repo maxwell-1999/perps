@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
-import { VaultSnapshot, VaultUserSnapshot } from '@/constants/vaults'
+import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
 import { sum } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { add, calcExposure, calcLeverage, next } from '@/utils/positionUtils'

@@ -1,9 +1,9 @@
 import { Flex, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
 import { useState } from 'react'
 
-import { VaultMetadata, VaultSnapshot } from '@/constants/vaults'
+import { VaultMetadata } from '@/constants/vaults'
 import { useChainId } from '@/hooks/network'
-import { useVaultUserSnapshot } from '@/hooks/vaults'
+import { VaultSnapshot, useVaultUserSnapshot } from '@/hooks/vaults'
 import { Big18Math } from '@/utils/big18Utils'
 
 import colors from '@ds/theme/colors'

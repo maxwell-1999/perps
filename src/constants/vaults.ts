@@ -1,10 +1,6 @@
 import { arbitrum, arbitrumGoerli, baseGoerli, mainnet } from '@wagmi/chains'
 import { parseEther } from 'viem'
 
-import { ClaimEvent, DepositEvent, RedemptionEvent } from '@t/generated/BalancedVaultAbi'
-import { IPerennialLens } from '@t/generated/LensAbi'
-import { TypedContractEvent, TypedEventLog } from '@t/generated/common'
-
 import { SupportedAsset } from './assets'
 
 export enum PerennialVaultType {
@@ -55,40 +51,4 @@ export const FeeApr: { [chainId: number]: { [key in VaultSymbol]?: bigint } } = 
   [baseGoerli.id]: {
     [VaultSymbol.PVA]: parseEther('0.1391'),
   },
-}
-
-export type VaultSnapshot = {
-  address: string
-  name: string
-  symbol: VaultSymbol
-  long: string
-  short: string
-  totalSupply: bigint
-  totalAssets: bigint
-  targetLeverage: bigint
-  maxCollateral: bigint
-  longSnapshot: IPerennialLens.ProductSnapshotStructOutput
-  shortSnapshot: IPerennialLens.ProductSnapshotStructOutput
-  longUserSnapshot: IPerennialLens.UserProductSnapshotStructOutput
-  shortUserSnapshot: IPerennialLens.UserProductSnapshotStructOutput
-  canSync: boolean
-}
-
-export type VaultUserSnapshot = {
-  balance: bigint
-  assets: bigint
-  claimable: bigint
-  totalDeposit: bigint
-  totalClaim: bigint
-  currentPositionDeposits: bigint
-  currentPositionClaims: bigint
-  deposits: TypedEventLog<
-    TypedContractEvent<DepositEvent.InputTuple, DepositEvent.OutputTuple, DepositEvent.OutputObject>
-  >[]
-  redemptions: TypedEventLog<
-    TypedContractEvent<RedemptionEvent.InputTuple, RedemptionEvent.OutputTuple, RedemptionEvent.OutputObject>
-  >[]
-  pendingRedemptionAmount: bigint
-  pendingDepositAmount: bigint
-  claims: TypedEventLog<TypedContractEvent<ClaimEvent.InputTuple, ClaimEvent.OutputTuple, ClaimEvent.OutputObject>>[]
 }

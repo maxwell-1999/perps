@@ -1,8 +1,8 @@
 import { createContext, useContext, useMemo, useState } from 'react'
 
-import { PerennialVaultType, SupportedVaults, VaultSnapshot } from '@/constants/vaults'
+import { PerennialVaultType, SupportedVaults } from '@/constants/vaults'
 import { useChainId } from '@/hooks/network'
-import { useVaultSnapshots } from '@/hooks/vaults'
+import { VaultSnapshot, useRefreshVaultsOnPriceUpdates, useVaultSnapshots } from '@/hooks/vaults'
 
 type VaultContextType = {
   vaultSnapshots: VaultSnapshot[]
@@ -29,6 +29,8 @@ export const VaultProvider = ({ children }: { children: React.ReactNode }) => {
 
   const { data, status } = useVaultSnapshots(supportedVaults)
   const vaultSnapshots = data ?? []
+
+  useRefreshVaultsOnPriceUpdates()
 
   return (
     <VaultContext.Provider value={{ vaultSnapshots, status, selectedVault, setSelectedVault }}>

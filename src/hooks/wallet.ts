@@ -45,9 +45,9 @@ export const useBalances = () => {
 
       const [alphaVaultAllowance, bravoVaultAllowance] = await Promise.all(
         Object.values(PerennialVaultType).map((vaultType) => {
-          const vaultContract = getVaultForType(vaultType, chainId, provider)
+          const vaultContract = getVaultForType(vaultType, chainId)
           if (!vaultContract) return Promise.resolve(null)
-          return vaultContract.allowance(address, MultiInvokerAddresses[chainId])
+          return vaultContract.read.allowance([address, MultiInvokerAddresses[chainId]])
         }),
       )
       // Map vault allowances to vault symbol
