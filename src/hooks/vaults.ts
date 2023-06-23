@@ -389,9 +389,7 @@ const convertAssetsToShares = async ({
   return shares
 }
 
-const bufferGasLimit = (estimatedGas: bigint) => {
-  return Big18Math.div(Big18Math.mul(estimatedGas, 3n), 2n)
-}
+const bufferGasLimit = (estimatedGas: bigint) => (estimatedGas * 3n) / 2n
 
 const trySync = async (
   vault: GetContractResult<typeof BalancedVaultAbi>,
