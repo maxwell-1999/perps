@@ -1,13 +1,12 @@
 import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
-import { AlchemyProvider, JsonRpcProvider, WebSocketProvider } from 'ethers'
+import { WebSocketProvider } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useRouter } from 'next/router'
 import { getAddress } from 'viem'
 // eslint-disable-next-line no-restricted-imports
-import { useNetwork, useAccount as useWagmiAccount } from 'wagmi'
-import { baseGoerli } from 'wagmi/chains'
+import { useNetwork, usePublicClient, useAccount as useWagmiAccount } from 'wagmi'
 
-import { AlchemyActiveKey, DefaultChain, GraphUrls, SupportedChainId, isSupportedChain } from '@/constants/network'
+import { DefaultChain, GraphUrls, SupportedChainId, isSupportedChain } from '@/constants/network'
 
 export const useAddress = () => {
   const { address: wagmiAddress } = useWagmiAccount()
@@ -26,35 +25,14 @@ export const useChainId = () => {
   return chain.id as SupportedChainId
 }
 
-const providers = new Map<SupportedChainId, AlchemyProvider | JsonRpcProvider>()
-export const useProvider = () => {
-  const chainId = useChainId()
-
-  if (!providers.has(chainId)) {
-    providers.set(
-      chainId,
-      chainId === baseGoerli.id
-        ? new JsonRpcProvider('https://goerli.base.org')
-        : new AlchemyProvider(chainId, AlchemyActiveKey),
-    )
-  }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return providers.get(chainId)!
-}
-
 const wsProviders = new Map<SupportedChainId, WebSocketProvider>()
 export const useWsProvider = () => {
   const chainId = useChainId()
-  const provider = useProvider()
+  const { transport } = usePublicClient({ chainId })
 
   if (!wsProviders.has(chainId)) {
-    const providerUrl = provider._getConnection().url // TODO: Find a better way to get the provider url
-    wsProviders.set(
-      chainId,
-      chainId === baseGoerli.id
-        ? new WebSocketProvider('wss://goerli.base.org')
-        : new WebSocketProvider(providerUrl.replace('https://', 'wss://')),
-    )
+    const providerUrl = transport.transports[0].value.url // Taken from https://wagmi.sh/core/ethers-adapters
+    wsProviders.set(chainId, new WebSocketProvider(providerUrl.replace('https://', 'wss://')))
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return wsProviders.get(chainId)!

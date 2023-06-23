@@ -2,9 +2,11 @@ import { getDefaultWallets } from '@rainbow-me/rainbowkit'
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from '@wagmi/chains'
 import { configureChains, createConfig } from 'wagmi'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { publicProvider } from 'wagmi/providers/public'
 
 export const AlchemyProdKeys = process.env.NEXT_PUBLIC_ALCHEMY_PROD_KEYS?.split(',').map((k) => k.trim())
+export const QuickNodeBaseGoerliUrl = process.env.NEXT_PUBLIC_QUICKNODE_URL_BASE_GOERLI
 export const WalletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 
 if (!AlchemyProdKeys || !AlchemyProdKeys.length) throw new Error('Missing alchemy key configuration')
@@ -22,7 +24,20 @@ export const isTestnet = (chainId?: number) =>
 
 export const { chains, publicClient, webSocketPublicClient } = configureChains(
   [arbitrum, mainnet, goerli, arbitrumGoerli, baseGoerli],
-  [alchemyProvider({ apiKey: AlchemyActiveKey }), publicProvider()],
+  [
+    alchemyProvider({ apiKey: AlchemyActiveKey }),
+    jsonRpcProvider({
+      rpc: (chain) => {
+        if (chain.id === baseGoerli.id)
+          return {
+            http: QuickNodeBaseGoerliUrl || '',
+            webSocket: QuickNodeBaseGoerliUrl?.replace('https', 'wss'),
+          }
+        return { http: '' }
+      },
+    }),
+    publicProvider(),
+  ],
   {
     batch: {
       multicall: true,

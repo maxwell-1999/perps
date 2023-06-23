@@ -87,12 +87,18 @@ export default function VaultForm({
   }
 
   const onClickMaxAmount = () => {
-    setValue(FormNames.amount, Big18Math.toFloatString(Big18Math.fromDecimals(balances?.usdc ?? 0n, 6)))
+    setValue(FormNames.amount, Big18Math.toFloatString(Big18Math.fromDecimals(balances?.usdc ?? 0n, 6)), {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
   }
 
   const onClickMaxShares = () => {
     setMaxWithdrawal(true)
-    setValue(FormNames.amount, Big18Math.toFloatString(vaultUserSnapshot?.assets ?? 0n))
+    setValue(FormNames.amount, Big18Math.toFloatString(vaultUserSnapshot?.assets ?? 0n), {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
   }
 
   const displayAmount = Intl.NumberFormat('en-US', {
