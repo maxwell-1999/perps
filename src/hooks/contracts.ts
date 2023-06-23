@@ -1,3 +1,4 @@
+import { WalletClient } from 'viem'
 import { getContract } from 'wagmi/actions'
 
 import {
@@ -7,17 +8,37 @@ import {
   MultiInvokerAddresses,
   USDCAddresses,
 } from '@/constants/contracts'
-import { useChainId, useProvider } from '@/hooks/network'
+import { useChainId } from '@/hooks/network'
 
-import { LensProductSnapshotAbi, LensUserProductSnapshotAbi } from '@abi/Lens.abi'
-
-import { ERC20Abi__factory, ICollateralAbi__factory, LensAbi__factory, MultiInvokerAbi__factory } from '@t/generated'
+import { ERC20Abi } from '@abi/ERC20.abi'
+import { ICollateralAbi } from '@abi/ICollateral.abi'
+import { LensAbi, LensProductSnapshotAbi, LensProtocolSnapshotAbi, LensUserProductSnapshotAbi } from '@abi/Lens.abi'
+import { MultiInvokerAbi } from '@abi/MultiInvoker.abi'
 
 export const useLens = () => {
-  const provider = useProvider()
   const chainId = useChainId()
 
-  return LensAbi__factory.connect(LensAddresses[chainId], provider)
+  return getContract({ address: LensAddresses[chainId], abi: LensAbi, chainId })
+}
+
+// We need these because Viem currently doesn't handle overloads correctly
+// TODO(arjun): Remove this when Viem supports overloads
+export const useLensProductSnapshot = () => {
+  const chainId = useChainId()
+
+  return getContract({ address: LensAddresses[chainId], abi: LensProductSnapshotAbi, chainId })
+}
+
+export const useLensUserProductSnapshot = () => {
+  const chainId = useChainId()
+
+  return getContract({ address: LensAddresses[chainId], abi: LensUserProductSnapshotAbi, chainId })
+}
+
+export const useLensProtocolSnapshot = () => {
+  const chainId = useChainId()
+
+  return getContract({ address: LensAddresses[chainId], abi: LensProtocolSnapshotAbi, chainId })
 }
 
 export const useLensProductSnapshotViem = () => {
@@ -33,29 +54,40 @@ export const useLensUserProductSnapshotViem = () => {
 }
 
 export const useCollateral = () => {
-  const provider = useProvider()
   const chainId = useChainId()
 
-  return ICollateralAbi__factory.connect(CollateralAddresses[chainId], provider)
+  return getContract({ address: CollateralAddresses[chainId], abi: ICollateralAbi, chainId })
 }
 
-export const useDSU = () => {
-  const provider = useProvider()
+export const useDSU = (signer?: WalletClient) => {
   const chainId = useChainId()
 
-  return ERC20Abi__factory.connect(DSUAddresses[chainId], provider)
+  return getContract({
+    address: DSUAddresses[chainId],
+    abi: ERC20Abi,
+    chainId,
+    walletClient: signer,
+  })
 }
 
-export const useUSDC = () => {
-  const provider = useProvider()
+export const useUSDC = (signer?: WalletClient) => {
   const chainId = useChainId()
 
-  return ERC20Abi__factory.connect(USDCAddresses[chainId], provider)
+  return getContract({
+    address: USDCAddresses[chainId],
+    abi: ERC20Abi,
+    chainId,
+    walletClient: signer,
+  })
 }
 
-export const useMultiInvoker = () => {
-  const provider = useProvider()
+export const useMultiInvoker = (signer?: WalletClient) => {
   const chainId = useChainId()
 
-  return MultiInvokerAbi__factory.connect(MultiInvokerAddresses[chainId], provider)
+  return getContract({
+    address: MultiInvokerAddresses[chainId],
+    abi: MultiInvokerAbi,
+    chainId,
+    walletClient: signer,
+  })
 }

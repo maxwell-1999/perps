@@ -22,7 +22,7 @@ import { Button, IconButton } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
 
-import { IPerennialLens } from '@t/generated/LensAbi'
+import { ProductSnapshot } from '@t/perennial'
 
 import { FormNames, OrderValues, orderDirections } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
@@ -35,7 +35,7 @@ interface TradeFormProps {
   asset: SupportedAsset
   orderDirection: OrderDirection
   setOrderDirection: (orderDirection: OrderDirection) => void
-  product: IPerennialLens.ProductSnapshotStructOutput
+  product: ProductSnapshot
   position?: PositionDetails
 }
 

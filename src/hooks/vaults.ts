@@ -1,12 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
-import { Address, BlockNumber, Hex, getAbiItem, getAddress } from 'viem'
-import { PublicClient, usePublicClient, useSendTransaction, useWalletClient } from 'wagmi'
+import { Address, BlockNumber, getAbiItem, zeroAddress } from 'viem'
+import { PublicClient, useNetwork, usePublicClient, useWalletClient } from 'wagmi'
 import { GetContractResult, waitForTransaction } from 'wagmi/actions'
 
 import { MultiInvokerAddresses } from '@/constants/contracts'
-import { MaxUint256 } from '@/constants/markets'
-import { SupportedChainId, SupportedChainIds } from '@/constants/network'
+import { SupportedChainId } from '@/constants/network'
+import { MaxUint256 } from '@/constants/units'
 import { PerennialVaultType, VaultSymbol } from '@/constants/vaults'
 import { notEmpty, sum as sumArray } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
@@ -16,20 +16,14 @@ import { BalancedVaultAbi } from '@abi/BalancedVault.abi'
 import { LensProductSnapshotAbi, LensUserProductSnapshotAbi } from '@abi/Lens.abi'
 
 import { getProductContract, getVaultAddressForType, getVaultForType } from '../utils/contractUtils'
-import {
-  useDSU,
-  useLensProductSnapshotViem,
-  useLensUserProductSnapshotViem,
-  useMultiInvoker,
-  useUSDC,
-} from './contracts'
+import { useDSU, useLensProductSnapshot, useLensUserProductSnapshot, useMultiInvoker, useUSDC } from './contracts'
 import { useRefreshKeysOnPriceUpdates } from './markets'
 import { useAddress, useChainId } from './network'
 
 export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
   const chainId = useChainId()
-  const lensProductSnapshot = useLensProductSnapshotViem()
-  const lensUserProductSnapshot = useLensUserProductSnapshotViem()
+  const lensProductSnapshot = useLensProductSnapshot()
+  const lensUserProductSnapshot = useLensUserProductSnapshot()
 
   return useQuery({
     queryKey: ['vaultSnapshots', vaultTypes, chainId],
@@ -173,9 +167,9 @@ const vaultUserFetcher = async (
     vaultContract.read.convertToAssets([balance]),
   ])
 
-  const deposits = _deposits.sort((a, b) => Big18Math.subFixed(b.args.version, a.args.version).toUnsafeFloat())
+  const deposits = _deposits.sort((a, b) => Big18Math.cmp(b.args.version, a.args.version))
   const claims = _claims.sort((a, b) => Big18Math.cmp(b.blockNumber ?? 0n, a.blockNumber ?? 0n))
-  const redemptions = _redemptions.sort((a, b) => Big18Math.subFixed(b.args.version, a.args.version).toUnsafeFloat())
+  const redemptions = _redemptions.sort((a, b) => Big18Math.cmp(b.args.version, a.args.version))
 
   let pendingRedemptionAmount = 0n
   if (redemptions.length && redemptions[0].args.version >= latestVersion) {
@@ -208,10 +202,10 @@ const vaultUserFetcher = async (
     totalDeposit: sumArray(_deposits.map((e) => e.args.assets)),
     totalClaim: sumArray(_claims.map((e) => e.args.assets)),
     currentPositionDeposits: sumArray(
-      _deposits.filter((e) => e.blockNumber ?? 0n > currentPositionStartBlock).map((e) => e.args.assets),
+      _deposits.filter((e) => (e.blockNumber ?? 0n) > currentPositionStartBlock).map((e) => e.args.assets),
     ),
     currentPositionClaims: sumArray(
-      _claims.filter((e) => e.blockNumber ?? 0n > currentPositionStartBlock).map((e) => e.args.assets),
+      _claims.filter((e) => (e.blockNumber ?? 0n) > currentPositionStartBlock).map((e) => e.args.assets),
     ),
     // Sort redemptions as most recent first
     deposits,
@@ -236,18 +230,19 @@ export type VaultTransactions = {
   onClaim: (unwrapAmount?: bigint) => Promise<void>
 }
 export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransactions => {
-  const { address } = useAddress()
+  const { chain } = useNetwork()
   const chainId = useChainId()
-  const usdcContract = useUSDC()
-  const dsuContract = useDSU()
-  const multiInvoker = useMultiInvoker()
-  const { data: walletClient } = useWalletClient()
+  const { address } = useAddress()
+  const { data: walletClient } = useWalletClient({ chainId })
+
+  const usdcContract = useUSDC(walletClient ?? undefined)
+  const dsuContract = useDSU(walletClient ?? undefined)
+  const multiInvoker = useMultiInvoker(walletClient ?? undefined)
   const vaultType = [VaultSymbol.PVA, VaultSymbol.ePBV].includes(vaultSymbol)
     ? PerennialVaultType.alpha
     : PerennialVaultType.bravo
 
   const queryClient = useQueryClient()
-  const { sendTransactionAsync } = useSendTransaction()
 
   const refresh = useCallback(
     () =>
@@ -259,50 +254,32 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     [chainId, queryClient],
   )
 
+  const txOpts = { account: address || zeroAddress, chainId, chain }
   const onApproveUSDC = async () => {
-    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
-      return
-    }
-    const txData = await usdcContract.approve.populateTransaction(MultiInvokerAddresses[chainId], MaxUint256)
-    const receipt = await sendTransactionAsync({
-      chainId,
-      to: getAddress(txData.to),
-      data: txData.data as Hex,
-      account: walletClient?.account,
-    })
-    await waitForTransaction({ hash: receipt.hash })
+    const hash = await usdcContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
+    await waitForTransaction({ hash })
     await refresh()
   }
 
   const onApproveDSU = async () => {
-    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
-      return
-    }
-
-    const txData = await dsuContract.approve.populateTransaction(MultiInvokerAddresses[chainId], MaxUint256)
-    const receipt = await sendTransactionAsync({
-      chainId,
-      to: getAddress(txData.to),
-      data: txData.data as Hex,
-      account: walletClient?.account,
-    })
-    await waitForTransaction({ hash: receipt.hash })
+    const hash = await dsuContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
+    await waitForTransaction({ hash })
     await refresh()
   }
 
   const onApproveShares = async () => {
-    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !walletClient) return
+    if (!walletClient) return
     const vaultContract = getVaultForType(vaultType, chainId, walletClient)
     if (!vaultContract) return
 
-    const receiptHash = await vaultContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256])
+    const receiptHash = await vaultContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash: receiptHash })
     await refresh()
   }
 
   const onDeposit = async (amount: bigint) => {
     const vaultAddress = getVaultAddressForType(vaultType, chainId)
-    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultAddress) return
+    if (!address || !chainId || !walletClient || !vaultAddress) return
 
     const actions = [
       buildInvokerAction(InvokerAction.VAULT_WRAP_AND_DEPOSIT, {
@@ -312,21 +289,15 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
       }),
     ]
     // Extra buffer to account to changes to underlying state
-    const gasLimit = await multiInvoker.invoke.estimateGas(actions, { from: address })
-    const txData = await multiInvoker.invoke.populateTransaction(actions, { gasLimit: bufferGasLimit(gasLimit) })
-    const receipt = await sendTransactionAsync({
-      chainId,
-      to: getAddress(txData.to),
-      data: txData.data as Hex,
-      account: walletClient?.account,
-    })
-    await waitForTransaction({ hash: receipt.hash })
+    const gasLimit = await multiInvoker.estimateGas.invoke([actions], txOpts)
+    const hash = await multiInvoker.write.invoke([actions], { ...txOpts, gas: bufferGasLimit(gasLimit) })
+    await waitForTransaction({ hash })
     await refresh()
   }
 
   const onRedeem = async (amount: bigint, { assets = true, max = false }) => {
     const vaultContract = getVaultForType(vaultType, chainId)
-    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
+    if (!address || !chainId || !walletClient || !vaultContract) {
       return
     }
     const vaultAddress = vaultContract.address
@@ -344,21 +315,15 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
       }),
     ]
     // Extra buffer to account to changes to underlying state
-    const gasLimit = await multiInvoker.invoke.estimateGas(actions, { from: address })
-    const txData = await multiInvoker.invoke.populateTransaction(actions, { gasLimit: bufferGasLimit(gasLimit) })
-    const receipt = await sendTransactionAsync({
-      chainId,
-      to: getAddress(txData.to),
-      data: txData.data as Hex,
-      account: walletClient?.account,
-    })
-    await waitForTransaction({ hash: receipt.hash })
+    const gasLimit = await multiInvoker.estimateGas.invoke([actions], txOpts)
+    const hash = await multiInvoker.write.invoke([actions], { ...txOpts, gas: bufferGasLimit(gasLimit) })
+    await waitForTransaction({ hash })
     await refresh()
   }
 
   const onClaim = async (unwrapAmount?: bigint) => {
     const vaultContract = getVaultForType(vaultType, chainId)
-    if (!address || !chainId || !SupportedChainIds.includes(chainId) || !vaultContract) {
+    if (!address || !vaultContract) {
       return
     }
     const vaultAddress = vaultContract.address
@@ -379,15 +344,9 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     }
 
     // Extra buffer to account to changes to underlying state
-    const gasLimit = await multiInvoker.invoke.estimateGas(actions, { from: address })
-    const txData = await multiInvoker.invoke.populateTransaction(actions, { gasLimit: bufferGasLimit(gasLimit) })
-    const receipt = await sendTransactionAsync({
-      chainId,
-      to: getAddress(txData.to),
-      data: txData.data as Hex,
-      account: walletClient?.account,
-    })
-    await waitForTransaction({ hash: receipt.hash })
+    const gasLimit = await multiInvoker.estimateGas.invoke([actions], txOpts)
+    const hash = await multiInvoker.write.invoke([actions], { ...txOpts, gas: bufferGasLimit(gasLimit) })
+    await waitForTransaction({ hash })
     await refresh()
   }
 

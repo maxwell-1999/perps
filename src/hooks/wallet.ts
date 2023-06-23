@@ -4,12 +4,11 @@ import { mainnet } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
 import { ChainalysisContractAddress, MultiInvokerAddresses } from '@/constants/contracts'
-import { SupportedChainId, SupportedChainIds } from '@/constants/network'
 import { PerennialVaultType, SupportedVaults, VaultSymbol } from '@/constants/vaults'
 import { getVaultForType } from '@/utils/contractUtils'
 
 import { useDSU, useUSDC } from './contracts'
-import { useAddress, useChainId, useProvider } from './network'
+import { useAddress, useChainId } from './network'
 
 export type Balances =
   | {
@@ -25,8 +24,7 @@ export type Balances =
   | undefined
 
 export const useBalances = () => {
-  const chainId = useChainId() as SupportedChainId
-  const provider = useProvider()
+  const chainId = useChainId()
   const { address } = useAddress()
   const usdcContract = useUSDC()
   const dsuContract = useDSU()
@@ -35,12 +33,12 @@ export const useBalances = () => {
     queryKey: ['balances', chainId, address],
     enabled: !!address,
     queryFn: async () => {
-      if (!address || !chainId || !provider || !SupportedChainIds.includes(chainId)) return
+      if (!address || !chainId) return
 
       const [usdcBalance, usdcAllowance, dsuAllowance] = await Promise.all([
-        usdcContract.balanceOf(address),
-        usdcContract.allowance(address, MultiInvokerAddresses[chainId]),
-        dsuContract.allowance(address, MultiInvokerAddresses[chainId]),
+        usdcContract.read.balanceOf([address]),
+        usdcContract.read.allowance([address, MultiInvokerAddresses[chainId]]),
+        dsuContract.read.allowance([address, MultiInvokerAddresses[chainId]]),
       ])
 
       const [alphaVaultAllowance, bravoVaultAllowance] = await Promise.all(
@@ -82,7 +80,7 @@ export const useIsSanctioned = () => {
 
       return readContract({
         address: ChainalysisContractAddress,
-        abi: parseAbi(['function isSanctioned(address) view returns (bool)']),
+        abi: parseAbi(['function isSanctioned(address) view returns (bool)'] as const),
         functionName: 'isSanctioned',
         args: [address],
         chainId: mainnet.id,

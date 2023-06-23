@@ -121,7 +121,7 @@ export const useExposure = ({ vault }: { vault?: VaultSnapshot; vaultUserSnapsho
 
     const isLongExposure = delta > 0n
 
-    const exposure = Math.abs(Big18Math.fixedFrom(Big18Math.mul(leverage, delta)).toUnsafeFloat()) * 100
+    const exposure = Math.abs(Big18Math.toUnsafeFloat(Big18Math.mul(leverage, delta))) * 100
     return { exposure, isLongExposure }
   }, [vault])
 

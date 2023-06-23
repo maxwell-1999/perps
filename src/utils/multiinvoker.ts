@@ -1,6 +1,4 @@
-import { AbiCoder } from 'ethers'
-
-import { IMultiInvoker } from '@t/generated/MultiInvokerAbi'
+import { Address, Hex, encodeAbiParameters, parseAbiParameters } from 'viem'
 
 export enum InvokerAction {
   NOOP,
@@ -32,91 +30,125 @@ export const buildInvokerAction = (
     vaultAddress,
     vaultAmount,
   }: {
-    userAddress?: string
-    productAddress?: string
+    userAddress: Address
+    productAddress?: Address
     position?: bigint
     amount?: bigint
-    programs?: number[]
-    vaultAddress?: string
+    programs?: bigint[]
+    vaultAddress?: Address
     vaultAmount?: bigint
   },
-): IMultiInvoker.InvocationStruct => {
-  const abiCoder = new AbiCoder()
+): { action: number; args: Hex } => {
   switch (action) {
     case InvokerAction.DEPOSIT:
+      if (amount === undefined || productAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 1,
-        args: abiCoder.encode(['address', 'address', 'uint'], [userAddress, productAddress, amount]),
+        args: encodeAbiParameters(parseAbiParameters('address, address, uint'), [userAddress, productAddress, amount]),
       }
     case InvokerAction.WITHDRAW:
+      if (amount === undefined || productAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 2,
-        args: abiCoder.encode(['address', 'address', 'uint'], [userAddress, productAddress, amount]),
+        args: encodeAbiParameters(parseAbiParameters(['address, address, uint']), [
+          userAddress,
+          productAddress,
+          amount,
+        ]),
       }
     case InvokerAction.OPEN_TAKE:
+      if (position === undefined || productAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 3,
-        args: abiCoder.encode(['address', 'uint'], [productAddress, position]),
+        args: encodeAbiParameters(parseAbiParameters(['address, uint']), [productAddress, position]),
       }
     case InvokerAction.CLOSE_TAKE:
+      if (position === undefined || productAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 4,
-        args: abiCoder.encode(['address', 'uint'], [productAddress, position]),
+        args: encodeAbiParameters(parseAbiParameters(['address, uint']), [productAddress, position]),
       }
     case InvokerAction.OPEN_MAKE:
+      if (position === undefined || productAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 5,
-        args: abiCoder.encode(['address', 'uint'], [productAddress, position]),
+        args: encodeAbiParameters(parseAbiParameters(['address, uint']), [productAddress, position]),
       }
     case InvokerAction.CLOSE_MAKE:
+      if (position === undefined || productAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 6,
-        args: abiCoder.encode(['address', 'uint'], [productAddress, position]),
+        args: encodeAbiParameters(parseAbiParameters(['address, uint']), [productAddress, position]),
       }
     case InvokerAction.CLAIM:
+      if (programs === undefined || productAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 7,
-        args: abiCoder.encode(['address', 'uint[]'], [productAddress, programs]),
+        args: encodeAbiParameters(parseAbiParameters(['address, uint[]']), [productAddress, programs]),
       }
     case InvokerAction.WRAP:
+      if (amount === undefined) throw new Error('Invalid arguments')
       return {
         action: 8,
-        args: abiCoder.encode(['address', 'uint'], [userAddress, amount]),
+        args: encodeAbiParameters(parseAbiParameters(['address, uint']), [userAddress, amount]),
       }
     case InvokerAction.UNWRAP:
+      if (amount === undefined) throw new Error('Invalid arguments')
       return {
         action: 9,
-        args: abiCoder.encode(['address', 'uint'], [userAddress, amount]),
+        args: encodeAbiParameters(parseAbiParameters(['address, uint']), [userAddress, amount]),
       }
     case InvokerAction.WRAP_AND_DEPOSIT:
+      if (amount === undefined || productAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 10,
-        args: abiCoder.encode(['address', 'address', 'uint'], [userAddress, productAddress, amount]),
+        args: encodeAbiParameters(parseAbiParameters(['address, address, uint']), [
+          userAddress,
+          productAddress,
+          amount,
+        ]),
       }
     case InvokerAction.WITHDRAW_AND_UNWRAP:
+      if (amount === undefined || productAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 11,
-        args: abiCoder.encode(['address', 'address', 'uint'], [userAddress, productAddress, amount]),
+        args: encodeAbiParameters(parseAbiParameters(['address, address, uint']), [
+          userAddress,
+          productAddress,
+          amount,
+        ]),
       }
     case InvokerAction.VAULT_DEPOSIT:
+      if (vaultAddress === undefined || vaultAmount === undefined) throw new Error('Invalid arguments')
       return {
         action: 12,
-        args: abiCoder.encode(['address', 'address', 'uint'], [userAddress, vaultAddress, vaultAmount]),
+        args: encodeAbiParameters(parseAbiParameters(['address, address, uint']), [
+          userAddress,
+          vaultAddress,
+          vaultAmount,
+        ]),
       }
     case InvokerAction.VAULT_REDEEM:
+      if (vaultAddress === undefined || vaultAmount === undefined) throw new Error('Invalid arguments')
       return {
         action: 13,
-        args: abiCoder.encode(['address', 'uint'], [vaultAddress, vaultAmount]),
+        args: encodeAbiParameters(parseAbiParameters(['address, uint']), [vaultAddress, vaultAmount]),
       }
     case InvokerAction.VAULT_CLAIM:
+      if (vaultAddress === undefined) throw new Error('Invalid arguments')
       return {
         action: 14,
-        args: abiCoder.encode(['address', 'address'], [userAddress, vaultAddress]),
+        args: encodeAbiParameters(parseAbiParameters(['address, address']), [userAddress, vaultAddress]),
       }
     case InvokerAction.VAULT_WRAP_AND_DEPOSIT:
+      if (vaultAddress === undefined || vaultAmount === undefined) throw new Error('Invalid arguments')
       return {
         action: 15,
-        args: abiCoder.encode(['address', 'address', 'uint'], [userAddress, vaultAddress, vaultAmount]),
+        args: encodeAbiParameters(parseAbiParameters(['address, address, uint']), [
+          userAddress,
+          vaultAddress,
+          vaultAmount,
+        ]),
       }
     default:
       return { action: 0, args: '0x' }

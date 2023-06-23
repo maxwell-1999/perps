@@ -1,8 +1,7 @@
 import { PositionStatus } from '@/constants/markets'
 
-import { IPerennialLens } from '@t/generated/LensAbi'
 import { PositionSide } from '@t/gql/graphql'
-import { Position, PrePosition } from '@t/position'
+import { Position, PrePosition, ProductSnapshot } from '@t/perennial'
 
 import { Big18Math } from './big18Utils'
 
@@ -45,7 +44,7 @@ export function socialization(pre: PrePosition, pos: Position) {
 
 // LiquidationPrice = ((position * abs(price) + collateral) / (position * (1 + maintenanceRatio))
 export const calcLiquidationPrice = (
-  product: IPerennialLens.ProductSnapshotStructOutput,
+  product: ProductSnapshot,
   userPosition: Position,
   collateral: bigint,
   userPositionDelta?: Position,
@@ -63,16 +62,16 @@ export const calcLiquidationPrice = (
   )
 
   // Long Market, Maker Position takes Short exposure
-  if (payoffDirection === 0n && posSide === 'maker')
+  if (payoffDirection === 0 && posSide === 'maker')
     return calcLiquidationPriceShort(product, nextGlobalPosition, posSize, collateral, false)
   // Long Market, Taker Position takes Long exposure
-  else if (payoffDirection === 0n && posSide === 'taker')
+  else if (payoffDirection === 0 && posSide === 'taker')
     return calcLiquidationPriceLong(product, nextGlobalPosition, posSize, collateral, true)
   // Short Market, Maker Position takes Long exposure
-  else if (payoffDirection === 1n && posSide === 'maker')
+  else if (payoffDirection === 1 && posSide === 'maker')
     return calcLiquidationPriceLong(product, nextGlobalPosition, posSize, collateral, false)
   // Short Market, Taker Position takes Short exposure
-  else if (payoffDirection === 1n && posSide === 'taker')
+  else if (payoffDirection === 1 && posSide === 'taker')
     return calcLiquidationPriceShort(product, nextGlobalPosition, posSize, collateral, true)
 
   return 0n
@@ -80,7 +79,7 @@ export const calcLiquidationPrice = (
 
 // LiquidationPrice = |(Collateral * Makers + Position * Takers * |Price|)/(Position * (Makers * Maintenance + Takers))|
 export const calcLiquidationPriceShort = (
-  product: IPerennialLens.ProductSnapshotStructOutput,
+  product: ProductSnapshot,
   productNextPosition: Position,
   userPosition: bigint,
   collateral: bigint,
@@ -104,7 +103,7 @@ export const calcLiquidationPriceShort = (
 
 // LiquidationPrice = |(Position * Takers * |Price| - Collateral * Makers) / (Position * (Makers * Maintenance - Takers))|
 export const calcLiquidationPriceLong = (
-  product: IPerennialLens.ProductSnapshotStructOutput,
+  product: ProductSnapshot,
   productNextPosition: Position,
   userPosition: bigint,
   collateral: bigint,

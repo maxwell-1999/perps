@@ -14,7 +14,7 @@ import { Big18Math } from '@/utils/big18Utils'
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 
-import { IPerennialLens } from '@t/generated/LensAbi'
+import { ProductSnapshot } from '@t/perennial'
 
 import { FormNames, OrderValues, buttonPercentValues } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
@@ -27,7 +27,7 @@ import { useCloseAmountValidator } from './validatorHooks'
 interface ClosePositionFormProps {
   asset: SupportedAsset
   position: PositionDetails
-  product: IPerennialLens.ProductSnapshotStructOutput
+  product: ProductSnapshot
 }
 
 function ClosePositionForm({ position, product, asset }: ClosePositionFormProps) {
@@ -53,7 +53,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
     defaultValues: {
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
-      [FormNames.leverage]: parseFloat(Big18Math.toFloatString(nextLeverage ?? 0n)),
+      [FormNames.leverage]: Big18Math.toUnsafeFloat(nextLeverage ?? 0n),
     },
   })
   const amount = watch(FormNames.amount)

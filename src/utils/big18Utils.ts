@@ -1,4 +1,6 @@
-import { FixedNumber, WeiPerEther, formatUnits, parseEther } from 'ethers'
+import { formatUnits, parseEther } from 'viem'
+
+import { WeiPerEther } from '@/constants/units'
 
 export const formatBig18 = (
   value: bigint = 0n,
@@ -15,7 +17,7 @@ export const formatBig18 = (
     maximumFractionDigits: minDecimals,
 
     useGrouping,
-  }).format(Big18Math.divFixed(value, Big18Math.ONE).toUnsafeFloat())
+  }).format(Big18Math.toUnsafeFloat(value))
 }
 
 // Formats an 18 decimal bigint as a USD price
@@ -23,9 +25,7 @@ export const formatBig18USDPrice = (
   value: bigint = 0n,
   { compact = false, fromUsdc = false }: { compact?: boolean; fromUsdc?: boolean } = {},
 ) => {
-  const valueToFormat = fromUsdc
-    ? Number(formatUnits(value, 6))
-    : Big18Math.divFixed(value, Big18Math.ONE).toUnsafeFloat()
+  const valueToFormat = fromUsdc ? Number(formatUnits(value, 6)) : Big18Math.toUnsafeFloat(value)
   return Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -45,16 +45,13 @@ export const formatBig18Percent = (value: bigint = 0n, { numDecimals = 2 }: { nu
     style: 'percent',
     minimumFractionDigits: numDecimals,
     maximumFractionDigits: numDecimals,
-  }).format(Big18Math.divFixed(value, Big18Math.ONE).toUnsafeFloat())
+  }).format(Big18Math.toUnsafeFloat(value))
 }
 export class Big18Math {
   public static FIXED_DECIMALS = 18
-  public static FIXED_WIDTH = 'fixed256x18'
   public static BASE = WeiPerEther
   public static ZERO = 0n
-  public static ZERO_FIXED = Big18Math.fixedFrom(Big18Math.ZERO)
   public static ONE = 1n * Big18Math.BASE
-  public static ONE_FIXED = Big18Math.fixedFrom(Big18Math.ONE)
   public static TWO = 2n * Big18Math.BASE
 
   public static mul(a: bigint, b: bigint): bigint {
@@ -71,14 +68,6 @@ export class Big18Math {
 
   public static sub(a: bigint, b: bigint): bigint {
     return a - b
-  }
-
-  public static subFixed(a: bigint, b: bigint): FixedNumber {
-    return this.fixedFrom(a).subUnsafe(this.fixedFrom(b))
-  }
-
-  public static divFixed(a: bigint, b: bigint): FixedNumber {
-    return this.fixedFrom(a).divUnsafe(this.fixedFrom(b))
   }
 
   public static isZero(a: bigint): boolean {
@@ -105,10 +94,6 @@ export class Big18Math {
     return a === b ? 0 : a < b ? -1 : 1
   }
 
-  public static fixedFrom(a: bigint): FixedNumber {
-    return FixedNumber.fromValue(a, Big18Math.FIXED_DECIMALS, Big18Math.FIXED_WIDTH)
-  }
-
   public static fromFloatString(a: string): bigint {
     if (!a || a === '.') return 0n
     return parseEther(a.replace(/','/g, '') as `${number}`)
@@ -116,6 +101,10 @@ export class Big18Math {
 
   public static toFloatString(a: bigint): string {
     return formatUnits(a, Big18Math.FIXED_DECIMALS)
+  }
+
+  public static toUnsafeFloat(a: bigint): number {
+    return parseFloat(Big18Math.toFloatString(a))
   }
 
   public static fromDecimals(amount: bigint, decimals: number): bigint {

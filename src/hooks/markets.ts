@@ -1,50 +1,54 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
+import { parseAbi } from 'abitype'
 import { ethers } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useCallback, useEffect, useState } from 'react'
-import { Address, Hex, getAddress, numberToHex, parseAbi, toHex, zeroAddress } from 'viem'
-// eslint-disable-next-line no-restricted-imports
-import { useAccount, useSendTransaction, useWalletClient } from 'wagmi'
-import { multicall, waitForTransaction } from 'wagmi/actions'
+import { Address, getAbiItem, getAddress, zeroAddress } from 'viem'
+import { PublicClient, useNetwork, usePublicClient, useWalletClient } from 'wagmi'
+import { GetContractResult, multicall, waitForTransaction } from 'wagmi/actions'
 import { goerli, mainnet } from 'wagmi/chains'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { MultiInvokerAddresses } from '@/constants/contracts'
-import {
-  ChainMarkets,
-  MaxUint256,
-  OpenPositionType,
-  OrderDirection,
-  PositionStatus,
-  addressToAsset,
-} from '@/constants/markets'
-import { SupportedChainId, SupportedChainIds } from '@/constants/network'
+import { ChainMarkets, OpenPositionType, OrderDirection, PositionStatus, addressToAsset } from '@/constants/markets'
+import { SupportedChainId } from '@/constants/network'
+import { MaxUint256 } from '@/constants/units'
 import { equal, notEmpty, sum, unique } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
+import { getProductContract } from '@/utils/contractUtils'
 import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
 import { InvokerAction, buildInvokerAction } from '@/utils/multiinvoker'
-import { ethersResultToPOJO } from '@/utils/objectUtils'
 import { calcLiquidationPrice, next, side as positionSide, positionStatus, size } from '@/utils/positionUtils'
 import { last24hrBounds } from '@/utils/timeUtils'
 
-import { ICollateralAbi, IProductAbi__factory } from '@t/generated'
-import { IPerennialLens, LensAbi } from '@t/generated/LensAbi'
+import { ICollateralAbi } from '@abi/ICollateral.abi'
+import { LensAbi } from '@abi/Lens.abi'
+
 import { gql } from '@t/gql'
 import { GetAccountPositionsQuery, PositionSide } from '@t/gql/graphql'
+import { ProductSnapshot, UserProductSnapshot } from '@t/perennial'
 
-import { useCollateral, useLens, useMultiInvoker, useUSDC } from './contracts'
+import {
+  useCollateral,
+  useLens,
+  useLensProductSnapshot,
+  useLensProtocolSnapshot,
+  useLensUserProductSnapshot,
+  useMultiInvoker,
+  useUSDC,
+} from './contracts'
 import { useAddress, useChainId, useGraphClient, useWsProvider } from './network'
 import { usePyth } from './network'
 
 export type AssetSnapshots = {
   [key in SupportedAsset]?: {
-    [OrderDirection.Long]?: IPerennialLens.ProductSnapshotStructOutput
-    [OrderDirection.Short]?: IPerennialLens.ProductSnapshotStructOutput
+    [OrderDirection.Long]?: ProductSnapshot
+    [OrderDirection.Short]?: ProductSnapshot
   }
 }
 export const useChainAssetSnapshots = () => {
   const chainId = useChainId()
-  const lens = useLens()
+  const lens = useLensProductSnapshot()
 
   return useQuery({
     queryKey: ['assetSnapshots', chainId],
@@ -56,7 +60,7 @@ export const useChainAssetSnapshots = () => {
         .map((market) => [market.Long, market.Short].filter(notEmpty))
         .flat()
 
-      const snapshots = await lens['snapshots(address[])'].staticCall(markets)
+      const snapshots = await lens.read.snapshots([markets])
 
       return assets.reduce((acc, asset) => {
         const longSnapshot = snapshots.find((s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Long)
@@ -67,8 +71,8 @@ export const useChainAssetSnapshots = () => {
         // so that react-query can correctly serialize it
         // TODO: when we switch to viem, we should be able to remove this
         acc[asset] = {
-          [OrderDirection.Long]: longSnapshot ? ethersResultToPOJO(longSnapshot) : undefined,
-          [OrderDirection.Short]: shortSnapshot ? ethersResultToPOJO(shortSnapshot) : undefined,
+          [OrderDirection.Long]: longSnapshot ? longSnapshot : undefined,
+          [OrderDirection.Short]: shortSnapshot ? shortSnapshot : undefined,
         }
 
         return acc
@@ -79,13 +83,13 @@ export const useChainAssetSnapshots = () => {
 
 export const useProtocolSnapshot = () => {
   const chainId = useChainId()
-  const lens = useLens()
+  const lens = useLensProtocolSnapshot()
 
   return useQuery({
     queryKey: ['protocolSnapshot', chainId],
     enabled: !!chainId,
     queryFn: async () => {
-      return lens['snapshot()'].staticCall()
+      return lens.read.snapshot()
     },
   })
 }
@@ -160,8 +164,10 @@ export const useUserCurrentPositions = () => {
   const chainId = useChainId()
   const { address } = useAddress()
   const lens = useLens()
+  const userLens = useLensUserProductSnapshot()
   const collateral = useCollateral()
   const graphClient = useGraphClient()
+  const publicClient = usePublicClient()
   const { data: productSnapshots } = useChainAssetSnapshots()
 
   return useQuery({
@@ -176,7 +182,7 @@ export const useUserCurrentPositions = () => {
         .map((market) => [market.Long, market.Short].filter(notEmpty))
         .flat()
 
-      const accountSnapshots = await lens['snapshots(address,address[])'].staticCall(address, markets)
+      const accountSnapshots = await userLens.read.snapshots([address, markets])
 
       const query = gql(`
         query getAccountPositions($account: Bytes!, $products: [Bytes!]!) {
@@ -216,6 +222,7 @@ export const useUserCurrentPositions = () => {
               lens,
               collateral,
               graphClient,
+              publicClient,
               accountSnapshots.find((s) => getAddress(s.productAddress) === market.Long),
               positions.positions.find((p) => getAddress(p.product) === market.Long),
               productSnapshots[asset]?.Long,
@@ -228,6 +235,7 @@ export const useUserCurrentPositions = () => {
               lens,
               collateral,
               graphClient,
+              publicClient,
               accountSnapshots.find((s) => getAddress(s.productAddress) === market.Short),
               positions.positions.find((p) => getAddress(p.product) === market.Short),
               productSnapshots[asset]?.Short,
@@ -248,8 +256,11 @@ const PositionHistoryPageSize = 3
 export const useUserChainPositionHistory = (side: PositionSide) => {
   const chainId = useChainId()
   const graphClient = useGraphClient()
+  const publicClient = usePublicClient()
   const { address } = useAddress()
   const lens = useLens()
+  const productLens = useLensProductSnapshot()
+  const userLens = useLensUserProductSnapshot()
   const collateral = useCollateral()
 
   return useInfiniteQuery({
@@ -297,11 +308,11 @@ export const useUserChainPositionHistory = (side: PositionSide) => {
       })
 
       const accountSnapshots = graphPositions.positions.map(async (graphPosition) => {
-        const snapshot = await lens['snapshot(address,address)'](address, graphPosition.product, {
-          blockTag: toHex(BigInt(graphPosition.endBlock)),
+        const snapshot = await userLens.read.snapshot([address, getAddress(graphPosition.product)], {
+          blockNumber: BigInt(graphPosition.endBlock),
         })
-        const productSnapshot = await lens['snapshot(address)'](graphPosition.product, {
-          blockTag: toHex(BigInt(graphPosition.endBlock)),
+        const productSnapshot = await productLens.read.snapshot([getAddress(graphPosition.product)], {
+          blockNumber: BigInt(graphPosition.endBlock),
         })
 
         const asset = addressToAsset(getAddress(graphPosition.product))
@@ -315,6 +326,7 @@ export const useUserChainPositionHistory = (side: PositionSide) => {
           lens,
           collateral,
           graphClient,
+          publicClient,
           snapshot,
           graphPosition,
           productSnapshot,
@@ -339,12 +351,13 @@ const fetchUserPositionDetails = async (
   asset: SupportedAsset,
   direction: OrderDirection,
   address: Address,
-  lens: LensAbi,
-  collateralContract: ICollateralAbi,
+  lens: GetContractResult<typeof LensAbi>,
+  collateralContract: GetContractResult<typeof ICollateralAbi>,
   graphClient: GraphQLClient,
-  snapshot?: IPerennialLens.UserProductSnapshotStructOutput,
+  rpcClient: PublicClient,
+  snapshot?: UserProductSnapshot,
   graphPosition?: GetAccountPositionsQuery['positions'][0],
-  productSnapshot?: IPerennialLens.ProductSnapshotStructOutput,
+  productSnapshot?: ProductSnapshot,
 ) => {
   if (!snapshot || !productSnapshot) return { asset, direction, currentCollateral: 0n, status: PositionStatus.resolved }
   const { productAddress, collateral, pre, position, openInterest, maintenance } = snapshot
@@ -519,9 +532,11 @@ const fetchUserPositionDetails = async (
   ).sort((a, b) => Number(a.blockNumber) - Number(b.blockNumber))
 
   // Collateral at one block before the position was opened
-  const intialCollateral = await lens['collateral(address,address)'].staticCall(address, productAddress, {
-    blockTag: numberToHex(Number(startBlock) - 1),
-  })
+  // We need the cast here because Viem overload handling is not working
+  // TODO(arjun): remove cast when Viem fixes overload handling
+  const intialCollateral = (await lens.read.collateral([address, productAddress], {
+    blockNumber: BigInt(Number(startBlock) - 1),
+  })) as bigint
   const initialDeposits =
     sum(
       positionChanges.deposits.filter((d) => BigInt(d.blockNumber) === BigInt(startBlock)).map((d) => BigInt(d.amount)),
@@ -556,41 +571,16 @@ const fetchUserPositionDetails = async (
     }
   `)
 
-  const productContract = IProductAbi__factory.connect(productAddress, lens.runner)
+  const productContract = getProductContract(productAddress, chainId)
   const currentVersion = productSnapshot.latestVersion
-  const latestVersion = await productContract['latestVersion()']()
+  const latestVersion = await productContract.read.latestVersion()
   // Get the post-settlement value
-  const [, latestValue, latestPrice, currentValue] = await multicall({
-    chainId,
-    allowFailure: false,
-    contracts: [
-      {
-        abi: parseAbi(['function settle() external']),
-        address: getAddress(productAddress),
-        functionName: 'settle',
-      },
-      {
-        abi: parseAbi(['function valueAtVersion(uint256) external view returns ((int256 maker, int256 taker))']),
-        address: getAddress(productAddress),
-        functionName: 'valueAtVersion',
-        args: [latestVersion + 1n],
-      },
-      {
-        abi: parseAbi([
-          'function atVersion(uint256) external view returns ((uint256 version, uint256 timestamp, int256 price))',
-        ]),
-        address: getAddress(productAddress),
-        functionName: 'atVersion',
-        args: [latestVersion + 1n],
-      },
-      {
-        abi: parseAbi(['function valueAtVersion(uint256) external view returns ((int256 maker, int256 taker))']),
-        address: getAddress(productAddress),
-        functionName: 'valueAtVersion',
-        args: [currentVersion.version],
-      },
-    ],
-  })
+  const [, latestValue, latestPrice, currentValue] = await Promise.all([
+    productContract.read.settle(),
+    productContract.read.valueAtVersion([latestVersion + 1n]),
+    productContract.read.atVersion([latestVersion + 1n]),
+    productContract.read.valueAtVersion([currentVersion.version]),
+  ])
 
   const atVersions = (
     await graphClient.request(valueAtVersionQuery, {
@@ -693,14 +683,22 @@ const fetchUserPositionDetails = async (
   if (!closedPosition) {
     // Pull any deposits/withdrawals that have happened between graph syncs
     const [_deposits, _withdrawals] = await Promise.all([
-      collateralContract.queryFilter(
-        collateralContract.filters.Deposit(address, productAddress),
-        toHex(BigInt(positionChanges.meta?.block.number || lastUpdatedBlockNumber) + 1n),
-      ),
-      collateralContract.queryFilter(
-        collateralContract.filters.Withdrawal(address, productAddress),
-        toHex(BigInt(positionChanges.meta?.block.number || lastUpdatedBlockNumber) + 1n),
-      ),
+      rpcClient.getLogs({
+        address: collateralContract.address,
+        event: getAbiItem({ abi: collateralContract.abi, name: 'Deposit' }),
+        args: { user: address, product: productAddress },
+        fromBlock: BigInt(positionChanges.meta?.block.number || lastUpdatedBlockNumber) + 1n,
+        toBlock: 'latest',
+        strict: true,
+      }),
+      rpcClient.getLogs({
+        address: collateralContract.address,
+        event: getAbiItem({ abi: collateralContract.abi, name: 'Withdrawal' }),
+        args: { user: address, product: productAddress },
+        fromBlock: BigInt(positionChanges.meta?.block.number || lastUpdatedBlockNumber) + 1n,
+        toBlock: 'latest',
+        strict: true,
+      }),
     ])
 
     deposits = deposits + sum(_deposits.map((d) => d.args.amount)) - sum(_withdrawals.map((d) => d.args.amount))
@@ -804,17 +802,17 @@ export const useRefreshKeysOnPriceUpdates = (invalidKeys: string[] = ['userCurre
               contracts: [
                 {
                   address: getAddress(p),
-                  abi: parseAbi(['function base() view returns (address)']),
+                  abi: parseAbi(['function base() view returns (address)'] as const),
                   functionName: 'base',
                 },
                 {
                   address: getAddress(p),
-                  abi: parseAbi(['function quote() view returns (address)']),
+                  abi: parseAbi(['function quote() view returns (address)'] as const),
                   functionName: 'quote',
                 },
                 {
                   address: getAddress(p),
-                  abi: parseAbi(['function registry() view returns (address)']),
+                  abi: parseAbi(['function registry() view returns (address)'] as const),
                   functionName: 'registry',
                 },
               ],
@@ -825,25 +823,27 @@ export const useRefreshKeysOnPriceUpdates = (invalidKeys: string[] = ['userCurre
         )
 
         // Registry -> Aggregator
-        aggregatorAddresses = await multicall({
+        // TODO(arjun): Investigate why the casts are necessary here
+        aggregatorAddresses = (await multicall({
           chainId,
           allowFailure: false,
           contracts: registryLookup.map((p) => ({
             address: p.registry,
-            abi: parseAbi(['function getFeed(address base, address quote) view returns (address)']),
+            abi: parseAbi(['function getFeed(address base, address quote) view returns (address)'] as const),
             functionName: 'getFeed',
             args: [p.base, p.quote],
           })),
-        })
+        })) as Address[]
       } else {
         // Some goerli products use a legacy oracle which uses 'feed' instead of 'aggregator'
         const aggregatorAbi = parseAbi([
           'function aggregator() view returns (address)',
           'function feed() view returns (address)',
-        ])
+        ] as const)
 
         // Feed Oracle -> Proxy
-        const proxyAddresses = await multicall({
+        // TODO(arjun): Investigate why the casts are necessary here
+        const proxyAddresses = (await multicall({
           chainId,
           allowFailure: false,
           contracts: productOracles.map((p) => ({
@@ -851,10 +851,11 @@ export const useRefreshKeysOnPriceUpdates = (invalidKeys: string[] = ['userCurre
             abi: aggregatorAbi,
             functionName: goerli.id === chainId ? 'feed' : 'aggregator',
           })),
-        })
+        })) as Address[]
 
         // Proxy -> Aggregator
-        aggregatorAddresses = await multicall({
+        // TODO(arjun): Investigate why the casts are necessary here
+        aggregatorAddresses = (await multicall({
           chainId,
           allowFailure: false,
           contracts: proxyAddresses.map((p) => ({
@@ -862,7 +863,7 @@ export const useRefreshKeysOnPriceUpdates = (invalidKeys: string[] = ['userCurre
             abi: aggregatorAbi,
             functionName: 'aggregator',
           })),
-        })
+        })) as Address[]
       }
 
       setAggregators((currAggregators) => {
@@ -877,6 +878,7 @@ export const useRefreshKeysOnPriceUpdates = (invalidKeys: string[] = ['userCurre
   useEffect(() => {
     if (!aggregators.length || !wsProvider) return
     // Ideally we could use wagmi for this, but they don't support eth_subscribe
+    // TODO(arjun): Use viem/wagmi when they support eth_subscribe
     const contracts = aggregators.map(
       (a) =>
         new ethers.Contract(
@@ -890,13 +892,15 @@ export const useRefreshKeysOnPriceUpdates = (invalidKeys: string[] = ['userCurre
   }, [aggregators, refresh, wsProvider])
 }
 
-export const useProductTransactions = (productAddress?: string) => {
-  const multiInvoker = useMultiInvoker()
+export const useProductTransactions = (productAddress?: Address) => {
+  const { chain } = useNetwork()
   const chainId = useChainId()
-  const usdcContract = useUSDC()
-  const { address } = useAccount()
-  const { sendTransactionAsync } = useSendTransaction()
+  const { address } = useAddress()
   const { data: walletClient } = useWalletClient()
+
+  const multiInvoker = useMultiInvoker(walletClient ?? undefined)
+  const usdcContract = useUSDC(walletClient ?? undefined)
+
   const queryClient = useQueryClient()
 
   const refresh = useCallback(
@@ -908,23 +912,15 @@ export const useProductTransactions = (productAddress?: string) => {
     [queryClient, chainId],
   )
 
+  const txOpts = { account: address || zeroAddress, chainId, chain }
   const onApproveUSDC = async () => {
-    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
-      return
-    }
-    const txData = await usdcContract.approve.populateTransaction(MultiInvokerAddresses[chainId], MaxUint256)
-    const receipt = await sendTransactionAsync({
-      chainId,
-      to: getAddress(txData.to),
-      data: txData.data as Hex,
-      account: walletClient?.account,
-    })
-    await waitForTransaction({ hash: receipt.hash })
+    const hash = await usdcContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
+    await waitForTransaction({ hash })
     await refresh()
   }
 
   const onModifyPosition = async (collateralDelta: bigint, positionSide: OpenPositionType, positionDelta: bigint) => {
-    if (!address || !chainId || !SupportedChainIds.includes(chainId)) {
+    if (!address || !chainId || !walletClient) {
       return
     }
 
@@ -955,14 +951,8 @@ export const useProductTransactions = (productAddress?: string) => {
       }),
     ].filter(({ action }) => !Big18Math.eq(BigInt(action), BigInt(InvokerAction.NOOP)))
 
-    const txData = await multiInvoker.invoke.populateTransaction(orderedActions)
-    const receipt = await sendTransactionAsync({
-      chainId,
-      to: getAddress(txData.to),
-      data: txData.data as Hex,
-      account: walletClient?.account,
-    })
-    await waitForTransaction({ hash: receipt.hash })
+    const hash = await multiInvoker.write.invoke([orderedActions], txOpts)
+    await waitForTransaction({ hash })
     await refresh()
   }
   return {

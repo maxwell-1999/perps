@@ -7,13 +7,13 @@ import { calcLeverage, calcLiquidationPrice, utilization } from '@/utils/positio
 import { Hour, Year } from '@/utils/timeUtils'
 import { computeFundingRate } from '@/utils/utilizationRateUtils'
 
-import { IPerennialLens, PositionStructOutput } from '@t/generated/LensAbi'
+import { ProductSnapshot } from '@t/perennial'
 
 import { useReceiptCopy } from '../hooks'
 import { calcPositionFee } from '../utils'
 
 interface ReceiptProps {
-  product: IPerennialLens.ProductSnapshotStructOutput
+  product: ProductSnapshot
   positionDetails?: PositionDetails
   positionDelta: {
     collateralDelta: bigint
@@ -48,12 +48,10 @@ export function TradeReceipt({
     ? 0n
     : positionDelta.collateralDelta + (positionDetails?.currentCollateral ?? 0n)
   const newLeverage = calcLeverage(price, newPosition, newCollateral)
-  const liquidationPrice = calcLiquidationPrice(
-    product,
-    { maker: 0n, taker: newPosition } as PositionStructOutput,
-    newCollateral,
-    { maker: 0n, taker: positionDelta.positionDelta } as PositionStructOutput,
-  )
+  const liquidationPrice = calcLiquidationPrice(product, { maker: 0n, taker: newPosition }, newCollateral, {
+    maker: 0n,
+    taker: positionDelta.positionDelta,
+  })
   const globalPosition = { ...position, taker: position.taker + positionDelta.positionDelta }
   const fundingRate = (computeFundingRate(utilizationCurve, utilization(globalPre, globalPosition)) / Year) * Hour
 

@@ -15,7 +15,7 @@ import { Big18Math } from '@/utils/big18Utils'
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 
-import { IPerennialLens } from '@t/generated/LensAbi'
+import { ProductSnapshot } from '@t/perennial'
 
 import { FormNames, OrderValues, buttonPercentValues } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
@@ -28,7 +28,7 @@ import { useCloseCollateralValidator } from './validatorHooks'
 interface WithdrawCollateralFormProps {
   asset: SupportedAsset
   position: PositionDetails
-  product: IPerennialLens.ProductSnapshotStructOutput
+  product: ProductSnapshot
 }
 
 function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateralFormProps) {
@@ -55,7 +55,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
     defaultValues: {
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
-      [FormNames.leverage]: parseFloat(Big18Math.toFloatString(nextLeverage ?? 0n)),
+      [FormNames.leverage]: Big18Math.toUnsafeFloat(nextLeverage ?? 0n),
     },
   })
   const amount = watch(FormNames.amount)

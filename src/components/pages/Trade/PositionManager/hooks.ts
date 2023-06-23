@@ -167,7 +167,7 @@ export const usePnl = ({ positionDetails, live }: { positionDetails: PositionDet
   // Multiply the live price by the payoff direction of the market
   let payoffDirectionMultiplier = 1n
   if (productSnapshot) {
-    payoffDirectionMultiplier = productSnapshot.productInfo.payoffDefinition.payoffDirection === 0n ? 1n : -1n
+    payoffDirectionMultiplier = productSnapshot.productInfo.payoffDefinition.payoffDirection === 0 ? 1n : -1n
     // Makers take the opposite side of the payoff
     if (positionDetails.side === 'maker') payoffDirectionMultiplier = payoffDirectionMultiplier * -1n
   }

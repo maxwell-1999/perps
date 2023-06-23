@@ -1,8 +1,8 @@
-import { JumpRateUtilizationCurveStructOutput } from '@t/generated/LensAbi'
+import { JumpRateUtilizationCurve } from '@t/perennial'
 
 import { Big18Math } from './big18Utils'
 
-export const computeFundingRate = (curve: JumpRateUtilizationCurveStructOutput, utilization: bigint) => {
+export const computeFundingRate = (curve: JumpRateUtilizationCurve, utilization: bigint) => {
   if (utilization < Big18Math.ZERO) return curve.minRate
 
   if (utilization < curve.targetUtilization)

@@ -20,7 +20,7 @@ export function getVaultAddressForType(vaultType: PerennialVaultType, chainId: S
 export function getVaultForType(vaultType: PerennialVaultType, chainId: SupportedChainId, signer?: WalletClient) {
   const address = getVaultAddressForType(vaultType, chainId)
   if (!address) return
-  return getContract({ abi: BalancedVaultAbi, address, walletClient: signer })
+  return getContract({ abi: BalancedVaultAbi, address, walletClient: signer, chainId })
 }
 
 export function getProductContract(productAddress: Address, chainId: SupportedChainId) {

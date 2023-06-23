@@ -6,8 +6,8 @@
     "node": "18"
   },
   "scripts": {
-    "dev": "yarn gen:abi-typings && yarn gen:gql-typings && next dev",
-    "build": "yarn gen:abi-typings && yarn gen:gql-typings && next build",
+    "dev": "yarn gen:gql-typings && next dev",
+    "build": "yarn gen:gql-typings && next build",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "test": "jest",
@@ -22,7 +22,6 @@
     "localize:extract": "formatjs extract 'src/{pages,components}/**/*.{ts,tsx}' --format simple --id-interpolation-pattern '[sha512:contenthash:base64:6]' --out-file lang/locales/en.json",
     "localize:compile": "formatjs compile-folder --ast --format simple lang/locales lang/compiled-locales",
     "localize": "yarn localize:extract && yarn localize:compile",
-    "gen:abi-typings": "typechain --target ethers-v6 --out-dir types/generated abi/*.json",
     "gen:gql-typings": "graphql-codegen --config graph-codegen.ts",
     "gen:gql-typings:watch": "graphql-codegen --watch --config graph-codegen.ts",
     "postinstall": "husky install"
@@ -36,10 +35,10 @@
     "@rainbow-me/rainbowkit": "^1",
     "@tanstack/react-query": "^4.29.3",
     "@tanstack/react-query-devtools": "^4.29.7",
-    "@typechain/ethers-v6": "^0.3.2",
     "@types/node": "18.16.0",
     "@types/react": "18.0.38",
     "@types/react-dom": "18.0.11",
+    "abitype": "^0.8.11",
     "connectkit": "^1.2.3",
     "cookies-next": "^2.1.2",
     "date-fns": "^2.30.0",
@@ -57,7 +56,6 @@
     "react-intl": "^6.4.2",
     "react-table": "^7.8.0",
     "siwe": "^2.1.4",
-    "typechain": "^8.1.1",
     "typescript": "5.0.4",
     "viem": "^1.1.4",
     "wagmi": "^1",

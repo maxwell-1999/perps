@@ -12,7 +12,7 @@ import {
 } from '@/hooks/markets'
 import { useChainId } from '@/hooks/network'
 
-import { IPerennialLens } from '@t/generated/LensAbi'
+import { ProductSnapshot } from '@t/perennial'
 
 export enum PositionsTab {
   current,
@@ -30,8 +30,8 @@ type MarketContextType = {
   snapshots?: AssetSnapshots
   positions?: UserCurrentPositions
   selectedMarketSnapshot?: {
-    [OrderDirection.Long]?: IPerennialLens.ProductSnapshotStructOutput
-    [OrderDirection.Short]?: IPerennialLens.ProductSnapshotStructOutput
+    [OrderDirection.Long]?: ProductSnapshot
+    [OrderDirection.Short]?: ProductSnapshot
   }
   activePositionTab: PositionsTab
   setActivePositionTab: (tab: PositionsTab) => void

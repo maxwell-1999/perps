@@ -21,7 +21,7 @@ import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
 
-import { IPerennialLens } from '@t/generated/LensAbi'
+import { ProductSnapshot } from '@t/perennial'
 
 import { OrderValues } from '../../constants'
 import { PositionInfo } from './components'
@@ -35,7 +35,7 @@ interface AdjustmentModalProps {
   title: string
   asset: SupportedAsset
   position?: PositionDetails
-  product: IPerennialLens.ProductSnapshotStructOutput
+  product: ProductSnapshot
   usdcAllowance: bigint
   orderValues: OrderValues
   positionType: OpenPositionType

@@ -2,7 +2,7 @@ import { PositionDetails } from '@/hooks/markets'
 import { Big18Math } from '@/utils/big18Utils'
 import { calcLeverage } from '@/utils/positionUtils'
 
-import { IPerennialLens } from '@t/generated/LensAbi'
+import { ProductSnapshot } from '@t/perennial'
 
 import { OrderValues } from '../../constants'
 import {
@@ -17,7 +17,7 @@ import { Adjustment } from './constants'
 type CreateAdjustmentArgs = {
   orderValues: OrderValues
   position?: PositionDetails
-  product: IPerennialLens.ProductSnapshotStructOutput
+  product: ProductSnapshot
   usdcAllowance: bigint
 }
 
