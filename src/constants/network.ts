@@ -34,7 +34,7 @@ export const mainnetChains = chains.filter((c) => !isTestnet(c.id))
 const { connectors } = getDefaultWallets({
   appName: 'Perennial Interface V2',
   projectId: WalletConnectProjectId,
-  chains: mainnetChains, // Only pass in mainnet chains to clean up the select modal. Testnets will still work
+  chains: [...mainnetChains, baseGoerli], // Only pass in mainnet (and basegoerli) chains to clean up the select modal. Testnets will still work
 })
 
 export const wagmiConfig = createConfig({

@@ -24,7 +24,7 @@
     "localize": "yarn localize:extract && yarn localize:compile",
     "gen:gql-typings": "graphql-codegen --config graph-codegen.ts",
     "gen:gql-typings:watch": "graphql-codegen --watch --config graph-codegen.ts",
-    "postinstall": "husky install"
+    "postinstall": "husky install && patch-package"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.19",
@@ -93,6 +93,8 @@
     "husky": "^8.0.3",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
+    "patch-package": "^7.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.8.8",
     "storybook": "^7.0.7"
   },

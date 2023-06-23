@@ -1,0 +1,51 @@
+diff --git a/node_modules/@wagmi/chains/dist/index.d.ts b/node_modules/@wagmi/chains/dist/index.d.ts
+index 7b5d11c..e0d450f 100644
+--- a/node_modules/@wagmi/chains/dist/index.d.ts
++++ b/node_modules/@wagmi/chains/dist/index.d.ts
+@@ -340,6 +340,12 @@ declare const baseGoerli: {
+             readonly url: "https://goerli.basescan.org";
+         };
+     };
++    readonly contracts: {
++        readonly multicall3: {
++            readonly address: "0xca11bde05977b3631167028862be2a173976ca11";
++            readonly blockCreated: 1376988;
++        };
++    };
+     readonly testnet: true;
+ };
+ 
+diff --git a/node_modules/@wagmi/chains/dist/index.js b/node_modules/@wagmi/chains/dist/index.js
+index 103e18a..4eedc5a 100644
+--- a/node_modules/@wagmi/chains/dist/index.js
++++ b/node_modules/@wagmi/chains/dist/index.js
+@@ -225,6 +225,12 @@ var baseGoerli = {
+       url: "https://goerli.basescan.org"
+     }
+   },
++  contracts: {
++    multicall3: {
++      address: "0xca11bde05977b3631167028862be2a173976ca11",
++      blockCreated: 1376988
++    }
++  },
+   testnet: true
+ };
+ 
+diff --git a/node_modules/@wagmi/chains/dist/index.mjs b/node_modules/@wagmi/chains/dist/index.mjs
+index 0bcc62c..e2ead4d 100644
+--- a/node_modules/@wagmi/chains/dist/index.mjs
++++ b/node_modules/@wagmi/chains/dist/index.mjs
+@@ -225,6 +225,12 @@ var baseGoerli = {
+       url: "https://goerli.basescan.org"
+     }
+   },
++  contracts: {
++    multicall3: {
++      address: "0xca11bde05977b3631167028862be2a173976ca11",
++      blockCreated: 1376988
++    }
++  },
+   testnet: true
+ };
+ 
