@@ -107,7 +107,7 @@ export default function ClaimModal({
               />
             )}
             <ModalStep
-              title={copy.claimShares}
+              title={copy.withdrawAssets}
               description={intl.formatMessage(
                 { defaultMessage: '{claimableBalance} available for withdrawal' },
                 { claimableBalance: formattedClaimableBalance },
@@ -144,7 +144,7 @@ export default function ClaimModal({
               <Button
                 variant={requiresDSUApproval && !approveDSUCompleted ? 'outline' : 'primary'}
                 isDisabled={requiresDSUApproval && !approveDSUCompleted}
-                label={claimLoading ? <Spinner size="sm" /> : copy.claimShares}
+                label={claimLoading ? <Spinner size="sm" /> : copy.withdrawAssets}
                 onClick={handleClaim}
                 width="100%"
               />

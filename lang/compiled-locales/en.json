@@ -631,6 +631,12 @@
       "value": "Collateral (after fees)"
     }
   ],
+  "Uq0c8S": [
+    {
+      "type": 0,
+      "value": "Withdraw pending"
+    }
+  ],
   "UwvPFx": [
     {
       "type": 0,
@@ -939,6 +945,12 @@
     {
       "type": 0,
       "value": "Place your trade."
+    }
+  ],
+  "nF4Glg": [
+    {
+      "type": 0,
+      "value": "Withdraw assets"
     }
   ],
   "npb5FN": [

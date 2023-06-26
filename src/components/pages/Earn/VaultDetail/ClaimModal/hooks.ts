@@ -9,7 +9,7 @@ export const useClaimModalCopy = () => {
     }),
     Withdraw: intl.formatMessage({ defaultMessage: 'Withdraw' }),
     withdrawFromVault: intl.formatMessage({ defaultMessage: 'Withdraw from vault' }),
-    claimShares: intl.formatMessage({ defaultMessage: 'Claim shares' }),
+    withdrawAssets: intl.formatMessage({ defaultMessage: 'Withdraw assets' }),
     approveDSU: intl.formatMessage({ defaultMessage: 'Approve DSU' }),
     cancel: intl.formatMessage({ defaultMessage: 'Cancel' }),
   }

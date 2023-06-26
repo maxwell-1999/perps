@@ -236,7 +236,7 @@ export const ClaimCard = ({
     <Container p={4} mb="22px" variant="vaultCard" bg={alpha5}>
       <Flex flexDirection="column">
         <Text mb={2} fontSize="16px">
-          {copy.yourWithdrawIsReady}
+          {isPending ? copy.withdrawPending : copy.yourWithdrawIsReady}
         </Text>
         <Text fontSize="14px" variant="label" mb={2}>
           {isPending ? copy.pendingWithdrawal : bodyText}

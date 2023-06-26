@@ -53,6 +53,7 @@ export default function VaultForm({
 
   useEffect(() => {
     reset()
+    setMaxWithdrawal(false)
   }, [vaultOption, reset])
 
   const onAmountChange = useOnAmountChange(setValue)
@@ -65,10 +66,12 @@ export default function VaultForm({
 
   const onClose = () => {
     setFormValues(null)
+    setMaxWithdrawal(false)
   }
 
   const onCancel = () => {
     setFormValues(null)
+    setMaxWithdrawal(false)
     reset()
   }
 
