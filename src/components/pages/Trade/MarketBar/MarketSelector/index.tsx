@@ -32,7 +32,7 @@ function MarketSelector() {
     <Popover
       placement="bottom-start"
       variant="assetSelector"
-      offset={[-8, 6]}
+      offset={[-5, 6]}
       isOpen={isOpen}
       onOpen={onOpen}
       onClose={onClose}
