@@ -12,16 +12,16 @@ export function useVaultFormCopy() {
 
   return {
     Deposit: intl.formatMessage({ defaultMessage: 'Deposit' }),
-    Withdraw: intl.formatMessage({ defaultMessage: 'Withdraw' }),
+    Redeem: intl.formatMessage({ defaultMessage: 'Redeem' }),
     Amount: intl.formatMessage({ defaultMessage: 'Amount' }),
     ChangeInValue: intl.formatMessage({ defaultMessage: 'Change in Value' }),
     ChangeInPnL: intl.formatMessage({ defaultMessage: 'Change in P&L' }),
     zeroUsd: intl.formatMessage({ defaultMessage: '$0.00' }),
     max: intl.formatMessage({ defaultMessage: 'Max' }),
     confirmDeposit: intl.formatMessage({ defaultMessage: 'Confirm deposit' }),
-    confirmWithdraw: intl.formatMessage({ defaultMessage: 'Confirm withdraw' }),
+    confirmWithdraw: intl.formatMessage({ defaultMessage: 'Confirm redemption' }),
     confirmWithdrawBody: intl.formatMessage({
-      defaultMessage: 'Please check your wallet, and confirm the following request to withdraw funds.',
+      defaultMessage: 'Please check your wallet, and confirm the following request to redeem your funds.',
     }),
     confirmDepositBody: intl.formatMessage({
       defaultMessage: 'Please check your wallet, and confirm the following request to deposit funds.',
@@ -35,7 +35,7 @@ export function useVaultFormCopy() {
     depositCollateral: intl.formatMessage({ defaultMessage: 'Deposit collateral' }),
     addToVault: intl.formatMessage({ defaultMessage: 'Add to vault' }),
     withdrawCollateral: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
-    withdrawFromVault: intl.formatMessage({ defaultMessage: 'Withdraw from vault' }),
+    redeemFromVault: intl.formatMessage({ defaultMessage: 'Redeem from vault' }),
     cancel: intl.formatMessage({ defaultMessage: 'Cancel' }),
     approveShares: intl.formatMessage({ defaultMessage: 'Approve shares' }),
     approveSharesBody: intl.formatMessage({ defaultMessage: 'Approve shares for redemption' }),
@@ -44,12 +44,6 @@ export function useVaultFormCopy() {
     noValue: intl.formatMessage({ defaultMessage: '——' }),
     insufficientFunds: intl.formatMessage({ defaultMessage: 'Insufficient funds' }),
     insufficientShares: intl.formatMessage({ defaultMessage: 'Insufficient shares' }),
-    approveDSU: intl.formatMessage({ defaultMessage: 'Approve DSU' }),
-    approveDSUBody: intl.formatMessage({ defaultMessage: 'Approve DSU to withdraw' }),
-    positionUpdating: intl.formatMessage({ defaultMessage: 'Position settlement' }),
-    positionUpdatingBody: intl.formatMessage({
-      defaultMessage: 'Once your position is settled, you may withdraw your funds',
-    }),
   }
 }
 
