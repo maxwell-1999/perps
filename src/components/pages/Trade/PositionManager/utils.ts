@@ -1,6 +1,8 @@
 import { Row } from 'react-table'
 
+import colors from '@/components/design-system/theme/colors'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
+import { PositionStatus } from '@/constants/markets'
 import { AssetSnapshots, LivePrices, PositionDetails, UserCurrentPositions } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 
@@ -109,4 +111,17 @@ export const numericColumnSort = (rowA: Row, rowB: Row, id: string) => {
     return -1
   }
   return 0
+}
+
+export const getStatusDetails = (status: PositionStatus) => {
+  const isOpenPosition =
+    status === PositionStatus.open ||
+    status === PositionStatus.pricing ||
+    status === PositionStatus.closing ||
+    status === PositionStatus.opening
+  const isTransitionPosition =
+    status === PositionStatus.pricing || status === PositionStatus.opening || status === PositionStatus.closing
+  const statusColor = isOpenPosition ? (isTransitionPosition ? 'goldenRod' : colors.brand.green) : 'darkGray'
+
+  return { isOpenPosition, isTransitionPosition, statusColor }
 }
