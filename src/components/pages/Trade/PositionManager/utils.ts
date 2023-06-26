@@ -95,6 +95,7 @@ export const getFormattedPositionDetails = ({
   nextNotional: positionDetails ? formatBig18USDPrice(positionDetails?.nextNotional) : placeholderString,
   unformattedNotional: positionDetails ? formatBig18(positionDetails?.notional) : placeholderString,
   leverage: positionDetails ? formatBig18(positionDetails?.leverage) : placeholderString,
+  nextLeverage: positionDetails ? formatBig18(positionDetails?.nextLeverage) : placeholderString,
   fees: positionDetails ? formatBig18USDPrice(positionDetails?.fees) : placeholderString,
 })
 

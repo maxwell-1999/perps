@@ -41,7 +41,7 @@ function CurrentPosition() {
     averageEntry,
     liquidationPrice,
     nextNotional,
-    leverage,
+    nextLeverage,
   } = formattedValues
   const status = positionDetails?.status ?? PositionStatus.resolved
 
@@ -77,7 +77,7 @@ function CurrentPosition() {
             <Text fontSize="17px" color={isOpenPosition ? directionTextColor : subheaderTextColor}>
               {direction}
             </Text>
-            <LeverageBadge leverage={leverage} />
+            <LeverageBadge leverage={nextLeverage} />
           </ActivePositionHeader>
           {hasPosition ? (
             <PnlPositionDetail positionDetails={positionDetails as PositionDetails} />
