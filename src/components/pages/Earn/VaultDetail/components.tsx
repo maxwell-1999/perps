@@ -209,18 +209,20 @@ export const PositionCard = ({
 }
 
 export const ClaimCard = ({
-  claimable,
+  vaultUserSnapshot,
   vaultName,
   setShowClaimModal,
 }: {
-  claimable: bigint
+  vaultUserSnapshot: VaultUserSnapshot
   vaultName: string
   setShowClaimModal: (show: boolean) => void
 }) => {
+  const { claimable, pendingRedemptionAmount } = vaultUserSnapshot
   const intl = useIntl()
   const copy = useVaultDetailCopy()
   const alpha5 = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])
   const formattedClaimable = formatBig18USDPrice(claimable)
+  const isPending = !Big18Math.isZero(pendingRedemptionAmount)
 
   const bodyText = intl.formatMessage(
     {
@@ -234,23 +236,29 @@ export const ClaimCard = ({
     <Container p={4} mb="22px" variant="vaultCard" bg={alpha5}>
       <Flex flexDirection="column">
         <Text mb={2} fontSize="16px">
-          {copy.yourWithdrawIsReady}
+          {isPending ? copy.withdrawPending : copy.yourWithdrawIsReady}
         </Text>
         <Text fontSize="14px" variant="label" mb={2}>
-          {bodyText}
+          {isPending ? copy.pendingWithdrawal : bodyText}
         </Text>
         <Flex>
-          <Button
-            variant="text"
-            p={0}
-            height="initial"
-            onClick={() => setShowClaimModal(true)}
-            label={
-              <Text color={colors.brand.green} fontSize="14px">
-                {copy.confirmWithdraw}
-              </Text>
-            }
-          />
+          {!isPending ? (
+            <Button
+              variant="text"
+              p={0}
+              height="initial"
+              onClick={() => setShowClaimModal(true)}
+              label={
+                <Text color={colors.brand.green} fontSize="14px">
+                  {copy.confirmWithdraw}
+                </Text>
+              }
+            />
+          ) : (
+            <Flex width="100%" justifyContent="center">
+              <Spinner />
+            </Flex>
+          )}
         </Flex>
       </Flex>
     </Container>

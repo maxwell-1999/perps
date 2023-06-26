@@ -11,18 +11,18 @@ import {
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
-import { parseEther } from 'viem'
 
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
-import { Big18Math, formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
+import { Big18Math, formatBig18 } from '@/utils/big18Utils'
 
 import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
 
-import { FormValues, RequiredApprovals, TransactionState, VaultFormOption, initialTransactionState } from './constants'
-import { useVaultFormCopy } from './hooks'
+import { FormValues, VaultFormOption, initialTransactionState } from '../constants'
+import { useVaultFormCopy } from '../hooks'
+import { RequiredApprovals, TransactionState } from './constants'
 import { getRequiredApprovals, setAmountForConfirmation } from './utils'
 
 interface ConfirmationModalProps {
@@ -35,8 +35,6 @@ interface ConfirmationModalProps {
   vaultSnapshot: VaultSnapshot
   vaultUserSnapshot: VaultUserSnapshot
   maxWithdrawal: boolean
-  isClaimOnly: boolean
-  positionUpdating: boolean
 }
 
 export default function ConfirmationModal({
@@ -49,43 +47,28 @@ export default function ConfirmationModal({
   vaultName,
   vaultUserSnapshot,
   maxWithdrawal,
-  isClaimOnly,
-  positionUpdating,
 }: ConfirmationModalProps) {
   const copy = useVaultFormCopy()
   const intl = useIntl()
-  const { onApproveUSDC, onApproveShares, onDeposit, onRedeem, onClaim, onApproveDSU } = useVaultTransactions(
-    vaultSnapshot.symbol,
-  )
+  const { onApproveUSDC, onApproveShares, onDeposit, onRedeem } = useVaultTransactions(vaultSnapshot.symbol)
   const bigintAmount = setAmountForConfirmation({
     maxWithdrawal,
     vaultUserSnapshot,
     amount: formValues.amount,
-    isClaimOnly,
   })
-
-  const hasClaimable = !Big18Math.isZero(
-    Big18Math.add(vaultUserSnapshot.claimable, vaultUserSnapshot.pendingRedemptionAmount),
-  )
-  const hasAssets = !Big18Math.isZero(vaultUserSnapshot.assets)
 
   const [requiredApprovals, setRequiredApprovals] = useState<RequiredApprovals[]>()
 
-  // TODO: manage tx state with useQuery status
   const [transactionState, setTransactionState] = useState<TransactionState>(initialTransactionState)
   const {
     approveUSDCLoading,
     approveUSDCCompleted,
     depositCompleted,
     depositLoading,
-    approveDSUCompleted,
-    approveDSULoading,
     approveSharesCompleted,
     approveSharesLoading,
     redemptionCompleted,
     redemptionLoading,
-    claimCompleted,
-    claimLoading,
   } = transactionState
 
   const isDeposit = vaultOption === VaultFormOption.Deposit
@@ -98,11 +81,9 @@ export default function ConfirmationModal({
     const requiredApprovals = getRequiredApprovals({
       amount: bigintAmount,
       vaultSnapshot,
-      vaultUserSnapshot,
       vaultSymbol: vaultSnapshot.symbol,
       vaultOption,
       balances,
-      isClaimOnly,
     })
     setRequiredApprovals(requiredApprovals)
   }, [])
@@ -148,6 +129,7 @@ export default function ConfirmationModal({
     try {
       await onRedeem(bigintAmount, { max: maxWithdrawal || bigintAmount === vaultUserSnapshot.assets })
       setTransactionState((prevState) => ({ ...prevState, redemptionCompleted: true }))
+      onClose()
     } catch (e) {
       console.error(e)
     } finally {
@@ -155,41 +137,12 @@ export default function ConfirmationModal({
     }
   }
 
-  const handleApproveDSU = async () => {
-    setTransactionState((prevState) => ({ ...prevState, approveDSULoading: true }))
-    try {
-      await onApproveDSU()
-      setTransactionState((prevState) => ({ ...prevState, approveDSUCompleted: true }))
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setTransactionState((prevState) => ({ ...prevState, approveDSULoading: false }))
-    }
-  }
-
-  const handleClaim = async () => {
-    setTransactionState((prevState) => ({ ...prevState, claimLoading: true }))
-    try {
-      await onClaim(vaultUserSnapshot.claimable)
-      setTransactionState((prevState) => ({ ...prevState, claimCompleted: true }))
-      onClose()
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setTransactionState((prevState) => ({ ...prevState, claimLoading: false }))
-    }
-  }
-
   const requiresUSDCApproval = requiredApprovals?.includes(RequiredApprovals.usdc)
   const requiresSharesApproval = requiredApprovals?.includes(RequiredApprovals.shares)
-  const requiresDSUApproval = requiredApprovals?.includes(RequiredApprovals.dsu)
-  const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
   const approximateShares = formatBig18(
     Big18Math.div(Big18Math.mul(bigintAmount, vaultSnapshot.totalSupply), vaultSnapshot.totalAssets),
   )
-  const dsuApprovalSuggestion = formatBig18USDPrice(
-    Big18Math.add(parseEther('0.01'), vaultUserSnapshot.claimable ? vaultUserSnapshot.claimable ?? 0n : bigintAmount),
-  )
+
   return (
     <Modal isOpen onClose={onClose} isCentered variant="confirmation">
       <ModalOverlay />
@@ -231,7 +184,7 @@ export default function ConfirmationModal({
             )}
             {!isDeposit && (
               <>
-                {!isClaimOnly && hasAssets && requiresSharesApproval && (
+                {requiresSharesApproval && (
                   <ModalStep
                     title={copy.approveShares}
                     description={intl.formatMessage(
@@ -242,58 +195,23 @@ export default function ConfirmationModal({
                     isCompleted={approveSharesCompleted}
                   />
                 )}
-                {!isClaimOnly && hasAssets && (
-                  <ModalStep
-                    title={copy.redeemShares}
-                    description={intl.formatMessage(
-                      { defaultMessage: 'Redeem funds from {vaultName} vault' },
-                      { vaultName },
-                    )}
-                    isLoading={redemptionLoading}
-                    isCompleted={redemptionCompleted}
-                  />
-                )}
-                {positionUpdating && !isClaimOnly && (
-                  <ModalStep
-                    title={copy.positionUpdating}
-                    description={copy.positionUpdatingBody}
-                    isLoading={positionUpdating}
-                    isCompleted={redemptionCompleted && !positionUpdating}
-                  />
-                )}
-                {requiresDSUApproval && (
-                  <ModalStep
-                    title={copy.approveDSU}
-                    description={intl.formatMessage(
-                      { defaultMessage: 'Approve {dsuApprovalSuggestion} DSU to withdraw collateral' },
-                      { dsuApprovalSuggestion },
-                    )}
-                    isLoading={approveDSULoading}
-                    isCompleted={approveDSUCompleted}
-                  />
-                )}
                 <ModalStep
-                  title={copy.claimShares}
-                  description={
-                    isClaimOnly
-                      ? intl.formatMessage(
-                          { defaultMessage: '{claimableBalance} available for withdrawal' },
-                          { claimableBalance: formattedClaimableBalance },
-                        )
-                      : intl.formatMessage({ defaultMessage: 'Claim funds from {vaultName} vault' }, { vaultName })
-                  }
-                  isLoading={claimLoading}
-                  isCompleted={claimCompleted}
+                  title={copy.redeemShares}
+                  description={intl.formatMessage(
+                    { defaultMessage: 'Redeem funds from {vaultName} vault' },
+                    { vaultName },
+                  )}
+                  isLoading={redemptionLoading}
+                  isCompleted={redemptionCompleted}
                 />
-
                 <ModalDetail
-                  title={copy.withdrawFromVault}
-                  action={copy.Withdraw}
+                  title={copy.redeemFromVault}
+                  action={copy.Redeem}
                   color={colors.brand.purple[240]}
                   detail={intl.formatMessage(
                     { defaultMessage: '{amount} from {vaultName}' },
                     {
-                      amount: hasClaimable ? formattedClaimableBalance : formattedAmount,
+                      amount: formattedAmount,
                       vaultName,
                     },
                   )}
@@ -326,72 +244,24 @@ export default function ConfirmationModal({
             )}
             {!isDeposit && (
               <>
-                {!isClaimOnly && hasAssets && (
-                  <>
-                    {requiresSharesApproval && (
-                      <Button
-                        variant={approveSharesCompleted ? 'outline' : 'primary'}
-                        isDisabled={approveSharesCompleted || approveSharesLoading}
-                        label={approveSharesLoading ? <Spinner size="sm" /> : copy.approveShares}
-                        onClick={handleSharesApproval}
-                        width="100%"
-                      />
-                    )}
-                    <Button
-                      variant={
-                        (requiresSharesApproval && !approveSharesCompleted) || redemptionCompleted
-                          ? 'outline'
-                          : 'primary'
-                      }
-                      isDisabled={
-                        (requiresSharesApproval && !approveSharesCompleted) || redemptionLoading || redemptionCompleted
-                      }
-                      label={redemptionLoading ? <Spinner size="sm" /> : copy.redeemShares}
-                      onClick={handleRedemption}
-                      width="100%"
-                    />
-                  </>
-                )}
-                {requiresDSUApproval && (
+                {requiresSharesApproval && (
                   <Button
-                    variant={
-                      hasClaimable && !approveDSUCompleted
-                        ? 'primary'
-                        : (requiresSharesApproval && !approveSharesCompleted) ||
-                          approveDSUCompleted ||
-                          (!hasClaimable && !redemptionCompleted)
-                        ? 'outline'
-                        : 'primary'
-                    }
-                    isDisabled={
-                      (requiresSharesApproval && !approveSharesCompleted) ||
-                      (!hasClaimable && !redemptionCompleted) ||
-                      approveDSULoading ||
-                      (!isClaimOnly && positionUpdating) ||
-                      approveDSUCompleted
-                    }
-                    label={approveDSULoading ? <Spinner size="sm" /> : copy.approveDSU}
-                    onClick={handleApproveDSU}
+                    variant={approveSharesCompleted ? 'outline' : 'primary'}
+                    isDisabled={approveSharesCompleted || approveSharesLoading}
+                    label={approveSharesLoading ? <Spinner size="sm" /> : copy.approveShares}
+                    onClick={handleSharesApproval}
                     width="100%"
                   />
                 )}
                 <Button
                   variant={
-                    (requiresDSUApproval && !approveDSUCompleted) ||
-                    !hasClaimable ||
-                    (!hasClaimable && !redemptionCompleted)
-                      ? 'outline'
-                      : 'primary'
+                    (requiresSharesApproval && !approveSharesCompleted) || redemptionCompleted ? 'outline' : 'primary'
                   }
                   isDisabled={
-                    (requiresDSUApproval && !approveDSUCompleted) ||
-                    claimLoading ||
-                    claimCompleted ||
-                    (!isClaimOnly && positionUpdating) ||
-                    (!hasClaimable && !redemptionCompleted)
+                    (requiresSharesApproval && !approveSharesCompleted) || redemptionLoading || redemptionCompleted
                   }
-                  label={claimLoading ? <Spinner size="sm" /> : copy.claimShares}
-                  onClick={handleClaim}
+                  label={redemptionLoading ? <Spinner size="sm" /> : copy.redeemShares}
+                  onClick={handleRedemption}
                   width="100%"
                 />
               </>

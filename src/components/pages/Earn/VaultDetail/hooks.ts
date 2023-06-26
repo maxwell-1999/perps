@@ -61,6 +61,10 @@ export const useVaultDetailCopy = () => {
     capitalEfficientBody: intl.formatMessage({
       defaultMessage: 'Take advantage of the power of the Perennial protocol to get high utilization of capital.',
     }),
+    pendingWithdrawal: intl.formatMessage({
+      defaultMessage: 'Once your position settles you may withdraw your funds.',
+    }),
+    withdrawPending: intl.formatMessage({ defaultMessage: 'Withdraw pending' }),
   }
 }
 

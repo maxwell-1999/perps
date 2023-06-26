@@ -1,4 +1,10 @@
 {
+  "+8YEz7": [
+    {
+      "type": 0,
+      "value": "Once your position settles you may withdraw your funds."
+    }
+  ],
   "+PUp2/": [
     {
       "type": 0,
@@ -39,6 +45,12 @@
       "value": "% left"
     }
   ],
+  "0qSkc+": [
+    {
+      "type": 0,
+      "value": "Withdraw your collateral"
+    }
+  ],
   "12vECb": [
     {
       "type": 0,
@@ -67,20 +79,6 @@
     {
       "type": 0,
       "value": "Approve Vault Deposits"
-    }
-  ],
-  "4LacZK": [
-    {
-      "type": 0,
-      "value": "Claim funds from "
-    },
-    {
-      "type": 1,
-      "value": "vaultName"
-    },
-    {
-      "type": 0,
-      "value": " vault"
     }
   ],
   "56DzI+": [
@@ -181,12 +179,6 @@
     {
       "type": 0,
       "value": "Capital Efficient"
-    }
-  ],
-  "9yWVUm": [
-    {
-      "type": 0,
-      "value": "Approve DSU to withdraw"
     }
   ],
   "A3zdUJ": [
@@ -325,12 +317,6 @@
       "value": "Viewing"
     }
   ],
-  "FC4JMf": [
-    {
-      "type": 0,
-      "value": "Position settlement"
-    }
-  ],
   "FIMqSt": [
     {
       "type": 0,
@@ -353,12 +339,6 @@
     {
       "type": 0,
       "value": "Market"
-    }
-  ],
-  "GG4xPq": [
-    {
-      "type": 0,
-      "value": "Please check your wallet, and confirm the following request to withdraw funds."
     }
   ],
   "GufXy5": [
@@ -651,6 +631,12 @@
       "value": "Collateral (after fees)"
     }
   ],
+  "Uq0c8S": [
+    {
+      "type": 0,
+      "value": "Withdraw pending"
+    }
+  ],
   "UwvPFx": [
     {
       "type": 0,
@@ -711,6 +697,12 @@
       "value": "You can now withdraw..."
     }
   ],
+  "XSdWHA": [
+    {
+      "type": 0,
+      "value": "Redeem"
+    }
+  ],
   "XmwS+S": [
     {
       "type": 0,
@@ -733,12 +725,6 @@
     {
       "type": 0,
       "value": "Please check your wallet, and confirm the following requests."
-    }
-  ],
-  "aFX27t": [
-    {
-      "type": 0,
-      "value": "Once your position is settled, you may withdraw your funds"
     }
   ],
   "aYqugF": [
@@ -769,6 +755,12 @@
     {
       "type": 0,
       "value": "Liquidation price"
+    }
+  ],
+  "byKRKx": [
+    {
+      "type": 0,
+      "value": "Claim your collateral from the vault"
     }
   ],
   "cRUfAq": [
@@ -943,10 +935,22 @@
       "value": "of capacity"
     }
   ],
+  "lp+CVM": [
+    {
+      "type": 0,
+      "value": "Please check your wallet, and confirm the following request to redeem your funds."
+    }
+  ],
   "mDNzLd": [
     {
       "type": 0,
       "value": "Place your trade."
+    }
+  ],
+  "nF4Glg": [
+    {
+      "type": 0,
+      "value": "Withdraw assets"
     }
   ],
   "npb5FN": [
@@ -1093,6 +1097,12 @@
       "value": "Value exceeds collateral amount."
     }
   ],
+  "vf1MO6": [
+    {
+      "type": 0,
+      "value": "Redeem from vault"
+    }
+  ],
   "wHzwL2": [
     {
       "type": 0,
@@ -1115,6 +1125,12 @@
     {
       "type": 0,
       "value": "Select vault"
+    }
+  ],
+  "x8Vy97": [
+    {
+      "type": 0,
+      "value": "Confirm redemption"
     }
   ],
   "y7EKeV": [
