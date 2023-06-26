@@ -919,7 +919,12 @@ export const useProductTransactions = (productAddress?: Address) => {
     await refresh()
   }
 
-  const onModifyPosition = async (collateralDelta: bigint, positionSide: OpenPositionType, positionDelta: bigint) => {
+  const onModifyPosition = async (
+    collateralDelta: bigint,
+    positionSide: OpenPositionType,
+    positionDelta: bigint,
+    { crossProduct, crossCollateral }: { crossProduct?: Address; crossCollateral?: bigint } = {},
+  ) => {
     if (!address || !chainId || !walletClient) {
       return
     }
@@ -950,6 +955,17 @@ export const useProductTransactions = (productAddress?: Address) => {
         position: Big18Math.abs(positionDelta),
       }),
     ].filter(({ action }) => !Big18Math.eq(BigInt(action), BigInt(InvokerAction.NOOP)))
+
+    // If we have collateral in another product, withdraw it first
+    if (crossProduct && crossCollateral) {
+      orderedActions.unshift(
+        buildInvokerAction(InvokerAction.WITHDRAW_AND_UNWRAP, {
+          productAddress: crossProduct,
+          userAddress: address,
+          amount: crossCollateral,
+        }),
+      )
+    }
 
     const hash = await multiInvoker.write.invoke([orderedActions], txOpts)
     await waitForTransaction({ hash })

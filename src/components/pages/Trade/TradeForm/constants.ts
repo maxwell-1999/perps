@@ -24,4 +24,5 @@ export type OrderValues = {
   collateral: string
   amount: string
   fullClose?: boolean
+  crossCollateral?: bigint
 }

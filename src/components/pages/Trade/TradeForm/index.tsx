@@ -1,7 +1,7 @@
 import { Flex, Spinner } from '@chakra-ui/react'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
-import { OrderDirection, PositionStatus } from '@/constants/markets'
+import { OrderDirection, PositionStatus, closedOrResolved } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { useUserCurrentPositions } from '@/hooks/markets'
@@ -30,12 +30,19 @@ function TradeContainer() {
   const oppositeSidePosition = positions?.[selectedMarket]?.[orderDirection === Long ? Short : Long]
 
   useEffect(() => {
-    if (position?.status === PositionStatus.resolved && oppositeSidePosition?.status !== PositionStatus.resolved)
+    // If this position is closed/resolve and the other side is not, switch to that side
+    if (closedOrResolved(position?.status) && !closedOrResolved(oppositeSidePosition?.status))
       setOrderDirection(orderDirection === Long ? OrderDirection.Short : OrderDirection.Long)
   }, [orderDirection, position, oppositeSidePosition, setOrderDirection])
 
-  const containerVariant =
-    formState !== FormState.close && position && position.status !== PositionStatus.resolved ? 'pink' : 'transparent'
+  const crossCollateral = useMemo(() => {
+    // If this position is closed/resolved and the other side has collateral, mark it as cross collateral
+    if (closedOrResolved(position?.status) && oppositeSidePosition?.status === PositionStatus.closed)
+      return oppositeSidePosition?.currentCollateral ?? 0n
+    return 0n
+  }, [position, oppositeSidePosition])
+
+  const containerVariant = formState !== FormState.close && !closedOrResolved(position?.status) ? 'pink' : 'transparent'
 
   if (!product || (address && positionsLoading)) {
     return (
@@ -61,6 +68,8 @@ function TradeContainer() {
           setOrderDirection={setOrderDirection}
           product={product}
           position={position?.side === 'taker' ? position : undefined}
+          crossCollateral={crossCollateral}
+          crossProduct={oppositeSidePosition?.product}
         />
       )}
       {formState === FormState.close && position && (

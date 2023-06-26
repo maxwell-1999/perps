@@ -297,6 +297,28 @@
       "value": "Delta-Hedged"
     }
   ],
+  "Eypml7": [
+    {
+      "type": 0,
+      "value": "* Includes "
+    },
+    {
+      "type": 1,
+      "value": "crossCollateralAmount"
+    },
+    {
+      "type": 0,
+      "value": " from "
+    },
+    {
+      "type": 1,
+      "value": "oppositeSide"
+    },
+    {
+      "type": 0,
+      "value": " market"
+    }
+  ],
   "F/BpPU": [
     {
       "type": 0,

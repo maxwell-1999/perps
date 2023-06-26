@@ -81,6 +81,13 @@ export function useTradeFormCopy() {
     confirmOrder: intl.formatMessage({ defaultMessage: 'Confirm Order' }),
     confirmChanges: intl.formatMessage({ defaultMessage: 'Confirm Changes' }),
     reset: intl.formatMessage({ defaultMessage: 'Reset' }),
+    crossCollateralInfo: (crossCollateralAmount: string, oppositeSide: string) =>
+      intl.formatMessage(
+        {
+          defaultMessage: '* Includes {crossCollateralAmount} from {oppositeSide} market',
+        },
+        { crossCollateralAmount, oppositeSide },
+      ),
   }
 }
 

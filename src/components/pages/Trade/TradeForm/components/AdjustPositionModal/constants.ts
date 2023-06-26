@@ -2,6 +2,7 @@ type CollateralDetails = {
   prevCollateral: bigint
   newCollateral: bigint
   difference: bigint
+  crossCollateral: bigint
 }
 
 type PositionDetails = {

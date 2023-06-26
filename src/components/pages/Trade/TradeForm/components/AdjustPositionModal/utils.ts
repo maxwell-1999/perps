@@ -57,6 +57,7 @@ export const createAdjustment = ({
       prevCollateral: currentCollateral,
       newCollateral: collateralAmount,
       difference: collateralDifference,
+      crossCollateral: orderValues.crossCollateral ?? 0n,
     },
     position: {
       prevPosition: currentPositionAmount,

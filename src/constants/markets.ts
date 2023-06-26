@@ -23,6 +23,9 @@ export enum PositionStatus {
   resolved = 'noValue',
 }
 
+export const closedOrResolved = (status?: PositionStatus) =>
+  status && [PositionStatus.closed, PositionStatus.resolved].includes(status)
+
 export const ChainMarkets: {
   [chainId in SupportedChainId]: {
     [asset in SupportedAsset]?: { [OrderDirection.Long]?: Address; [OrderDirection.Short]?: Address }

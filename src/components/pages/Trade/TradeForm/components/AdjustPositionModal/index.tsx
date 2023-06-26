@@ -10,6 +10,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
+import { Address } from 'viem'
 
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import { SupportedAsset } from '@/constants/assets'
@@ -36,6 +37,7 @@ interface AdjustmentModalProps {
   asset: SupportedAsset
   position?: PositionDetails
   product: ProductSnapshot
+  crossProduct?: Address
   usdcAllowance: bigint
   orderValues: OrderValues
   positionType: OpenPositionType
@@ -52,6 +54,7 @@ function AdjustPositionModal({
   positionType,
   position,
   product,
+  crossProduct,
   usdcAllowance,
   variant,
 }: AdjustmentModalProps) {
@@ -76,7 +79,7 @@ function AdjustPositionModal({
   })
 
   const {
-    collateral: { prevCollateral, newCollateral, difference: collateralDifference },
+    collateral: { prevCollateral, newCollateral, difference: collateralDifference, crossCollateral },
     position: { prevPosition, newPosition, difference: positionDifference },
     leverage: { prevLeverage, newLeverage },
     needsApproval,
@@ -117,7 +120,10 @@ function AdjustPositionModal({
     try {
       // If this requires two-step, then the collateral should stay the same
       const collateralModification = requiresTwoStep ? 0n : collateralDifference
-      await onModifyPosition(collateralModification, positionType, positionDifference)
+      await onModifyPosition(collateralModification, positionType, positionDifference, {
+        crossCollateral,
+        crossProduct,
+      })
       setIsTransactionCompleted(true)
       if (!requiresTwoStep) {
         onClose()

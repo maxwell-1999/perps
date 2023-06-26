@@ -2,13 +2,14 @@ import { RepeatIcon } from '@chakra-ui/icons'
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { Address } from 'viem'
 
 import Toggle from '@/components/shared/Toggle'
 import { TxButton } from '@/components/shared/TxButton'
 import { FormattedBig18USDPrice } from '@/components/shared/components'
 import { Form } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/assets'
-import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/markets'
+import { OpenPositionType, OrderDirection, PositionStatus, closedOrResolved } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails, useProtocolSnapshot } from '@/hooks/markets'
@@ -37,6 +38,8 @@ interface TradeFormProps {
   setOrderDirection: (orderDirection: OrderDirection) => void
   product: ProductSnapshot
   position?: PositionDetails
+  crossCollateral: bigint
+  crossProduct?: Address
 }
 
 function TradeForm(props: TradeFormProps) {
@@ -64,7 +67,7 @@ function TradeForm(props: TradeFormProps) {
   const hasPosition = positionStatus !== PositionStatus.resolved
   const positionOrderDirection = hasPosition ? position?.direction : undefined
   const currentPositionAmount = position?.nextPosition ?? 0n
-  const currentCollateral = position?.currentCollateral ?? 0n
+  const currentCollateral = (position?.currentCollateral ?? 0n) + props.crossCollateral
   const isNewPosition = Big18Math.isZero(currentPositionAmount)
   const maxLeverage = useMemo(() => calcMaxLeverage(maintenance), [maintenance])
   const userMaintenance = position?.maintenance ?? 0n
@@ -140,7 +143,7 @@ function TradeForm(props: TradeFormProps) {
   })
 
   const onConfirm = (orderData: { collateral: string; amount: string }) => {
-    setOrderValues(orderData)
+    setOrderValues({ ...orderData, crossCollateral: props.crossCollateral })
   }
 
   const onWithdrawCollateral = () => {
@@ -198,6 +201,7 @@ function TradeForm(props: TradeFormProps) {
           asset={props.asset}
           position={position}
           product={product}
+          crossProduct={props.crossProduct}
           orderValues={orderValues}
           usdcAllowance={balances?.usdcAllowance ?? 0n}
           variant="adjust"
@@ -230,12 +234,13 @@ function TradeForm(props: TradeFormProps) {
               labels={orderDirections}
               activeLabel={positionOrderDirection ? positionOrderDirection : orderDirection}
               onChange={setOrderDirection}
-              overrideValue={positionOrderDirection}
+              overrideValue={!closedOrResolved(positionStatus) ? positionOrderDirection : undefined}
             />
           </Flex>
           <Input
             key={FormNames.collateral}
-            labelText={copy.collateral}
+            // eslint-disable-next-line formatjs/no-literal-string-in-jsx
+            labelText={`${copy.collateral}${props.crossCollateral > 0n ? '*' : ''}`}
             title={copy.collateral}
             placeholder="0.0000"
             rightLabel={
@@ -266,6 +271,14 @@ function TradeForm(props: TradeFormProps) {
             validate={!!address ? collateralValidators : {}}
             isRequired={!!address}
           />
+          {props.crossCollateral > 0n && (
+            <Text variant="label" fontSize="11px" m={1} mt={0}>
+              {copy.crossCollateralInfo(
+                formatBig18USDPrice(props.crossCollateral),
+                orderDirection === OrderDirection.Long ? 'short' : 'long',
+              )}
+            </Text>
+          )}
           <Input
             key={FormNames.amount}
             labelText={copy.amount}
