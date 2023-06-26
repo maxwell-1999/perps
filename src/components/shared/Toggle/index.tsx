@@ -1,4 +1,6 @@
-import { Button, ButtonGroup } from '@chakra-ui/react'
+import { Button, ButtonGroup, Text, useColorModeValue } from '@chakra-ui/react'
+
+import colors from '@/components/design-system/theme/colors'
 
 function hideConnnectedBorder(index: number, side: 'right' | 'left') {
   if (index === 0 && side === 'right') {
@@ -14,14 +16,23 @@ interface ToggleProps<T = string> {
   activeLabel: T
   onChange: (label: T) => void
   overrideValue?: T
+  activeColor?: string
 }
 
-function Toggle<T extends string>({ labels, activeLabel, onChange, overrideValue }: ToggleProps<T>) {
+function Toggle<T extends string>({
+  labels,
+  activeLabel,
+  onChange,
+  overrideValue,
+  activeColor = colors.brand.green,
+}: ToggleProps<T>) {
   const handleToggle = (label: T) => {
     if (label !== activeLabel) {
       onChange(label)
     }
   }
+
+  const inactiveColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
 
   return (
     <ButtonGroup isAttached display="flex" flex={1} height="35px">
@@ -36,7 +47,7 @@ function Toggle<T extends string>({ labels, activeLabel, onChange, overrideValue
           // disable the button if the overrideValue prop is present and does not match this label
           isDisabled={overrideValue !== undefined && label !== overrideValue}
         >
-          {label}
+          <Text color={label === activeLabel ? activeColor : inactiveColor}>{label}</Text>
         </Button>
       ))}
     </ButtonGroup>

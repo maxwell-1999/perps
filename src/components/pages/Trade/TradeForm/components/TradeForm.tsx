@@ -22,6 +22,7 @@ import { next } from '@/utils/positionUtils'
 import { Button, IconButton } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
+import colors from '@ds/theme/colors'
 
 import { ProductSnapshot } from '@t/perennial'
 
@@ -235,6 +236,7 @@ function TradeForm(props: TradeFormProps) {
               activeLabel={positionOrderDirection ? positionOrderDirection : orderDirection}
               onChange={setOrderDirection}
               overrideValue={!closedOrResolved(positionStatus) ? positionOrderDirection : undefined}
+              activeColor={orderDirection === OrderDirection.Long ? colors.brand.green : colors.brand.red}
             />
           </Flex>
           <Input
