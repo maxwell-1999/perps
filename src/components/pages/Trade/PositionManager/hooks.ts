@@ -75,6 +75,8 @@ export const usePositionManagerCopy = () => {
     status: intl.formatMessage({ defaultMessage: 'Status' }),
     noCurrentPositions: intl.formatMessage({ defaultMessage: 'No current positions to show' }),
     noHistoryPositions: intl.formatMessage({ defaultMessage: 'No position history to show' }),
+    noPositionOpen: intl.formatMessage({ defaultMessage: 'No position open' }),
+    noPnLToShow: intl.formatMessage({ defaultMessage: 'No P&L to show' }),
   }
 }
 

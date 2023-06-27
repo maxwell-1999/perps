@@ -69,6 +69,12 @@
       "value": "Open / Liq"
     }
   ],
+  "2qmdQu": [
+    {
+      "type": 0,
+      "value": "No position open"
+    }
+  ],
   "3Bd9gC": [
     {
       "type": 0,
@@ -731,6 +737,12 @@
     {
       "type": 0,
       "value": "$0.00"
+    }
+  ],
+  "Y4Utq5": [
+    {
+      "type": 0,
+      "value": "No P&L to show"
     }
   ],
   "ZaNKvA": [

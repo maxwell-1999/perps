@@ -63,7 +63,7 @@ function CurrentPosition() {
           <ActivePositionDetail
             label={copy.size}
             value={isOpenPosition ? nextPosition : noValue}
-            valueSubheader={isOpenPosition ? nextNotional : noValue}
+            valueSubheader={isOpenPosition ? nextNotional : copy.noPositionOpen}
             valueColor={isOpenPosition ? 'initial' : subheaderTextColor}
           />
         </Flex>
@@ -72,7 +72,13 @@ function CurrentPosition() {
             <Text fontSize="17px" color={isOpenPosition ? directionTextColor : subheaderTextColor}>
               {direction}
             </Text>
-            <LeverageBadge leverage={nextLeverage} />
+            {hasPosition ? (
+              <LeverageBadge leverage={nextLeverage} />
+            ) : (
+              <Text variant="label" fontSize="15px">
+                {noValue}
+              </Text>
+            )}
           </ActivePositionHeader>
           {hasPosition ? (
             <PnlPositionDetail positionDetails={positionDetails as PositionDetails} />
@@ -80,7 +86,7 @@ function CurrentPosition() {
             <ActivePositionDetail
               label={copy.pnl}
               value={noValue}
-              valueSubheader={noValue}
+              valueSubheader={copy.noPnLToShow}
               valueColor={subheaderTextColor}
             />
           )}
@@ -144,7 +150,7 @@ function CurrentPosition() {
           label={copy.liquidationPrice}
           value={
             <Text fontSize="14px" color={alpha75}>
-              {liquidationPrice}
+              {hasPosition ? liquidationPrice : noValue}
             </Text>
           }
         />
@@ -152,7 +158,7 @@ function CurrentPosition() {
           label={copy.averageEntry}
           value={
             <Text fontSize="14px" color={alpha75}>
-              {averageEntry}
+              {hasPosition ? averageEntry : noValue}
             </Text>
           }
         />
@@ -168,7 +174,7 @@ function CurrentPosition() {
           label={copy.collateral}
           value={
             <Text fontSize="14px" color={alpha75}>
-              {currentCollateral}
+              {hasPosition ? currentCollateral : noValue}
             </Text>
           }
         />
