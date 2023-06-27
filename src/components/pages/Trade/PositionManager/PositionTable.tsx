@@ -144,10 +144,10 @@ const PositionTableRow = ({
           <Box flex="2">
             <Flex flexDirection="column">
               <Text fontSize="14px">
-                {row.position} {row.asset.toUpperCase()}
+                {currentPosition ? row.nextPosition : row.position} {row.asset.toUpperCase()}
               </Text>
               <Text variant="label" fontSize="12px">
-                {row.notional}
+                {currentPosition ? row.nextNotional : row.notional}
               </Text>
             </Flex>
           </Box>
