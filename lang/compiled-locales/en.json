@@ -35,6 +35,12 @@
       "value": "Load more"
     }
   ],
+  "08j0k5": [
+    {
+      "type": 0,
+      "value": "No position history to show"
+    }
+  ],
   "0NQ9Tn": [
     {
       "type": 1,
@@ -405,6 +411,12 @@
     {
       "type": 0,
       "value": "Hourly Funding"
+    }
+  ],
+  "K8nsss": [
+    {
+      "type": 0,
+      "value": "No current positions to show"
     }
   ],
   "KtEZXn": [

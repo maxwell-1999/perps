@@ -73,6 +73,8 @@ export const usePositionManagerCopy = () => {
     openLiq: intl.formatMessage({ defaultMessage: 'Open / Liq' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
     status: intl.formatMessage({ defaultMessage: 'Status' }),
+    noCurrentPositions: intl.formatMessage({ defaultMessage: 'No current positions to show' }),
+    noHistoryPositions: intl.formatMessage({ defaultMessage: 'No position history to show' }),
   }
 }
 

@@ -3,7 +3,7 @@ import React from 'react'
 
 import { Button } from '@/components/design-system'
 
-import { PositionTable } from '../components'
+import { PositionTable } from '../PositionTable'
 import { usePositionHistoryTableData, usePositionManagerCopy } from '../hooks'
 
 function AllPositions() {
@@ -13,7 +13,7 @@ function AllPositions() {
   return (
     <Box>
       <Box>
-        <PositionTable positions={positions} />
+        <PositionTable positions={positions} emptyStateMessage={copy.noHistoryPositions} />
       </Box>
       <Flex justifyContent="center" alignContent="center">
         {(hasNextPage || isLoading) && (
