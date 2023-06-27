@@ -11,6 +11,8 @@ import { PositionDetails } from '@/hooks/markets'
 import { Button } from '@ds/Button'
 import { DataRow } from '@ds/DataRow'
 
+import { getStatusDetails } from '@utils/positionUtils'
+
 import { useFormatPosition, usePositionManagerCopy, useStyles } from '../hooks'
 import {
   ActivePositionDetail,
@@ -47,14 +49,7 @@ function CurrentPosition() {
 
   const hasPosition = status !== PositionStatus.resolved
   const directionTextColor = direction === OrderDirection.Long ? green : red
-  const isOpenPosition =
-    status === PositionStatus.open ||
-    status === PositionStatus.pricing ||
-    status === PositionStatus.closing ||
-    status === PositionStatus.opening
-  const isTransitionPosition =
-    status === PositionStatus.pricing || status === PositionStatus.opening || status === PositionStatus.closing
-  const statusColor = isOpenPosition ? (isTransitionPosition ? 'goldenRod' : green) : 'darkGray'
+  const { isOpenPosition, statusColor } = getStatusDetails(status)
 
   const statusLabel = copy[status]
   return (

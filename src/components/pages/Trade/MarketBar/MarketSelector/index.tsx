@@ -32,7 +32,7 @@ function MarketSelector() {
     <Popover
       placement="bottom-start"
       variant="assetSelector"
-      offset={[-8, 6]}
+      offset={[-5, 6]}
       isOpen={isOpen}
       onOpen={onOpen}
       onClose={onClose}
@@ -45,7 +45,7 @@ function MarketSelector() {
           rightIcon={<HamburgerIcon height="20px" width="20px" />}
         />
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent width={{ base: '304px', xl: '400px' }}>
         <PopoverHeader>
           <Flex flex={1} alignItems="center" justifyContent="space-between" mb="14px">
             <Text fontSize="17px">{copy.switchMarket}</Text>

@@ -172,7 +172,7 @@ export const PositionCard = ({
         <Flex flex={1} justifyContent="space-between" mb={4}>
           <Text color={alpha50}>{copy.value}</Text>
           {address && hasPosition ? (
-            <FormattedBig18USDPrice value={positionAmount} fontSize="16px" fontWeight={500} compact />
+            <FormattedBig18USDPrice value={positionAmount} fontSize="16px" fontWeight={500} />
           ) : (
             <Text color={alpha50}>{copy.noValue}</Text>
           )}

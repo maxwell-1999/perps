@@ -57,6 +57,12 @@
       "value": "Fully on-chain smart contracts deploy liquidity & adjust multiple positions, so you don’t have to."
     }
   ],
+  "2Xvb7U": [
+    {
+      "type": 0,
+      "value": "Open / Liq"
+    }
+  ],
   "3Bd9gC": [
     {
       "type": 0,
@@ -1069,6 +1075,12 @@
     {
       "type": 0,
       "value": "Confirm deposit"
+    }
+  ],
+  "tzMNF3": [
+    {
+      "type": 0,
+      "value": "Status"
     }
   ],
   "uHK9pk": [

@@ -12,6 +12,7 @@ export type PositionTableData = {
   averageEntry: string
   currentCollateral: string
   leverage: string
+  nextLeverage: string
   liquidationPrice: string
   nextPosition: string
   notional: string

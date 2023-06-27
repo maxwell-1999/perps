@@ -1,11 +1,12 @@
 import { Flex, Spinner } from '@chakra-ui/react'
 import { useEffect, useMemo } from 'react'
 
-import { OrderDirection, PositionStatus, closedOrResolved } from '@/constants/markets'
+import { OrderDirection, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { useUserCurrentPositions } from '@/hooks/markets'
 import { useAddress } from '@/hooks/network'
+import { closedOrResolved } from '@/utils/positionUtils'
 
 import { Container } from '@ds/Container'
 

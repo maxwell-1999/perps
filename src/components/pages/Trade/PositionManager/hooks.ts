@@ -70,6 +70,9 @@ export const usePositionManagerCopy = () => {
     executionPrice: intl.formatMessage({ defaultMessage: 'Execution Price' }),
     date: intl.formatMessage({ defaultMessage: 'Date' }),
     opened: intl.formatMessage({ defaultMessage: 'Opened' }),
+    openLiq: intl.formatMessage({ defaultMessage: 'Open / Liq' }),
+    leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
+    status: intl.formatMessage({ defaultMessage: 'Status' }),
   }
 }
 
