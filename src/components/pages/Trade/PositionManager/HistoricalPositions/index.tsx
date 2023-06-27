@@ -2,13 +2,18 @@ import { Box, Flex } from '@chakra-ui/react'
 import React from 'react'
 
 import { Button } from '@/components/design-system'
+import { LoadingScreen } from '@/components/shared/components'
 
 import { PositionTable } from '../PositionTable'
 import { usePositionHistoryTableData, usePositionManagerCopy } from '../hooks'
 
 function AllPositions() {
   const copy = usePositionManagerCopy()
-  const { positions, hasNextPage, fetchNextPage, isLoading, isFetchingNextPage } = usePositionHistoryTableData()
+  const { positions, hasNextPage, fetchNextPage, isLoading, isFetchingNextPage, status } = usePositionHistoryTableData()
+
+  if (status === 'loading') {
+    return <LoadingScreen />
+  }
 
   return (
     <Box>

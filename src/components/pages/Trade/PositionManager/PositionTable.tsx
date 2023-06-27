@@ -37,6 +37,7 @@ export const PositionTable = ({
 }) => {
   const { background } = useStyles()
   const copy = usePositionManagerCopy()
+
   return (
     <Box>
       <Flex alignItems="center" justifyContent="center" py={1} px={4} position="sticky" top={0} background={background}>
