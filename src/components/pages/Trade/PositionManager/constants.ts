@@ -16,6 +16,7 @@ export type PositionTableData = {
   liquidationPrice: string
   nextPosition: string
   notional: string
+  nextNotional: string
   position: string
   startCollateral: string
   symbol: string

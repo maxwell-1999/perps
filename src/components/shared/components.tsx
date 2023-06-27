@@ -1,4 +1,4 @@
-import { Flex, FlexProps, Text, TextProps } from '@chakra-ui/react'
+import { Flex, FlexProps, Spinner, Text, TextProps } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 import Image from 'next/image'
 
@@ -50,3 +50,11 @@ export const Form = styled('form')`
   width: 100%;
   height: 100%;
 `
+
+export const LoadingScreen = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
+  return (
+    <Flex width="100%" height="100%" justifyContent="center" alignItems="center">
+      <Spinner size={size} />
+    </Flex>
+  )
+}

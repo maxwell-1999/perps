@@ -73,6 +73,10 @@ export const usePositionManagerCopy = () => {
     openLiq: intl.formatMessage({ defaultMessage: 'Open / Liq' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
     status: intl.formatMessage({ defaultMessage: 'Status' }),
+    noCurrentPositions: intl.formatMessage({ defaultMessage: 'No current positions to show' }),
+    noHistoryPositions: intl.formatMessage({ defaultMessage: 'No position history to show' }),
+    noPositionOpen: intl.formatMessage({ defaultMessage: 'No position open' }),
+    noPnLToShow: intl.formatMessage({ defaultMessage: 'No P&L to show' }),
   }
 }
 
@@ -101,11 +105,11 @@ export const useFormatPosition = () => {
 }
 
 export const useOpenPositionTableData = () => {
-  const { data: positionData } = useUserCurrentPositions()
+  const { data: positionData, status } = useUserCurrentPositions()
   const { noValue } = usePositionManagerCopy()
-  const positions = transformPositionDataToArray(positionData)
+  const transformedPositions = transformPositionDataToArray(positionData)
 
-  return positions
+  const positions = transformedPositions
     .map((position) => {
       const numSigFigs = AssetMetadata[position.asset]?.displayDecimals ?? 2
 
@@ -117,6 +121,11 @@ export const useOpenPositionTableData = () => {
       }
     })
     .sort((a, b) => Big18Math.cmp(b.details?.nextNotional ?? 0n, a.details?.nextNotional ?? 0n))
+
+  return {
+    positions,
+    status,
+  }
 }
 
 export const usePositionHistoryTableData = () => {
@@ -127,6 +136,7 @@ export const usePositionHistoryTableData = () => {
     fetchNextPage,
     isLoading,
     isFetchingNextPage,
+    status,
   } = useUserChainPositionHistory(PositionSide.Taker)
 
   const positions = (positionHistory?.pages.flatMap((page) => page?.positions).filter(notEmpty) ?? []).map(
@@ -155,6 +165,7 @@ export const usePositionHistoryTableData = () => {
     fetchNextPage,
     isLoading,
     isFetchingNextPage,
+    status,
   }
 }
 

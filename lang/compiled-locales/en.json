@@ -35,6 +35,12 @@
       "value": "Load more"
     }
   ],
+  "08j0k5": [
+    {
+      "type": 0,
+      "value": "No position history to show"
+    }
+  ],
   "0NQ9Tn": [
     {
       "type": 1,
@@ -61,6 +67,12 @@
     {
       "type": 0,
       "value": "Open / Liq"
+    }
+  ],
+  "2qmdQu": [
+    {
+      "type": 0,
+      "value": "No position open"
     }
   ],
   "3Bd9gC": [
@@ -407,6 +419,12 @@
       "value": "Hourly Funding"
     }
   ],
+  "K8nsss": [
+    {
+      "type": 0,
+      "value": "No current positions to show"
+    }
+  ],
   "KtEZXn": [
     {
       "type": 0,
@@ -719,6 +737,12 @@
     {
       "type": 0,
       "value": "$0.00"
+    }
+  ],
+  "Y4Utq5": [
+    {
+      "type": 0,
+      "value": "No P&L to show"
     }
   ],
   "ZaNKvA": [
