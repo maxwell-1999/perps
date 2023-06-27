@@ -22,12 +22,13 @@ import { formatDateRelative } from '@/utils/timeUtils'
 
 import colors from '@ds/theme/colors'
 
+import { getStatusDetails } from '@utils/positionUtils'
+
 import { StatusLight } from './CurrentPosition/components'
 import { PositionTableData } from './constants'
 import { usePnl, usePositionManagerCopy, useStyles } from './hooks'
-import { getStatusDetails } from './utils'
 
-const AssetDirectionlabel = ({
+const AssetDirectionLabel = ({
   market,
   direction,
 }: {
@@ -87,7 +88,11 @@ export const PositionTable = ({
         <Text variant="label" flex="3">
           {copy.market}
         </Text>
-        {currentPosition && <Box flex="2" />}
+        {currentPosition && (
+          <Text variant="label" flex="2">
+            {copy.leverage}
+          </Text>
+        )}
         <Text variant="label" flex="2">
           {currentPosition ? copy.size : copy.openSize}
         </Text>
@@ -158,14 +163,14 @@ const PositionTableRow = ({
               onClick={() => (onClick ? onClick(row) : undefined)}
               _hover={!onClick ? { textDecoration: 'none' } : undefined}
             >
-              <AssetDirectionlabel market={market} direction={row.details.direction} />
+              <AssetDirectionLabel market={market} direction={row.details.direction} />
             </Link>
           </Box>
           {currentPosition && (
             <Box flex="2">
               <Badge borderRadius="6px" p={1} as="p">
                 <Text as="span" fontSize="13px" color={leverageColor}>
-                  {row.leverage}
+                  {row.nextLeverage}
                   {copy.x}
                 </Text>
               </Badge>

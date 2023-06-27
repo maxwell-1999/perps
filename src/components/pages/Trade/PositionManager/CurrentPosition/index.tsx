@@ -11,8 +11,9 @@ import { PositionDetails } from '@/hooks/markets'
 import { Button } from '@ds/Button'
 import { DataRow } from '@ds/DataRow'
 
+import { getStatusDetails } from '@utils/positionUtils'
+
 import { useFormatPosition, usePositionManagerCopy, useStyles } from '../hooks'
-import { getStatusDetails } from '../utils'
 import {
   ActivePositionDetail,
   ActivePositionHeader,

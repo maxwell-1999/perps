@@ -1,3 +1,4 @@
+import colors from '@/components/design-system/theme/colors'
 import { PositionStatus } from '@/constants/markets'
 
 import { PositionSide } from '@t/gql/graphql'
@@ -155,3 +156,19 @@ export const calcExposure = (userPosition: bigint, globalPosition: Position) => 
 
   return Big18Math.div(Big18Math.mul(userPosition, globalPosition.taker), globalPosition.maker)
 }
+
+export const getStatusDetails = (status: PositionStatus) => {
+  const isOpenPosition =
+    status === PositionStatus.open ||
+    status === PositionStatus.pricing ||
+    status === PositionStatus.closing ||
+    status === PositionStatus.opening
+  const isTransitionPosition =
+    status === PositionStatus.pricing || status === PositionStatus.opening || status === PositionStatus.closing
+  const statusColor = isOpenPosition ? (isTransitionPosition ? 'goldenRod' : colors.brand.green) : 'darkGray'
+
+  return { isOpenPosition, isTransitionPosition, statusColor }
+}
+
+export const closedOrResolved = (status?: PositionStatus) =>
+  status && [PositionStatus.closed, PositionStatus.resolved].includes(status)
