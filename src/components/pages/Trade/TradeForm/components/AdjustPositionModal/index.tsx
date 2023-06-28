@@ -10,6 +10,7 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react'
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { Address } from 'viem'
@@ -72,6 +73,7 @@ function AdjustPositionModal({
   const [isTransactionCompleted, setIsTransactionCompleted] = useState(false)
   const [isSettlementCompleted, setIsSettlementCompleted] = useState(false)
   const { orderDirection } = useMarketContext()
+  const addRecentTransaction = useAddRecentTransaction()
 
   const { productAddress } = product
   const { onApproveUSDC, onModifyPosition } = useProductTransactions(productAddress)
@@ -119,7 +121,11 @@ function AdjustPositionModal({
   const handleApproveUSDC = async () => {
     setApproveUsdcLoading(true)
     try {
-      await onApproveUSDC()
+      const hash = await onApproveUSDC()
+      addRecentTransaction({
+        hash,
+        description: copy.approveUSDC,
+      })
       setUsdcApproved(true)
       setStep(1)
     } catch (err) {
@@ -134,7 +140,7 @@ function AdjustPositionModal({
     try {
       // If this requires two-step, then the collateral should stay the same
       const collateralModification = requiresTwoStep ? 0n : collateralDifference
-      await onModifyPosition(collateralModification, positionType, positionDifference, {
+      const hash = await onModifyPosition(collateralModification, positionType, positionDifference, {
         crossCollateral,
         crossProduct,
       })
@@ -149,6 +155,12 @@ function AdjustPositionModal({
         intl,
         adjustment,
       })
+      if (hash) {
+        addRecentTransaction({
+          hash,
+          description: title,
+        })
+      }
       toast({
         render: ({ onClose }) => (
           <Toast
@@ -174,8 +186,14 @@ function AdjustPositionModal({
   const handleWithdrawCollateral = async () => {
     setWithdrawCollateralLoading(true)
     try {
-      await onModifyPosition(collateralDifference, positionType, 0n)
+      const hash = await onModifyPosition(collateralDifference, positionType, 0n)
       onClose()
+      if (hash) {
+        addRecentTransaction({
+          hash,
+          description: copy.withdraw,
+        })
+      }
       toast({
         render: ({ onClose }) => (
           <Toast

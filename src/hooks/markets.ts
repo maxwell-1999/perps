@@ -936,6 +936,7 @@ export const useProductTransactions = (productAddress?: Address) => {
     const hash = await usdcContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    return hash
   }
 
   const onModifyPosition = async (
@@ -989,6 +990,7 @@ export const useProductTransactions = (productAddress?: Address) => {
     const hash = await multiInvoker.write.invoke([orderedActions], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    return hash
   }
   return {
     onApproveUSDC,

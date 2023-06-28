@@ -222,12 +222,12 @@ export const useRefreshVaultsOnPriceUpdates = () => {
 }
 
 export type VaultTransactions = {
-  onApproveUSDC: () => Promise<void>
-  onApproveDSU: () => Promise<void>
-  onApproveShares: () => Promise<void>
-  onDeposit: (amount: bigint) => Promise<void>
-  onRedeem: (amount: bigint, { assets, max }: { assets?: boolean; max?: boolean }) => Promise<void>
-  onClaim: (unwrapAmount?: bigint) => Promise<void>
+  onApproveUSDC: () => Promise<`0x${string}`>
+  onApproveDSU: () => Promise<`0x${string}`>
+  onApproveShares: () => Promise<`0x${string}` | undefined>
+  onDeposit: (amount: bigint) => Promise<`0x${string}` | undefined>
+  onRedeem: (amount: bigint, { assets, max }: { assets?: boolean; max?: boolean }) => Promise<`0x${string}` | undefined>
+  onClaim: (unwrapAmount?: bigint) => Promise<`0x${string}` | undefined>
 }
 export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransactions => {
   const { chain } = useNetwork()
@@ -259,12 +259,14 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await usdcContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    return hash
   }
 
   const onApproveDSU = async () => {
     const hash = await dsuContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    return hash
   }
 
   const onApproveShares = async () => {
@@ -272,9 +274,10 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const vaultContract = getVaultForType(vaultType, chainId, walletClient)
     if (!vaultContract) return
 
-    const receiptHash = await vaultContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
-    await waitForTransaction({ hash: receiptHash })
+    const hash = await vaultContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
+    await waitForTransaction({ hash })
     await refresh()
+    return hash
   }
 
   const onDeposit = async (amount: bigint) => {
@@ -293,6 +296,7 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await multiInvoker.write.invoke([actions], { ...txOpts, gas: bufferGasLimit(gasLimit) })
     await waitForTransaction({ hash })
     await refresh()
+    return hash
   }
 
   const onRedeem = async (amount: bigint, { assets = true, max = false }) => {
@@ -319,6 +323,7 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await multiInvoker.write.invoke([actions], { ...txOpts, gas: bufferGasLimit(gasLimit) })
     await waitForTransaction({ hash })
     await refresh()
+    return hash
   }
 
   const onClaim = async (unwrapAmount?: bigint) => {
@@ -348,6 +353,7 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await multiInvoker.write.invoke([actions], { ...txOpts, gas: bufferGasLimit(gasLimit) })
     await waitForTransaction({ hash })
     await refresh()
+    return hash
   }
 
   return {

@@ -10,6 +10,7 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react'
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { parseEther } from 'viem'
@@ -46,6 +47,7 @@ export default function ClaimModal({
   const toast = useToast()
   const { onClaim, onApproveDSU } = useVaultTransactions(vaultSnapshot.symbol)
   const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
+  const addRecentTransaction = useAddRecentTransaction()
 
   const [requiresDSUApproval, setRequiresDSUApproval] = useState<boolean>(false)
 
@@ -61,7 +63,11 @@ export default function ClaimModal({
   const handleApproveDSU = async () => {
     setTransactionState((prevState) => ({ ...prevState, approveDSULoading: true }))
     try {
-      await onApproveDSU()
+      const hash = await onApproveDSU()
+      addRecentTransaction({
+        hash,
+        description: copy.approveDSU,
+      })
       setTransactionState((prevState) => ({ ...prevState, approveDSUCompleted: true }))
     } catch (e) {
       console.error(e)
@@ -73,9 +79,15 @@ export default function ClaimModal({
   const handleClaim = async () => {
     setTransactionState((prevState) => ({ ...prevState, claimLoading: true }))
     try {
-      await onClaim(vaultUserSnapshot.claimable)
+      const hash = await onClaim(vaultUserSnapshot.claimable)
       setTransactionState((prevState) => ({ ...prevState, claimCompleted: true }))
       onClose()
+      if (hash) {
+        addRecentTransaction({
+          hash,
+          description: copy.withdrawAssets,
+        })
+      }
       const message = intl.formatMessage({ defaultMessage: '{amount}' }, { amount: formattedClaimableBalance })
       toast({
         render: ({ onClose }) => (
