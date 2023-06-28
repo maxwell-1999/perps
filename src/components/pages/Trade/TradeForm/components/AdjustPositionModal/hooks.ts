@@ -41,5 +41,19 @@ export const useAdjustmentModalCopy = () => {
     approveRequests: intl.formatMessage({
       defaultMessage: 'Please check your wallet, and confirm the following requests.',
     }),
+    orderPlaced: intl.formatMessage({
+      defaultMessage: 'Order placed',
+    }),
+    positionChanged: intl.formatMessage({ defaultMessage: 'Position changed' }),
+    positionClose: intl.formatMessage({ defaultMessage: 'Position close' }),
+    buy: intl.formatMessage({ defaultMessage: 'Buy' }),
+    sell: intl.formatMessage({ defaultMessage: 'Sell' }),
+    bought: intl.formatMessage({ defaultMessage: 'Bought' }),
+    sold: intl.formatMessage({ defaultMessage: 'Sold' }),
+    positionSettled: intl.formatMessage({ defaultMessage: 'Position settled' }),
+    yourPositionHasSettled: intl.formatMessage({ defaultMessage: 'Your position has settled' }),
+    withdrawComplete: intl.formatMessage({ defaultMessage: 'Withdrawal complete' }),
   }
 }
+
+export type ModalCopy = ReturnType<typeof useAdjustmentModalCopy>
