@@ -6,6 +6,14 @@ import { SupportedChainId } from './network'
 
 type AddressMapping = { [chain in SupportedChainId]: Address }
 
+export const ControllerAddresses: AddressMapping = {
+  [mainnet.id]: getAddress('0x9df509186b6d3b7D033359f94c8b1BB5544d51b3'),
+  [arbitrum.id]: getAddress('0xA59eF0208418559770a48D7ae4f260A28763167B'),
+  [arbitrumGoerli.id]: getAddress('0x6cF1A4373ba7D10bC37fAeC4694807B626B7f161'),
+  [goerli.id]: getAddress('0x7c4ABBF7CB0C0BcB72917734B068Ed4D1AcdF8C5'),
+  [baseGoerli.id]: getAddress('0x49bCb3e1b0bA6A68EE1f1941EB56Ac7F46B67e09'),
+}
+
 export const LensAddresses: AddressMapping = {
   [mainnet.id]: getAddress('0x26F70E5fA46aD10DF9d43ba469cfAbC79B073a01'),
   [arbitrum.id]: getAddress('0x1593318424df66128cb7d0c5574B1283C3A74C3d'),

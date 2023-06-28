@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import Image from 'next/image'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import { formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
+import { formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 
 interface AssetIconWithTextProps extends FlexProps {
   market: AssetMetadata[SupportedAsset]
@@ -42,6 +42,13 @@ interface FormattedBig18USDPriceProps extends TextProps {
 }
 export const FormattedBig18USDPrice: React.FC<FormattedBig18USDPriceProps> = ({ value, compact, ...props }) => (
   <Text {...props}>{formatBig18USDPrice(value, { compact: Boolean(compact) })}</Text>
+)
+
+interface FormattedBig18PercentProps extends TextProps {
+  value: bigint
+}
+export const FormattedBig18Percent: React.FC<FormattedBig18PercentProps> = ({ value, ...props }) => (
+  <Text {...props}>{formatBig18Percent(value)}</Text>
 )
 
 export const Form = styled('form')`

@@ -17,6 +17,12 @@
       "value": "Connect"
     }
   ],
+  "/+Cr+B": [
+    {
+      "type": 0,
+      "value": "Funding →"
+    }
+  ],
   "/0TOL5": [
     {
       "type": 0,
@@ -33,6 +39,12 @@
     {
       "type": 0,
       "value": "Load more"
+    }
+  ],
+  "07CvY9": [
+    {
+      "type": 0,
+      "value": "Price Feed"
     }
   ],
   "08j0k5": [
@@ -97,6 +109,12 @@
     {
       "type": 0,
       "value": "Approve Vault Deposits"
+    }
+  ],
+  "4zj5zm": [
+    {
+      "type": 0,
+      "value": "Market Info"
     }
   ],
   "56DzI+": [
@@ -365,6 +383,12 @@
       "value": "Value"
     }
   ],
+  "HEui6S": [
+    {
+      "type": 0,
+      "value": "Maker Fees"
+    }
+  ],
   "HpDope": [
     {
       "type": 0,
@@ -555,6 +579,12 @@
       "value": "Date"
     }
   ],
+  "PIfHqb": [
+    {
+      "type": 0,
+      "value": "Price Chart"
+    }
+  ],
   "PK3Msb": [
     {
       "type": 0,
@@ -727,6 +757,18 @@
       "value": "Redeem"
     }
   ],
+  "XZSl7Y": [
+    {
+      "type": 0,
+      "value": "Utilization →"
+    }
+  ],
+  "Xg4ct2": [
+    {
+      "type": 0,
+      "value": "Utilization Curve"
+    }
+  ],
   "XmwS+S": [
     {
       "type": 0,
@@ -849,6 +891,12 @@
       "value": "Home"
     }
   ],
+  "fF376U": [
+    {
+      "type": 0,
+      "value": "Current"
+    }
+  ],
   "g/yIqy": [
     {
       "type": 0,
@@ -867,6 +915,12 @@
     {
       "type": 0,
       "value": " DSU to withdraw collateral"
+    }
+  ],
+  "gWc5Mu": [
+    {
+      "type": 0,
+      "value": "Coordinator"
     }
   ],
   "gf2bvu": [
@@ -959,6 +1013,12 @@
       "value": " available for withdrawal"
     }
   ],
+  "l8sjKE": [
+    {
+      "type": 0,
+      "value": "Min. Collateral"
+    }
+  ],
   "ljjcTc": [
     {
       "type": 0,
@@ -981,6 +1041,12 @@
     {
       "type": 0,
       "value": "Withdraw assets"
+    }
+  ],
+  "nfAZ/T": [
+    {
+      "type": 0,
+      "value": "Taker Fees"
     }
   ],
   "npb5FN": [
@@ -1089,6 +1155,12 @@
       "value": "Menu"
     }
   ],
+  "tTCSmN": [
+    {
+      "type": 0,
+      "value": "Liquidation Fee"
+    }
+  ],
   "thiOfy": [
     {
       "type": 0,
@@ -1167,6 +1239,12 @@
     {
       "type": 0,
       "value": "Confirm redemption"
+    }
+  ],
+  "xFAn9C": [
+    {
+      "type": 0,
+      "value": "Max Leverage"
     }
   ],
   "y7EKeV": [
