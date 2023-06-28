@@ -567,6 +567,15 @@ const fetchUserPositionDetails = async (
         toVersionPrice
         toTakerValue
         toMakerValue
+        blockTimestamp
+      }
+      productVersions(
+        where:{ product: $product, version_in: $versions }
+      ) {
+        product
+        version
+        price
+        timestamp
       }
     }
   `)
@@ -582,33 +591,41 @@ const fetchUserPositionDetails = async (
     productContract.read.valueAtVersion([currentVersion.version]),
   ])
 
-  const atVersions = (
-    await graphClient.request(valueAtVersionQuery, {
-      product: productAddress,
-      versions: settleVersions.map((v) => v.toString()),
-    })
-  ).settles.reduce(
+  const versionsQueryResult = await graphClient.request(valueAtVersionQuery, {
+    product: productAddress,
+    versions: settleVersions.map((v) => v.toString()),
+  })
+
+  const versionTimestamps = versionsQueryResult.productVersions.reduce((acc, version) => {
+    acc.set(BigInt(version.version), BigInt(version.timestamp))
+    return acc
+  }, new Map<bigint, bigint>())
+
+  const atVersions = versionsQueryResult.settles.reduce(
     (acc, settle) => {
       acc.set(BigInt(settle.preVersion), {
         price: BigInt(settle.preVersionPrice),
         makerValue: BigInt(settle.preMakerValue),
         takerValue: BigInt(settle.preTakerValue),
+        timestamp: versionTimestamps.get(BigInt(settle.preVersion)),
       })
       acc.set(BigInt(settle.toVersion), {
         price: BigInt(settle.toVersionPrice),
         makerValue: BigInt(settle.toMakerValue),
         takerValue: BigInt(settle.toTakerValue),
+        timestamp: versionTimestamps.get(BigInt(settle.toVersion)),
       })
 
       return acc
     },
-    new Map<bigint, { price: bigint; makerValue: bigint; takerValue: bigint }>([
+    new Map<bigint, { price: bigint; makerValue: bigint; takerValue: bigint; timestamp?: bigint }>([
       [
         latestVersion + 1n, // Place version + 1 in map, since this data isn't available in the graph yet
         {
           price: latestPrice.price,
           makerValue: latestValue.maker ?? 0n,
           takerValue: latestValue.taker ?? 0n,
+          timestamp: latestPrice.timestamp,
         },
       ],
       [
@@ -617,6 +634,7 @@ const fetchUserPositionDetails = async (
           price: currentVersion.price,
           makerValue: currentValue.maker ?? 0n,
           takerValue: currentValue.taker ?? 0n,
+          timestamp: currentVersion.timestamp,
         },
       ],
     ]),
@@ -644,6 +662,7 @@ const fetchUserPositionDetails = async (
       settleVersion,
       settleValue,
       settlePrice: Big18Math.abs(settleVersionData?.price ?? 0n),
+      settleTimestamp: settleVersionData?.timestamp ?? 0n,
 
       prevVersion,
       prevValue,
@@ -750,11 +769,11 @@ export const useChainLivePrices = () => {
     const feedIds = Object.keys(feedToAsset)
 
     pyth.subscribePriceFeedUpdates(feedIds, (priceFeed) => {
-      const price = priceFeed.getPriceNoOlderThan(60)?.price
+      const price = priceFeed.getPriceNoOlderThan(60)
       setPrices((prices) => ({
         ...prices,
-        // Pyth price is 8 decimals, normalize to expected 18 decimals by multiplying by 10^10
-        [feedToAsset['0x' + priceFeed.id]]: price ? BigInt(price) * 10n ** 10n : undefined,
+        // Pyth price is has `expo` (negative number) decimals, normalize to expected 18 decimals by multiplying by 10^(18 + expo)
+        [feedToAsset['0x' + priceFeed.id]]: price ? BigInt(price.price) * 10n ** BigInt(18 + price.expo) : undefined,
       }))
     })
   }, [markets, pyth])

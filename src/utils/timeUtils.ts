@@ -1,6 +1,8 @@
 import { formatDistanceToNowStrict } from 'date-fns'
 
-export const Hour = 60n * 60n
+export const Second = 1n
+export const Minute = Second * 60n
+export const Hour = Minute & 60n
 export const Day = Hour * 24n
 export const Year = Day * 365n
 
