@@ -105,8 +105,6 @@ function AdjustPositionModal({
       setIsSettlementCompleted(true)
       setAwaitingSettlement(false)
       toast({
-        duration: 5000,
-        isClosable: true,
         render: ({ onClose }) => (
           <Toast
             title={copy.positionSettled}
@@ -152,8 +150,6 @@ function AdjustPositionModal({
         adjustment,
       })
       toast({
-        duration: 5000,
-        isClosable: true,
         render: ({ onClose }) => (
           <Toast
             title={title}
@@ -181,8 +177,6 @@ function AdjustPositionModal({
       await onModifyPosition(collateralDifference, positionType, 0n)
       onClose()
       toast({
-        duration: 5000,
-        isClosable: true,
         render: ({ onClose }) => (
           <Toast
             title={copy.withdrawComplete}

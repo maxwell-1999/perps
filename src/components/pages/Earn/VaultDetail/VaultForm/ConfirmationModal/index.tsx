@@ -8,11 +8,13 @@ import {
   Spinner,
   Text,
   VStack,
+  useToast,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
+import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
 import { Big18Math, formatBig18 } from '@/utils/big18Utils'
@@ -50,6 +52,7 @@ export default function ConfirmationModal({
 }: ConfirmationModalProps) {
   const copy = useVaultFormCopy()
   const intl = useIntl()
+  const toast = useToast()
   const { onApproveUSDC, onApproveShares, onDeposit, onRedeem } = useVaultTransactions(vaultSnapshot.symbol)
   const bigintAmount = setAmountForConfirmation({
     maxWithdrawal,
@@ -117,6 +120,19 @@ export default function ConfirmationModal({
       await onDeposit(bigintAmount)
       setTransactionState((prevState) => ({ ...prevState, depositCompleted: true }))
       onClose()
+      const message = intl.formatMessage(
+        { defaultMessage: '{formattedAmount} to {vaultName}' },
+        { formattedAmount, vaultName },
+      )
+      toast({
+        render: ({ onClose }) => (
+          <Toast
+            title={copy.collateralDeposited}
+            onClose={onClose}
+            body={<ToastMessage action={copy.Deposit} message={message} actionColor={colors.brand.green} />}
+          />
+        ),
+      })
     } catch (e) {
       console.error(e)
     } finally {
@@ -130,6 +146,19 @@ export default function ConfirmationModal({
       await onRedeem(bigintAmount, { max: maxWithdrawal || bigintAmount === vaultUserSnapshot.assets })
       setTransactionState((prevState) => ({ ...prevState, redemptionCompleted: true }))
       onClose()
+      const message = intl.formatMessage(
+        { defaultMessage: '{formattedAmount} from {vaultName}' },
+        { formattedAmount, vaultName },
+      )
+      toast({
+        render: ({ onClose }) => (
+          <Toast
+            title={copy.assetsRedeemed}
+            onClose={onClose}
+            body={<ToastMessage action={copy.Redeem} message={message} actionColor={colors.brand.green} />}
+          />
+        ),
+      })
     } catch (e) {
       console.error(e)
     } finally {

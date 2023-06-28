@@ -103,7 +103,7 @@ export const getOrderToastProps = ({
   product: ProductSnapshot
 }) => {
   const formattedAsset = asset.toUpperCase()
-  if (variant === 'close') {
+  if (variant === 'close' && adjustment.fullClose) {
     const message = intl.formatMessage({ defaultMessage: 'Your {asset} position is closed' }, { asset: formattedAsset })
     return { title: copy.positionClose, message, action: undefined, actionColor: undefined }
   }

@@ -8,12 +8,14 @@ import {
   Spinner,
   Text,
   VStack,
+  useToast,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { parseEther } from 'viem'
 
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
+import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
@@ -41,6 +43,7 @@ export default function ClaimModal({
 }: ClaimModalProps) {
   const copy = useClaimModalCopy()
   const intl = useIntl()
+  const toast = useToast()
   const { onClaim, onApproveDSU } = useVaultTransactions(vaultSnapshot.symbol)
   const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
 
@@ -73,6 +76,16 @@ export default function ClaimModal({
       await onClaim(vaultUserSnapshot.claimable)
       setTransactionState((prevState) => ({ ...prevState, claimCompleted: true }))
       onClose()
+      const message = intl.formatMessage({ defaultMessage: '{amount}' }, { amount: formattedClaimableBalance })
+      toast({
+        render: ({ onClose }) => (
+          <Toast
+            title={copy.collateralWithdrawn}
+            onClose={onClose}
+            body={<ToastMessage action={copy.Withdraw} actionColor={colors.brand.green} message={message} />}
+          />
+        ),
+      })
     } catch (e) {
       console.error(e)
     } finally {

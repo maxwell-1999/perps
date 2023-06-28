@@ -105,16 +105,16 @@
       "value": "Cancel"
     }
   ],
+  "4Fb8FZ": [
+    {
+      "type": 0,
+      "value": "Bought"
+    }
+  ],
   "4HP+t3": [
     {
       "type": 0,
       "value": "Approve Vault Deposits"
-    }
-  ],
-  "4zj5zm": [
-    {
-      "type": 0,
-      "value": "Market Info"
     }
   ],
   "56DzI+": [
@@ -215,6 +215,26 @@
     {
       "type": 0,
       "value": "Capital Efficient"
+    }
+  ],
+  "9AgXoz": [
+    {
+      "type": 0,
+      "value": "Sell"
+    }
+  ],
+  "9u0El+": [
+    {
+      "type": 0,
+      "value": "Your "
+    },
+    {
+      "type": 1,
+      "value": "asset"
+    },
+    {
+      "type": 0,
+      "value": " position is closed"
     }
   ],
   "A3zdUJ": [
@@ -323,6 +343,12 @@
     {
       "type": 0,
       "value": "Delta-Hedged"
+    }
+  ],
+  "EnCOBJ": [
+    {
+      "type": 0,
+      "value": "Buy"
     }
   ],
   "Eypml7": [
@@ -527,6 +553,28 @@
       "value": "Place Order"
     }
   ],
+  "NeATzQ": [
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "asset"
+    },
+    {
+      "type": 0,
+      "value": " at "
+    },
+    {
+      "type": 1,
+      "value": "price"
+    }
+  ],
   "No1uU6": [
     {
       "type": 0,
@@ -561,10 +609,30 @@
       "value": "Take advantage of the power of the Perennial protocol to get high utilization of capital."
     }
   ],
+  "Of1WyM": [
+    {
+      "type": 0,
+      "value": "Withdrawal complete"
+    }
+  ],
   "Oj4si1": [
     {
       "type": 0,
       "value": "Liquidation"
+    }
+  ],
+  "Ou0Bre": [
+    {
+      "type": 1,
+      "value": "difference"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "asset"
     }
   ],
   "P0byqT": [
@@ -673,6 +741,12 @@
       "value": "Await Settlement"
     }
   ],
+  "TvI9L9": [
+    {
+      "type": 0,
+      "value": "Your position has settled"
+    }
+  ],
   "U6qGuO": [
     {
       "type": 0,
@@ -733,6 +807,12 @@
       "value": "Approve"
     }
   ],
+  "WjiRhX": [
+    {
+      "type": 0,
+      "value": "Vault assets redeemed"
+    }
+  ],
   "X8XIdK": [
     {
       "type": 0,
@@ -787,6 +867,12 @@
       "value": "No P&L to show"
     }
   ],
+  "Y4qk/D": [
+    {
+      "type": 0,
+      "value": "Position settled"
+    }
+  ],
   "ZaNKvA": [
     {
       "type": 0,
@@ -811,10 +897,22 @@
       "value": "Size"
     }
   ],
+  "auVAvc": [
+    {
+      "type": 0,
+      "value": "Collateral withdrawn"
+    }
+  ],
   "bHUwuP": [
     {
       "type": 0,
       "value": "App Not Available"
+    }
+  ],
+  "bUPIrt": [
+    {
+      "type": 1,
+      "value": "amount"
     }
   ],
   "bYFLPY": [
@@ -859,6 +957,18 @@
       "value": "Deposit"
     }
   ],
+  "dMvvqr": [
+    {
+      "type": 0,
+      "value": "Sold"
+    }
+  ],
+  "daB/6P": [
+    {
+      "type": 0,
+      "value": "Position changed"
+    }
+  ],
   "djJp6c": [
     {
       "type": 0,
@@ -891,10 +1001,25 @@
       "value": "Home"
     }
   ],
-  "fF376U": [
+
+  "fGroR9": [
     {
       "type": 0,
-      "value": "Current"
+      "value": "Order placed"
+    }
+  ],
+  "fk1B4Q": [
+    {
+      "type": 1,
+      "value": "formattedAmount"
+    },
+    {
+      "type": 0,
+      "value": " to "
+    },
+    {
+      "type": 1,
+      "value": "vaultName"
     }
   ],
   "g/yIqy": [
@@ -1029,6 +1154,20 @@
     {
       "type": 0,
       "value": "Please check your wallet, and confirm the following request to redeem your funds."
+    }
+  ],
+  "lyebEd": [
+    {
+      "type": 1,
+      "value": "formattedAmount"
+    },
+    {
+      "type": 0,
+      "value": " from "
+    },
+    {
+      "type": 1,
+      "value": "vaultName"
     }
   ],
   "mDNzLd": [
@@ -1191,6 +1330,12 @@
     {
       "type": 0,
       "value": " vault"
+    }
+  ],
+  "uPdHV7": [
+    {
+      "type": 0,
+      "value": "Position close"
     }
   ],
   "uhhVzY": [

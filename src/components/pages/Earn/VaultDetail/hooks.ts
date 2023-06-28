@@ -65,6 +65,8 @@ export const useVaultDetailCopy = () => {
       defaultMessage: 'Once your position settles you may withdraw your funds.',
     }),
     withdrawPending: intl.formatMessage({ defaultMessage: 'Withdraw pending' }),
+    positionSettled: intl.formatMessage({ defaultMessage: 'Position settled' }),
+    yourPositionHasSettled: intl.formatMessage({ defaultMessage: 'Your position has settled' }),
   }
 }
 
