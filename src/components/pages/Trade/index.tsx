@@ -10,6 +10,7 @@ import {
   TradeLayout,
 } from '@/components/layout/TradeLayout'
 import { MarketProvider } from '@/contexts/marketContext'
+import { SettlementToastProvider } from '@/contexts/settlementToastContext'
 import { TradeFormProvider } from '@/contexts/tradeFormContext'
 
 import Chart from './Chart'
@@ -26,27 +27,29 @@ export default function Trade() {
   return (
     <MarketProvider>
       <TradeFormProvider>
-        <TradeLayout>
-          <HeaderGridItem>
-            <NavBar />
-          </HeaderGridItem>
-          <MarketBarGridItem>
-            <MarketBar />
-          </MarketBarGridItem>
-          <TradeFormGridItem>
-            <TradeForm />
-          </TradeFormGridItem>
-          {!isBase && (
-            <>
-              <ChartGridItem>
-                <Chart />
-              </ChartGridItem>
-              <PositionManagerGridItem>
-                <PositionManager />
-              </PositionManagerGridItem>
-            </>
-          )}
-        </TradeLayout>
+        <SettlementToastProvider>
+          <TradeLayout>
+            <HeaderGridItem>
+              <NavBar />
+            </HeaderGridItem>
+            <MarketBarGridItem>
+              <MarketBar />
+            </MarketBarGridItem>
+            <TradeFormGridItem>
+              <TradeForm />
+            </TradeFormGridItem>
+            {!isBase && (
+              <>
+                <ChartGridItem>
+                  <Chart />
+                </ChartGridItem>
+                <PositionManagerGridItem>
+                  <PositionManager />
+                </PositionManagerGridItem>
+              </>
+            )}
+          </TradeLayout>
+        </SettlementToastProvider>
       </TradeFormProvider>
     </MarketProvider>
   )

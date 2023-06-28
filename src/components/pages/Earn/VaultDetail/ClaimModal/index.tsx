@@ -10,7 +10,6 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react'
-import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { parseEther } from 'viem'
@@ -47,7 +46,6 @@ export default function ClaimModal({
   const toast = useToast()
   const { onClaim, onApproveDSU } = useVaultTransactions(vaultSnapshot.symbol)
   const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
-  const addRecentTransaction = useAddRecentTransaction()
 
   const [requiresDSUApproval, setRequiresDSUApproval] = useState<boolean>(false)
 
@@ -58,16 +56,13 @@ export default function ClaimModal({
     const dsuAllowance = balances?.dsuAllowance ?? 0n
     const requiresDSUApproval = vaultUserSnapshot.claimable > dsuAllowance
     setRequiresDSUApproval(requiresDSUApproval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleApproveDSU = async () => {
     setTransactionState((prevState) => ({ ...prevState, approveDSULoading: true }))
     try {
-      const hash = await onApproveDSU()
-      addRecentTransaction({
-        hash,
-        description: copy.approveDSU,
-      })
+      await onApproveDSU()
       setTransactionState((prevState) => ({ ...prevState, approveDSUCompleted: true }))
     } catch (e) {
       console.error(e)
@@ -79,16 +74,10 @@ export default function ClaimModal({
   const handleClaim = async () => {
     setTransactionState((prevState) => ({ ...prevState, claimLoading: true }))
     try {
-      const hash = await onClaim(vaultUserSnapshot.claimable)
+      await onClaim(vaultUserSnapshot.claimable)
       setTransactionState((prevState) => ({ ...prevState, claimCompleted: true }))
       onClose()
-      if (hash) {
-        addRecentTransaction({
-          hash,
-          description: copy.withdrawAssets,
-        })
-      }
-      const message = intl.formatMessage({ defaultMessage: '{amount}' }, { amount: formattedClaimableBalance })
+      const message = copy.claimToast(formattedClaimableBalance)
       toast({
         render: ({ onClose }) => (
           <Toast
@@ -110,7 +99,6 @@ export default function ClaimModal({
   return (
     <Modal isOpen onClose={onClose} isCentered variant="confirmation">
       <ModalOverlay />
-
       <ModalContent>
         <ModalBody>
           <Flex direction="column" maxWidth="350px">

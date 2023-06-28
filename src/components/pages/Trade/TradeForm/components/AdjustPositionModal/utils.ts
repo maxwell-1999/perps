@@ -104,7 +104,10 @@ export const getOrderToastProps = ({
 }) => {
   const formattedAsset = asset.toUpperCase()
   if (variant === 'close' && adjustment.fullClose) {
-    const message = intl.formatMessage({ defaultMessage: 'Your {asset} position is closed' }, { asset: formattedAsset })
+    const message = intl.formatMessage(
+      { defaultMessage: 'Your {asset} position is closing' },
+      { asset: formattedAsset },
+    )
     return { title: copy.positionClose, message, action: undefined, actionColor: undefined }
   }
   const { prevPosition, newPosition } = adjustment.position
@@ -126,19 +129,16 @@ export const getOrderToastProps = ({
   }
 
   const difference = Big18Math.toFloatString(Big18Math.abs(adjustment.position.difference))
-  const message = intl.formatMessage({ defaultMessage: '{difference} {asset}' }, { difference, asset: formattedAsset })
-  const action = isLong
-    ? newPosition < prevPosition
-      ? copy.sold
-      : copy.bought
-    : newPosition < prevPosition
-    ? copy.bought
-    : copy.sold
+  const message = intl.formatMessage(
+    { defaultMessage: '{orderDirection} {asset} {difference}' },
+    { difference, asset: formattedAsset, orderDirection },
+  )
+  const action = newPosition > prevPosition ? copy.increase : copy.decrease
 
   return {
-    title: copy.positionChanged,
+    title: copy.orderPlaced,
     action,
     message,
-    actionColor: action === copy.bought ? colors.brand.green : colors.brand.red,
+    actionColor: action === copy.increase ? colors.brand.green : colors.brand.red,
   }
 }

@@ -1,5 +1,7 @@
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
+import { useIntl } from 'react-intl'
 import { Address, BlockNumber, getAbiItem, zeroAddress } from 'viem'
 import { PublicClient, useNetwork, usePublicClient, useWalletClient } from 'wagmi'
 import { GetContractResult, waitForTransaction } from 'wagmi/actions'
@@ -216,6 +218,18 @@ const vaultUserFetcher = async (
   }
 }
 
+const useVaultTransactionCopy = () => {
+  const intl = useIntl()
+  return {
+    approveUSDC: intl.formatMessage({ defaultMessage: 'Approve USDC' }),
+    approveDSU: intl.formatMessage({ defaultMessage: 'Approve DSU' }),
+    approveShares: intl.formatMessage({ defaultMessage: 'Approve Shares' }),
+    depositCollateral: intl.formatMessage({ defaultMessage: 'Deposit Collateral' }),
+    redeemCollateral: intl.formatMessage({ defaultMessage: 'Redeem Collateral' }),
+    claimCollateral: intl.formatMessage({ defaultMessage: 'Claim Collateral' }),
+  }
+}
+
 export const useRefreshVaultsOnPriceUpdates = () => {
   const keys = ['vaultSnapshots', 'vaultUserSnapshot']
   useRefreshKeysOnPriceUpdates(keys)
@@ -234,6 +248,8 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
   const chainId = useChainId()
   const { address } = useAddress()
   const { data: walletClient } = useWalletClient({ chainId })
+  const addRecentTransaction = useAddRecentTransaction()
+  const copy = useVaultTransactionCopy()
 
   const usdcContract = useUSDC(walletClient ?? undefined)
   const dsuContract = useDSU(walletClient ?? undefined)
@@ -259,6 +275,10 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await usdcContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: copy.approveUSDC,
+    })
     return hash
   }
 
@@ -266,6 +286,10 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await dsuContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: copy.approveDSU,
+    })
     return hash
   }
 
@@ -277,6 +301,10 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await vaultContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: copy.approveShares,
+    })
     return hash
   }
 
@@ -296,6 +324,10 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await multiInvoker.write.invoke([actions], { ...txOpts, gas: bufferGasLimit(gasLimit) })
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: copy.depositCollateral,
+    })
     return hash
   }
 
@@ -323,6 +355,10 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await multiInvoker.write.invoke([actions], { ...txOpts, gas: bufferGasLimit(gasLimit) })
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: copy.redeemCollateral,
+    })
     return hash
   }
 
@@ -353,6 +389,10 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
     const hash = await multiInvoker.write.invoke([actions], { ...txOpts, gas: bufferGasLimit(gasLimit) })
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: copy.claimCollateral,
+    })
     return hash
   }
 

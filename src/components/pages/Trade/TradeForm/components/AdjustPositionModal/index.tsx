@@ -106,26 +106,13 @@ function AdjustPositionModal({
     if (positionSettled && awaitingSettlement) {
       setIsSettlementCompleted(true)
       setAwaitingSettlement(false)
-      toast({
-        render: ({ onClose }) => (
-          <Toast
-            title={copy.positionSettled}
-            onClose={onClose}
-            body={<ToastMessage message={copy.yourPositionHasSettled} />}
-          />
-        ),
-      })
     }
-  }, [positionSettled, awaitingSettlement, copy, toast])
+  }, [positionSettled, awaitingSettlement])
 
   const handleApproveUSDC = async () => {
     setApproveUsdcLoading(true)
     try {
-      const hash = await onApproveUSDC()
-      addRecentTransaction({
-        hash,
-        description: copy.approveUSDC,
-      })
+      await onApproveUSDC()
       setUsdcApproved(true)
       setStep(1)
     } catch (err) {

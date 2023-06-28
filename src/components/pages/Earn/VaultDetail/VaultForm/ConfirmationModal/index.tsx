@@ -10,7 +10,6 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react'
-import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 
@@ -54,7 +53,6 @@ export default function ConfirmationModal({
   const copy = useVaultFormCopy()
   const intl = useIntl()
   const toast = useToast()
-  const addRecentTransaction = useAddRecentTransaction()
   const { onApproveUSDC, onApproveShares, onDeposit, onRedeem } = useVaultTransactions(vaultSnapshot.symbol)
   const bigintAmount = setAmountForConfirmation({
     maxWithdrawal,
@@ -91,16 +89,13 @@ export default function ConfirmationModal({
       balances,
     })
     setRequiredApprovals(requiredApprovals)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleUSDCApproval = async () => {
     setTransactionState((prevState) => ({ ...prevState, approveUSDCLoading: true }))
     try {
-      const hash = await onApproveUSDC()
-      addRecentTransaction({
-        hash,
-        description: copy.approveUSDC,
-      })
+      await onApproveUSDC()
       setTransactionState((prevState) => ({ ...prevState, approveUSDCCompleted: true }))
     } catch (e) {
       console.error(e)
@@ -111,13 +106,7 @@ export default function ConfirmationModal({
   const handleSharesApproval = async () => {
     setTransactionState((prevState) => ({ ...prevState, approveSharesLoading: true }))
     try {
-      const hash = await onApproveShares()
-      if (hash) {
-        addRecentTransaction({
-          hash,
-          description: copy.approveShares,
-        })
-      }
+      await onApproveShares()
       setTransactionState((prevState) => ({ ...prevState, approveSharesCompleted: true }))
     } catch (e) {
       console.error(e)
@@ -129,19 +118,10 @@ export default function ConfirmationModal({
   const handleDeposit = async () => {
     setTransactionState((prevState) => ({ ...prevState, depositLoading: true }))
     try {
-      const hash = await onDeposit(bigintAmount)
-      if (hash) {
-        addRecentTransaction({
-          hash,
-          description: copy.Deposit,
-        })
-      }
+      await onDeposit(bigintAmount)
       setTransactionState((prevState) => ({ ...prevState, depositCompleted: true }))
       onClose()
-      const message = intl.formatMessage(
-        { defaultMessage: '{formattedAmount} to {vaultName}' },
-        { formattedAmount, vaultName },
-      )
+      const message = copy.depositToast(formattedAmount, vaultName)
       toast({
         render: ({ onClose }) => (
           <Toast
@@ -161,19 +141,10 @@ export default function ConfirmationModal({
   const handleRedemption = async () => {
     setTransactionState((prevState) => ({ ...prevState, redemptionLoading: true }))
     try {
-      const hash = await onRedeem(bigintAmount, { max: maxWithdrawal || bigintAmount === vaultUserSnapshot.assets })
+      await onRedeem(bigintAmount, { max: maxWithdrawal || bigintAmount === vaultUserSnapshot.assets })
       setTransactionState((prevState) => ({ ...prevState, redemptionCompleted: true }))
       onClose()
-      if (hash) {
-        addRecentTransaction({
-          hash,
-          description: copy.Redeem,
-        })
-      }
-      const message = intl.formatMessage(
-        { defaultMessage: '{formattedAmount} from {vaultName}' },
-        { formattedAmount, vaultName },
-      )
+      const message = copy.redeemToast(formattedAmount, vaultName)
       toast({
         render: ({ onClose }) => (
           <Toast

@@ -1,3 +1,4 @@
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import { parseAbi } from 'abitype'
 import { ethers } from 'ethers'
@@ -8,6 +9,7 @@ import { PublicClient, useNetwork, usePublicClient, useWalletClient } from 'wagm
 import { GetContractResult, multicall, waitForTransaction } from 'wagmi/actions'
 import { goerli, mainnet } from 'wagmi/chains'
 
+import { useAdjustmentModalCopy } from '@/components/pages/Trade/TradeForm/components/AdjustPositionModal/hooks'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { MultiInvokerAddresses } from '@/constants/contracts'
 import { ChainMarkets, OpenPositionType, OrderDirection, PositionStatus, addressToAsset } from '@/constants/markets'
@@ -916,6 +918,8 @@ export const useProductTransactions = (productAddress?: Address) => {
   const chainId = useChainId()
   const { address } = useAddress()
   const { data: walletClient } = useWalletClient()
+  const { approveUSDC } = useAdjustmentModalCopy()
+  const addRecentTransaction = useAddRecentTransaction()
 
   const multiInvoker = useMultiInvoker(walletClient ?? undefined)
   const usdcContract = useUSDC(walletClient ?? undefined)
@@ -936,6 +940,10 @@ export const useProductTransactions = (productAddress?: Address) => {
     const hash = await usdcContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: approveUSDC,
+    })
     return hash
   }
 
