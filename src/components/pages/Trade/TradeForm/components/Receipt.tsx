@@ -1,6 +1,7 @@
 import { Flex, FlexProps } from '@chakra-ui/react'
 
 import { DataRow } from '@/components/design-system'
+import { TooltipText } from '@/components/design-system/Tooltip'
 import { PositionDetails, useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { calcLeverage, calcLiquidationPrice, utilization } from '@/utils/positionUtils'
@@ -71,8 +72,11 @@ export function TradeReceipt({
       <DataRow label={copy.liquidationPrice} value={formatBig18USDPrice(liquidationPrice)} />
       <DataRow
         label={copy.tradingFee}
-        value={formatBig18USDPrice(tradingFee)}
-        tooltipText={copy.tooltipFee(takerFeeRate)}
+        value={
+          <TooltipText fontSize="13px" tooltipText={copy.tooltipFee(takerFeeRate)}>
+            {formatBig18USDPrice(tradingFee)}
+          </TooltipText>
+        }
       />
       <DataRow label={copy.hourlyFundingRate} value={formatBig18Percent(fundingRate, { numDecimals: 4 })} />
     </Flex>

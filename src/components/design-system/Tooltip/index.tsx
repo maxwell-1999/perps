@@ -10,8 +10,8 @@ export const TooltipText = ({
   tooltipProps?: Omit<TooltipProps, 'children'>
 } & ChakraTextProps) => {
   return (
-    <Tooltip label={tooltipText} placement="top" size="sm" pointerEvents="all" {...tooltipProps}>
-      <Text {...props} textDecoration="underline dashed" textUnderlineOffset="2px" cursor="pointer">
+    <Tooltip label={tooltipText} placement="top" size="sm" pointerEvents="all" {...tooltipProps} id="foooooo">
+      <Text as="span" {...props} textDecoration="underline dashed" textUnderlineOffset="2px" cursor="pointer">
         {props.children}
       </Text>
     </Tooltip>

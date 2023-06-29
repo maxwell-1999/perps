@@ -14,8 +14,7 @@ import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/ma
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails, useProtocolSnapshot } from '@/hooks/markets'
-import { useChainId } from '@/hooks/network'
-import { useAddress } from '@/hooks/network'
+import { useAddress, useChainId } from '@/hooks/network'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 import { usePrevious } from '@/utils/hooks'
@@ -261,7 +260,7 @@ function TradeForm(props: TradeFormProps) {
                           closeDelay: 2000,
                         }}
                         tooltipText={
-                          <Text>
+                          <Text as="span">
                             {copy.tooltipUSDCeOnly1}
                             <Text
                               mx={1}
