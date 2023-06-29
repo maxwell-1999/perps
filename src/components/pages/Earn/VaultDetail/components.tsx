@@ -39,7 +39,7 @@ export const SupportedAssetsSection = ({ supportedAssets }: { supportedAssets: S
 
   return (
     <Flex alignItems="center" justifyContent="space-between" mb="22px">
-      <Text color={alpha50}>{copy.assetsSupported}</Text>
+      <Text color={alpha50}>{copy.marketsSupported}</Text>
       <Flex>
         {supportedAssets.map((asset, i) => (
           <AssetIconWithText

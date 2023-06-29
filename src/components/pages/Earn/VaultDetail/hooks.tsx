@@ -26,8 +26,8 @@ export const useVaultDetailCopy = () => {
     viewing: intl.formatMessage({
       defaultMessage: 'Viewing',
     }),
-    assetsSupported: intl.formatMessage({
-      defaultMessage: 'Assets supported',
+    marketsSupported: intl.formatMessage({
+      defaultMessage: 'Markets Supported',
     }),
     currentExposure: intl.formatMessage({
       defaultMessage: 'Current Exposure',
