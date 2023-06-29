@@ -88,6 +88,22 @@ export function useTradeFormCopy() {
         },
         { crossCollateralAmount, oppositeSide },
       ),
+    positionSettled: intl.formatMessage({ defaultMessage: 'Position settled' }),
+    positionOpened: intl.formatMessage({ defaultMessage: 'Position Opened' }),
+    long: intl.formatMessage({ defaultMessage: 'Long' }),
+    short: intl.formatMessage({ defaultMessage: 'Short' }),
+    orderSettled: intl.formatMessage({ defaultMessage: 'Order Settled' }),
+    orderDetailToast: (amount: string, asset: string, direction: string) =>
+      intl.formatMessage(
+        {
+          defaultMessage: '{direction} {asset} {amount}',
+        },
+        { amount, asset, direction },
+      ),
+    increase: intl.formatMessage({ defaultMessage: 'Increase' }),
+    decrease: intl.formatMessage({ defaultMessage: 'Decrease' }),
+    open: intl.formatMessage({ defaultMessage: 'Open' }),
+    close: intl.formatMessage({ defaultMessage: 'Close' }),
   }
 }
 

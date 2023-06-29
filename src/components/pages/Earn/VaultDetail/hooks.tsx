@@ -1,6 +1,8 @@
-import { useMemo } from 'react'
+import { useToast } from '@chakra-ui/react'
+import { useEffect, useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
+import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
 import { sum } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
@@ -65,6 +67,8 @@ export const useVaultDetailCopy = () => {
       defaultMessage: 'Once your position settles you may withdraw your funds.',
     }),
     withdrawPending: intl.formatMessage({ defaultMessage: 'Withdraw pending' }),
+    positionSettled: intl.formatMessage({ defaultMessage: 'Position settled' }),
+    yourPositionHasSettled: intl.formatMessage({ defaultMessage: 'Your position has settled' }),
   }
 }
 
@@ -130,4 +134,30 @@ export const useExposure = ({ vault }: { vault?: VaultSnapshot; vaultUserSnapsho
   }, [vault])
 
   return exposureData
+}
+
+export const usePositionSettledToast = ({
+  prevPositionUpdating,
+  positionUpdating,
+  copy,
+}: {
+  prevPositionUpdating?: boolean
+  positionUpdating?: boolean
+  copy: ReturnType<typeof useVaultDetailCopy>
+}) => {
+  const toast = useToast()
+
+  useEffect(() => {
+    if (prevPositionUpdating && !positionUpdating) {
+      toast({
+        render: ({ onClose }) => (
+          <Toast
+            title={copy.positionSettled}
+            onClose={onClose}
+            body={<ToastMessage message={copy.yourPositionHasSettled} />}
+          />
+        ),
+      })
+    }
+  }, [positionUpdating, prevPositionUpdating, copy, toast])
 }

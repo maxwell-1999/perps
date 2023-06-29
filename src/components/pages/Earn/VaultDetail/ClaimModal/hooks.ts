@@ -12,5 +12,7 @@ export const useClaimModalCopy = () => {
     withdrawAssets: intl.formatMessage({ defaultMessage: 'Withdraw assets' }),
     approveDSU: intl.formatMessage({ defaultMessage: 'Approve DSU' }),
     cancel: intl.formatMessage({ defaultMessage: 'Cancel' }),
+    collateralWithdrawn: intl.formatMessage({ defaultMessage: 'Collateral withdrawn' }),
+    claimToast: (amount: string) => intl.formatMessage({ defaultMessage: '{amount}' }, { amount }),
   }
 }

@@ -72,8 +72,8 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
 
   return (
     <RainbowKitAuthenticationProvider enabled={!LocalDev} adapter={authAdapter} status={authStatus}>
-      <RainbowKitProvider chains={chains} theme={darkTheme()} modalSize="compact">
-        <ChakraProvider theme={theme}>
+      <RainbowKitProvider chains={chains} theme={darkTheme()} modalSize="compact" showRecentTransactions>
+        <ChakraProvider theme={theme} toastOptions={{ defaultOptions: { position: 'top-right', duration: 5000 } }}>
           <CSSReset />
           {sanctioned ? <SanctionModal /> : <Component {...pageProps} />}
         </ChakraProvider>

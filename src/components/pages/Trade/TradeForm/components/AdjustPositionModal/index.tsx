@@ -8,11 +8,14 @@ import {
   Spinner,
   Text,
   VStack,
+  useToast,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
+import { useIntl } from 'react-intl'
 import { Address } from 'viem'
 
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
+import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
@@ -27,7 +30,7 @@ import { ProductSnapshot } from '@t/perennial'
 import { OrderValues } from '../../constants'
 import { PositionInfo } from './components'
 import { useAdjustmentModalCopy } from './hooks'
-import { createAdjustment } from './utils'
+import { createAdjustment, getOrderToastProps } from './utils'
 
 interface AdjustmentModalProps {
   isOpen: boolean
@@ -58,6 +61,8 @@ function AdjustPositionModal({
   usdcAllowance,
   variant,
 }: AdjustmentModalProps) {
+  const toast = useToast()
+  const intl = useIntl()
   const copy = useAdjustmentModalCopy()
   const [approveUsdcLoading, setApproveUsdcLoading] = useState(false)
   const [usdcApproved, setUsdcApproved] = useState(false)
@@ -120,11 +125,31 @@ function AdjustPositionModal({
     try {
       // If this requires two-step, then the collateral should stay the same
       const collateralModification = requiresTwoStep ? 0n : collateralDifference
+      const { action, message, title, actionColor } = getOrderToastProps({
+        orderDirection,
+        variant,
+        asset,
+        amount: orderValues.amount,
+        product,
+        copy,
+        intl,
+        adjustment,
+      })
       await onModifyPosition(collateralModification, positionType, positionDifference, {
         crossCollateral,
         crossProduct,
+        txHistoryLabel: title,
       })
       setIsTransactionCompleted(true)
+      toast({
+        render: ({ onClose }) => (
+          <Toast
+            title={title}
+            onClose={onClose}
+            body={<ToastMessage action={action} message={message} actionColor={actionColor} />}
+          />
+        ),
+      })
       if (!requiresTwoStep) {
         onClose()
       } else {
@@ -141,8 +166,24 @@ function AdjustPositionModal({
   const handleWithdrawCollateral = async () => {
     setWithdrawCollateralLoading(true)
     try {
-      await onModifyPosition(collateralDifference, positionType, 0n)
+      await onModifyPosition(collateralDifference, positionType, 0n, { txHistoryLabel: copy.withdraw })
       onClose()
+
+      toast({
+        render: ({ onClose }) => (
+          <Toast
+            title={copy.withdrawComplete}
+            onClose={onClose}
+            body={
+              <ToastMessage
+                action={copy.withdraw}
+                message={formatBig18USDPrice(Big18Math.abs(collateralDifference))}
+                actionColor={colors.brand.green}
+              />
+            }
+          />
+        ),
+      })
     } catch (err) {
       console.error(err)
       setWithdrawCollateralLoading(false)

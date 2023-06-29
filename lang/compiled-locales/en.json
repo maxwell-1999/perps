@@ -81,10 +81,38 @@
       "value": "Open / Liq"
     }
   ],
+  "2moxWw": [
+    {
+      "type": 0,
+      "value": "Position Opened"
+    }
+  ],
   "2qmdQu": [
     {
       "type": 0,
       "value": "No position open"
+    }
+  ],
+  "2vIqTf": [
+    {
+      "type": 1,
+      "value": "direction"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "asset"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "amount"
     }
   ],
   "3Bd9gC": [
@@ -109,6 +137,12 @@
     {
       "type": 0,
       "value": "Approve Vault Deposits"
+    }
+  ],
+  "4OSuZb": [
+    {
+      "type": 0,
+      "value": "Collateral deposited"
     }
   ],
   "4zj5zm": [
@@ -217,6 +251,12 @@
       "value": "Capital Efficient"
     }
   ],
+  "9AgXoz": [
+    {
+      "type": 0,
+      "value": "Sell"
+    }
+  ],
   "A3zdUJ": [
     {
       "type": 0,
@@ -233,6 +273,28 @@
     {
       "type": 0,
       "value": "Opened"
+    }
+  ],
+  "AMYSKP": [
+    {
+      "type": 1,
+      "value": "orderDirection"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "asset"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "difference"
     }
   ],
   "AxhyVR": [
@@ -325,6 +387,12 @@
       "value": "Delta-Hedged"
     }
   ],
+  "EnCOBJ": [
+    {
+      "type": 0,
+      "value": "Buy"
+    }
+  ],
   "Eypml7": [
     {
       "type": 0,
@@ -381,6 +449,12 @@
     {
       "type": 0,
       "value": "Value"
+    }
+  ],
+  "H/XqXJ": [
+    {
+      "type": 0,
+      "value": "Increase"
     }
   ],
   "HEui6S": [
@@ -527,6 +601,28 @@
       "value": "Place Order"
     }
   ],
+  "NeATzQ": [
+    {
+      "type": 1,
+      "value": "amount"
+    },
+    {
+      "type": 0,
+      "value": " "
+    },
+    {
+      "type": 1,
+      "value": "asset"
+    },
+    {
+      "type": 0,
+      "value": " at "
+    },
+    {
+      "type": 1,
+      "value": "price"
+    }
+  ],
   "No1uU6": [
     {
       "type": 0,
@@ -559,6 +655,12 @@
     {
       "type": 0,
       "value": "Take advantage of the power of the Perennial protocol to get high utilization of capital."
+    }
+  ],
+  "Of1WyM": [
+    {
+      "type": 0,
+      "value": "Withdrawal complete"
     }
   ],
   "Oj4si1": [
@@ -673,6 +775,12 @@
       "value": "Await Settlement"
     }
   ],
+  "TvI9L9": [
+    {
+      "type": 0,
+      "value": "Your position has settled"
+    }
+  ],
   "U6qGuO": [
     {
       "type": 0,
@@ -709,6 +817,12 @@
       "value": "Vaults provide liquidity to Perennial markets, taking the other side of trades in exchange for funding & trading fees. See more here:"
     }
   ],
+  "VMJPtv": [
+    {
+      "type": 0,
+      "value": "Order Settled"
+    }
+  ],
   "VplG8G": [
     {
       "type": 0,
@@ -731,6 +845,12 @@
     {
       "type": 0,
       "value": "Approve"
+    }
+  ],
+  "WjiRhX": [
+    {
+      "type": 0,
+      "value": "Vault assets redeemed"
     }
   ],
   "X8XIdK": [
@@ -787,6 +907,12 @@
       "value": "No P&L to show"
     }
   ],
+  "Y4qk/D": [
+    {
+      "type": 0,
+      "value": "Position settled"
+    }
+  ],
   "ZaNKvA": [
     {
       "type": 0,
@@ -811,10 +937,22 @@
       "value": "Size"
     }
   ],
+  "auVAvc": [
+    {
+      "type": 0,
+      "value": "Collateral withdrawn"
+    }
+  ],
   "bHUwuP": [
     {
       "type": 0,
       "value": "App Not Available"
+    }
+  ],
+  "bUPIrt": [
+    {
+      "type": 1,
+      "value": "amount"
     }
   ],
   "bYFLPY": [
@@ -859,6 +997,12 @@
       "value": "Deposit"
     }
   ],
+  "daB/6P": [
+    {
+      "type": 0,
+      "value": "Position changed"
+    }
+  ],
   "djJp6c": [
     {
       "type": 0,
@@ -895,6 +1039,12 @@
     {
       "type": 0,
       "value": "Current"
+    }
+  ],
+  "fGroR9": [
+    {
+      "type": 0,
+      "value": "Order placed"
     }
   ],
   "g/yIqy": [
@@ -949,6 +1099,20 @@
       "value": "Sign transaction"
     }
   ],
+  "iTSlRJ": [
+    {
+      "type": 0,
+      "value": "Your "
+    },
+    {
+      "type": 1,
+      "value": "asset"
+    },
+    {
+      "type": 0,
+      "value": " position is closing"
+    }
+  ],
   "iXZuBN": [
     {
       "type": 0,
@@ -959,6 +1123,12 @@
     {
       "type": 0,
       "value": "to view details"
+    }
+  ],
+  "jLs6b9": [
+    {
+      "type": 0,
+      "value": "Decrease"
     }
   ],
   "jm/spn": [
@@ -1191,6 +1361,12 @@
     {
       "type": 0,
       "value": " vault"
+    }
+  ],
+  "uPdHV7": [
+    {
+      "type": 0,
+      "value": "Position close"
     }
   ],
   "uhhVzY": [

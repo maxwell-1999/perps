@@ -6,6 +6,7 @@ import { useChainId } from '@/hooks/network'
 import { VaultSnapshot, useVaultUserSnapshot } from '@/hooks/vaults'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math } from '@/utils/big18Utils'
+import { usePrevious } from '@/utils/hooks'
 
 import colors from '@ds/theme/colors'
 
@@ -14,7 +15,7 @@ import { useVaultDescription } from '../hooks'
 import ClaimModal from './ClaimModal'
 import VaultForm from './VaultForm'
 import { CapactiyCard, ClaimCard, PositionCard, RiskCard, SupportedAssetsSection, VaultDetailTitle } from './components'
-import { useExposure, usePnl } from './hooks'
+import { useExposure, usePnl, usePositionSettledToast, useVaultDetailCopy } from './hooks'
 
 export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
   const chainId = useChainId()
@@ -22,6 +23,7 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
   const [showClaimModal, setShowClaimModal] = useState(false)
   const vaultDescription = useVaultDescription()
   const { data: balances } = useBalances()
+  const copy = useVaultDetailCopy()
 
   const { symbol, name, totalAssets, maxCollateral } = vault
 
@@ -41,6 +43,10 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
       (!Big18Math.isZero(vaultUserSnapshot.pendingDepositAmount) ||
         !Big18Math.isZero(vaultUserSnapshot.pendingRedemptionAmount)),
   )
+  const prevPositionUpdating = usePrevious(positionUpdating)
+
+  usePositionSettledToast({ prevPositionUpdating, positionUpdating, copy })
+
   const showClaimCard = vaultUserSnapshot && (hasClaimable || hasPendingRedemptions)
 
   return (

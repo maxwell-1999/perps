@@ -8,12 +8,14 @@ import {
   Spinner,
   Text,
   VStack,
+  useToast,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { parseEther } from 'viem'
 
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
+import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
@@ -41,6 +43,7 @@ export default function ClaimModal({
 }: ClaimModalProps) {
   const copy = useClaimModalCopy()
   const intl = useIntl()
+  const toast = useToast()
   const { onClaim, onApproveDSU } = useVaultTransactions(vaultSnapshot.symbol)
   const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
 
@@ -53,6 +56,7 @@ export default function ClaimModal({
     const dsuAllowance = balances?.dsuAllowance ?? 0n
     const requiresDSUApproval = vaultUserSnapshot.claimable > dsuAllowance
     setRequiresDSUApproval(requiresDSUApproval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleApproveDSU = async () => {
@@ -73,6 +77,16 @@ export default function ClaimModal({
       await onClaim(vaultUserSnapshot.claimable)
       setTransactionState((prevState) => ({ ...prevState, claimCompleted: true }))
       onClose()
+      const message = copy.claimToast(formattedClaimableBalance)
+      toast({
+        render: ({ onClose }) => (
+          <Toast
+            title={copy.collateralWithdrawn}
+            onClose={onClose}
+            body={<ToastMessage action={copy.Withdraw} actionColor={colors.brand.green} message={message} />}
+          />
+        ),
+      })
     } catch (e) {
       console.error(e)
     } finally {
@@ -85,7 +99,6 @@ export default function ClaimModal({
   return (
     <Modal isOpen onClose={onClose} isCentered variant="confirmation">
       <ModalOverlay />
-
       <ModalContent>
         <ModalBody>
           <Flex direction="column" maxWidth="350px">

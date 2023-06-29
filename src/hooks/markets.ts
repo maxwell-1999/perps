@@ -1,3 +1,4 @@
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import { parseAbi } from 'abitype'
 import { ethers } from 'ethers'
@@ -8,6 +9,7 @@ import { PublicClient, useNetwork, usePublicClient, useWalletClient } from 'wagm
 import { GetContractResult, multicall, waitForTransaction } from 'wagmi/actions'
 import { goerli, mainnet } from 'wagmi/chains'
 
+import { useAdjustmentModalCopy } from '@/components/pages/Trade/TradeForm/components/AdjustPositionModal/hooks'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { MultiInvokerAddresses } from '@/constants/contracts'
 import { ChainMarkets, OpenPositionType, OrderDirection, PositionStatus, addressToAsset } from '@/constants/markets'
@@ -916,6 +918,8 @@ export const useProductTransactions = (productAddress?: Address) => {
   const chainId = useChainId()
   const { address } = useAddress()
   const { data: walletClient } = useWalletClient()
+  const copy = useAdjustmentModalCopy()
+  const addRecentTransaction = useAddRecentTransaction()
 
   const multiInvoker = useMultiInvoker(walletClient ?? undefined)
   const usdcContract = useUSDC(walletClient ?? undefined)
@@ -936,13 +940,22 @@ export const useProductTransactions = (productAddress?: Address) => {
     const hash = await usdcContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: copy.approveUSDC,
+    })
+    return hash
   }
 
   const onModifyPosition = async (
     collateralDelta: bigint,
     positionSide: OpenPositionType,
     positionDelta: bigint,
-    { crossProduct, crossCollateral }: { crossProduct?: Address; crossCollateral?: bigint } = {},
+    {
+      crossProduct,
+      crossCollateral,
+      txHistoryLabel,
+    }: { crossProduct?: Address; crossCollateral?: bigint; txHistoryLabel?: string } = {},
   ) => {
     if (!address || !chainId || !walletClient) {
       return
@@ -989,6 +1002,11 @@ export const useProductTransactions = (productAddress?: Address) => {
     const hash = await multiInvoker.write.invoke([orderedActions], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: txHistoryLabel || copy.positionChanged,
+    })
+    return hash
   }
   return {
     onApproveUSDC,

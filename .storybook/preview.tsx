@@ -23,7 +23,7 @@ function ColorMode(props: ColorModeProps) {
 export const decorators = [
   (Story, context) => {
     return (
-      <ChakraProvider theme={theme}>
+      <ChakraProvider theme={theme} toastOptions={{ defaultOptions: { position: 'top-right' } }}>
         <CSSReset />
         <ColorMode colorMode={context.globals.colorMode}>
           <Story />
