@@ -13,7 +13,7 @@ export const useChartCopy = () => {
     takerFees: intl.formatMessage({ defaultMessage: 'Taker Fees' }),
     makerFees: intl.formatMessage({ defaultMessage: 'Maker Fees' }),
     liquidationFee: intl.formatMessage({ defaultMessage: 'Liquidation Fee' }),
-    maxLeverage: intl.formatMessage({ defaultMessage: 'Max Leverage' }),
+    liquidationLeverage: intl.formatMessage({ defaultMessage: 'Liquidation Leverage' }),
     utilization: intl.formatMessage({ defaultMessage: 'Utilization →' }),
     funding: intl.formatMessage({ defaultMessage: 'Funding →' }),
     utilizationCurve: intl.formatMessage({ defaultMessage: 'Utilization Curve' }),

@@ -110,7 +110,7 @@ function MarketInfo() {
           size="lg"
         />
         <DataRow
-          label={copy.maxLeverage}
+          label={copy.liquidationLeverage}
           value={`${(1 / Big18Math.toUnsafeFloat(marketSnapshot.productInfo.maintenance)).toString()}x`}
           size="lg"
         />
