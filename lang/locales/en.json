@@ -1,6 +1,7 @@
 {
   "+8YEz7": "Once your position settles you may withdraw your funds.",
   "+PUp2/": "Liquidity provided to Perennial is autonomously provisioned, taking the other side against traders in exchange for funding.",
+  "+Q0YsT": "Perennial Vaults are not available on Ethereum L1. A new Pro LP maker experience is coming soon to all networks.",
   "+vVZ/G": "Connect",
   "/+Cr+B": "Funding →",
   "/0TOL5": "Amount",
@@ -8,6 +9,7 @@
   "00LcfG": "Load more",
   "07CvY9": "Price Feed",
   "08j0k5": "No position history to show",
+  "0MOCmc": "If you have existing LP positions you can manage them at",
   "0NQ9Tn": "{remainder}% left",
   "0qSkc+": "Withdraw your collateral",
   "12vECb": "Fully on-chain smart contracts deploy liquidity & adjust multiple positions, so you don’t have to.",
@@ -150,6 +152,7 @@
   "djJp6c": "History",
   "e9WF4L": "Add funds to {vaultName} vault",
   "eERi22": "Arbitrum Ecosystem Vaults (PVB) deploys liquidity to markets of Arbitrum ecosystem assets. Right now, this includes 2 pools: ARB-long & ARB-short.",
+  "egXVxb": "https://v1.app.perennial.finance.",
   "ejEGdx": "Home",
   "fF376U": "Current",
   "fGroR9": "Order placed",

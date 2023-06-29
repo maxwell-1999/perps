@@ -11,6 +11,12 @@
       "value": "Liquidity provided to Perennial is autonomously provisioned, taking the other side against traders in exchange for funding."
     }
   ],
+  "+Q0YsT": [
+    {
+      "type": 0,
+      "value": "Perennial Vaults are not available on Ethereum L1. A new Pro LP maker experience is coming soon to all networks."
+    }
+  ],
   "+vVZ/G": [
     {
       "type": 0,
@@ -51,6 +57,12 @@
     {
       "type": 0,
       "value": "No position history to show"
+    }
+  ],
+  "0MOCmc": [
+    {
+      "type": 0,
+      "value": "If you have existing LP positions you can manage them at"
     }
   ],
   "0NQ9Tn": [
@@ -1027,6 +1039,12 @@
     {
       "type": 0,
       "value": "Arbitrum Ecosystem Vaults (PVB) deploys liquidity to markets of Arbitrum ecosystem assets. Right now, this includes 2 pools: ARB-long & ARB-short."
+    }
+  ],
+  "egXVxb": [
+    {
+      "type": 0,
+      "value": "https://v1.app.perennial.finance."
     }
   ],
   "ejEGdx": [

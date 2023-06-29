@@ -69,6 +69,14 @@ export const useVaultDetailCopy = () => {
     withdrawPending: intl.formatMessage({ defaultMessage: 'Withdraw pending' }),
     positionSettled: intl.formatMessage({ defaultMessage: 'Position settled' }),
     yourPositionHasSettled: intl.formatMessage({ defaultMessage: 'Your position has settled' }),
+    ethereumUnavailable: intl.formatMessage({
+      defaultMessage:
+        'Perennial Vaults are not available on Ethereum L1. A new Pro LP maker experience is coming soon to all networks.',
+    }),
+    ethereumUnavailableLink: intl.formatMessage({
+      defaultMessage: 'If you have existing LP positions you can manage them at ',
+    }),
+    linkText: intl.formatMessage({ defaultMessage: 'https://v1.app.perennial.finance.' }),
   }
 }
 
