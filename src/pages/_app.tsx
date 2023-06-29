@@ -3,6 +3,7 @@ import { RainbowKitAuthenticationProvider, RainbowKitProvider, darkTheme } from 
 import '@rainbow-me/rainbowkit/styles.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { Analytics } from '@vercel/analytics/react'
 import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -97,15 +98,18 @@ export default function App(props: AppProps) {
   }, [locale])
 
   return (
-    <IntlProvider locale={locale} defaultLocale={defaultLocale} messages={messages}>
-      <QueryClientProvider client={queryClient}>
-        <WagmiConfig config={wagmiConfig}>
-          <AuthStatusProvider>
-            <AppWithAuth {...props} />
-          </AuthStatusProvider>
-        </WagmiConfig>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </IntlProvider>
+    <>
+      <IntlProvider locale={locale} defaultLocale={defaultLocale} messages={messages}>
+        <QueryClientProvider client={queryClient}>
+          <WagmiConfig config={wagmiConfig}>
+            <AuthStatusProvider>
+              <AppWithAuth {...props} />
+            </AuthStatusProvider>
+          </WagmiConfig>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </IntlProvider>
+      <Analytics />
+    </>
   )
 }

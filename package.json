@@ -38,6 +38,7 @@
     "@types/node": "18.16.0",
     "@types/react": "18.0.38",
     "@types/react-dom": "18.0.11",
+    "@vercel/analytics": "^1.0.1",
     "abitype": "^0.8.11",
     "connectkit": "^1.2.3",
     "cookies-next": "^2.1.2",
