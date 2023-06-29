@@ -12,6 +12,11 @@ const Text = defineStyleConfig({
       color: mode(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])(props),
       fontSize: '12px',
     }),
+    tooltip: {
+      textDecoration: 'underline dashed',
+      textUnderlineOffset: '2px',
+      cursor: 'pointer',
+    },
   },
 })
 

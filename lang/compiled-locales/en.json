@@ -205,6 +205,12 @@
       "value": "Pricing"
     }
   ],
+  "6IfUpv": [
+    {
+      "type": 0,
+      "value": "USDC.e (bridged USDC)."
+    }
+  ],
   "6KmFRm": [
     {
       "type": 0,
@@ -235,6 +241,12 @@
       "value": "Execution Price"
     }
   ],
+  "7FnFRg": [
+    {
+      "type": 0,
+      "value": "Perennial currently only supports"
+    }
+  ],
   "7xpfuy": [
     {
       "type": 0,
@@ -261,6 +273,12 @@
     {
       "type": 0,
       "value": "Switch Market"
+    }
+  ],
+  "8TFv9T": [
+    {
+      "type": 0,
+      "value": "As of now"
     }
   ],
   "90axO4": [
@@ -503,6 +521,12 @@
     {
       "type": 0,
       "value": "Maker Fees"
+    }
+  ],
+  "HNF3HN": [
+    {
+      "type": 0,
+      "value": "As of now,"
     }
   ],
   "HpDope": [
@@ -871,6 +895,20 @@
       "value": "Insufficent collateral available."
     }
   ],
+  "Vymvnk": [
+    {
+      "type": 0,
+      "value": "Open/Close Fee: "
+    },
+    {
+      "type": 1,
+      "value": "rate"
+    },
+    {
+      "type": 0,
+      "value": "%"
+    }
+  ],
   "W6nSYE": [
     {
       "type": 0,
@@ -953,6 +991,12 @@
     {
       "type": 0,
       "value": "Position settled"
+    }
+  ],
+  "Za3ico": [
+    {
+      "type": 0,
+      "value": "Native USDC"
     }
   ],
   "ZaNKvA": [
@@ -1463,6 +1507,12 @@
     {
       "type": 0,
       "value": "Confirm redemption"
+    }
+  ],
+  "xjx+iS": [
+    {
+      "type": 0,
+      "value": "will not be recognized by the UI."
     }
   ],
   "y7EKeV": [

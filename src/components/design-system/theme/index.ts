@@ -12,6 +12,7 @@ import Popover from './components/popover'
 import Progress from './components/progress'
 import Tabs from './components/tabs'
 import Text from './components/text'
+import Tooltip from './components/tooltip'
 import styles, { breakpoints } from './styles'
 
 const hankenGrotesk = Hanken_Grotesk({ subsets: ['latin'] })
@@ -44,6 +45,7 @@ const theme = extendTheme({
     Popover,
     Modal,
     Progress,
+    Tooltip,
   },
 })
 
