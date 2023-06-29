@@ -5,9 +5,14 @@ import colors from '@/components/design-system/theme/colors'
 import { AssetIconWithText } from '@/components/shared/components'
 import { FormattedBig18USDPrice } from '@/components/shared/components'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
+import { FeeApr } from '@/constants/vaults'
+import { useChainId } from '@/hooks/network'
+import { VaultSnapshot } from '@/hooks/vaults'
+import { formatBig18 } from '@/utils/big18Utils'
 
 import { Container } from '@ds/Container'
 
+import { useExposureAndFunding } from '../../hooks'
 import { formatValueForProgressBar } from '../../utils'
 import { useVaultSelectCopy } from '../hooks'
 import { CapacityRow, DescriptionRow, TitleRow } from './styles'
@@ -16,13 +21,13 @@ interface VaultCardProps {
   apr: string
   name: string
   assets: SupportedAsset[]
+  vault: VaultSnapshot
   description: string
-  collateral: bigint
-  capacity: bigint
   onClick: () => void
 }
 
-export default function VaultCard({ name, assets, apr, description, collateral, capacity, onClick }: VaultCardProps) {
+export default function VaultCard({ name, assets, description, vault, onClick }: VaultCardProps) {
+  const chainId = useChainId()
   const intl = useIntl()
   const copy = useVaultSelectCopy()
   const grayTextColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
@@ -30,8 +35,16 @@ export default function VaultCard({ name, assets, apr, description, collateral, 
   const borderColor = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
   const hoverBorderColor = useColorModeValue(colors.brand.blackAlpha[40], colors.brand.whiteAlpha[40])
   const cardBorder = `1px solid ${borderColor}`
+
+  const feeRate = FeeApr[chainId][vault.symbol] ?? 0n
+  const exposureAndFunding = useExposureAndFunding({ vault })
+  const apr = formatBig18((feeRate + (exposureAndFunding?.totalFundingAPR ?? 0n)) * 100n, {
+    numSigFigs: 4,
+    minDecimals: 2,
+  })
   const aprPercent = intl.formatMessage({ defaultMessage: '{apr}%' }, { apr })
-  const progressbarCollateral = formatValueForProgressBar(collateral, capacity)
+
+  const progressbarCollateral = formatValueForProgressBar(vault.totalAssets, vault.maxCollateral)
   const progressPercent = intl.formatMessage({ defaultMessage: '{progressbarCollateral}%' }, { progressbarCollateral })
 
   return (
@@ -85,7 +98,7 @@ export default function VaultCard({ name, assets, apr, description, collateral, 
       <CapacityRow>
         <Progress value={progressbarCollateral} width="100%" size="sm" mb={2} />
         <Flex justifyContent="space-between" width="100%">
-          <FormattedBig18USDPrice value={collateral} fontSize="12px" fontWeight={500} />
+          <FormattedBig18USDPrice value={vault.totalAssets} fontSize="12px" fontWeight={500} />
           <Text fontSize="12px" fontWeight={500} color={grayTextColor}>
             <Text as="span" mr={1} color={descriptionTextColor}>
               {progressPercent}

@@ -1,8 +1,8 @@
-import { Flex, Progress, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
+import { Divider, Flex, Progress, Spinner, Text, Tooltip, useColorModeValue } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
 import colors from '@/components/design-system/theme/colors'
-import { AssetIconWithText, FormattedBig18USDPrice } from '@/components/shared/components'
+import { AssetIconWithText, FormattedBig18Percent, FormattedBig18USDPrice } from '@/components/shared/components'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { MaxUint256 } from '@/constants/units'
 import { useAddress } from '@/hooks/network'
@@ -76,7 +76,9 @@ export const RiskCard = ({ exposure, isLong }: { exposure?: number; isLong?: boo
   return (
     <Container p={4} variant="vaultCard" justifyContent="space-between" mb="22px" flexDirection="row">
       <Flex justifyContent="space-between" borderRight={`1px solid ${alpha20}`} pr={2} mr={2} flex={1}>
-        <Text color={alpha50}>{copy.currentExposure}</Text>
+        <Tooltip label={copy.currentExposureTooltip}>
+          <Text color={alpha50}>{copy.currentExposure}</Text>
+        </Tooltip>
         <Text color={exposureColor}>{exposurePercent}</Text>
       </Flex>
       <Text color={alpha60}>{label}</Text>
@@ -259,6 +261,39 @@ export const ClaimCard = ({
               <Spinner />
             </Flex>
           )}
+        </Flex>
+      </Flex>
+    </Container>
+  )
+}
+
+export const APRCard = ({ feeAPR, fundingAPR }: { feeAPR: bigint; fundingAPR: bigint }) => {
+  const copy = useVaultDetailCopy()
+  const alpha5 = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])
+  const alpha50 = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
+
+  return (
+    <Container p={4} mb="22px" variant="vaultCard" bg={alpha5}>
+      <Flex flexDirection="column" gap={4}>
+        <Flex flex={1} justifyContent="space-between">
+          <Text color={alpha50}>{copy.fundingFees}</Text>
+          <FormattedBig18Percent value={fundingAPR} fontSize="16px" fontWeight={500} />
+        </Flex>
+        <Flex flex={1} justifyContent="space-between">
+          <Text color={alpha50}>{copy.tradingFees}</Text>
+          <FormattedBig18Percent value={feeAPR} fontSize="16px" fontWeight={500} />
+        </Flex>
+        <Divider />
+        <Flex flex={1} justifyContent="space-between">
+          <Tooltip label={copy.vaultPnlTooltip}>
+            <Text color={alpha50}>{copy.totalAPR}</Text>
+          </Tooltip>
+          <FormattedBig18Percent
+            color={colors.brand.green}
+            value={feeAPR + fundingAPR}
+            fontSize="16px"
+            fontWeight={500}
+          />
         </Flex>
       </Flex>
     </Container>

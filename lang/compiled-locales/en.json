@@ -41,6 +41,12 @@
       "value": "Confirm Close"
     }
   ],
+  "/jsaqr": [
+    {
+      "type": 0,
+      "value": "Funding Fees"
+    }
+  ],
   "00LcfG": [
     {
       "type": 0,
@@ -127,6 +133,12 @@
       "value": "amount"
     }
   ],
+  "32fCz/": [
+    {
+      "type": 0,
+      "value": "The net direction of the Vault's current market position. Larger directional exposure will result in greater counterparty profit/loss when the price moves."
+    }
+  ],
   "3Bd9gC": [
     {
       "type": 0,
@@ -179,6 +191,12 @@
     {
       "type": 0,
       "value": "Funding Rate (1h)"
+    }
+  ],
+  "5AWZzF": [
+    {
+      "type": 0,
+      "value": "Total APR"
     }
   ],
   "5Wwopw": [
@@ -387,10 +405,22 @@
       "value": "P&L"
     }
   ],
+  "DuObtE": [
+    {
+      "type": 0,
+      "value": "Liquidation Leverage"
+    }
+  ],
   "E3NMR5": [
     {
       "type": 0,
       "value": "Add to vault"
+    }
+  ],
+  "EL56mX": [
+    {
+      "type": 0,
+      "value": "Annualized values do not include net profit or loss as counterparty for traders"
     }
   ],
   "EUrnaL": [
@@ -1213,6 +1243,12 @@
       "value": "Please check your wallet, and confirm the following request to redeem your funds."
     }
   ],
+  "m3b558": [
+    {
+      "type": 0,
+      "value": "Trading Fees"
+    }
+  ],
   "mDNzLd": [
     {
       "type": 0,
@@ -1427,12 +1463,6 @@
     {
       "type": 0,
       "value": "Confirm redemption"
-    }
-  ],
-  "xFAn9C": [
-    {
-      "type": 0,
-      "value": "Max Leverage"
     }
   ],
   "y7EKeV": [

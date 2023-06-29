@@ -6,7 +6,6 @@ import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
 import { sum } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
-import { add, calcExposure, calcLeverage, next } from '@/utils/positionUtils'
 
 export const useVaultDetailCopy = () => {
   const intl = useIntl()
@@ -76,6 +75,16 @@ export const useVaultDetailCopy = () => {
     ethereumUnavailableLink: intl.formatMessage({
       defaultMessage: 'If you have existing LP positions you can manage them at ',
     }),
+    fundingFees: intl.formatMessage({ defaultMessage: 'Funding Fees' }),
+    tradingFees: intl.formatMessage({ defaultMessage: 'Trading Fees' }),
+    totalAPR: intl.formatMessage({ defaultMessage: 'Total APR' }),
+    vaultPnlTooltip: intl.formatMessage({
+      defaultMessage: 'Annualized values do not include net profit or loss as counterparty for traders',
+    }),
+    currentExposureTooltip: intl.formatMessage({
+      defaultMessage:
+        "The net direction of the Vault's current market position. Larger directional exposure will result in greater counterparty profit/loss when the price moves.",
+    }),
   }
 }
 
@@ -113,34 +122,6 @@ export const usePnl = ({
   }, [vault, vaultUserSnapshot])
 
   return pnl
-}
-
-export const useExposure = ({ vault }: { vault?: VaultSnapshot; vaultUserSnapshot?: VaultUserSnapshot }) => {
-  const exposureData = useMemo(() => {
-    if (!vault) {
-      return
-    }
-
-    const price = vault.longSnapshot.latestVersion?.price ?? 0n
-    const longPosition = next(vault.longUserSnapshot.pre, vault.longUserSnapshot.position)
-    const shortPosition = next(vault.shortUserSnapshot.pre, vault.shortUserSnapshot.position)
-    const totalPosition = add(longPosition, shortPosition)
-    const leverage = calcLeverage(price as bigint, totalPosition.maker, vault.totalAssets)
-
-    const longExposure = calcExposure(longPosition.maker, next(vault.longSnapshot.pre, vault.longSnapshot.position))
-    const shortExposure = calcExposure(shortPosition.maker, next(vault.shortSnapshot.pre, vault.shortSnapshot.position))
-
-    const delta = Big18Math.isZero(totalPosition.maker)
-      ? 0n
-      : Big18Math.div(Big18Math.sub(longExposure, shortExposure), Big18Math.mul(totalPosition.maker, -Big18Math.ONE))
-
-    const isLongExposure = delta > 0n
-
-    const exposure = Math.abs(Big18Math.toUnsafeFloat(Big18Math.mul(leverage, delta))) * 100
-    return { exposure, isLongExposure }
-  }, [vault])
-
-  return exposureData
 }
 
 export const usePositionSettledToast = ({

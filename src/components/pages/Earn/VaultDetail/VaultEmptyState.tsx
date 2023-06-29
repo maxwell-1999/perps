@@ -1,7 +1,8 @@
 import { ArrowBackIcon, InfoIcon } from '@chakra-ui/icons'
 import { Flex, Heading, Text, useColorModeValue } from '@chakra-ui/react'
 import { mainnet } from '@wagmi/chains'
-import { useChainId } from 'wagmi'
+
+import { useChainId } from '@/hooks/network'
 
 import colors from '@ds/theme/colors'
 

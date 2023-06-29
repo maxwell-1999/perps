@@ -1,5 +1,6 @@
 import { arbitrum, arbitrumGoerli, baseGoerli, mainnet } from '@wagmi/chains'
-import { parseEther } from 'viem'
+
+import { Big18Math } from '@/utils/big18Utils'
 
 import { SupportedAsset } from './assets'
 
@@ -41,14 +42,14 @@ export const VaultMetadata: {
 
 export const FeeApr: { [chainId: number]: { [key in VaultSymbol]?: bigint } } = {
   [arbitrumGoerli.id]: {
-    [VaultSymbol.ePBV]: parseEther('0.1391'),
-    [VaultSymbol.PVB]: parseEther('0.1206'),
+    [VaultSymbol.ePBV]: Big18Math.fromFloatString('0.1391'),
+    [VaultSymbol.PVB]: Big18Math.fromFloatString('0.1206'),
   },
   [arbitrum.id]: {
-    [VaultSymbol.PVA]: parseEther('0.1391'),
-    [VaultSymbol.PVB]: parseEther('0.1206'),
+    [VaultSymbol.PVA]: Big18Math.fromFloatString('0.1391'),
+    [VaultSymbol.PVB]: Big18Math.fromFloatString('0.1206'),
   },
   [baseGoerli.id]: {
-    [VaultSymbol.PVA]: parseEther('0.1391'),
+    [VaultSymbol.PVA]: Big18Math.fromFloatString('0.1391'),
   },
 }

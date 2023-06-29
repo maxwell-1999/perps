@@ -46,6 +46,11 @@ module.exports = {
             importNames: ['useAccount'],
             message: 'Please use useAddress to correctly handle overriding addresses.',
           },
+          {
+            name: 'wagmi',
+            importNames: ['useChainId'],
+            message: 'Use hook from @/hooks/network instead',
+          },
         ],
       },
     ],

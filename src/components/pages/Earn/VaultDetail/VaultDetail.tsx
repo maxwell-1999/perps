@@ -1,7 +1,7 @@
 import { Flex, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
 import { useState } from 'react'
 
-import { VaultMetadata } from '@/constants/vaults'
+import { FeeApr, VaultMetadata } from '@/constants/vaults'
 import { useChainId } from '@/hooks/network'
 import { VaultSnapshot, useVaultUserSnapshot } from '@/hooks/vaults'
 import { useBalances } from '@/hooks/wallet'
@@ -11,11 +11,20 @@ import { usePrevious } from '@/utils/hooks'
 import colors from '@ds/theme/colors'
 
 import MobileVaultSelect from '../VaultSelect/MobileVaultSelector'
+import { useExposureAndFunding } from '../hooks'
 import { useVaultDescription } from '../hooks'
 import ClaimModal from './ClaimModal'
 import VaultForm from './VaultForm'
-import { CapactiyCard, ClaimCard, PositionCard, RiskCard, SupportedAssetsSection, VaultDetailTitle } from './components'
-import { useExposure, usePnl, usePositionSettledToast, useVaultDetailCopy } from './hooks'
+import {
+  APRCard,
+  CapactiyCard,
+  ClaimCard,
+  PositionCard,
+  RiskCard,
+  SupportedAssetsSection,
+  VaultDetailTitle,
+} from './components'
+import { usePnl, usePositionSettledToast, useVaultDetailCopy } from './hooks'
 
 export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
   const chainId = useChainId()
@@ -28,7 +37,7 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
   const { symbol, name, totalAssets, maxCollateral } = vault
 
   const { data: vaultUserSnapshot } = useVaultUserSnapshot(symbol)
-  const exposureData = useExposure({
+  const exposureData = useExposureAndFunding({
     vault,
   })
   const pnl = usePnl({ vault, vaultUserSnapshot })
@@ -83,6 +92,7 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
               />
             </>
           )}
+          <APRCard feeAPR={FeeApr[chainId][vault.symbol] ?? 0n} fundingAPR={exposureData?.totalFundingAPR ?? 0n} />
           <RiskCard exposure={exposureData?.exposure} isLong={exposureData?.isLongExposure} />
           <CapactiyCard collateral={totalAssets} capacity={maxCollateral} />
         </Flex>

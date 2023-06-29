@@ -157,6 +157,13 @@ export const calcExposure = (userPosition: bigint, globalPosition: Position) => 
   return Big18Math.div(Big18Math.mul(userPosition, globalPosition.taker), globalPosition.maker)
 }
 
+export const calcFunding = (leverage: bigint, rate: bigint, globalPosition: Position) => {
+  if (Big18Math.isZero(globalPosition.maker)) return Big18Math.ZERO
+
+  const levxRate = Big18Math.mul(leverage, rate)
+  return Big18Math.div(Big18Math.mul(levxRate, globalPosition.taker), globalPosition.maker)
+}
+
 export const getStatusDetails = (status: PositionStatus) => {
   const isOpenPosition =
     status === PositionStatus.open ||

@@ -61,13 +61,12 @@ export default function VaultSelect() {
                     onClick={() => {
                       setSelectedVault(`${i}`)
                     }}
+                    vault={snapshot}
                     key={snapshot.address}
                     apr={feeAPR}
                     name={metadata.name}
                     assets={metadata.assets}
                     description={vaultDescription[snapshot.symbol]}
-                    collateral={snapshot.totalAssets}
-                    capacity={snapshot.maxCollateral}
                   />
                 </Box>
               )
