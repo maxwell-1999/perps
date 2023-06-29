@@ -3,6 +3,7 @@ import { useIntl } from 'react-intl'
 
 import { TooltipIcon } from '@/components/design-system/Tooltip'
 import colors from '@/components/design-system/theme/colors'
+import { TxButton } from '@/components/shared/TxButton'
 import { AssetIconWithText, FormattedBig18Percent, FormattedBig18USDPrice } from '@/components/shared/components'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { MaxUint256 } from '@/constants/units'
@@ -10,7 +11,6 @@ import { useAddress } from '@/hooks/network'
 import { VaultUserSnapshot } from '@/hooks/vaults'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 
-import { Button } from '@ds/Button'
 import { Container } from '@ds/Container'
 
 import { formatValueForProgressBar } from '../utils'
@@ -247,7 +247,7 @@ export const ClaimCard = ({
         </Text>
         <Flex>
           {!isPending ? (
-            <Button
+            <TxButton
               variant="text"
               p={0}
               height="initial"
@@ -257,6 +257,7 @@ export const ClaimCard = ({
                   {copy.confirmWithdraw}
                 </Text>
               }
+              overrideLabel
             />
           ) : (
             <Flex width="100%" justifyContent="center">

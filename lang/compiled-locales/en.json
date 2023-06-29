@@ -375,12 +375,6 @@
       "value": "Change"
     }
   ],
-  "BosPH/": [
-    {
-      "type": 0,
-      "value": "Assets supported"
-    }
-  ],
   "C5rikK": [
     {
       "type": 0,
@@ -397,6 +391,12 @@
     {
       "type": 0,
       "value": "Settings"
+    }
+  ],
+  "D628dO": [
+    {
+      "type": 0,
+      "value": "Blue Chip Vaults (PVA) deploys liquidity to markets of major crypto assets. Currently, this includes 2 pools: ETH-long & ETH-short."
     }
   ],
   "DRhXM2": [
@@ -479,6 +479,12 @@
     {
       "type": 0,
       "value": "Viewing"
+    }
+  ],
+  "F4M7HJ": [
+    {
+      "type": 0,
+      "value": "Arbitrum Ecosystem Vaults (PVB) deploys liquidity to markets of Arbitrum ecosystem assets. Currently, this includes 2 pools: ARB-long & ARB-short."
     }
   ],
   "FIMqSt": [
@@ -721,6 +727,12 @@
     {
       "type": 0,
       "value": "Take advantage of the power of the Perennial protocol to get high utilization of capital."
+    }
+  ],
+  "OeLyvA": [
+    {
+      "type": 0,
+      "value": "Markets Supported"
     }
   ],
   "Of1WyM": [
@@ -1109,12 +1121,6 @@
       "value": " vault"
     }
   ],
-  "eERi22": [
-    {
-      "type": 0,
-      "value": "Arbitrum Ecosystem Vaults (PVB) deploys liquidity to markets of Arbitrum ecosystem assets. Right now, this includes 2 pools: ARB-long & ARB-short."
-    }
-  ],
   "ejEGdx": [
     {
       "type": 0,
@@ -1197,12 +1203,6 @@
     {
       "type": 0,
       "value": " position is closing"
-    }
-  ],
-  "iXZuBN": [
-    {
-      "type": 0,
-      "value": "Blue Chip Vaults (PVA) deploys liquidity to markets of major crypto assets. Right now, this includes 2 pools: ETH-long & ETH-short."
     }
   ],
   "iv4B8O": [

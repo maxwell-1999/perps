@@ -202,6 +202,7 @@ export default function VaultForm({
             type="submit"
             isDisabled={buttonDisabled}
             label={vaultOption === VaultFormOption.Deposit ? copy.Deposit : copy.Redeem}
+            overrideLabel
           />
         </Form>
       </Container>
