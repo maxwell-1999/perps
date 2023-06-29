@@ -20,7 +20,7 @@ export const useMarketBarCopy = () => {
   const intl = useIntl()
   return {
     change: intl.formatMessage({ defaultMessage: 'Change' }),
-    hourlyFunding: intl.formatMessage({ defaultMessage: 'Hourly Funding' }),
+    hourlyFunding: intl.formatMessage({ defaultMessage: 'Funding Rate (1h)' }),
     low: intl.formatMessage({ defaultMessage: '24h Low' }),
     high: intl.formatMessage({ defaultMessage: '24h High' }),
     volume: intl.formatMessage({ defaultMessage: '24h Volume' }),

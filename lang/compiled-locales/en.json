@@ -559,6 +559,12 @@
       "value": "vaultName"
     }
   ],
+  "I3Vj5P": [
+    {
+      "type": 0,
+      "value": "Funding Rate (24h)"
+    }
+  ],
   "IXw0x/": [
     {
       "type": 0,
@@ -581,12 +587,6 @@
     {
       "type": 0,
       "value": "Modify"
-    }
-  ],
-  "K5GOP+": [
-    {
-      "type": 0,
-      "value": "Hourly Funding"
     }
   ],
   "K8nsss": [
@@ -1005,6 +1005,12 @@
       "value": "Position settled"
     }
   ],
+  "ZYuzsl": [
+    {
+      "type": 0,
+      "value": "Funding Rate (Year)"
+    }
+  ],
   "Za3ico": [
     {
       "type": 0,
@@ -1125,6 +1131,12 @@
     {
       "type": 0,
       "value": "Home"
+    }
+  ],
+  "f+aM7s": [
+    {
+      "type": 0,
+      "value": "Funding Rate (8h)"
     }
   ],
   "fF376U": [
@@ -1513,12 +1525,6 @@
     {
       "type": 0,
       "value": "will not be recognized by the UI."
-    }
-  ],
-  "y7EKeV": [
-    {
-      "type": 0,
-      "value": "Daily Funding Rate"
     }
   ],
   "yR4V5C": [
