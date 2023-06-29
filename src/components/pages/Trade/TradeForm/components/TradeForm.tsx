@@ -20,7 +20,7 @@ import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 import { usePrevious } from '@/utils/hooks'
 import { closedOrResolved, next } from '@/utils/positionUtils'
 
-import { Button, IconButton } from '@ds/Button'
+import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
 import { TooltipText } from '@ds/Tooltip'
@@ -351,12 +351,15 @@ function TradeForm(props: TradeFormProps) {
           />
           <Flex height={6} width="100%" justifyContent="flex-end" px={2} mt={2}>
             {Object.keys(dirtyFields).length > 0 && (
-              <IconButton
+              <Button
                 ml="auto"
                 justifyContent="flex-end"
                 height="100%"
                 variant="text"
-                icon={<RepeatIcon />}
+                p={0}
+                fontSize="12px"
+                label={copy.reset}
+                rightIcon={<RepeatIcon />}
                 onClick={resetInputs}
                 aria-label={copy.reset}
               />

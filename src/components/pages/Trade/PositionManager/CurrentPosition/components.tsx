@@ -152,3 +152,37 @@ export const PnlDataRow = ({ positionDetails }: { positionDetails: PositionDetai
     />
   )
 }
+
+export const FundingRateTooltip = ({
+  hourlyFunding,
+  eightHourFunding,
+  dailyFunding,
+  yearlyFunding,
+}: {
+  hourlyFunding: string
+  eightHourFunding: string
+  dailyFunding: string
+  yearlyFunding: string
+}) => {
+  const copy = usePositionManagerCopy()
+  return (
+    <Flex flexDirection="column" gap={2}>
+      <Flex alignItems="center" justifyContent="space-between" gap={4}>
+        <Text variant="label">{copy.fundingRate1hr}</Text>
+        <Text fontSize="13px">{hourlyFunding}</Text>
+      </Flex>
+      <Flex alignItems="center" justifyContent="space-between" gap={4}>
+        <Text variant="label">{copy.fundingRate8hr}</Text>
+        <Text fontSize="13px">{eightHourFunding}</Text>
+      </Flex>
+      <Flex alignItems="center" justifyContent="space-between" gap={4}>
+        <Text variant="label">{copy.fundingRate24hr}</Text>
+        <Text fontSize="13px">{dailyFunding}</Text>
+      </Flex>
+      <Flex alignItems="center" justifyContent="space-between" gap={4}>
+        <Text variant="label">{copy.fundingRateYearly}</Text>
+        <Text fontSize="13px">{yearlyFunding}</Text>
+      </Flex>
+    </Flex>
+  )
+}

@@ -2,6 +2,7 @@ import { ButtonGroup, Flex, Text } from '@chakra-ui/react'
 import ClosePositionIcon from '@public/icons/closePositionIcon.svg'
 import React from 'react'
 
+import { TooltipIcon } from '@/components/design-system/Tooltip'
 import { AssetIconWithText } from '@/components/shared/components'
 import { OrderDirection, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
@@ -18,6 +19,7 @@ import {
   ActivePositionDetail,
   ActivePositionHeader,
   DesktopButtonContainer,
+  FundingRateTooltip,
   HiddenOnLargeScreen,
   LeftContainer,
   LeverageBadge,
@@ -31,13 +33,16 @@ import {
 function CurrentPosition() {
   const copy = usePositionManagerCopy()
   const { noValue } = copy
-  const { borderColor, green, red, alpha75, subheaderTextColor } = useStyles()
+  const { borderColor, green, red, alpha75, subheaderTextColor, alpha50 } = useStyles()
   const { assetMetadata } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
   const { positionDetails, formattedValues } = useFormatPosition()
   const {
     direction,
     dailyFunding,
+    hourlyFunding,
+    eightHourFunding,
+    yearlyFundingRate,
     currentCollateral,
     nextPosition,
     averageEntry,
@@ -163,10 +168,27 @@ function CurrentPosition() {
           }
         />
         <DataRow
-          label={copy.dailyFundingRate}
+          label={
+            <Flex alignItems="center" gap={2}>
+              <Text variant="label">{copy.fundingRate1hr}</Text>
+              <TooltipIcon
+                height="11px"
+                width="11px"
+                color={alpha50}
+                tooltipText={
+                  <FundingRateTooltip
+                    dailyFunding={dailyFunding}
+                    hourlyFunding={hourlyFunding}
+                    yearlyFunding={yearlyFundingRate}
+                    eightHourFunding={eightHourFunding}
+                  />
+                }
+              />
+            </Flex>
+          }
           value={
             <Text fontSize="14px" color={alpha75}>
-              {dailyFunding}
+              {hourlyFunding}
             </Text>
           }
         />

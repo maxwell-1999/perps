@@ -14,7 +14,7 @@ import {
 import { notEmpty } from '@/utils/arrayUtils'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { socialization, utilization } from '@/utils/positionUtils'
-import { Day } from '@/utils/timeUtils'
+import { Day, Hour, Year } from '@/utils/timeUtils'
 
 import { PositionSide } from '@t/gql/graphql'
 
@@ -26,12 +26,13 @@ export const useStyles = () => {
   const subheaderTextColor = useColorModeValue(theme.colors.brand.blackAlpha[50], theme.colors.brand.whiteAlpha[50])
   const alpha75 = useColorModeValue(theme.colors.brand.blackAlpha[75], theme.colors.brand.whiteAlpha[75])
   const alpha90 = useColorModeValue(theme.colors.brand.blackAlpha[90], theme.colors.brand.whiteAlpha[90])
+  const alpha50 = useColorModeValue(theme.colors.brand.blackAlpha[50], theme.colors.brand.whiteAlpha[50])
   const alpha5 = useColorModeValue(theme.colors.brand.blackAlpha[5], theme.colors.brand.whiteAlpha[5])
   // TODO: light color theme background
   const background = useColorModeValue(theme.colors.brand.blackSolid[5], theme.colors.brand.blackSolid[5])
   const green = theme.colors.brand.green
   const red = theme.colors.brand.red
-  return { borderColor, green, red, subheaderTextColor, alpha75, alpha90, alpha5, background }
+  return { borderColor, green, red, subheaderTextColor, alpha75, alpha90, alpha5, alpha50, background }
 }
 
 export const usePositionManagerCopy = () => {
@@ -53,7 +54,7 @@ export const usePositionManagerCopy = () => {
     pnl: intl.formatMessage({ defaultMessage: 'P&L' }),
     liquidationPrice: intl.formatMessage({ defaultMessage: 'Liquidation Price' }),
     averageEntry: intl.formatMessage({ defaultMessage: 'Average Entry' }),
-    dailyFundingRate: intl.formatMessage({ defaultMessage: 'Daily Funding Rate' }),
+    fundingRate1hr: intl.formatMessage({ defaultMessage: 'Funding Rate (1h)' }),
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     sharePosition: intl.formatMessage({ defaultMessage: 'Share position' }),
     modify: intl.formatMessage({ defaultMessage: 'Modify' }),
@@ -77,6 +78,9 @@ export const usePositionManagerCopy = () => {
     noHistoryPositions: intl.formatMessage({ defaultMessage: 'No position history to show' }),
     noPositionOpen: intl.formatMessage({ defaultMessage: 'No position open' }),
     noPnLToShow: intl.formatMessage({ defaultMessage: 'No P&L to show' }),
+    fundingRate8hr: intl.formatMessage({ defaultMessage: 'Funding Rate (8h)' }),
+    fundingRate24hr: intl.formatMessage({ defaultMessage: 'Funding Rate (24h)' }),
+    fundingRateYearly: intl.formatMessage({ defaultMessage: 'Funding Rate (Year)' }),
   }
 }
 
@@ -99,6 +103,9 @@ export const useFormatPosition = () => {
     formattedValues: {
       direction: position ? (position.direction === OrderDirection.Long ? long : short) : noValue,
       dailyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Day, { numDecimals: 4 }) : noValue,
+      hourlyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Hour, { numDecimals: 4 }) : noValue,
+      eightHourFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Hour * 8n, { numDecimals: 4 }) : noValue,
+      yearlyFundingRate: position ? formatBig18Percent((fundingRate ?? 0n) * Year, { numDecimals: 4 }) : noValue,
       ...getFormattedPositionDetails({ positionDetails: position, placeholderString: noValue, numSigFigs }),
     },
   }
