@@ -88,7 +88,7 @@ export const SettlementToastProvider = ({ children }: { children: React.ReactNod
         ),
       })
     }
-  }, [prevStatus, status, toast, copy, asset, direction, position?.nextPosition])
+  }, [prevStatus, status, toast, copy, asset, direction, position?.nextPosition, amount, nextPosition, prevPosition])
 
   return <SettlementToastContext.Provider value={{}}>{children}</SettlementToastContext.Provider>
 }

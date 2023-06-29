@@ -1,7 +1,6 @@
-import { Flex, useBreakpointValue, useColorModeValue, useToast } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { Flex, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
+import { useState } from 'react'
 
-import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultMetadata } from '@/constants/vaults'
 import { useChainId } from '@/hooks/network'
 import { VaultSnapshot, useVaultUserSnapshot } from '@/hooks/vaults'
@@ -16,11 +15,10 @@ import { useVaultDescription } from '../hooks'
 import ClaimModal from './ClaimModal'
 import VaultForm from './VaultForm'
 import { CapactiyCard, ClaimCard, PositionCard, RiskCard, SupportedAssetsSection, VaultDetailTitle } from './components'
-import { useExposure, usePnl, useVaultDetailCopy } from './hooks'
+import { useExposure, usePnl, usePositionSettledToast, useVaultDetailCopy } from './hooks'
 
 export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
   const chainId = useChainId()
-  const toast = useToast()
   const isBase = useBreakpointValue({ base: true, md: false })
   const [showClaimModal, setShowClaimModal] = useState(false)
   const vaultDescription = useVaultDescription()
@@ -47,19 +45,7 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
   )
   const prevPositionUpdating = usePrevious(positionUpdating)
 
-  useEffect(() => {
-    if (prevPositionUpdating && !positionUpdating) {
-      toast({
-        render: ({ onClose }) => (
-          <Toast
-            title={copy.positionSettled}
-            onClose={onClose}
-            body={<ToastMessage message={copy.yourPositionHasSettled} />}
-          />
-        ),
-      })
-    }
-  }, [positionUpdating, prevPositionUpdating, toast, copy])
+  usePositionSettledToast({ prevPositionUpdating, positionUpdating, copy })
 
   const showClaimCard = vaultUserSnapshot && (hasClaimable || hasPendingRedemptions)
 

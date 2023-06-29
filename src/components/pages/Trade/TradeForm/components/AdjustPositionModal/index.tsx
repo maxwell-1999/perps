@@ -10,7 +10,6 @@ import {
   VStack,
   useToast,
 } from '@chakra-ui/react'
-import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { Address } from 'viem'
@@ -73,7 +72,6 @@ function AdjustPositionModal({
   const [isTransactionCompleted, setIsTransactionCompleted] = useState(false)
   const [isSettlementCompleted, setIsSettlementCompleted] = useState(false)
   const { orderDirection } = useMarketContext()
-  const addRecentTransaction = useAddRecentTransaction()
 
   const { productAddress } = product
   const { onApproveUSDC, onModifyPosition } = useProductTransactions(productAddress)
@@ -127,11 +125,6 @@ function AdjustPositionModal({
     try {
       // If this requires two-step, then the collateral should stay the same
       const collateralModification = requiresTwoStep ? 0n : collateralDifference
-      const hash = await onModifyPosition(collateralModification, positionType, positionDifference, {
-        crossCollateral,
-        crossProduct,
-      })
-      setIsTransactionCompleted(true)
       const { action, message, title, actionColor } = getOrderToastProps({
         orderDirection,
         variant,
@@ -142,12 +135,12 @@ function AdjustPositionModal({
         intl,
         adjustment,
       })
-      if (hash) {
-        addRecentTransaction({
-          hash,
-          description: title,
-        })
-      }
+      await onModifyPosition(collateralModification, positionType, positionDifference, {
+        crossCollateral,
+        crossProduct,
+        txHistoryLabel: title,
+      })
+      setIsTransactionCompleted(true)
       toast({
         render: ({ onClose }) => (
           <Toast
@@ -173,14 +166,9 @@ function AdjustPositionModal({
   const handleWithdrawCollateral = async () => {
     setWithdrawCollateralLoading(true)
     try {
-      const hash = await onModifyPosition(collateralDifference, positionType, 0n)
+      await onModifyPosition(collateralDifference, positionType, 0n, { txHistoryLabel: copy.withdraw })
       onClose()
-      if (hash) {
-        addRecentTransaction({
-          hash,
-          description: copy.withdraw,
-        })
-      }
+
       toast({
         render: ({ onClose }) => (
           <Toast

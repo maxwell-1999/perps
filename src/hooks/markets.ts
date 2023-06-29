@@ -918,7 +918,7 @@ export const useProductTransactions = (productAddress?: Address) => {
   const chainId = useChainId()
   const { address } = useAddress()
   const { data: walletClient } = useWalletClient()
-  const { approveUSDC } = useAdjustmentModalCopy()
+  const copy = useAdjustmentModalCopy()
   const addRecentTransaction = useAddRecentTransaction()
 
   const multiInvoker = useMultiInvoker(walletClient ?? undefined)
@@ -942,7 +942,7 @@ export const useProductTransactions = (productAddress?: Address) => {
     await refresh()
     addRecentTransaction({
       hash,
-      description: approveUSDC,
+      description: copy.approveUSDC,
     })
     return hash
   }
@@ -951,7 +951,11 @@ export const useProductTransactions = (productAddress?: Address) => {
     collateralDelta: bigint,
     positionSide: OpenPositionType,
     positionDelta: bigint,
-    { crossProduct, crossCollateral }: { crossProduct?: Address; crossCollateral?: bigint } = {},
+    {
+      crossProduct,
+      crossCollateral,
+      txHistoryLabel,
+    }: { crossProduct?: Address; crossCollateral?: bigint; txHistoryLabel?: string } = {},
   ) => {
     if (!address || !chainId || !walletClient) {
       return
@@ -998,6 +1002,10 @@ export const useProductTransactions = (productAddress?: Address) => {
     const hash = await multiInvoker.write.invoke([orderedActions], txOpts)
     await waitForTransaction({ hash })
     await refresh()
+    addRecentTransaction({
+      hash,
+      description: txHistoryLabel || copy.positionChanged,
+    })
     return hash
   }
   return {
