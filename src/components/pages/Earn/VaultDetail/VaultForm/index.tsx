@@ -104,7 +104,7 @@ export default function VaultForm({
   const isDeposit = vaultOption === VaultFormOption.Deposit
   const buttonDisabled = Object.keys(errors).length > 0 || !amount || Number(amount) === 0
 
-  if (!vaultUserSnapshot || !vaultSnapshot || !balances) {
+  if (!vaultSnapshot) {
     return (
       <Container variant="vaultCard" justifyContent="center" alignItems="center" mb="22px" width="100%" height="270px">
         <Spinner />
@@ -112,11 +112,11 @@ export default function VaultForm({
     )
   }
 
-  const hasAssets = !Big18Math.isZero(vaultUserSnapshot.assets ?? 0n)
+  const hasAssets = !Big18Math.isZero(vaultUserSnapshot?.assets ?? 0n)
 
   return (
     <>
-      {!!formValues && (
+      {!!formValues && vaultUserSnapshot && (
         <ConfirmationModal
           formValues={formValues}
           balances={balances}
@@ -169,7 +169,7 @@ export default function VaultForm({
                 )}
                 {!!address && !isDeposit && (
                   <Flex gap={1}>
-                    <Text variant="label">{formatBig18USDPrice(vaultUserSnapshot.assets) ?? copy.zeroUsd}</Text>
+                    <Text variant="label">{formatBig18USDPrice(vaultUserSnapshot?.assets) ?? copy.zeroUsd}</Text>
                     <Button
                       variant="text"
                       padding={0}
