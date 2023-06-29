@@ -1,5 +1,6 @@
 import { RepeatIcon } from '@chakra-ui/icons'
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
+import { arbitrum } from '@wagmi/chains'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Address } from 'viem'
@@ -13,6 +14,7 @@ import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/ma
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails, useProtocolSnapshot } from '@/hooks/markets'
+import { useChainId } from '@/hooks/network'
 import { useAddress } from '@/hooks/network'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
@@ -22,6 +24,7 @@ import { closedOrResolved, next } from '@/utils/positionUtils'
 import { Button, IconButton } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
+import { TooltipText } from '@ds/Tooltip'
 import colors from '@ds/theme/colors'
 
 import { ProductSnapshot } from '@t/perennial'
@@ -53,6 +56,7 @@ function TradeForm(props: TradeFormProps) {
   } = product
 
   const prevProductAddress = usePrevious(productAddress)
+  const chainId = useChainId()
 
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles()
   const copy = useTradeFormCopy()
@@ -189,6 +193,7 @@ function TradeForm(props: TradeFormProps) {
     maxLeverage,
   })
   const notional = Big18Math.mul(Big18Math.fromFloatString(amount), Big18Math.abs(price))
+  const userBalance = formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
 
   return (
     <>
@@ -249,9 +254,45 @@ function TradeForm(props: TradeFormProps) {
               <FormLabel mr={0} mb={0}>
                 {!!address && (
                   <Flex gap={1}>
-                    <Text variant="label">
-                      {formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd}
-                    </Text>
+                    {chainId === arbitrum.id ? (
+                      <TooltipText
+                        variant="label"
+                        tooltipProps={{
+                          closeDelay: 2000,
+                        }}
+                        tooltipText={
+                          <Text>
+                            {copy.tooltipUSDCeOnly1}
+                            <Text
+                              mx={1}
+                              textDecoration="underline"
+                              as="a"
+                              href="https://arbiscan.io/token/0xff970a61a04b1ca14834a43f5de4533ebddb5cc8"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {copy.tooltipUSDCeOnly2}
+                            </Text>
+                            {copy.tooltipUSDCeOnly3}
+                            <Text
+                              mx={1}
+                              textDecoration="underline"
+                              as="a"
+                              href="https://arbiscan.io/token/0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {copy.tooltipUSDCeOnly4}
+                            </Text>
+                            {copy.tooltipUSDCeOnly5}
+                          </Text>
+                        }
+                      >
+                        {userBalance}
+                      </TooltipText>
+                    ) : (
+                      <Text variant="label">{userBalance}</Text>
+                    )}
                     <Button
                       variant="text"
                       padding={0}

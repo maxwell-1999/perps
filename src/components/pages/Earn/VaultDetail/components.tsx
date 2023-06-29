@@ -1,6 +1,7 @@
-import { Divider, Flex, Progress, Spinner, Text, Tooltip, useColorModeValue } from '@chakra-ui/react'
+import { Divider, Flex, Progress, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
+import { TooltipIcon } from '@/components/design-system/Tooltip'
 import colors from '@/components/design-system/theme/colors'
 import { AssetIconWithText, FormattedBig18Percent, FormattedBig18USDPrice } from '@/components/shared/components'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
@@ -76,9 +77,10 @@ export const RiskCard = ({ exposure, isLong }: { exposure?: number; isLong?: boo
   return (
     <Container p={4} variant="vaultCard" justifyContent="space-between" mb="22px" flexDirection="row">
       <Flex justifyContent="space-between" borderRight={`1px solid ${alpha20}`} pr={2} mr={2} flex={1}>
-        <Tooltip label={copy.currentExposureTooltip}>
+        <Flex gap={2} alignItems="center">
           <Text color={alpha50}>{copy.currentExposure}</Text>
-        </Tooltip>
+          <TooltipIcon color={alpha50} tooltipText={copy.currentExposureTooltip} />
+        </Flex>
         <Text color={exposureColor}>{exposurePercent}</Text>
       </Flex>
       <Text color={alpha60}>{label}</Text>
@@ -285,9 +287,11 @@ export const APRCard = ({ feeAPR, fundingAPR }: { feeAPR: bigint; fundingAPR: bi
         </Flex>
         <Divider />
         <Flex flex={1} justifyContent="space-between">
-          <Tooltip label={copy.vaultPnlTooltip}>
+          <Flex alignItems="center" gap={2}>
             <Text color={alpha50}>{copy.totalAPR}</Text>
-          </Tooltip>
+            <TooltipIcon color={alpha50} tooltipText={copy.vaultPnlTooltip} />
+          </Flex>
+
           <FormattedBig18Percent
             color={colors.brand.green}
             value={feeAPR + fundingAPR}
