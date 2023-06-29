@@ -1,10 +1,7 @@
 import { Box, Heading } from '@chakra-ui/react'
 import styled from '@emotion/styled'
-import dynamic from 'next/dynamic'
 
-const NavBar = dynamic(() => import('@/components/shared/NavBar'), {
-  ssr: false,
-})
+import NavBar from '@/components/shared/NavBar'
 
 interface LayoutProps {
   header: React.ReactNode
