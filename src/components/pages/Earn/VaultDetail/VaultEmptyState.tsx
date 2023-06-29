@@ -75,12 +75,12 @@ export default function VaultEmptyState() {
                 color="initial"
                 ml={1}
                 as="a"
-                href="https://v1.app.perennial.finance"
+                href="https://v1app.perennial.finance/ethereum"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 {/* eslint-disable formatjs/no-literal-string-in-jsx */}
-                https://v1.app.perennial.finance.
+                https://v1app.perennial.finance.
               </Text>
             </Text>
           </Flex>
