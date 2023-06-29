@@ -14,6 +14,7 @@ import ClosePositionForm from './components/ClosePositionForm'
 import TradeForm from './components/TradeForm'
 import WithdrawCollateralForm from './components/WithdrawCollateralForm'
 import { useResetFormOnMarketChange } from './hooks'
+import { getContainerVariant } from './utils'
 
 const Long = OrderDirection.Long
 const Short = OrderDirection.Short
@@ -43,7 +44,7 @@ function TradeContainer() {
     return 0n
   }, [position, oppositeSidePosition])
 
-  const containerVariant = formState !== FormState.close && !closedOrResolved(position?.status) ? 'pink' : 'transparent'
+  const containerVariant = getContainerVariant(formState, !!closedOrResolved(position?.status))
 
   if (!product || (address && positionsLoading)) {
     return (

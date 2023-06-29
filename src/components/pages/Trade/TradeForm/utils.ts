@@ -1,3 +1,4 @@
+import { FormState } from '@/contexts/tradeFormContext'
 import { Big18Math } from '@/utils/big18Utils'
 import { calcLeverage } from '@/utils/positionUtils'
 
@@ -169,4 +170,14 @@ export const calcMaxLeverage = (maintenance?: bigint) => {
 
 export const isFullClose = (closeAmount: string, currPosition: bigint) => {
   return Big18Math.eq(Big18Math.fromFloatString(closeAmount), Big18Math.abs(currPosition))
+}
+
+export const getContainerVariant = (formState: FormState, isClosedOrResolved: boolean) => {
+  if (isClosedOrResolved) {
+    return 'transparent'
+  }
+  if (formState === FormState.close) {
+    return 'pink'
+  }
+  return 'active'
 }
