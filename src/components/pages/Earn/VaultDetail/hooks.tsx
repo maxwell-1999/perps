@@ -76,7 +76,6 @@ export const useVaultDetailCopy = () => {
     ethereumUnavailableLink: intl.formatMessage({
       defaultMessage: 'If you have existing LP positions you can manage them at ',
     }),
-    linkText: intl.formatMessage({ defaultMessage: 'https://v1.app.perennial.finance.' }),
   }
 }
 

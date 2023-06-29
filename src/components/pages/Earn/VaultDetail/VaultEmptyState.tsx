@@ -79,7 +79,8 @@ export default function VaultEmptyState() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {copy.linkText}
+                {/* eslint-disable formatjs/no-literal-string-in-jsx */}
+                https://v1.app.perennial.finance.
               </Text>
             </Text>
           </Flex>
