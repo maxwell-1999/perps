@@ -47,6 +47,7 @@ export const usePositionManagerCopy = () => {
     closing: intl.formatMessage({ defaultMessage: 'Closing' }),
     pricing: intl.formatMessage({ defaultMessage: 'Pricing' }),
     resolved: intl.formatMessage({ defaultMessage: 'Resolved' }),
+    liquidated: intl.formatMessage({ defaultMessage: 'Liquidated' }),
     long: intl.formatMessage({ defaultMessage: 'Long' }),
     short: intl.formatMessage({ defaultMessage: 'Short' }),
     size: intl.formatMessage({ defaultMessage: 'Size' }),
@@ -81,6 +82,12 @@ export const usePositionManagerCopy = () => {
     fundingRate8hr: intl.formatMessage({ defaultMessage: 'Funding Rate (8h)' }),
     fundingRate24hr: intl.formatMessage({ defaultMessage: 'Funding Rate (24h)' }),
     fundingRateYearly: intl.formatMessage({ defaultMessage: 'Funding Rate (Year)' }),
+    liquidationFee: intl.formatMessage({ defaultMessage: 'Liquidation Fee' }),
+    liquidationFeeTooltip: (feeAmount: bigint) =>
+      intl.formatMessage(
+        { defaultMessage: 'Liquidation Fee: {feeAmount}' },
+        { feeAmount: formatBig18USDPrice(feeAmount) },
+      ),
   }
 }
 

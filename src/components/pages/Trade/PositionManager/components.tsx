@@ -34,10 +34,10 @@ export const AssetDirectionLabel = ({
   )
 }
 
-export const Status = ({ status }: { status: PositionStatus }) => {
-  const { statusColor, isOpenPosition } = getStatusDetails(status)
+export const Status = ({ status, liquidated }: { status: PositionStatus; liquidated: boolean }) => {
+  const { statusColor, isOpenPosition } = getStatusDetails(status, liquidated)
   const copy = usePositionManagerCopy()
-  const statusLabel = copy[status]
+  const statusLabel = liquidated ? copy.liquidated : copy[status]
 
   return (
     <Flex alignItems="center">

@@ -97,6 +97,7 @@ export const getFormattedPositionDetails = ({
   leverage: positionDetails ? formatBig18(positionDetails?.leverage) : placeholderString,
   nextLeverage: positionDetails ? formatBig18(positionDetails?.nextLeverage) : placeholderString,
   fees: positionDetails ? formatBig18USDPrice(positionDetails?.fees) : placeholderString,
+  liquidationFee: positionDetails ? formatBig18USDPrice(positionDetails?.liquidationFee) : placeholderString,
 })
 
 export const numericColumnSort = (rowA: Row, rowB: Row, id: string) => {

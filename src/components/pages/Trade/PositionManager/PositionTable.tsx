@@ -12,6 +12,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 
+import { TooltipIcon, TooltipText } from '@/components/design-system/Tooltip'
 import { AssetMetadata } from '@/constants/assets'
 import { ExplorerURLs } from '@/constants/network'
 import { useChainId } from '@/hooks/network'
@@ -112,6 +113,8 @@ const PositionTableRow = ({
   const subPositionBg = useColorModeValue('white', 'black')
   const leverageColor = useColorModeValue(colors.brand.blackAlpha[70], colors.brand.whiteAlpha[70])
   const hoverColor = useColorModeValue(colors.brand.whiteAlpha[10], colors.brand.blackAlpha[10])
+  const { fees, liquidationFee } = row.details
+
   return (
     <AccordionItem borderBottom="none" _hover={{ bg: hoverColor }}>
       <Box>
@@ -173,7 +176,7 @@ const PositionTableRow = ({
           </Box>
           {currentPosition && (
             <Box flex="2">
-              <Status status={row.details.status} />
+              <Status status={row.details.status} liquidated={!!row.details.liquidations?.length} />
             </Box>
           )}
           {!currentPosition && (
@@ -182,7 +185,17 @@ const PositionTableRow = ({
                 <Text fontSize="14px">{row.averageEntry}</Text>
               </Box>
               <Box flex="2">
-                <Text fontSize="14px">{row.fees}</Text>
+                {!!liquidationFee ? (
+                  <TooltipText
+                    tooltipText={copy.liquidationFeeTooltip(liquidationFee)}
+                    tooltipProps={{ placement: 'top-start' }}
+                    fontSize="14px"
+                  >
+                    {formatBig18USDPrice((fees ?? 0n) + (liquidationFee ?? 0n))}
+                  </TooltipText>
+                ) : (
+                  <Text fontSize="14px">{row.fees}</Text>
+                )}
               </Box>
             </>
           )}
@@ -206,6 +219,7 @@ const SubPositionTable = (row: PositionTableData) => {
   } = row
 
   if (!subPositions) return null
+  const liquidated = !!row.details.liquidations?.length
 
   return (
     <Box>
@@ -262,7 +276,7 @@ const SubPositionTable = (row: PositionTableData) => {
               </Text>
             </Flex>
           </Box>
-          <Box flex="1">
+          <Flex flex="1" alignItems="center" gap={1}>
             <Text fontSize="13px">
               {subPosition.delta >= 0n ? (
                 // eslint-disable-next-line formatjs/no-literal-string-in-jsx
@@ -279,7 +293,10 @@ const SubPositionTable = (row: PositionTableData) => {
                 {formatBig18(Big18Math.abs(subPosition.delta))} {asset.toUpperCase()}
               </Text>
             </Text>
-          </Box>
+            {liquidated && i === subPositions.length - 1 && (
+              <TooltipIcon tooltipText={copy.liquidated} color={colors.brand.red} />
+            )}
+          </Flex>
           <Box flex="1">
             <Text fontSize="13px">{formatBig18USDPrice(subPosition.collateral)}</Text>
           </Box>
@@ -287,7 +304,17 @@ const SubPositionTable = (row: PositionTableData) => {
             <Text fontSize="13px">{formatBig18USDPrice(subPosition.settlePrice)}</Text>
           </Box>
           <Box flex="1">
-            <Text fontSize="13px">{formatBig18USDPrice(subPosition.fee)}</Text>
+            {liquidated && i === subPositions.length - 1 ? (
+              <TooltipText
+                tooltipText={copy.liquidationFeeTooltip(row.details?.liquidationFee ?? 0n)}
+                tooltipProps={{ placement: 'top-start' }}
+                fontSize="13px"
+              >
+                {formatBig18USDPrice(subPosition.fee + (row.details?.liquidationFee ?? 0n))}
+              </TooltipText>
+            ) : (
+              <Text fontSize="13px">{formatBig18USDPrice(subPosition.fee)}</Text>
+            )}
           </Box>
           <Box flex="1">
             <Flex flexDirection="column">

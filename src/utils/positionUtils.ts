@@ -164,7 +164,7 @@ export const calcFunding = (leverage: bigint, rate: bigint, globalPosition: Posi
   return Big18Math.div(Big18Math.mul(levxRate, globalPosition.taker), globalPosition.maker)
 }
 
-export const getStatusDetails = (status: PositionStatus) => {
+export const getStatusDetails = (status: PositionStatus, liquidated?: boolean) => {
   const isOpenPosition =
     status === PositionStatus.open ||
     status === PositionStatus.pricing ||
@@ -172,7 +172,8 @@ export const getStatusDetails = (status: PositionStatus) => {
     status === PositionStatus.opening
   const isTransitionPosition =
     status === PositionStatus.pricing || status === PositionStatus.opening || status === PositionStatus.closing
-  const statusColor = isOpenPosition ? (isTransitionPosition ? 'goldenRod' : colors.brand.green) : 'darkGray'
+  let statusColor = isOpenPosition ? (isTransitionPosition ? 'goldenRod' : colors.brand.green) : 'darkGray'
+  if (liquidated) statusColor = colors.brand.red
 
   return { isOpenPosition, isTransitionPosition, statusColor }
 }

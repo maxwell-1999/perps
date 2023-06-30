@@ -607,6 +607,16 @@
       "value": "Current Exposure"
     }
   ],
+  "LKUJBO": [
+    {
+      "type": 0,
+      "value": "Liquidation Fee: "
+    },
+    {
+      "type": 1,
+      "value": "feeAmount"
+    }
+  ],
   "LPnWdG": [
     {
       "type": 0,
@@ -979,6 +989,12 @@
     {
       "type": 0,
       "value": "24h Volume"
+    }
+  ],
+  "XnSyoz": [
+    {
+      "type": 0,
+      "value": "Liquidated"
     }
   ],
   "XviFuR": [

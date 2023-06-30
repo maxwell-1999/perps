@@ -725,6 +725,7 @@ const fetchUserPositionDetails = async (
     deposits = deposits + sum(_deposits.map((d) => d.args.amount)) - sum(_withdrawals.map((d) => d.args.amount))
   }
 
+  const liquidationFee = positionChanges.liquidations.length ? BigInt(positionChanges.liquidations[0].fee) : 0n
   const fees = BigInt(_fees)
   const positionSize = side === 'maker' ? position.maker : position.taker
   const nextPositionSize = side === 'maker' ? next(pre, position).maker : next(pre, position).taker
@@ -747,7 +748,8 @@ const fetchUserPositionDetails = async (
     fees,
     subPositions,
     liquidations: positionChanges.liquidations,
-    pnl: closedPosition ? BigInt(valuePnl) - fees : collateral - startCollateral - deposits,
+    liquidationFee,
+    pnl: closedPosition ? BigInt(valuePnl) - fees - liquidationFee : collateral - startCollateral - deposits,
     collateralChanges,
     maintenance,
     status: positionStatus(positionSize, nextPositionSize, collateral),

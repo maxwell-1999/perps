@@ -49,14 +49,16 @@ function CurrentPosition() {
     liquidationPrice,
     nextNotional,
     nextLeverage,
+    liquidationFee,
   } = formattedValues
   const status = positionDetails?.status ?? PositionStatus.resolved
 
   const hasPosition = status !== PositionStatus.resolved
+  const liquidated = !!positionDetails?.liquidations?.length
   const directionTextColor = direction === OrderDirection.Long ? green : red
-  const { isOpenPosition, statusColor } = getStatusDetails(status)
+  const { isOpenPosition, statusColor } = getStatusDetails(status, liquidated)
 
-  const statusLabel = copy[status]
+  const statusLabel = liquidated ? copy.liquidated : copy[status]
   return (
     <ResponsiveContainer>
       <LeftContainer borderColor={borderColor}>
@@ -200,6 +202,16 @@ function CurrentPosition() {
             </Text>
           }
         />
+        {liquidated && (
+          <DataRow
+            label={copy.liquidationFee}
+            value={
+              <Text fontSize="14px" color={alpha75}>
+                {liquidationFee}
+              </Text>
+            }
+          />
+        )}
         {hasPosition && (
           <DesktopButtonContainer>
             {isOpenPosition && (

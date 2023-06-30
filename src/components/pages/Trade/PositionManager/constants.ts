@@ -21,6 +21,7 @@ export type PositionTableData = {
   startCollateral: string
   symbol: string
   fees: string
+  liquidationFee: string
   details: PositionDetails
   unformattedNotional: string
   unformattedLiquidationPrice: string
