@@ -5,6 +5,8 @@ import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { publicProvider } from 'wagmi/providers/public'
 
+import { LocalDev } from './auth'
+
 export const AlchemyProdKeys = process.env.NEXT_PUBLIC_ALCHEMY_PROD_KEYS?.split(',').map((k) => k.trim())
 export const QuickNodeBaseGoerliUrl = process.env.NEXT_PUBLIC_QUICKNODE_URL_BASE_GOERLI
 export const WalletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
@@ -49,7 +51,7 @@ export const mainnetChains = chains.filter((c) => !isTestnet(c.id))
 const { connectors } = getDefaultWallets({
   appName: 'Perennial Interface V2',
   projectId: WalletConnectProjectId,
-  chains: [...mainnetChains, baseGoerli], // Only pass in mainnet (and basegoerli) chains to clean up the select modal. Testnets will still work
+  chains: LocalDev ? chains : [...mainnetChains, baseGoerli], // Only pass in mainnet (and basegoerli) chains to clean up the select modal. Testnets will still work
 })
 
 export const wagmiConfig = createConfig({
