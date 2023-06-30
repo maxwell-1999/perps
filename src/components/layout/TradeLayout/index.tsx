@@ -43,7 +43,7 @@ const GridContainer = styled.div`
   @media (min-width: ${breakpoints.xl}) {
     grid-template-areas: ${largeScreenLayout};
     grid-template-columns: 400px 1fr;
-    grid-template-rows: auto auto 1fr 0.45fr;
+    grid-template-rows: auto auto 1fr 320px;
   }
 `
 interface LayoutProps {
