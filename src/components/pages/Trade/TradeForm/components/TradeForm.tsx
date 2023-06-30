@@ -7,7 +7,7 @@ import { Address } from 'viem'
 
 import Toggle from '@/components/shared/Toggle'
 import { TxButton } from '@/components/shared/TxButton'
-import { FormattedBig18USDPrice } from '@/components/shared/components'
+import { FormattedBig18USDPrice, USDCETooltip } from '@/components/shared/components'
 import { Form } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/markets'
@@ -23,7 +23,6 @@ import { closedOrResolved, next } from '@/utils/positionUtils'
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import { Slider } from '@ds/Slider'
-import { TooltipText } from '@ds/Tooltip'
 import colors from '@ds/theme/colors'
 
 import { ProductSnapshot } from '@t/perennial'
@@ -254,41 +253,7 @@ function TradeForm(props: TradeFormProps) {
                 {!!address && (
                   <Flex gap={1}>
                     {chainId === arbitrum.id ? (
-                      <TooltipText
-                        variant="label"
-                        tooltipProps={{
-                          closeDelay: 2000,
-                        }}
-                        tooltipText={
-                          <Text as="span">
-                            {copy.tooltipUSDCeOnly1}
-                            <Text
-                              mx={1}
-                              textDecoration="underline"
-                              as="a"
-                              href="https://arbiscan.io/token/0xff970a61a04b1ca14834a43f5de4533ebddb5cc8"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {copy.tooltipUSDCeOnly2}
-                            </Text>
-                            {copy.tooltipUSDCeOnly3}
-                            <Text
-                              mx={1}
-                              textDecoration="underline"
-                              as="a"
-                              href="https://arbiscan.io/token/0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {copy.tooltipUSDCeOnly4}
-                            </Text>
-                            {copy.tooltipUSDCeOnly5}
-                          </Text>
-                        }
-                      >
-                        {userBalance}
-                      </TooltipText>
+                      <USDCETooltip userBalance={userBalance} />
                     ) : (
                       <Text variant="label">{userBalance}</Text>
                     )}
