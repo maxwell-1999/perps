@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import { Label, LabelList, Line, LineChart, ReferenceLine, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 import { parseAbi, zeroAddress } from 'viem'
 import { useContractRead } from 'wagmi'
+import { arbitrum } from 'wagmi/chains'
 
 import { DataRow } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
@@ -88,7 +89,7 @@ function MarketInfo() {
           }
           size="lg"
         />
-        <DataRow label={copy.collateral} value={'DSU / USDC'} size="lg" />
+        <DataRow label={copy.collateral} value={chainId === arbitrum.id ? 'DSU / USDC.e' : 'DSU / USDC'} size="lg" />
         <DataRow
           label={copy.minCollateral}
           value={<FormattedBig18USDPrice value={protocoSnapshot.minCollateral} />}
