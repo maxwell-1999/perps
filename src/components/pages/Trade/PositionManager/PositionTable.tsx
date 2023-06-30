@@ -292,10 +292,10 @@ const SubPositionTable = (row: PositionTableData) => {
           <Box flex="1">
             <Flex flexDirection="column">
               <Text fontSize="13px" color={subPosition.pnl >= 0n ? (subPosition.pnl === 0n ? undefined : green) : red}>
-                {formatBig18Percent(Big18Math.div(subPosition.pnl, subPosition.collateral))}
+                {formatBig18USDPrice(subPosition.pnl)}
               </Text>
               <Text variant="label" fontSize="11px">
-                {formatBig18USDPrice(subPosition.pnl)}
+                {formatBig18Percent(Big18Math.div(subPosition.pnl, subPosition.collateral))}
               </Text>
             </Flex>
           </Box>

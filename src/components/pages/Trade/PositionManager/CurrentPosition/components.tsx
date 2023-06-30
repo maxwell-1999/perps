@@ -131,7 +131,7 @@ export const PnlPositionDetail = ({ positionDetails }: { positionDetails: Positi
   const { red, green } = useStyles()
   const pnlTextColor = isPnlPositive ? green : red
 
-  return <ActivePositionDetail label={copy.pnl} value={pnlPercentage} valueSubheader={pnl} valueColor={pnlTextColor} />
+  return <ActivePositionDetail label={copy.pnl} value={pnl} valueSubheader={pnlPercentage} valueColor={pnlTextColor} />
 }
 
 export const PnlDataRow = ({ positionDetails }: { positionDetails: PositionDetails }) => {
@@ -146,7 +146,7 @@ export const PnlDataRow = ({ positionDetails }: { positionDetails: PositionDetai
       value={
         <Text fontSize="14px" color={pnlTextColor}>
           {/*eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
-          {pnlPercentage} / {pnl}
+          {pnl} / {pnlPercentage}
         </Text>
       }
     />
