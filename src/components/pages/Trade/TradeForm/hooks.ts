@@ -104,24 +104,6 @@ export function useTradeFormCopy() {
     decrease: intl.formatMessage({ defaultMessage: 'Decrease' }),
     open: intl.formatMessage({ defaultMessage: 'Open' }),
     close: intl.formatMessage({ defaultMessage: 'Close' }),
-    usdceOnlyOne: intl.formatMessage({ defaultMessage: 'Perennial currently only supports' }),
-    usdceOnlyLinkOne: intl.formatMessage({ defaultMessage: 'USDC.e (bridged USDC).' }),
-    usdceOnlyTwo: intl.formatMessage({ defaultMessage: 'As of now,' }),
-    tooltipUSDCeOnly1: intl.formatMessage({
-      defaultMessage: 'Perennial currently only supports',
-    }),
-    tooltipUSDCeOnly2: intl.formatMessage({
-      defaultMessage: 'USDC.e (bridged USDC).',
-    }),
-    tooltipUSDCeOnly3: intl.formatMessage({
-      defaultMessage: 'As of now',
-    }),
-    tooltipUSDCeOnly4: intl.formatMessage({
-      defaultMessage: 'Native USDC',
-    }),
-    tooltipUSDCeOnly5: intl.formatMessage({
-      defaultMessage: 'will not be recognized by the UI.',
-    }),
   }
 }
 

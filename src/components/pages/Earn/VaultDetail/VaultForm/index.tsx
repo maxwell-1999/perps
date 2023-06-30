@@ -1,4 +1,5 @@
 import { Flex, FormLabel, Spinner, Text } from '@chakra-ui/react'
+import { arbitrum } from '@wagmi/chains'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -7,9 +8,10 @@ import { DataRow } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
 import Toggle from '@/components/shared/Toggle'
 import { TxButton } from '@/components/shared/TxButton'
-import { Form } from '@/components/shared/components'
+import { Form, USDCETooltip } from '@/components/shared/components'
 import { QuoteCurrency } from '@/constants/assets'
 import { useAddress } from '@/hooks/network'
+import { useChainId } from '@/hooks/network'
 import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
 import { Big18Math } from '@/utils/big18Utils'
@@ -34,6 +36,7 @@ export default function VaultForm({
 }) {
   const copy = useVaultFormCopy()
   const { address } = useAddress()
+  const chainId = useChainId()
   const [formValues, setFormValues] = useState<FormValues | null>(null)
   const [vaultOption, setVaultOption] = useState<VaultFormOption>(VaultFormOption.Deposit)
   const [maxWithdrawal, setMaxWithdrawal] = useState(false)
@@ -113,6 +116,7 @@ export default function VaultForm({
   }
 
   const hasAssets = !Big18Math.isZero(vaultUserSnapshot?.assets ?? 0n)
+  const userBalance = formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
 
   return (
     <>
@@ -153,9 +157,11 @@ export default function VaultForm({
               <FormLabel mr={0} mb={0}>
                 {!!address && isDeposit && (
                   <Flex gap={1}>
-                    <Text variant="label">
-                      {formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd}
-                    </Text>
+                    {chainId === arbitrum.id ? (
+                      <USDCETooltip userBalance={userBalance} />
+                    ) : (
+                      <Text variant="label">{userBalance}</Text>
+                    )}
                     <Button
                       variant="text"
                       padding={0}
