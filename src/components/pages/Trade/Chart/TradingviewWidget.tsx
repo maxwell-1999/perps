@@ -65,7 +65,7 @@ const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ overrides, theme,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       datafeed: datafeed!,
       interval: '5' as ResolutionString,
-      timeframe: '1D',
+      timeframe: '6H',
       symbol: tvTicker,
       autosize: true,
       toolbar_bg: colors.brand.blackSolid[5],
