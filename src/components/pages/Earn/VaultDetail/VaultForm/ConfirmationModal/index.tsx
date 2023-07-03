@@ -163,8 +163,9 @@ export default function ConfirmationModal({
 
   const requiresUSDCApproval = requiredApprovals?.includes(RequiredApprovals.usdc)
   const requiresSharesApproval = requiredApprovals?.includes(RequiredApprovals.shares)
-  const approximateShares = formatBig18(
+  const approximateShares = Big18Math.mul(
     Big18Math.div(Big18Math.mul(bigintAmount, vaultSnapshot.totalSupply), vaultSnapshot.totalAssets),
+    Big18Math.fromFloatString('1.05'),
   )
 
   return (
@@ -212,8 +213,14 @@ export default function ConfirmationModal({
                   <ModalStep
                     title={copy.approveShares}
                     description={intl.formatMessage(
-                      { defaultMessage: 'Approve at least {approximateShares} shares to redeem your funds' },
-                      { approximateShares },
+                      { defaultMessage: 'Approve at least {approximateShares} to redeem your funds' },
+                      {
+                        approximateShares: (
+                          <Text as="span" color={colors.brand.purple[240]}>
+                            {formatBig18(approximateShares)} {copy.shares}
+                          </Text>
+                        ),
+                      },
                     )}
                     isLoading={approveSharesLoading}
                     isCompleted={approveSharesCompleted}

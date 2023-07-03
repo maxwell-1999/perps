@@ -12,13 +12,12 @@ import {
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
-import { parseEther } from 'viem'
 
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
-import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
+import { Big18Math, formatBig18, formatBig18USDPrice } from '@/utils/big18Utils'
 
 import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
@@ -94,7 +93,10 @@ export default function ClaimModal({
     }
   }
 
-  const dsuApprovalSuggestion = formatBig18USDPrice(Big18Math.add(parseEther('0.01'), vaultUserSnapshot.claimable))
+  const dsuApprovalSuggestion = formatBig18(
+    Big18Math.add(Big18Math.fromFloatString('0.001'), vaultUserSnapshot.claimable),
+    { minDecimals: 2 },
+  )
 
   return (
     <Modal isOpen onClose={onClose} isCentered variant="confirmation">
@@ -112,8 +114,15 @@ export default function ClaimModal({
               <ModalStep
                 title={copy.approveDSU}
                 description={intl.formatMessage(
-                  { defaultMessage: 'Approve {dsuApprovalSuggestion} DSU to withdraw collateral' },
-                  { dsuApprovalSuggestion },
+                  { defaultMessage: 'Approve at least {dsuApprovalSuggestion} to withdraw collateral' },
+                  {
+                    dsuApprovalSuggestion: (
+                      <Text as="span" color={colors.brand.purple[240]}>
+                        {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+                        {dsuApprovalSuggestion} DSU
+                      </Text>
+                    ),
+                  },
                 )}
                 isLoading={approveDSULoading}
                 isCompleted={approveDSUCompleted}

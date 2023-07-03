@@ -46,6 +46,7 @@ export function useVaultFormCopy() {
     insufficientShares: intl.formatMessage({ defaultMessage: 'Insufficient shares' }),
     collateralDeposited: intl.formatMessage({ defaultMessage: 'Collateral deposited' }),
     assetsRedeemed: intl.formatMessage({ defaultMessage: 'Vault assets redeemed' }),
+    shares: intl.formatMessage({ defaultMessage: 'shares' }),
     redeemToast: (amount: string, vaultName: string) =>
       intl.formatMessage({ defaultMessage: '{amount} from {vaultName}' }, { amount, vaultName }),
     depositToast: (amount: string, vaultName: string) =>

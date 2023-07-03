@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { formatUnits, parseEther } from 'viem'
 
 import { WeiPerEther } from '@/constants/units'
@@ -17,6 +18,8 @@ export const formatBig18 = (
     maximumFractionDigits: minDecimals,
 
     useGrouping,
+    // @ts-ignore
+    roundingPriority: 'morePrecision',
   }).format(Big18Math.toUnsafeFloat(value))
 }
 

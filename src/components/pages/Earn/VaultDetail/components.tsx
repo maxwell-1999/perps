@@ -230,10 +230,16 @@ export const ClaimCard = ({
 
   const bodyText = intl.formatMessage(
     {
-      defaultMessage:
-        'Please click this notification to finalize your withdrawal of {formattedClaimable} from the {vaultName} vault.',
+      defaultMessage: 'Confirm your withdrawal of {formattedClaimable} from the {vaultName} vault.',
     },
-    { formattedClaimable, vaultName },
+    {
+      formattedClaimable: (
+        <Text as="span" color={colors.brand.green}>
+          {formattedClaimable}
+        </Text>
+      ),
+      vaultName,
+    },
   )
 
   return (
@@ -246,7 +252,7 @@ export const ClaimCard = ({
           {isPending ? copy.pendingWithdrawal : bodyText}
         </Text>
         <Flex>
-          {!isPending ? (
+          {
             <TxButton
               variant="text"
               p={0}
@@ -257,13 +263,11 @@ export const ClaimCard = ({
                   {copy.confirmWithdraw}
                 </Text>
               }
+              isLoading={isPending}
+              loadingText={copy.confirmWithdraw}
               overrideLabel
             />
-          ) : (
-            <Flex width="100%" justifyContent="center">
-              <Spinner />
-            </Flex>
-          )}
+          }
         </Flex>
       </Flex>
     </Container>

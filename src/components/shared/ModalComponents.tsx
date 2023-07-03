@@ -9,7 +9,7 @@ const StepIncomplete = () => (
 
 interface ModalStepProps {
   title: string
-  description: string
+  description: string | React.ReactNode
   isLoading?: boolean
   isCompleted?: boolean
 }
