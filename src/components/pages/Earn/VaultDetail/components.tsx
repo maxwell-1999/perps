@@ -252,22 +252,20 @@ export const ClaimCard = ({
           {isPending ? copy.pendingWithdrawal : bodyText}
         </Text>
         <Flex>
-          {
-            <TxButton
-              variant="text"
-              p={0}
-              height="initial"
-              onClick={() => setShowClaimModal(true)}
-              label={
-                <Text color={colors.brand.green} fontSize="14px">
-                  {copy.confirmWithdraw}
-                </Text>
-              }
-              isLoading={isPending}
-              loadingText={copy.confirmWithdraw}
-              overrideLabel
-            />
-          }
+          <TxButton
+            variant="text"
+            p={0}
+            height="initial"
+            onClick={() => setShowClaimModal(true)}
+            label={
+              <Text color={colors.brand.green} fontSize="14px">
+                {copy.confirmWithdraw}
+              </Text>
+            }
+            isLoading={isPending}
+            loadingText={copy.confirmWithdraw}
+            overrideLabel
+          />
         </Flex>
       </Flex>
     </Container>

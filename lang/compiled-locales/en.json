@@ -511,6 +511,20 @@
       "value": "Market"
     }
   ],
+  "GMaAlw": [
+    {
+      "type": 0,
+      "value": "Approve at least "
+    },
+    {
+      "type": 1,
+      "value": "dsuApprovalSuggestion"
+    },
+    {
+      "type": 0,
+      "value": " to withdraw collateral"
+    }
+  ],
   "GufXy5": [
     {
       "type": 0,
@@ -811,28 +825,6 @@
       "value": "Deploy liquidity to both long & short sides of the market, reducing net exposure."
     }
   ],
-  "Qt4oL6": [
-    {
-      "type": 0,
-      "value": "Please click this notification to finalize your withdrawal of "
-    },
-    {
-      "type": 1,
-      "value": "formattedClaimable"
-    },
-    {
-      "type": 0,
-      "value": " from the "
-    },
-    {
-      "type": 1,
-      "value": "vaultName"
-    },
-    {
-      "type": 0,
-      "value": " vault."
-    }
-  ],
   "RoqJiX": [
     {
       "type": 0,
@@ -947,6 +939,20 @@
     {
       "type": 0,
       "value": "Vault assets redeemed"
+    }
+  ],
+  "Wni0Tr": [
+    {
+      "type": 0,
+      "value": "Approve at least "
+    },
+    {
+      "type": 1,
+      "value": "approximateShares"
+    },
+    {
+      "type": 0,
+      "value": " to redeem your funds"
     }
   ],
   "X8XIdK": [
@@ -1075,6 +1081,12 @@
       "value": "24h High"
     }
   ],
+  "beB5uE": [
+    {
+      "type": 0,
+      "value": "shares"
+    }
+  ],
   "bri4Pp": [
     {
       "type": 0,
@@ -1167,38 +1179,10 @@
       "value": "Your withdraw is ready"
     }
   ],
-  "gAKL9i": [
-    {
-      "type": 0,
-      "value": "Approve "
-    },
-    {
-      "type": 1,
-      "value": "dsuApprovalSuggestion"
-    },
-    {
-      "type": 0,
-      "value": " DSU to withdraw collateral"
-    }
-  ],
   "gWc5Mu": [
     {
       "type": 0,
       "value": "Coordinator"
-    }
-  ],
-  "gf2bvu": [
-    {
-      "type": 0,
-      "value": "Approve at least "
-    },
-    {
-      "type": 1,
-      "value": "approximateShares"
-    },
-    {
-      "type": 0,
-      "value": " shares to redeem your funds"
     }
   ],
   "h3ShxL": [
@@ -1211,6 +1195,28 @@
     {
       "type": 0,
       "value": "Sign transaction"
+    }
+  ],
+  "hzEOjl": [
+    {
+      "type": 0,
+      "value": "Confirm your withdrawal of "
+    },
+    {
+      "type": 1,
+      "value": "formattedClaimable"
+    },
+    {
+      "type": 0,
+      "value": " from the "
+    },
+    {
+      "type": 1,
+      "value": "vaultName"
+    },
+    {
+      "type": 0,
+      "value": " vault."
     }
   ],
   "iTSlRJ": [
