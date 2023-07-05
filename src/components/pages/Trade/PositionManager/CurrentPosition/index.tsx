@@ -34,7 +34,7 @@ function CurrentPosition() {
   const copy = usePositionManagerCopy()
   const { noValue } = copy
   const { borderColor, green, red, alpha75, subheaderTextColor, alpha50 } = useStyles()
-  const { assetMetadata } = useMarketContext()
+  const { assetMetadata, selectedMarket } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
   const { positionDetails, formattedValues } = useFormatPosition()
   const {
@@ -64,8 +64,10 @@ function CurrentPosition() {
       <LeftContainer borderColor={borderColor}>
         <Flex width="50%" flexDirection="column" borderRight={`1px solid ${borderColor}`}>
           <ActivePositionHeader borderColor={borderColor}>
-            <AssetIconWithText market={assetMetadata} text={statusLabel} />
-            <StatusLight color={statusColor} glow={isOpenPosition} />
+            <AssetIconWithText market={assetMetadata} text={selectedMarket.toUpperCase()} />
+            <Flex alignItems="center" gap="12px">
+              <Text fontSize="15px">{statusLabel}</Text> <StatusLight color={statusColor} glow={isOpenPosition} />
+            </Flex>
           </ActivePositionHeader>
           <ActivePositionDetail
             label={copy.size}

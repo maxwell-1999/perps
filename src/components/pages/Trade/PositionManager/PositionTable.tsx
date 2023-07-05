@@ -111,7 +111,6 @@ const PositionTableRow = ({
   const market = AssetMetadata[row.asset]
   const { pnl, pnlPercentage, isPnlPositive } = usePnl({ positionDetails: row.details, live: currentPosition })
   const subPositionBg = useColorModeValue('white', 'black')
-  const leverageColor = useColorModeValue(colors.brand.blackAlpha[70], colors.brand.whiteAlpha[70])
   const hoverColor = useColorModeValue(colors.brand.whiteAlpha[10], colors.brand.blackAlpha[10])
   const { fees, liquidationFee } = row.details
 
@@ -136,8 +135,8 @@ const PositionTableRow = ({
           </Box>
           {currentPosition && (
             <Box flex="2">
-              <Badge borderRadius="6px" p={1} as="p">
-                <Text as="span" fontSize="13px" color={leverageColor}>
+              <Badge borderRadius="6px" p={1} as="p" textTransform="none">
+                <Text as="span" fontSize="13px">
                   {row.nextLeverage}
                   {copy.x}
                 </Text>

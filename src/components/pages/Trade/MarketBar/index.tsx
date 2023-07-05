@@ -41,7 +41,7 @@ export default function MarketBar() {
           <DividerStyled orientation="vertical" />
           <MobileMarketContainer mr={0} maxWidth="90px" overflowX="auto" overflowY="hidden">
             <Stat
-              label={copy.change}
+              label={copy.dailyChange}
               value={formattedValues.change}
               valueColor={formattedValues.changeIsNegative ? colors.brand.red : colors.brand.green}
             />
@@ -51,13 +51,10 @@ export default function MarketBar() {
       <DesktopContainer>
         <MarketContainer>
           <Stat
-            label={copy.change}
+            label={copy.dailyChange}
             value={formattedValues.change}
             valueColor={formattedValues.changeIsNegative ? colors.brand.red : colors.brand.green}
           />
-        </MarketContainer>
-        <MarketContainer>
-          <Stat label={copy.hourlyFunding} value={formattedValues.hourlyFunding} />
         </MarketContainer>
         <MarketContainer>
           <Stat label={copy.low} value={formattedValues.low} />
@@ -67,6 +64,9 @@ export default function MarketBar() {
         </MarketContainer>
         <MarketContainer>
           <Stat label={copy.volume} value={formattedValues.volume} />
+        </MarketContainer>
+        <MarketContainer>
+          <Stat label={copy.hourlyFunding} value={formattedValues.hourlyFunding} />
         </MarketContainer>
         <MarketContainer>
           <Stat label={copy.openInterest} value={formattedValues.openInterest} />

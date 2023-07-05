@@ -199,7 +199,7 @@ const vaultUserFetcher = async (
 
   return {
     balance,
-    assets,
+    assets: assets < 100n ? 0n : assets,
     claimable,
     totalDeposit: sumArray(_deposits.map((e) => e.args.assets)),
     totalClaim: sumArray(_claims.map((e) => e.args.assets)),
