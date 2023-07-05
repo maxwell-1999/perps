@@ -51,7 +51,7 @@ export const Status = ({ status, liquidated }: { status: PositionStatus; liquida
 
 export const TableEmptyScreen = ({ message }: { message: string }) => {
   return (
-    <Flex alignItems="center" justifyContent="center" flexDirection="column" py={10}>
+    <Flex alignItems="center" justifyContent="center" flexDirection="column" py={10} height="100%">
       <Text mt={2} fontSize="15px" variant="label">
         {message}
       </Text>

@@ -35,6 +35,12 @@
       "value": "Amount"
     }
   ],
+  "/G+9dE": [
+    {
+      "type": 0,
+      "value": "Connect your wallet to see your position history"
+    }
+  ],
   "/Waagm": [
     {
       "type": 0,
@@ -391,6 +397,12 @@
     {
       "type": 0,
       "value": "Select vault to continue"
+    }
+  ],
+  "D3VLIF": [
+    {
+      "type": 0,
+      "value": "Connect your wallet to see your positions"
     }
   ],
   "D3idYv": [
