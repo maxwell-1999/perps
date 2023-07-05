@@ -63,10 +63,10 @@ export default function MarketBar() {
           <Stat label={copy.high} value={formattedValues.high} />
         </MarketContainer>
         <MarketContainer>
-          <Stat label={copy.hourlyFunding} value={formattedValues.hourlyFunding} />
+          <Stat label={copy.volume} value={formattedValues.volume} />
         </MarketContainer>
         <MarketContainer>
-          <Stat label={copy.volume} value={formattedValues.volume} />
+          <Stat label={copy.hourlyFunding} value={formattedValues.hourlyFunding} />
         </MarketContainer>
         <MarketContainer>
           <Stat label={copy.openInterest} value={formattedValues.openInterest} />
