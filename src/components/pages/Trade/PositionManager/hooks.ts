@@ -83,6 +83,8 @@ export const usePositionManagerCopy = () => {
     fundingRate24hr: intl.formatMessage({ defaultMessage: 'Funding Rate (24h)' }),
     fundingRateYearly: intl.formatMessage({ defaultMessage: 'Funding Rate (Year)' }),
     liquidationFee: intl.formatMessage({ defaultMessage: 'Liquidation Fee' }),
+    connectWalletPositions: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your positions' }),
+    connectWalletHistory: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your position history' }),
     liquidationFeeTooltip: (feeAmount: bigint) =>
       intl.formatMessage(
         { defaultMessage: 'Liquidation Fee: {feeAmount}' },
