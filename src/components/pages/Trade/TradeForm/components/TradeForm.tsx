@@ -42,10 +42,11 @@ interface TradeFormProps {
   position?: PositionDetails
   crossCollateral: bigint
   crossProduct?: Address
+  singleDirection?: boolean
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { orderDirection, setOrderDirection, product, position } = props
+  const { orderDirection, setOrderDirection, product, position, singleDirection } = props
   const {
     productAddress,
     latestVersion: { price },
@@ -238,7 +239,13 @@ function TradeForm(props: TradeFormProps) {
               labels={orderDirections}
               activeLabel={positionOrderDirection ? positionOrderDirection : orderDirection}
               onChange={setOrderDirection}
-              overrideValue={!closedOrResolved(positionStatus) ? positionOrderDirection : undefined}
+              overrideValue={
+                !closedOrResolved(positionStatus)
+                  ? positionOrderDirection
+                  : singleDirection
+                  ? orderDirection
+                  : undefined
+              }
               activeColor={orderDirection === OrderDirection.Long ? colors.brand.green : colors.brand.red}
             />
           </Flex>

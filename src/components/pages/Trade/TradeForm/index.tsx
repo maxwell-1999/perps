@@ -34,8 +34,14 @@ function TradeContainer() {
   useEffect(() => {
     // If this position is closed/resolve and the other side is not, switch to that side
     if (closedOrResolved(position?.status) && !closedOrResolved(oppositeSidePosition?.status))
-      setOrderDirection(orderDirection === Long ? OrderDirection.Short : OrderDirection.Long)
+      setOrderDirection(orderDirection === Long ? Short : Long)
   }, [orderDirection, position, oppositeSidePosition, setOrderDirection])
+
+  // If data is loaded and one side is undefined, switch to the other side. This happens when only one side of the market is available
+  useEffect(() => {
+    if (!product && !!selectedMarketSnapshot?.[orderDirection === Long ? Short : Long])
+      setOrderDirection(orderDirection === Long ? Short : Long)
+  }, [product, orderDirection, selectedMarketSnapshot, setOrderDirection])
 
   const crossCollateral = useMemo(() => {
     // If this position is closed/resolved and the other side has collateral, mark it as cross collateral
@@ -58,16 +64,12 @@ function TradeContainer() {
 
   return (
     <Container height="100%" minHeight="560px" p="0" variant={containerVariant}>
-      {!product && (
-        <Flex height="100%" width="100%" justifyContent="center" alignItems="center">
-          <Spinner />
-        </Flex>
-      )}
       {[FormState.trade, FormState.modify].includes(formState) && (
         <TradeForm
           asset={selectedMarket}
           orderDirection={orderDirection}
           setOrderDirection={setOrderDirection}
+          singleDirection={!selectedMarketSnapshot?.[orderDirection === Long ? Short : Long]}
           product={product}
           position={position?.side === 'taker' ? position : undefined}
           crossCollateral={crossCollateral}
