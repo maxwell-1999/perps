@@ -19,7 +19,7 @@ export const useSelectorCopy = () => {
 export const useMarketBarCopy = () => {
   const intl = useIntl()
   return {
-    change: intl.formatMessage({ defaultMessage: 'Change' }),
+    dailyChange: intl.formatMessage({ defaultMessage: '24h Change' }),
     hourlyFunding: intl.formatMessage({ defaultMessage: 'Funding Rate (1h)' }),
     low: intl.formatMessage({ defaultMessage: '24h Low' }),
     high: intl.formatMessage({ defaultMessage: '24h High' }),
