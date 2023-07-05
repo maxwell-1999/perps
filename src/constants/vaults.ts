@@ -46,8 +46,8 @@ export const FeeApr: { [chainId: number]: { [key in VaultSymbol]?: bigint } } = 
     [VaultSymbol.PVB]: Big18Math.fromFloatString('0.1206'),
   },
   [arbitrum.id]: {
-    [VaultSymbol.PVA]: Big18Math.fromFloatString('0.3619'),
-    [VaultSymbol.PVB]: Big18Math.fromFloatString('0.9623'),
+    [VaultSymbol.PVA]: Big18Math.fromFloatString('0.3625'),
+    [VaultSymbol.PVB]: Big18Math.fromFloatString('0.9349'),
   },
   [baseGoerli.id]: {
     [VaultSymbol.PVA]: Big18Math.fromFloatString('0.1391'),
