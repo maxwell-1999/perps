@@ -141,6 +141,7 @@ export default function VaultForm({
               activeLabel={vaultOption}
               onChange={setVaultOption}
               overrideValue={!hasAssets ? VaultFormOption.Deposit : undefined}
+              activeColor={vaultOption === VaultFormOption.Deposit ? colors.brand.green : colors.brand.purple[300]}
             />
           </Flex>
           <Input
