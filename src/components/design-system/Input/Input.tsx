@@ -18,7 +18,7 @@ import {
 import { Control, Validate, useController } from 'react-hook-form'
 
 export interface InputProps extends ChakraInputProps {
-  labelText: string
+  label: string
   name: string
   control: Control<any>
   rightLabel?: React.ReactNode
@@ -33,7 +33,7 @@ export interface InputProps extends ChakraInputProps {
 
 export const Input: React.FC<InputProps> = ({
   id,
-  labelText,
+  label,
   name,
   control,
   rightLabel,
@@ -57,13 +57,11 @@ export const Input: React.FC<InputProps> = ({
   })
   return (
     <FormControl width={width} isInvalid={Boolean(error)}>
-      <Flex justifyContent="space-between" mb={2} px={1}>
-        {labelText && (
-          <FormLabel m={0} htmlFor={id}>
-            <Text variant="label">{labelText}</Text>
-          </FormLabel>
-        )}
-        {rightLabel && <Box>{rightLabel}</Box>}
+      <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
+        <FormLabel m={0} htmlFor={id}>
+          <Text variant="label">{label}</Text>
+        </FormLabel>
+        {rightLabel && rightLabel}
       </Flex>
       <InputGroup variant="trade" mb={0}>
         {leftEl && <InputLeftElement pointerEvents="none">{leftEl}</InputLeftElement>}
@@ -80,11 +78,7 @@ export const Input: React.FC<InputProps> = ({
         />
         {rightEl && <InputRightElement pointerEvents="none">{rightEl}</InputRightElement>}
       </InputGroup>
-      {error && (
-        <FormErrorMessage mt={-2} mb={1} pl={1}>
-          {error.message}
-        </FormErrorMessage>
-      )}
+      {error && <FormErrorMessage pl={1}>{error.message}</FormErrorMessage>}
     </FormControl>
   )
 }

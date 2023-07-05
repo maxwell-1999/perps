@@ -16,6 +16,14 @@ function useErrorMessages() {
     maxLeverage: intl.formatMessage({ defaultMessage: 'Maximum leverage exceeded.' }),
     insufficientPosition: intl.formatMessage({ defaultMessage: 'Value exceeds position amount.' }),
     insufficientCollateral: intl.formatMessage({ defaultMessage: 'Value exceeds collateral amount.' }),
+    requiredField: intl.formatMessage({ defaultMessage: 'This field is required.' }),
+  }
+}
+
+export const useIsRequiredValidator = () => {
+  const copy = useErrorMessages()
+  return (value: string) => {
+    return value && value.trim() !== '' ? true : copy.requiredField
   }
 }
 
@@ -31,6 +39,7 @@ export function useCollateralValidators({
   currentCollateral: bigint
 }) {
   const copy = useErrorMessages()
+  const isRequiredValidator = useIsRequiredValidator()
 
   const maxValidator = useMemo(() => {
     return (value: string) => {
@@ -59,11 +68,13 @@ export function useCollateralValidators({
   return {
     max: maxValidator,
     min: minValidator,
+    required: isRequiredValidator,
   }
 }
 
 export function usePositionValidators({ liquidity }: { liquidity: bigint }) {
   const copy = useErrorMessages()
+  const isRequiredValidator = useIsRequiredValidator()
 
   const maxValidator = useMemo(() => {
     return (value: string) => {
@@ -77,15 +88,17 @@ export function usePositionValidators({ liquidity }: { liquidity: bigint }) {
 
   return {
     max: maxValidator,
+    required: isRequiredValidator,
   }
 }
 
 export function useLeverageValidators({ maxLeverage }: { maxLeverage: number }) {
   const copy = useErrorMessages()
+  const isRequiredValidator = useIsRequiredValidator()
 
   const maxValidator = useMemo(() => {
-    return (value: number) => {
-      if (value > maxLeverage) {
+    return (value: string) => {
+      if (Number(value) > maxLeverage) {
         return copy.maxLeverage
       }
       return true
@@ -94,11 +107,13 @@ export function useLeverageValidators({ maxLeverage }: { maxLeverage: number }) 
 
   return {
     max: maxValidator,
+    required: isRequiredValidator,
   }
 }
 
 export function useCloseAmountValidator({ quantity }: { quantity: bigint }) {
   const copy = useErrorMessages()
+  const isRequiredValidator = useIsRequiredValidator()
 
   const maxValidator = useMemo(() => {
     return (value: string) => {
@@ -110,7 +125,7 @@ export function useCloseAmountValidator({ quantity }: { quantity: bigint }) {
     }
   }, [quantity, copy.insufficientPosition])
 
-  return { max: maxValidator }
+  return { max: maxValidator, required: isRequiredValidator }
 }
 
 export function useCloseCollateralValidator({
@@ -125,6 +140,7 @@ export function useCloseCollateralValidator({
   requiredMaintenance: bigint
 }) {
   const copy = useErrorMessages()
+  const isRequiredValidator = useIsRequiredValidator()
 
   const maxValidator = useMemo(() => {
     return (value: string, formValues: TradeFormValues) => {
@@ -152,5 +168,5 @@ export function useCloseCollateralValidator({
     copy.belowMaintenance,
   ])
 
-  return { max: maxValidator }
+  return { max: maxValidator, required: isRequiredValidator }
 }

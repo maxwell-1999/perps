@@ -10,6 +10,7 @@ import Input from './components/input'
 import Modal from './components/modal'
 import Popover from './components/popover'
 import Progress from './components/progress'
+import Switch from './components/switch'
 import Tabs from './components/tabs'
 import Text from './components/text'
 import Tooltip from './components/tooltip'
@@ -46,6 +47,7 @@ const theme = extendTheme({
     Modal,
     Progress,
     Tooltip,
+    Switch,
   },
 })
 

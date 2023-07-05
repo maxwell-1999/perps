@@ -51,6 +51,7 @@ export function useVaultFormCopy() {
       intl.formatMessage({ defaultMessage: '{amount} from {vaultName}' }, { amount, vaultName }),
     depositToast: (amount: string, vaultName: string) =>
       intl.formatMessage({ defaultMessage: '{amount} to {vaultName}' }, { amount, vaultName }),
+    requiredField: intl.formatMessage({ defaultMessage: 'This field is required.' }),
   }
 }
 
@@ -85,7 +86,13 @@ export function useVaultFormValidators({
     }
   }, [usdcBalance, vaultAssets, vaultFormOption, copy.insufficientFunds, copy.insufficientShares])
 
-  return { max: maxValidator }
+  const isRequiredValidator = useMemo(() => {
+    return (value: string) => {
+      return value && value.trim() !== '' ? true : copy.requiredField
+    }
+  }, [copy.requiredField])
+
+  return { max: maxValidator, required: isRequiredValidator }
 }
 
 const setArgs = { shouldValidate: true, shouldDirty: true }

@@ -67,7 +67,7 @@ export const Slider: React.FC<Props> = ({
 
   return (
     <Flex flexDirection="column" {...containerProps}>
-      <Flex justifyContent="space-between" mb={2} px={1}>
+      <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
         <Text variant="label">{label}</Text>
         {rightLabel}
       </Flex>

@@ -55,7 +55,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
     defaultValues: {
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
-      [FormNames.leverage]: Big18Math.toUnsafeFloat(nextLeverage ?? 0n),
+      [FormNames.leverage]: Big18Math.toFloatString(nextLeverage ?? 0n),
     },
   })
   const amount = watch(FormNames.amount)
@@ -145,10 +145,10 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
       )}
       <Form onSubmit={handleSubmit(onConfirm)}>
         <FormOverlayHeader title={copy.withdrawCollateral} onClose={() => setTradeFormState(FormState.trade)} />
-        <Flex flexDirection="column" px="16px" mb="12px">
+        <Flex flexDirection="column" px="16px" mb="12px" gap="12px">
           <Input
             name={FormNames.collateral}
-            labelText={copy.collateral}
+            label={copy.collateral}
             placeholder="0.0000"
             rightLabel={
               <FormLabel mr={0} mb={0}>
@@ -160,11 +160,9 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
             control={control}
             onChange={(e) => onChangeAmount(e.target.value)}
             rightEl={<Pill text={assetMetadata.quoteCurrency} />}
-            mb="12px"
             validate={collateralValidator}
-            isRequired
           />
-          <Flex mb="12px" justifyContent="space-between">
+          <Flex justifyContent="space-between">
             {buttonPercentValues.map((value, index) => (
               <Button
                 variant="transparent"

@@ -104,6 +104,8 @@ export function useTradeFormCopy() {
     decrease: intl.formatMessage({ defaultMessage: 'Decrease' }),
     open: intl.formatMessage({ defaultMessage: 'Open' }),
     close: intl.formatMessage({ defaultMessage: 'Close' }),
+    switchLeverageInput: intl.formatMessage({ defaultMessage: 'switch-leverage-input' }),
+    Slider: intl.formatMessage({ defaultMessage: 'Slider' }),
   }
 }
 
@@ -122,10 +124,10 @@ export function useReceiptCopy() {
   }
 }
 
-export type TradeFormValues = { amount: string; collateral: string; leverage: number }
+export type TradeFormValues = { amount: string; collateral: string; leverage: string }
 interface OnChangeHandlersArgs {
   setValue: UseFormSetValue<TradeFormValues>
-  leverage: number
+  leverage: string
   collateral: string
   amount: string
   price: bigint
@@ -151,7 +153,7 @@ export const useOnChangeHandlers = ({
       if (leverageFixed) {
         const newCollateralAmt = collateralFromAmountAndLeverage({
           amount: validatedAmount,
-          leverage: `${leverage}`,
+          leverage,
           price,
         })
         setValue(FormNames.collateral, newCollateralAmt, setArgs)
@@ -161,16 +163,17 @@ export const useOnChangeHandlers = ({
           collateral,
           price,
         })
-        setValue(FormNames.leverage, parseFloat(newLeverage), setArgs)
+        setValue(FormNames.leverage, newLeverage, setArgs)
       }
     },
     [leverage, collateral, price, setValue, leverageFixed],
   )
 
   const onChangeLeverage = useCallback(
-    (newLeverage: number) => {
-      const validatedLeverage = max18Decimals(`${newLeverage}`)
-      setValue(FormNames.leverage, parseFloat(validatedLeverage), setArgs)
+    (newLeverage: string) => {
+      if (!isNumbersOnly(newLeverage)) return
+      const validatedLeverage = max18Decimals(newLeverage)
+      setValue(FormNames.leverage, validatedLeverage, setArgs)
       const newPosition = positionFromCollateralAndLeverage({
         collateral,
         leverage: validatedLeverage,
@@ -200,7 +203,7 @@ export const useOnChangeHandlers = ({
           collateral: validatedCollateral,
           price,
         })
-        setValue(FormNames.leverage, parseFloat(newLeverage), setArgs)
+        setValue(FormNames.leverage, newLeverage, setArgs)
       }
     },
     [leverage, amount, price, setValue, leverageFixed],

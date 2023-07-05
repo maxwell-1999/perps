@@ -15,7 +15,7 @@ type Story = StoryObj<typeof Input>
 
 export const Default: Story = {
   args: {
-    labelText: 'Collateral',
+    label: 'Collateral',
     rightLabel: (
       <FormLabel mr={0} mb={0}>
         <Text variant="label">Available: 0.00</Text>
@@ -28,7 +28,7 @@ export const Default: Story = {
 
 export const HelperText: Story = {
   args: {
-    labelText: 'Collateral',
+    label: 'Collateral',
     width: '50%',
     helperText: 'Helper Text',
   },

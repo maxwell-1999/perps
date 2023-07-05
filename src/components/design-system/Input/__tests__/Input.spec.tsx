@@ -17,7 +17,7 @@ describe('Input Component', () => {
   const defaultProps = {
     id: 'test-input',
     name: 'test-input',
-    labelText: 'Test Label',
+    label: 'Test Label',
     errorMessage: '',
     helperText: 'Test Helper Text',
     isRequired: false,

@@ -53,7 +53,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
     defaultValues: {
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
-      [FormNames.leverage]: Big18Math.toUnsafeFloat(nextLeverage ?? 0n),
+      [FormNames.leverage]: Big18Math.toFloatString(nextLeverage ?? 0n),
     },
   })
   const amount = watch(FormNames.amount)
@@ -138,10 +138,10 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
       )}
       <Form onSubmit={handleSubmit(onConfirm)}>
         <FormOverlayHeader title={copy.closePosition} onClose={() => setTradeFormState(FormState.trade)} />
-        <Flex flexDirection="column" px="16px" mb="12px">
+        <Flex flexDirection="column" px="16px" mb="12px" gap="12px">
           <Input
             name={FormNames.amount}
-            labelText={copy.amount}
+            label={copy.amount}
             placeholder="0.0000"
             rightLabel={
               <FormLabel mr={0} mb={0}>
@@ -153,11 +153,9 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             control={control}
             onChange={(e) => onChangeAmount(e.target.value)}
             rightEl={<Pill text={assetMetadata.baseCurrency} />}
-            mb="12px"
             validate={amountValidator}
-            isRequired
           />
-          <Flex mb="12px" justifyContent="space-between">
+          <Flex justifyContent="space-between">
             {buttonPercentValues.map((value, index) => (
               <Button
                 variant="transparent"

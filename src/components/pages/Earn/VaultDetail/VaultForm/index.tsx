@@ -148,10 +148,9 @@ export default function VaultForm({
             title={copy.Amount}
             placeholder="0.0000"
             control={control}
-            labelText={copy.Amount}
+            label={copy.Amount}
             validate={vaultFormValidators}
             onChange={(e) => onAmountChange(e.target.value)}
-            isRequired
             rightEl={<Pill text={QuoteCurrency.usd} />}
             rightLabel={
               <FormLabel mr={0} mb={0}>
@@ -189,9 +188,8 @@ export default function VaultForm({
                 )}
               </FormLabel>
             }
-            mb={5}
           />
-          <Flex flexDirection="column" width="100%" mb={5}>
+          <Flex flexDirection="column" width="100%" my={5}>
             <DataRow
               mb={3}
               label={copy.ChangeInValue}

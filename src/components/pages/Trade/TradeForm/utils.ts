@@ -20,17 +20,17 @@ export const calculateInitialLeverage = ({
   currentCollateralAmount,
   price,
 }: CalculateInitialLeverage) => {
-  if (!amount || !currentCollateralAmount || !price) return 0
-  if (isNewPosition) return 1
+  if (!amount || !currentCollateralAmount || !price) return '0'
+  if (isNewPosition) return '1'
 
   const formattedAmount = Big18Math.toFloatString(amount)
   const parsedPositionAmount = Big18Math.fromFloatString(formattedAmount)
   if (Big18Math.isZero(currentCollateralAmount)) {
-    return Big18Math.toUnsafeFloat(0n)
+    return Big18Math.toFloatString(0n)
   }
 
   const leverage = calcLeverage(price, parsedPositionAmount, currentCollateralAmount)
-  return Big18Math.toUnsafeFloat(leverage)
+  return Big18Math.toFloatString(leverage)
 }
 
 export const max18Decimals = (amount: string) => {
@@ -150,7 +150,7 @@ export const formatInitialInputs = ({ userCollateral, amount, price, isNewPositi
     return {
       collateral: '',
       amount: '',
-      leverage: 1,
+      leverage: '1',
     }
   return {
     collateral: userCollateral ? (userCollateral === 0n ? '0' : Big18Math.toFloatString(userCollateral)) : '',

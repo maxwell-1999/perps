@@ -22,7 +22,6 @@ import { closedOrResolved, next } from '@/utils/positionUtils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
-import { Slider } from '@ds/Slider'
 import colors from '@ds/theme/colors'
 
 import { ProductSnapshot } from '@t/perennial'
@@ -31,6 +30,7 @@ import { FormNames, OrderValues, orderDirections } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
 import { calcMaxLeverage, formatInitialInputs } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
+import LeverageInput from './LeverageInput'
 import { TradeReceipt } from './Receipt'
 import { useCollateralValidators, useLeverageValidators, usePositionValidators } from './validatorHooks'
 
@@ -242,78 +242,75 @@ function TradeForm(props: TradeFormProps) {
               activeColor={orderDirection === OrderDirection.Long ? colors.brand.green : colors.brand.red}
             />
           </Flex>
-          <Input
-            key={FormNames.collateral}
-            // eslint-disable-next-line formatjs/no-literal-string-in-jsx
-            labelText={`${copy.collateral}${props.crossCollateral > 0n ? '*' : ''}`}
-            title={copy.collateral}
-            placeholder="0.0000"
-            rightLabel={
-              <FormLabel mr={0} mb={0}>
-                {!!address && (
-                  <Flex gap={1}>
-                    {chainId === arbitrum.id ? (
-                      <USDCETooltip userBalance={userBalance} />
-                    ) : (
-                      <Text variant="label">{userBalance}</Text>
-                    )}
-                    <Button
-                      variant="text"
-                      padding={0}
-                      height="unset"
-                      label={copy.max}
-                      size="xs"
-                      textDecoration="underline"
-                      onClick={onClickMaxCollateral}
-                    />
-                  </Flex>
+          <Flex flexDirection="column" gap="13px">
+            <Input
+              key={FormNames.collateral}
+              // eslint-disable-next-line formatjs/no-literal-string-in-jsx
+              label={`${copy.collateral}${props.crossCollateral > 0n ? '*' : ''}`}
+              title={copy.collateral}
+              placeholder="0.0000"
+              rightLabel={
+                <FormLabel mr={0} mb={0}>
+                  {!!address && (
+                    <Flex gap={1}>
+                      {chainId === arbitrum.id ? (
+                        <USDCETooltip userBalance={userBalance} />
+                      ) : (
+                        <Text variant="label">{userBalance}</Text>
+                      )}
+                      <Button
+                        variant="text"
+                        padding={0}
+                        height="unset"
+                        label={copy.max}
+                        size="xs"
+                        textDecoration="underline"
+                        onClick={onClickMaxCollateral}
+                      />
+                    </Flex>
+                  )}
+                </FormLabel>
+              }
+              rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+              control={control}
+              name={FormNames.collateral}
+              onChange={(e) => onChangeCollateral(e.target.value)}
+              validate={!!address ? collateralValidators : {}}
+            />
+            {props.crossCollateral > 0n && (
+              <Text variant="label" fontSize="11px" m={1} mt={0}>
+                {copy.crossCollateralInfo(
+                  formatBig18USDPrice(props.crossCollateral),
+                  orderDirection === OrderDirection.Long ? 'short' : 'long',
                 )}
-              </FormLabel>
-            }
-            rightEl={<Pill text={assetMetadata.quoteCurrency} />}
-            mb="12px"
-            control={control}
-            name={FormNames.collateral}
-            onChange={(e) => onChangeCollateral(e.target.value)}
-            validate={!!address ? collateralValidators : {}}
-            isRequired={!!address}
-          />
-          {props.crossCollateral > 0n && (
-            <Text variant="label" fontSize="11px" m={1} mt={0}>
-              {copy.crossCollateralInfo(
-                formatBig18USDPrice(props.crossCollateral),
-                orderDirection === OrderDirection.Long ? 'short' : 'long',
-              )}
-            </Text>
-          )}
-          <Input
-            key={FormNames.amount}
-            labelText={copy.amount}
-            placeholder="0.0000"
-            rightLabel={
-              <FormLabel mr={0} mb={0}>
-                {notional > 0n && <FormattedBig18USDPrice variant="label" value={notional} />}
-              </FormLabel>
-            }
-            rightEl={<Pill text={assetMetadata.baseCurrency} />}
-            mb="12px"
-            control={control}
-            name={FormNames.amount}
-            onChange={(e) => onChangeAmount(e.target.value)}
-            validate={!!address ? amountValidators : {}}
-            isRequired={!!address}
-          />
-          <Slider
-            label={copy.leverage}
-            ariaLabel="leverage-slider"
-            min={0}
-            max={maxLeverage}
-            step={0.1}
-            control={control}
-            name={FormNames.leverage}
-            onChange={onChangeLeverage}
-            validate={!!address ? leverageValidators : {}}
-          />
+              </Text>
+            )}
+            <Input
+              key={FormNames.amount}
+              label={copy.amount}
+              placeholder="0.0000"
+              rightLabel={
+                <FormLabel mr={0} mb={0}>
+                  {notional > 0n && <FormattedBig18USDPrice variant="label" value={notional} />}
+                </FormLabel>
+              }
+              rightEl={<Pill text={assetMetadata.baseCurrency} />}
+              control={control}
+              name={FormNames.amount}
+              onChange={(e) => onChangeAmount(e.target.value)}
+              validate={!!address ? amountValidators : {}}
+            />
+            <LeverageInput
+              label={copy.leverage}
+              min={0}
+              max={maxLeverage}
+              step={0.1}
+              control={control}
+              name={FormNames.leverage}
+              onChange={onChangeLeverage}
+              validate={!!address ? leverageValidators : {}}
+            />
+          </Flex>
           <Flex height={6} width="100%" justifyContent="flex-end" px={2} mt={2}>
             {Object.keys(dirtyFields).length > 0 && (
               <Button

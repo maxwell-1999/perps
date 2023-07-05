@@ -205,6 +205,12 @@
       "value": "Pricing"
     }
   ],
+  "6B5Jtu": [
+    {
+      "type": 0,
+      "value": "This field is required."
+    }
+  ],
   "6IfUpv": [
     {
       "type": 0,
@@ -537,6 +543,12 @@
       "value": "Increase"
     }
   ],
+  "HBSsow": [
+    {
+      "type": 0,
+      "value": "switch-leverage-input"
+    }
+  ],
   "HEui6S": [
     {
       "type": 0,
@@ -781,6 +793,12 @@
     {
       "type": 0,
       "value": "Price Chart"
+    }
+  ],
+  "PJfWgi": [
+    {
+      "type": 0,
+      "value": "Slider"
     }
   ],
   "PK3Msb": [
