@@ -6,7 +6,11 @@ export function middleware(request: NextRequest) {
   const country = request.geo?.country
   const res = NextResponse.rewrite(request.nextUrl)
   const path = request.nextUrl.pathname
-  if (path === '/') return NextResponse.redirect(request.nextUrl.origin + '/trade')
+  if (path === '/' || path.startsWith('/ethereum')) return NextResponse.redirect(request.nextUrl.origin + '/trade')
+
+  const splitPath = path.split('/')
+  if (splitPath.length === 3 && ['trade', 'provide'].includes(splitPath[2]))
+    return NextResponse.redirect(request.nextUrl.origin + `/${splitPath[2] === 'provide' ? 'earn' : 'trade'}`)
 
   res.cookies.set(GeolocationCookie, country || 'unknown')
   res.cookies.set(IPAddressCookie, request.ip || '0.0.0.0')
