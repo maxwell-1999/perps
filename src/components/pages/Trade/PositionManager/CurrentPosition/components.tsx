@@ -59,6 +59,7 @@ export const HiddenOnLargeScreen = styled(Flex)`
 
 export const ActivePositionHeader = styled(Flex)<{ borderColor: string }>`
   justify-content: space-between;
+  flex-wrap: wrap;
   min-height: 55px;
   align-items: center;
   padding: 0 16px;
