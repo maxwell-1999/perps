@@ -50,7 +50,7 @@ function TradeContainer() {
     return 0n
   }, [position, oppositeSidePosition])
 
-  const containerVariant = getContainerVariant(formState, !!closedOrResolved(position?.status))
+  const containerVariant = getContainerVariant(formState, !!closedOrResolved(position?.status), !address)
 
   if (!product || (address && positionsLoading)) {
     return (

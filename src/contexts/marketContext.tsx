@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { OrderDirection } from '@/constants/markets'
+import { ChainMarkets } from '@/constants/markets'
 import { DefaultChain } from '@/constants/network'
 import { SupportedChainId } from '@/constants/network'
 import {
@@ -91,7 +92,11 @@ export const MarketProvider = ({ children }: { children: React.ReactNode }) => {
         _setOrderDirection(directionFromLocalStorage as OrderDirection)
       }
     }
-  }, [chainId])
+
+    if (!(selectedMarket in ChainMarkets[chainId])) {
+      _setSelectedMarket(Object.keys(ChainMarkets[chainId])[0] as SupportedAsset)
+    }
+  }, [chainId, selectedMarket])
 
   const setSelectedMarket = (asset: SupportedAsset) => {
     localStorage.setItem(`${chainId}_market`, asset)
