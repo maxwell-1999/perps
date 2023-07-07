@@ -172,8 +172,8 @@ export const isFullClose = (closeAmount: string, currPosition: bigint) => {
   return Big18Math.eq(Big18Math.fromFloatString(closeAmount), Big18Math.abs(currPosition))
 }
 
-export const getContainerVariant = (formState: FormState, isClosedOrResolved: boolean) => {
-  if (isClosedOrResolved) {
+export const getContainerVariant = (formState: FormState, isClosedOrResolved: boolean, isLoggedOut: boolean) => {
+  if (isClosedOrResolved || isLoggedOut) {
     return 'transparent'
   }
   if (formState === FormState.close) {
