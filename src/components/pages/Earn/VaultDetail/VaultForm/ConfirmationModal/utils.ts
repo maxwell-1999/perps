@@ -1,4 +1,3 @@
-import { VaultSymbol } from '@/constants/vaults'
 import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
 import { Balances } from '@/hooks/wallet'
 import { Big18Math } from '@/utils/big18Utils'
@@ -8,13 +7,11 @@ import { RequiredApprovals } from './constants'
 
 export const getRequiredApprovals = ({
   amount,
-  vaultSymbol,
   balances,
   vaultOption,
   vaultSnapshot,
 }: {
   amount: bigint
-  vaultSymbol: VaultSymbol
   balances: Balances
   vaultOption: VaultFormOption
   vaultSnapshot: VaultSnapshot
@@ -30,7 +27,7 @@ export const getRequiredApprovals = ({
   }
   if (vaultOption === VaultFormOption.Redeem) {
     const approximateShares = Big18Math.div(Big18Math.mul(amount, vaultSnapshot.totalSupply), vaultSnapshot.totalAssets)
-    const sharesAllowance = balances.sharesAllowance[vaultSymbol] ?? 0n
+    const sharesAllowance = balances.sharesAllowance[vaultSnapshot.vaultType] ?? 0n
     const requiresSharesApproval = approximateShares > sharesAllowance
 
     if (requiresSharesApproval) {

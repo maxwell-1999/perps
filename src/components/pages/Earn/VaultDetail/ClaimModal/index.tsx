@@ -43,7 +43,7 @@ export default function ClaimModal({
   const copy = useClaimModalCopy()
   const intl = useIntl()
   const toast = useToast()
-  const { onClaim, onApproveDSU } = useVaultTransactions(vaultSnapshot.symbol)
+  const { onClaim, onApproveDSU } = useVaultTransactions(vaultSnapshot.vaultType)
   const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
 
   const [requiresDSUApproval, setRequiresDSUApproval] = useState<boolean>(false)

@@ -9,7 +9,7 @@ import { GetContractResult, waitForTransaction } from 'wagmi/actions'
 import { MultiInvokerAddresses } from '@/constants/contracts'
 import { SupportedChainId } from '@/constants/network'
 import { MaxUint256 } from '@/constants/units'
-import { PerennialVaultType, VaultSymbol } from '@/constants/vaults'
+import { PerennialVaultType } from '@/constants/vaults'
 import { notEmpty, sum as sumArray } from '@/utils/arrayUtils'
 import { Big18Math } from '@/utils/big18Utils'
 import { InvokerAction, buildInvokerAction } from '@/utils/multiinvoker'
@@ -76,9 +76,10 @@ const vaultFetcher = async (
     ])
 
   return {
+    vaultType,
     address: vaultAddress,
     name,
-    symbol: symbol as VaultSymbol,
+    symbol,
     long: long.toLowerCase(),
     short: short.toLowerCase(),
     totalSupply,
@@ -93,21 +94,39 @@ const vaultFetcher = async (
   }
 }
 
-export const useVaultUserSnapshot = (vaultSymbol: VaultSymbol) => {
+export const useVaultUserSnapshot = (vaultType: PerennialVaultType) => {
   const chainId = useChainId()
   const client = usePublicClient()
   const { address } = useAddress()
-  const vaultType = [VaultSymbol.PVA, VaultSymbol.ePBV].includes(vaultSymbol)
-    ? PerennialVaultType.alpha
-    : PerennialVaultType.bravo
   const vaultContract = getVaultForType(vaultType, chainId)
 
   return useQuery({
-    queryKey: ['vaultUserSnapshot', chainId, vaultSymbol, address],
-    enabled: !!chainId && !!address && !!vaultSymbol && !!vaultContract,
+    queryKey: ['vaultUserSnapshot', chainId, vaultType, address],
+    enabled: !!chainId && !!address && !!vaultType && !!vaultContract,
     queryFn: async () => {
       if (!address || !chainId || !vaultContract) return
       return vaultUserFetcher(address, vaultContract, chainId, client)
+    },
+  })
+}
+
+export const useVaultFeeAPRs = () => {
+  const chainId = useChainId()
+
+  return useQuery({
+    queryKey: ['vaultFeeAPRs', chainId],
+    enabled: !!chainId,
+    queryFn: async () => {
+      if (!chainId) return
+      const res = await fetch(`/api/vault_fee_aprs?chainId=${chainId}`)
+      if (!res.ok) return { alpha: undefined, bravo: undefined }
+
+      const data: { [key in PerennialVaultType]?: number } = await res.json()
+
+      return {
+        alpha: data.alpha ? Big18Math.fromFloatString(data.alpha.toString()) : undefined,
+        bravo: data.bravo ? Big18Math.fromFloatString(data.bravo.toString()) : undefined,
+      }
     },
   })
 }
@@ -243,7 +262,7 @@ export type VaultTransactions = {
   onRedeem: (amount: bigint, { assets, max }: { assets?: boolean; max?: boolean }) => Promise<`0x${string}` | undefined>
   onClaim: (unwrapAmount?: bigint) => Promise<`0x${string}` | undefined>
 }
-export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransactions => {
+export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransactions => {
   const { chain } = useNetwork()
   const chainId = useChainId()
   const { address } = useAddress()
@@ -254,9 +273,6 @@ export const useVaultTransactions = (vaultSymbol: VaultSymbol): VaultTransaction
   const usdcContract = useUSDC(walletClient ?? undefined)
   const dsuContract = useDSU(walletClient ?? undefined)
   const multiInvoker = useMultiInvoker(walletClient ?? undefined)
-  const vaultType = [VaultSymbol.PVA, VaultSymbol.ePBV].includes(vaultSymbol)
-    ? PerennialVaultType.alpha
-    : PerennialVaultType.bravo
 
   const queryClient = useQueryClient()
 

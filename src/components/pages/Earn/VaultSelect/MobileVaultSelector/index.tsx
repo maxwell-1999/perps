@@ -13,7 +13,7 @@ import {
 import styled from '@emotion/styled'
 import { useIntl } from 'react-intl'
 
-import { FeeApr, VaultMetadata } from '@/constants/vaults'
+import { VaultMetadata } from '@/constants/vaults'
 import { useVaultContext } from '@/contexts/vaultContext'
 import { useChainId } from '@/hooks/network'
 import { VaultSnapshot } from '@/hooks/vaults'
@@ -36,7 +36,7 @@ const SelectContainer = styled(Flex)`
 `
 
 export default function MobileVaultSelect() {
-  const { vaultSnapshots, status, setSelectedVault, selectedVault } = useVaultContext()
+  const { vaultSnapshots, status, setSelectedVault, selectedVault, feeAPRs } = useVaultContext()
   const { isOpen, onOpen, onClose } = useDisclosure({ id: 'vaultSelector' })
   const copy = useVaultSelectCopy()
 
@@ -57,7 +57,16 @@ export default function MobileVaultSelect() {
           <Button
             width="100%"
             height="50px"
-            label={hasSelection ? <SelectButtonLabel snapshot={vaultSnapshots[selectedVault]} /> : copy.selectVault}
+            label={
+              hasSelection ? (
+                <SelectButtonLabel
+                  snapshot={vaultSnapshots[selectedVault]}
+                  feeAPR={feeAPRs?.[vaultSnapshots[selectedVault].vaultType]}
+                />
+              ) : (
+                copy.selectVault
+              )
+            }
             variant="pairSelector"
             rightIcon={<HamburgerIcon height="20px" width="20px" />}
           />
@@ -91,13 +100,13 @@ export default function MobileVaultSelect() {
   )
 }
 
-const SelectButtonLabel = ({ snapshot }: { snapshot: VaultSnapshot }) => {
+const SelectButtonLabel = ({ snapshot, feeAPR }: { snapshot: VaultSnapshot; feeAPR?: bigint }) => {
   const intl = useIntl()
   const copy = useVaultSelectCopy()
   const chainId = useChainId()
-  const metadata = VaultMetadata[chainId][snapshot.symbol]
+  const metadata = VaultMetadata[chainId][snapshot.vaultType]
 
-  const feeRate = FeeApr[chainId][snapshot.symbol] ?? 0n
+  const feeRate = feeAPR ?? 0n
   const apr = formatBig18(feeRate * 100n, { numSigFigs: 4, minDecimals: 2 })
 
   const aprPercent = intl.formatMessage({ defaultMessage: '{apr}%' }, { apr })

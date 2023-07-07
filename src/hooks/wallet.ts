@@ -4,7 +4,7 @@ import { mainnet } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
 import { ChainalysisContractAddress, MultiInvokerAddresses } from '@/constants/contracts'
-import { PerennialVaultType, SupportedVaults, VaultSymbol } from '@/constants/vaults'
+import { PerennialVaultType, SupportedVaults } from '@/constants/vaults'
 import { getVaultForType } from '@/utils/contractUtils'
 
 import { useDSU, useUSDC } from './contracts'
@@ -15,11 +15,7 @@ export type Balances =
       usdc: bigint
       usdcAllowance: bigint
       dsuAllowance: bigint
-      sharesAllowance: {
-        PVA?: bigint | undefined
-        PVB?: bigint | undefined
-        ePBV?: bigint | undefined
-      }
+      sharesAllowance: { [key in PerennialVaultType]?: bigint | undefined }
     }
   | undefined
 
@@ -51,11 +47,10 @@ export const useBalances = () => {
       // Map vault allowances to vault symbol
       const sharesAllowance = Object.keys(SupportedVaults[chainId])
         .filter((vaultType) => SupportedVaults[chainId][vaultType as PerennialVaultType])
-        .reduce<{ [key in VaultSymbol]?: bigint }>((acc, vaultType) => {
+        .reduce<{ [key in PerennialVaultType]?: bigint }>((acc, vaultType) => {
           return {
             ...acc,
-            [SupportedVaults[chainId][vaultType as PerennialVaultType] as string]:
-              vaultType === PerennialVaultType.alpha ? alphaVaultAllowance : bravoVaultAllowance,
+            [vaultType]: vaultType === PerennialVaultType.alpha ? alphaVaultAllowance : bravoVaultAllowance,
           }
         }, {})
 

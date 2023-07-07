@@ -1,10 +1,9 @@
 import { Box, Flex, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
 import DownArrow from '@public/icons/downArrow.svg'
 
-import { FeeApr, VaultMetadata } from '@/constants/vaults'
+import { VaultMetadata } from '@/constants/vaults'
 import { useVaultContext } from '@/contexts/vaultContext'
 import { useChainId } from '@/hooks/network'
-import { formatBig18 } from '@/utils/big18Utils'
 
 import colors from '@ds/theme/colors'
 
@@ -19,7 +18,7 @@ export default function VaultSelect() {
   const borderColor = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
   const titleSpanColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const chainId = useChainId()
-  const { vaultSnapshots, status, setSelectedVault } = useVaultContext()
+  const { vaultSnapshots, status, setSelectedVault, feeAPRs: feeAprs } = useVaultContext()
 
   return (
     <Flex
@@ -47,10 +46,9 @@ export default function VaultSelect() {
             </Flex>
           ) : (
             vaultSnapshots.map((snapshot, i) => {
-              const metadata = VaultMetadata[chainId][snapshot.symbol]
+              const metadata = VaultMetadata[chainId][snapshot.vaultType]
               if (!metadata) return null
-              const feeRate = FeeApr[chainId][snapshot.symbol] ?? 0n
-              const feeAPR = formatBig18(feeRate * 100n, { numSigFigs: 4, minDecimals: 2 })
+              const feeAPR = feeAprs?.[snapshot.vaultType] ?? 0n
               return (
                 <Box
                   opacity={0}
@@ -63,10 +61,10 @@ export default function VaultSelect() {
                     }}
                     vault={snapshot}
                     key={snapshot.address}
-                    apr={feeAPR}
+                    feeAPR={feeAPR}
                     name={metadata.name}
                     assets={metadata.assets}
-                    description={vaultDescription[snapshot.symbol]}
+                    description={vaultDescription[snapshot.vaultType]}
                   />
                 </Box>
               )

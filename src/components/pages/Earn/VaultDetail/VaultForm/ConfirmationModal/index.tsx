@@ -53,7 +53,7 @@ export default function ConfirmationModal({
   const copy = useVaultFormCopy()
   const intl = useIntl()
   const toast = useToast()
-  const { onApproveUSDC, onApproveShares, onDeposit, onRedeem } = useVaultTransactions(vaultSnapshot.symbol)
+  const { onApproveUSDC, onApproveShares, onDeposit, onRedeem } = useVaultTransactions(vaultSnapshot.vaultType)
   const bigintAmount = setAmountForConfirmation({
     maxWithdrawal,
     vaultUserSnapshot,
@@ -84,7 +84,6 @@ export default function ConfirmationModal({
     const requiredApprovals = getRequiredApprovals({
       amount: bigintAmount,
       vaultSnapshot,
-      vaultSymbol: vaultSnapshot.symbol,
       vaultOption,
       balances,
     })

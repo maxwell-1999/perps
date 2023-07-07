@@ -1,7 +1,7 @@
 import { Flex, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
 import { useState } from 'react'
 
-import { FeeApr, VaultMetadata } from '@/constants/vaults'
+import { VaultMetadata } from '@/constants/vaults'
 import { useChainId } from '@/hooks/network'
 import { VaultSnapshot, useVaultUserSnapshot } from '@/hooks/vaults'
 import { useBalances } from '@/hooks/wallet'
@@ -26,7 +26,7 @@ import {
 } from './components'
 import { usePnl, usePositionSettledToast, useVaultDetailCopy } from './hooks'
 
-export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
+export default function VaultDetail({ vault, feeAPR }: { vault: VaultSnapshot; feeAPR?: bigint }) {
   const chainId = useChainId()
   const isBase = useBreakpointValue({ base: true, md: false })
   const [showClaimModal, setShowClaimModal] = useState(false)
@@ -34,16 +34,16 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
   const { data: balances } = useBalances()
   const copy = useVaultDetailCopy()
 
-  const { symbol, name, totalAssets, maxCollateral } = vault
+  const { name, totalAssets, maxCollateral, vaultType } = vault
 
-  const { data: vaultUserSnapshot } = useVaultUserSnapshot(symbol)
+  const { data: vaultUserSnapshot } = useVaultUserSnapshot(vaultType)
   const exposureData = useExposureAndFunding({
     vault,
   })
   const pnl = usePnl({ vault, vaultUserSnapshot })
 
   const alpha5 = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])
-  const metadata = VaultMetadata[chainId][symbol]
+  const metadata = VaultMetadata[chainId][vaultType]
   const vaultName = metadata?.name ?? name
   const hasClaimable = !Big18Math.isZero(vaultUserSnapshot?.claimable ?? 0n)
   const hasPendingRedemptions = !Big18Math.isZero(vaultUserSnapshot?.pendingRedemptionAmount ?? 0n)
@@ -72,7 +72,7 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
       <Flex height="100%" width="100%" pt={10} px={14} bg={alpha5}>
         <Flex flexDirection="column" mr={isBase ? 0 : 9} width={isBase ? '100%' : '50%'}>
           <MobileVaultSelect />
-          <VaultDetailTitle name={vaultName} description={vaultDescription[symbol]} />
+          <VaultDetailTitle name={vaultName} description={vaultDescription[vaultType]} />
           {metadata && <SupportedAssetsSection supportedAssets={metadata.assets} />}
           {isBase && (
             <>
@@ -92,7 +92,7 @@ export default function VaultDetail({ vault }: { vault: VaultSnapshot }) {
               />
             </>
           )}
-          <APRCard feeAPR={FeeApr[chainId][vault.symbol] ?? 0n} fundingAPR={exposureData?.totalFundingAPR ?? 0n} />
+          <APRCard feeAPR={feeAPR ?? 0n} fundingAPR={exposureData?.totalFundingAPR ?? 0n} />
           <RiskCard exposure={exposureData?.exposure} isLong={exposureData?.isLongExposure} />
           <CapactiyCard collateral={totalAssets} capacity={maxCollateral} />
         </Flex>

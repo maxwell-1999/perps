@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
-import { VaultSymbol } from '@/constants/vaults'
+import { PerennialVaultType } from '@/constants/vaults'
 import { VaultSnapshot } from '@/hooks/vaults'
 import { Big18Math } from '@/utils/big18Utils'
 import { add, calcExposure, calcFunding, calcLeverage, next } from '@/utils/positionUtils'
@@ -18,9 +18,8 @@ export const useVaultDescription = () => {
       'Arbitrum Ecosystem Vaults (PVB) deploys liquidity to markets of Arbitrum ecosystem assets. Currently, this includes 2 pools: ARB-long & ARB-short.',
   })
   return {
-    [VaultSymbol.ePBV]: blueChipDescription,
-    [VaultSymbol.PVA]: blueChipDescription,
-    [VaultSymbol.PVB]: arbitrumVaultDescription,
+    [PerennialVaultType.alpha]: blueChipDescription,
+    [PerennialVaultType.bravo]: arbitrumVaultDescription,
   }
 }
 
