@@ -51,9 +51,10 @@ export const Input: React.FC<InputProps> = ({
   const pr = rightEl ? { pr: '60px' } : {}
   const paddingProps = { ...pr }
   const [displayValue, setDisplayValue] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
 
   const {
-    field: { ref, value, onChange, ...inputHandlers },
+    field: { ref, value, ...inputHandlers },
     fieldState: { error },
   } = useController({
     name,
@@ -64,28 +65,15 @@ export const Input: React.FC<InputProps> = ({
   useEffect(() => {
     if (displayDecimals !== undefined && value !== undefined) {
       const [integerPart, decimalPart] = value.split('.')
-      if (decimalPart && decimalPart.length > displayDecimals) {
-        setDisplayValue(`${integerPart}.${decimalPart.slice(0, displayDecimals)}`)
+      if (decimalPart && decimalPart.length > displayDecimals && !isFocused) {
+        setDisplayValue(`${integerPart}.${decimalPart.slice(0, displayDecimals)}...`)
       } else {
         setDisplayValue(value)
       }
     } else {
       setDisplayValue(value || '')
     }
-  }, [value, displayDecimals])
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let inputValue = e.target.value
-    if (inputValue.includes('.') && displayDecimals) {
-      const [integer, decimal] = inputValue.split('.')
-      if (decimal.length > displayDecimals) {
-        const formattedDecimals = decimal.slice(0, displayDecimals)
-        inputValue = `${integer}.${formattedDecimals}`
-      }
-      setDisplayValue(inputValue)
-    }
-    onChange(e)
-  }
+  }, [value, displayDecimals, isFocused])
 
   return (
     <FormControl width={width} isInvalid={Boolean(error)}>
@@ -104,9 +92,10 @@ export const Input: React.FC<InputProps> = ({
           isRequired={isRequired}
           pattern={pattern}
           {...paddingProps}
-          onChange={handleChange}
-          value={displayValue}
           {...inputHandlers}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          value={displayValue}
           ref={ref}
           {...inputProps}
         />
