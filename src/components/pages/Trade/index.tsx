@@ -1,5 +1,3 @@
-import { useBreakpointValue } from '@chakra-ui/react'
-
 import {
   ChartGridItem,
   HeaderGridItem,
@@ -19,7 +17,6 @@ import PositionManager from './PositionManager'
 import TradeForm from './TradeForm'
 
 export default function Trade() {
-  const isBase = useBreakpointValue({ base: true, md: false })
   return (
     <MarketProvider>
       <TradeFormProvider>
@@ -34,16 +31,12 @@ export default function Trade() {
             <TradeFormGridItem>
               <TradeForm />
             </TradeFormGridItem>
-            {!isBase && (
-              <>
-                <ChartGridItem>
-                  <Chart />
-                </ChartGridItem>
-                <PositionManagerGridItem>
-                  <PositionManager />
-                </PositionManagerGridItem>
-              </>
-            )}
+            <ChartGridItem>
+              <Chart />
+            </ChartGridItem>
+            <PositionManagerGridItem>
+              <PositionManager />
+            </PositionManagerGridItem>
           </TradeLayout>
         </SettlementToastProvider>
       </TradeFormProvider>

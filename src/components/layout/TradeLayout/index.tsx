@@ -46,6 +46,14 @@ const GridContainer = styled.div`
     grid-template-rows: auto auto 1fr 320px;
   }
 `
+
+const DesktopOnlyGridItem = styled(GridItem)`
+  display: none;
+  @media (min-width: ${breakpoints.md}) {
+    display: Grid;
+  }
+`
+
 interface LayoutProps {
   children: React.ReactNode
 }
@@ -70,8 +78,10 @@ export const TradeFormGridItem: React.FC<GridItemProps> = ({ children }) => (
   <GridItem gridArea="tradeForm">{children}</GridItem>
 )
 
-export const ChartGridItem: React.FC<GridItemProps> = ({ children }) => <GridItem gridArea="chart">{children}</GridItem>
+export const ChartGridItem: React.FC<GridItemProps> = ({ children }) => (
+  <DesktopOnlyGridItem gridArea="chart">{children}</DesktopOnlyGridItem>
+)
 
 export const PositionManagerGridItem: React.FC<GridItemProps> = ({ children }) => (
-  <GridItem gridArea="positionManager">{children}</GridItem>
+  <DesktopOnlyGridItem gridArea="positionManager">{children}</DesktopOnlyGridItem>
 )
