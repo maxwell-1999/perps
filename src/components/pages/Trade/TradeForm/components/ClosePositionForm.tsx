@@ -143,7 +143,6 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             name={FormNames.amount}
             label={copy.amount}
             placeholder="0.0000"
-            displayDecimals={9}
             rightLabel={
               <FormLabel mr={0} mb={0}>
                 <Text variant="label">

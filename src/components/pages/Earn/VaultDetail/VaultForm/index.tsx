@@ -148,7 +148,6 @@ export default function VaultForm({
             name={FormNames.amount}
             title={copy.Amount}
             placeholder="0.0000"
-            displayDecimals={9}
             control={control}
             label={copy.Amount}
             validate={vaultFormValidators}

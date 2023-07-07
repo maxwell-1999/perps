@@ -150,7 +150,6 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
             name={FormNames.collateral}
             label={copy.collateral}
             placeholder="0.0000"
-            displayDecimals={9}
             rightLabel={
               <FormLabel mr={0} mb={0}>
                 <Text variant="label">

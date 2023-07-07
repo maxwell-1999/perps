@@ -256,7 +256,6 @@ function TradeForm(props: TradeFormProps) {
               label={`${copy.collateral}${props.crossCollateral > 0n ? '*' : ''}`}
               title={copy.collateral}
               placeholder="0.0000"
-              displayDecimals={9}
               rightLabel={
                 <FormLabel mr={0} mb={0}>
                   {!!address && (
@@ -297,7 +296,6 @@ function TradeForm(props: TradeFormProps) {
               key={FormNames.amount}
               label={copy.amount}
               placeholder="0.0000"
-              displayDecimals={9}
               rightLabel={
                 <FormLabel mr={0} mb={0}>
                   {notional > 0n && <FormattedBig18USDPrice variant="label" value={notional} />}

@@ -15,7 +15,6 @@ import {
   useColorModeValue,
   useTheme,
 } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
 import { Control, Validate, useController } from 'react-hook-form'
 
 export interface InputProps extends ChakraInputProps {
@@ -29,7 +28,6 @@ export interface InputProps extends ChakraInputProps {
   pattern?: string
   rightEl?: React.ReactNode
   leftEl?: React.ReactNode
-  displayDecimals?: number
   validate?: Validate<any, any> | Record<string, Validate<any, any>> | undefined
 }
 
@@ -44,36 +42,20 @@ export const Input: React.FC<InputProps> = ({
   pattern,
   rightEl,
   validate,
-  displayDecimals,
   leftEl,
   ...inputProps
 }) => {
   const pr = rightEl ? { pr: '60px' } : {}
   const paddingProps = { ...pr }
-  const [displayValue, setDisplayValue] = useState('')
-  const [isFocused, setIsFocused] = useState(false)
 
   const {
-    field: { ref, value, ...inputHandlers },
+    field: { ref, ...inputHandlers },
     fieldState: { error },
   } = useController({
     name,
     control,
     rules: { required: isRequired, validate },
   })
-
-  useEffect(() => {
-    if (displayDecimals !== undefined && value !== undefined) {
-      const [integerPart, decimalPart] = value.split('.')
-      if (decimalPart && decimalPart.length > displayDecimals && !isFocused) {
-        setDisplayValue(`${integerPart}.${decimalPart.slice(0, displayDecimals)}...`)
-      } else {
-        setDisplayValue(value)
-      }
-    } else {
-      setDisplayValue(value || '')
-    }
-  }, [value, displayDecimals, isFocused])
 
   return (
     <FormControl width={width} isInvalid={Boolean(error)}>
@@ -88,14 +70,12 @@ export const Input: React.FC<InputProps> = ({
         <ChakraInput
           id={id}
           variant="trade"
+          textOverflow="ellipsis"
           isInvalid={Boolean(error)}
           isRequired={isRequired}
           pattern={pattern}
           {...paddingProps}
           {...inputHandlers}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          value={displayValue}
           ref={ref}
           {...inputProps}
         />
