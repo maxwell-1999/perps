@@ -64,7 +64,11 @@ function CurrentPosition() {
       <LeftContainer borderColor={borderColor}>
         <Flex width="50%" flexDirection="column" borderRight={`1px solid ${borderColor}`}>
           <ActivePositionHeader borderColor={borderColor}>
-            <AssetIconWithText market={assetMetadata} text={selectedMarket.toUpperCase()} />
+            <AssetIconWithText
+              market={assetMetadata}
+              text={selectedMarket.toUpperCase()}
+              textProps={{ fontSize: '15px', textTransform: 'capitalize' }}
+            />
             <Flex alignItems="center" gap="12px">
               <Text fontSize="15px">{statusLabel}</Text> <StatusLight color={statusColor} glow={isOpenPosition} />
             </Flex>

@@ -62,7 +62,7 @@ export const ActivePositionHeader = styled(Flex)<{ borderColor: string }>`
   flex-wrap: wrap;
   min-height: 55px;
   align-items: center;
-  padding: 0 16px;
+  padding: 4px 16px;
   width: 100%;
   border-bottom: 1px solid ${(p) => p.borderColor};
 `
