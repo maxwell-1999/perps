@@ -47,6 +47,7 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const pr = rightEl ? { pr: '60px' } : {}
   const paddingProps = { ...pr }
+
   const {
     field: { ref, ...inputHandlers },
     fieldState: { error },
@@ -55,6 +56,7 @@ export const Input: React.FC<InputProps> = ({
     control,
     rules: { required: isRequired, validate },
   })
+
   return (
     <FormControl width={width} isInvalid={Boolean(error)}>
       <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
@@ -68,6 +70,7 @@ export const Input: React.FC<InputProps> = ({
         <ChakraInput
           id={id}
           variant="trade"
+          textOverflow="ellipsis"
           isInvalid={Boolean(error)}
           isRequired={isRequired}
           pattern={pattern}
