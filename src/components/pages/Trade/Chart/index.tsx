@@ -19,7 +19,7 @@ function Chart() {
   }, [containerRef, canRender])
 
   return (
-    <Tabs isLazy>
+    <Tabs>
       <TabList>
         <Tab>{priceChart}</Tab>
         <Tab>{marketInfo}</Tab>
