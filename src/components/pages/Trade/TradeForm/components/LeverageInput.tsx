@@ -46,6 +46,7 @@ function LeverageInput({ label, min, max, step, control, name, onChange, validat
           label={label}
           rightLabel={<LeverageToggle onClick={setInputType} inputType={inputType} />}
           placeholder="0.0"
+          displayDecimals={9}
           rightEl={<Pill text="X" />}
           control={control}
           name={name}

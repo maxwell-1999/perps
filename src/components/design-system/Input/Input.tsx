@@ -15,6 +15,7 @@ import {
   useColorModeValue,
   useTheme,
 } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
 import { Control, Validate, useController } from 'react-hook-form'
 
 export interface InputProps extends ChakraInputProps {
@@ -28,6 +29,7 @@ export interface InputProps extends ChakraInputProps {
   pattern?: string
   rightEl?: React.ReactNode
   leftEl?: React.ReactNode
+  displayDecimals?: number
   validate?: Validate<any, any> | Record<string, Validate<any, any>> | undefined
 }
 
@@ -42,19 +44,49 @@ export const Input: React.FC<InputProps> = ({
   pattern,
   rightEl,
   validate,
+  displayDecimals,
   leftEl,
   ...inputProps
 }) => {
   const pr = rightEl ? { pr: '60px' } : {}
   const paddingProps = { ...pr }
+  const [displayValue, setDisplayValue] = useState('')
+
   const {
-    field: { ref, ...inputHandlers },
+    field: { ref, value, onChange, ...inputHandlers },
     fieldState: { error },
   } = useController({
     name,
     control,
     rules: { required: isRequired, validate },
   })
+
+  useEffect(() => {
+    if (displayDecimals !== undefined && value !== undefined) {
+      const [integerPart, decimalPart] = value.split('.')
+      if (decimalPart && decimalPart.length > displayDecimals) {
+        setDisplayValue(`${integerPart}.${decimalPart.slice(0, displayDecimals)}`)
+      } else {
+        setDisplayValue(value)
+      }
+    } else {
+      setDisplayValue(value || '')
+    }
+  }, [value, displayDecimals])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let inputValue = e.target.value
+    if (inputValue.includes('.') && displayDecimals) {
+      const [integer, decimal] = inputValue.split('.')
+      if (decimal.length > displayDecimals) {
+        const formattedDecimals = decimal.slice(0, displayDecimals)
+        inputValue = `${integer}.${formattedDecimals}`
+      }
+      setDisplayValue(inputValue)
+    }
+    onChange(e)
+  }
+
   return (
     <FormControl width={width} isInvalid={Boolean(error)}>
       <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
@@ -72,6 +104,8 @@ export const Input: React.FC<InputProps> = ({
           isRequired={isRequired}
           pattern={pattern}
           {...paddingProps}
+          onChange={handleChange}
+          value={displayValue}
           {...inputHandlers}
           ref={ref}
           {...inputProps}
