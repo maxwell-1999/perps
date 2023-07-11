@@ -63,7 +63,10 @@ export const DividerStyled = styled(Divider)`
 `
 
 export const PriceText = styled(Text)`
-  font-size: 16px;
+  font-size: 15px;
+  @media (min-width: ${breakpoints.xs}) {
+    font-size: 18px;
+  }
   @media (min-width: ${breakpoints.md}) {
     font-size: 20px;
   }

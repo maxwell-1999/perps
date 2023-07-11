@@ -21,6 +21,7 @@ const styles = {
 
 export const breakpoints = {
   base: '0em',
+  xs: '28em',
   sm: '32em',
   smd: '38em',
   md: '40em',

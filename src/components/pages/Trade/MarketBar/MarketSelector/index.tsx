@@ -43,6 +43,7 @@ function MarketSelector() {
           label={<AssetIconWithText market={AssetMetadata[selectedMarket]} />}
           variant="pairSelector"
           rightIcon={<HamburgerIcon height="20px" width="20px" />}
+          minWidth={{ base: '160px', xs: '179px' }}
         />
       </PopoverTrigger>
       <PopoverContent width={{ base: '304px', xl: '400px' }}>
