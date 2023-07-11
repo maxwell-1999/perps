@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { Address } from 'viem'
 
+import { TrackingEvents, useMixpanel } from '@/analytics'
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { SupportedAsset } from '@/constants/assets'
@@ -43,6 +44,7 @@ interface AdjustmentModalProps {
   crossProduct?: Address
   usdcAllowance: bigint
   orderValues: OrderValues
+  leverage: string
   positionType: OpenPositionType
   variant: 'close' | 'adjust' | 'withdraw'
 }
@@ -59,6 +61,7 @@ function AdjustPositionModal({
   product,
   crossProduct,
   usdcAllowance,
+  leverage,
   variant,
 }: AdjustmentModalProps) {
   const toast = useToast()
@@ -72,6 +75,7 @@ function AdjustPositionModal({
   const [isTransactionCompleted, setIsTransactionCompleted] = useState(false)
   const [isSettlementCompleted, setIsSettlementCompleted] = useState(false)
   const { orderDirection } = useMarketContext()
+  const { track } = useMixpanel()
 
   const { productAddress } = product
   const { onApproveUSDC, onModifyPosition } = useProductTransactions(productAddress)
@@ -150,6 +154,15 @@ function AdjustPositionModal({
           />
         ),
       })
+      track(TrackingEvents.trade, {
+        asset,
+        leverage,
+        orderDirection,
+        orderType: title,
+        collateral: orderValues.collateral,
+        amount: orderValues.amount,
+        orderAction: action || '',
+      })
       if (!requiresTwoStep) {
         onClose()
       } else {
@@ -168,7 +181,6 @@ function AdjustPositionModal({
     try {
       await onModifyPosition(collateralDifference, positionType, 0n, { txHistoryLabel: copy.withdraw })
       onClose()
-
       toast({
         render: ({ onClose }) => (
           <Toast
@@ -183,6 +195,10 @@ function AdjustPositionModal({
             }
           />
         ),
+      })
+      track(TrackingEvents.withdrawCollateral, {
+        asset,
+        collateral: Big18Math.toFloatString(Big18Math.abs(collateralDifference)),
       })
     } catch (err) {
       console.error(err)

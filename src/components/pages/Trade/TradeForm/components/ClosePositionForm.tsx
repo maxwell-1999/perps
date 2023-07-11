@@ -134,6 +134,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
           orderValues={orderValues}
           usdcAllowance={0n}
           variant="close"
+          leverage={leverage}
         />
       )}
       <Form onSubmit={handleSubmit(onConfirm)}>

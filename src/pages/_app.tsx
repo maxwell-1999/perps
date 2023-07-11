@@ -11,6 +11,7 @@ import { IntlProvider } from 'react-intl'
 // eslint-disable-next-line no-restricted-imports
 import { WagmiConfig, useAccount, useDisconnect } from 'wagmi'
 
+import { MixpanelProvider, useMixpanel } from '@/analytics'
 import SanctionModal from '@/components/SanctionModal'
 import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
@@ -36,6 +37,7 @@ const queryClient = new QueryClient({
 const AppWithAuth = ({ Component, pageProps }: AppProps) => {
   const { authStatus, setAuthStatus, sanctioned } = useAuthStatus()
   const { disconnect } = useDisconnect()
+  const { mixpanel } = useMixpanel()
 
   const { address } = useAccount({
     onConnect: ({ address }) => {
@@ -60,7 +62,13 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
       else setAuthStatus(StartingAuthStatus)
       queryClient.invalidateQueries()
     }
-  }, [address, prevAddress, setAuthStatus, loginUser])
+    if (address) {
+      mixpanel?.identify(address)
+    }
+    if (!address && prevAddress) {
+      mixpanel?.reset()
+    }
+  }, [address, prevAddress, setAuthStatus, loginUser, mixpanel])
 
   const authAdapter = useMemo(
     () =>
@@ -103,7 +111,9 @@ export default function App(props: AppProps) {
         <QueryClientProvider client={queryClient}>
           <WagmiConfig config={wagmiConfig}>
             <AuthStatusProvider>
-              <AppWithAuth {...props} />
+              <MixpanelProvider>
+                <AppWithAuth {...props} />
+              </MixpanelProvider>
             </AuthStatusProvider>
           </WagmiConfig>
           <ReactQueryDevtools initialIsOpen={false} />

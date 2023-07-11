@@ -2,6 +2,7 @@ import { WarningIcon } from '@chakra-ui/icons'
 import { Box, Image, Text, useBreakpointValue, useTheme } from '@chakra-ui/react'
 import RedX from '@public/icons/red-x.svg'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
+import mixpanel from 'mixpanel-browser'
 import { useEffect, useState } from 'react'
 import { useDisconnect } from 'wagmi'
 
@@ -98,6 +99,8 @@ const ConnectWalletInner: React.FC<ConnectWalletInnerProps> = ({
     if (address && !tosAccepted) disconnect()
     // If the modal is no longer open and the connected address is not authed, disconnect them
     if (address && authStatus === 'unauthenticated' && prevModalOpen && !modalOpen) disconnect()
+    if (address && authStatus === 'authenticated' && typeof mixpanel !== 'undefined') {
+    }
   }, [address, authStatus, modalOpen, prevModalOpen, tosAccepted, disconnect])
 
   const onClickConnect = () => {
