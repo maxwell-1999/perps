@@ -209,6 +209,7 @@ function TradeForm(props: TradeFormProps) {
           crossProduct={props.crossProduct}
           orderValues={orderValues}
           usdcAllowance={balances?.usdcAllowance ?? 0n}
+          leverage={leverage}
           variant="adjust"
         />
       )}

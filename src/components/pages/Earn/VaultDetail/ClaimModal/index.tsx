@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 
+import { TrackingEvents, useMixpanel } from '@/analytics'
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
@@ -43,6 +44,7 @@ export default function ClaimModal({
   const copy = useClaimModalCopy()
   const intl = useIntl()
   const toast = useToast()
+  const { track } = useMixpanel()
   const { onClaim, onApproveDSU } = useVaultTransactions(vaultSnapshot.vaultType)
   const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
 
@@ -85,6 +87,10 @@ export default function ClaimModal({
             body={<ToastMessage action={copy.Withdraw} actionColor={colors.brand.green} message={message} />}
           />
         ),
+      })
+      track(TrackingEvents.withdrawFromVault, {
+        vaultName,
+        amount: Big18Math.toFloatString(vaultUserSnapshot.claimable),
       })
     } catch (e) {
       console.error(e)

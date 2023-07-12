@@ -2,6 +2,8 @@ import { Box } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
 
+import { TrackingEvents, useMixpanel } from '@/analytics'
+
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@ds/Tabs'
 
 import MarketInfo from './MarketInfo'
@@ -13,13 +15,18 @@ function Chart() {
   const { priceChart, marketInfo } = useChartCopy()
   const [canRender, setCanRender] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const { track } = useMixpanel()
 
   useEffect(() => {
     if (!!containerRef.current && !canRender) setCanRender(true)
   }, [containerRef, canRender])
 
+  const trackChartTab = (index: number) => {
+    track(TrackingEvents.changeChart, { chartType: index === 0 ? priceChart : marketInfo })
+  }
+
   return (
-    <Tabs>
+    <Tabs onChange={trackChartTab}>
       <TabList>
         <Tab>{priceChart}</Tab>
         <Tab>{marketInfo}</Tab>

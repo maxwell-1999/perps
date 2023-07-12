@@ -141,6 +141,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
           orderValues={orderValues}
           usdcAllowance={0n}
           variant="withdraw"
+          leverage={leverage}
         />
       )}
       <Form onSubmit={handleSubmit(onConfirm)}>
