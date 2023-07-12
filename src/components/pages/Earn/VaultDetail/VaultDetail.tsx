@@ -2,8 +2,9 @@ import { Flex, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
 import { useState } from 'react'
 
 import { VaultMetadata } from '@/constants/vaults'
+import { useVaultContext } from '@/contexts/vaultContext'
 import { useChainId } from '@/hooks/network'
-import { VaultSnapshot, useVaultUserSnapshot } from '@/hooks/vaults'
+import { VaultSnapshot } from '@/hooks/vaults'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math } from '@/utils/big18Utils'
 import { usePrevious } from '@/utils/hooks'
@@ -33,10 +34,11 @@ export default function VaultDetail({ vault, feeAPR }: { vault: VaultSnapshot; f
   const vaultDescription = useVaultDescription()
   const { data: balances } = useBalances()
   const copy = useVaultDetailCopy()
-
+  const { vaultUserSnapshots } = useVaultContext()
   const { name, totalAssets, maxCollateral, vaultType } = vault
 
-  const { data: vaultUserSnapshot } = useVaultUserSnapshot(vaultType)
+  const vaultUserSnapshot = vaultUserSnapshots && vaultUserSnapshots[vaultType]
+
   const exposureData = useExposureAndFunding({
     vault,
   })

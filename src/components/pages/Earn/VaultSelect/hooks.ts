@@ -8,5 +8,7 @@ export const useVaultSelectCopy = () => {
     toViewDetails: intl.formatMessage({ defaultMessage: 'to view details' }),
     apr: intl.formatMessage({ defaultMessage: 'APR' }),
     ofCapacity: intl.formatMessage({ defaultMessage: 'of capacity' }),
+    size: intl.formatMessage({ defaultMessage: 'Size' }),
+    pnl: intl.formatMessage({ defaultMessage: 'P&L' }),
   }
 }
