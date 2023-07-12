@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 
+import { TrackingEvents, useMixpanel } from '@/analytics'
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
@@ -53,6 +54,7 @@ export default function ConfirmationModal({
   const copy = useVaultFormCopy()
   const intl = useIntl()
   const toast = useToast()
+  const { track } = useMixpanel()
   const { onApproveUSDC, onApproveShares, onDeposit, onRedeem } = useVaultTransactions(vaultSnapshot.vaultType)
   const bigintAmount = setAmountForConfirmation({
     maxWithdrawal,
@@ -130,6 +132,7 @@ export default function ConfirmationModal({
           />
         ),
       })
+      track(TrackingEvents.depositToVault, { vaultName, amount: formValues.amount })
     } catch (e) {
       console.error(e)
     } finally {
@@ -153,6 +156,7 @@ export default function ConfirmationModal({
           />
         ),
       })
+      track(TrackingEvents.redeemFromVault, { vaultName, amount: formValues.amount })
     } catch (e) {
       console.error(e)
     } finally {

@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react'
 import CloseX from '@public/icons/close-x.svg'
 
+import { TrackingEvents, useMixpanel } from '@/analytics'
 import { AssetIconWithText } from '@/components/shared/components'
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { ChainMarkets } from '@/constants/markets'
@@ -27,6 +28,7 @@ function MarketSelector() {
   const { chainId, selectedMarket, setSelectedMarket, snapshots } = useMarketContext()
   const { isOpen, onOpen, onClose } = useDisclosure({ id: 'marketSelector' })
   const copy = useSelectorCopy()
+  const { track } = useMixpanel()
 
   return (
     <Popover
@@ -79,6 +81,7 @@ function MarketSelector() {
               isSelected={market === selectedMarket}
               onClick={() => {
                 setSelectedMarket(market as any)
+                track(TrackingEvents.selectMarket, { market: AssetMetadata[market as SupportedAsset].symbol })
                 onClose()
               }}
             />

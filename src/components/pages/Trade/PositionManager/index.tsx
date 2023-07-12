@@ -1,3 +1,4 @@
+import { TrackingEvents, useMixpanel } from '@/analytics'
 import { useMarketContext } from '@/contexts/marketContext'
 
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@ds/Tabs'
@@ -10,9 +11,16 @@ import { usePositionManagerCopy } from './hooks'
 function PositionManager() {
   const { activePositionTab, setActivePositionTab } = useMarketContext()
   const copy = usePositionManagerCopy()
+  const { track } = useMixpanel()
+
+  const onChangePositionTab = (index: number) => {
+    setActivePositionTab(index)
+    const selectedTab = index === 0 ? copy.thisPosition : index === 1 ? copy.allPositions : copy.history
+    track(TrackingEvents.changePositionManager, { selectedTab })
+  }
 
   return (
-    <Tabs isLazy index={activePositionTab} onChange={setActivePositionTab}>
+    <Tabs isLazy index={activePositionTab} onChange={onChangePositionTab}>
       <TabList>
         <Tab>{copy.thisPosition}</Tab>
         <Tab>{copy.allPositions}</Tab>
