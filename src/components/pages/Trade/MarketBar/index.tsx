@@ -31,7 +31,7 @@ export default function MarketBar() {
   return (
     <Container display="flex" flexDirection="row" alignItems="center" height="100%">
       <ResponsiveFlex>
-        <MarketContainer mr={6} ml={0}>
+        <MarketContainer mr={{ base: 4, xs: 5, sm: 6 }} ml={0}>
           <MarketSelector />
         </MarketContainer>
         <Flex>
