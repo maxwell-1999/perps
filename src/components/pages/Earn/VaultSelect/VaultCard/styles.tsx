@@ -1,4 +1,4 @@
-import { Box, Flex, Text, useColorModeValue } from '@chakra-ui/react'
+import { Box, Flex, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
 import { keyframes } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 
@@ -62,6 +62,11 @@ export const VaultUserStats = ({
   const pendingRedemption = vaultUserSnapshot?.pendingRedemptionAmount ?? 0n
   const positionAmount = Big18Math.sub(Big18Math.add(assets, pendingDeposits), pendingRedemption)
   const hasPosition = !Big18Math.isZero(positionAmount)
+  const positionUpdating = Boolean(
+    vaultUserSnapshot &&
+      (!Big18Math.isZero(vaultUserSnapshot.pendingDepositAmount) ||
+        !Big18Math.isZero(vaultUserSnapshot.pendingRedemptionAmount)),
+  )
 
   if (!hasPosition) return null
 
@@ -76,18 +81,24 @@ export const VaultUserStats = ({
         py={1}
         borderRadius="7px"
       >
-        <Flex px={2} flex={1} justifyContent="space-between">
+        <Flex px={2} flex={1} justifyContent="space-between" flexWrap="wrap">
           <Text color={alpha70} fontSize="12px">
             {copy.size}
           </Text>
-          <FormattedBig18USDPrice value={positionAmount} fontSize="12px" fontWeight={500} compact />
+          <FormattedBig18USDPrice value={positionAmount} fontSize="12px" fontWeight={500} />
         </Flex>
         <Box width="1px" height="100%" bg={alpha10} />
-        <Flex flex={1} px={2} justifyContent="space-between">
+        <Flex flex={1} px={2} justifyContent="space-between" flexWrap="wrap">
           <Text color={alpha70} fontSize="12px">
             {copy.pnl}
           </Text>
-          <FormattedBig18USDPrice value={pnl} fontSize="12px" fontWeight={500} compact color={pnlColor} />
+          {positionUpdating ? (
+            <Flex alignItems="center" justifyContent="center">
+              <Spinner size="xs" />
+            </Flex>
+          ) : (
+            <FormattedBig18USDPrice value={pnl} fontSize="12px" fontWeight={500} compact color={pnlColor} />
+          )}
         </Flex>
       </Container>
     </Flex>
