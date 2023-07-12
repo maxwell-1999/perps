@@ -22,6 +22,10 @@ export const MixpanelProvider = ({ children }: { children: React.ReactNode }) =>
   const { events } = useRouter()
 
   useEffect(() => {
+    if (!mixpanelToken || LocalDev) {
+      setIsInitialized(false)
+      return
+    }
     const _mixpanelInstance = mixpanel.init(
       mixpanelToken,
       {
@@ -31,7 +35,6 @@ export const MixpanelProvider = ({ children }: { children: React.ReactNode }) =>
       },
       'perennial',
     )
-
     setMixpanelInstance(_mixpanelInstance)
     setIsInitialized(true)
   }, [])
@@ -50,6 +53,9 @@ export const MixpanelProvider = ({ children }: { children: React.ReactNode }) =>
   )
 
   useEffect(() => {
+    if (!mixpanelToken || LocalDev) {
+      return
+    }
     const handleRouteChange = (url: string) => {
       track(TrackingEvents.pageview, { url })
     }
