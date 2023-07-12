@@ -94,18 +94,31 @@ const vaultFetcher = async (
   }
 }
 
-export const useVaultUserSnapshot = (vaultType: PerennialVaultType) => {
+export const useVaultUserSnapshots = (vaultTypes: PerennialVaultType[]) => {
   const chainId = useChainId()
   const client = usePublicClient()
   const { address } = useAddress()
-  const vaultContract = getVaultForType(vaultType, chainId)
-
+  const vaultContracts = vaultTypes
+    .map((vaultType) => ({ contract: getVaultForType(vaultType, chainId), type: vaultType }))
+    .filter(({ contract }) => contract !== undefined)
   return useQuery({
-    queryKey: ['vaultUserSnapshot', chainId, vaultType, address],
-    enabled: !!chainId && !!address && !!vaultType && !!vaultContract,
+    queryKey: ['vaultUserSnapshot', chainId, ...vaultTypes, address],
+    enabled: !!chainId && !!address && !!vaultTypes.length && !!vaultContracts.length,
     queryFn: async () => {
-      if (!address || !chainId || !vaultContract) return
-      return vaultUserFetcher(address, vaultContract, chainId, client)
+      if (!address || !chainId || !vaultContracts.length) return
+      const vaultUserSnapshots = await Promise.all(
+        vaultContracts.map(({ contract }) => vaultUserFetcher(address, contract as any, chainId, client)),
+      )
+      const snapshotMap = vaultContracts.reduce((acc, { type }) => {
+        acc[type] = undefined
+        return acc
+      }, {} as { [key in PerennialVaultType]?: VaultUserSnapshot | undefined })
+
+      vaultContracts.forEach(({ type }, index) => {
+        snapshotMap[type] = vaultUserSnapshots[index]
+      })
+
+      return snapshotMap
     },
   })
 }

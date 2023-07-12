@@ -18,7 +18,14 @@ export default function VaultSelect() {
   const borderColor = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
   const titleSpanColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const chainId = useChainId()
-  const { vaultSnapshots, status, setSelectedVault, feeAPRs: feeAprs } = useVaultContext()
+  const {
+    vaultSnapshots,
+    status,
+    setSelectedVault,
+    feeAPRs: feeAprs,
+    vaultUserSnapshots,
+    selectedVault,
+  } = useVaultContext()
 
   return (
     <Flex
@@ -65,6 +72,8 @@ export default function VaultSelect() {
                     name={metadata.name}
                     assets={metadata.assets}
                     description={vaultDescription[snapshot.vaultType]}
+                    vaultUserSnapshot={vaultUserSnapshots?.[snapshot.vaultType]}
+                    isSelected={selectedVault === `${i}`}
                   />
                 </Box>
               )
