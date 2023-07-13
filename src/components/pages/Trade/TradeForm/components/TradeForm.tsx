@@ -210,6 +210,7 @@ function TradeForm(props: TradeFormProps) {
           orderValues={orderValues}
           usdcAllowance={balances?.usdcAllowance ?? 0n}
           leverage={leverage}
+          positionDelta={positionDelta.positionDelta}
           variant="adjust"
         />
       )}

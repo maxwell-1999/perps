@@ -8,7 +8,16 @@ import { JSXElementConstructor, ReactElement, forwardRef } from 'react'
 
 export interface ButtonProps extends ChakraButtonProps {
   label: React.ReactNode
-  variant?: 'primary' | 'secondary' | 'ghost' | 'transparent' | 'text' | 'pairSelector' | 'pairDropdown' | 'outline'
+  variant?:
+    | 'primary'
+    | 'secondary'
+    | 'ghost'
+    | 'transparent'
+    | 'text'
+    | 'pairSelector'
+    | 'pairDropdown'
+    | 'outline'
+    | 'cancel'
   isDisabled?: boolean
   isLoading?: boolean
   leftIcon?: ReactElement<any, string | JSXElementConstructor<any>>

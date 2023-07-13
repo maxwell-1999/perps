@@ -1,14 +1,17 @@
 import { Box, Flex, Text, useColorModeValue } from '@chakra-ui/react'
-import RightArrow from '@public/icons/position-change-arrow.svg'
 import { memo } from 'react'
 
 import { ModalDetailContainer } from '@/components/shared/ModalComponents'
 import { FormattedBig18, FormattedBig18USDPrice } from '@/components/shared/components'
-import { SupportedAsset } from '@/constants/assets'
+import { AssetMetadata, SupportedAsset } from '@/constants/assets'
 import { OrderDirection } from '@/constants/markets'
+import { Big18Math } from '@/utils/big18Utils'
 
 import colors from '@ds/theme/colors'
 
+import { ProductSnapshot } from '@t/perennial'
+
+import { calcPositionFee } from '../../utils'
 import { useAdjustmentModalCopy } from './hooks'
 
 const PositionValueDisplay = ({
@@ -18,39 +21,50 @@ const PositionValueDisplay = ({
   usd,
   asset,
   leverage,
-  isLast,
 }: {
   title: string
-  newValue: bigint
-  prevValue: bigint
+  newValue: bigint | string
+  prevValue?: bigint
   usd?: boolean
   leverage?: boolean
   asset?: SupportedAsset
   isLast?: boolean
 }) => {
-  const previousColor = useColorModeValue(colors.brand.blackAlpha[70], colors.brand.whiteAlpha[70])
+  const previousColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
 
   return (
-    <Flex flexDirection="column" mb={isLast ? 0 : 2}>
-      <Text variant="label" fontSize="12px" mb="5px">
+    <Flex alignItems="center" justifyContent="space-between">
+      <Text variant="label" fontSize="13px">
         {title}
       </Text>
       <Flex alignItems="center">
-        <Box mr={2}>
-          {!!usd ? (
-            <FormattedBig18USDPrice fontSize="15px" color={previousColor} value={prevValue} />
-          ) : (
-            <FormattedBig18 fontSize="15px" color={previousColor} value={prevValue} asset={asset} leverage={leverage} />
-          )}
-        </Box>
-        <Box height="10px" width="10px" mr={2}>
-          <RightArrow />
-        </Box>
+        {prevValue !== undefined && (
+          <>
+            <Flex mr={1} alignItems="center">
+              {!!usd ? (
+                <FormattedBig18USDPrice fontSize="14px" color={previousColor} value={prevValue} />
+              ) : (
+                <FormattedBig18
+                  fontSize="14px"
+                  color={previousColor}
+                  value={prevValue}
+                  asset={asset}
+                  leverage={leverage}
+                />
+              )}
+              <Text ml={1} color={previousColor} fontSize="14px">
+                {/* eslint-disable formatjs/no-literal-string-in-jsx */}→
+              </Text>
+            </Flex>
+          </>
+        )}
         <Box>
-          {!!usd ? (
-            <FormattedBig18USDPrice fontSize="15px" value={newValue} />
+          {typeof newValue === 'string' ? (
+            <Text fontSize="14px">{newValue}</Text>
+          ) : !!usd ? (
+            <FormattedBig18USDPrice fontSize="14px" value={newValue} />
           ) : (
-            <FormattedBig18 fontSize="15px" value={newValue} asset={asset} leverage={leverage} />
+            <FormattedBig18 fontSize="14px" value={newValue} asset={asset} leverage={leverage} />
           )}
         </Box>
       </Flex>
@@ -65,9 +79,11 @@ interface PositionInfoProps {
   prevLeverage: bigint
   newPosition: bigint
   prevPosition: bigint
+  positionDelta?: bigint
   asset: SupportedAsset
   isPrevious?: boolean
   orderDirection: OrderDirection
+  product: ProductSnapshot
   frozen: boolean
 }
 
@@ -79,25 +95,45 @@ export const PositionInfo = memo(
     prevCollateral,
     prevLeverage,
     prevPosition,
+    positionDelta,
     asset,
+    product,
     orderDirection,
   }: PositionInfoProps) {
     const copy = useAdjustmentModalCopy()
-    const isLong = orderDirection === OrderDirection.Long
-    const sideColor = isLong ? colors.brand.green : colors.brand.red
+
+    const {
+      latestVersion: { price },
+      productInfo: { takerFee },
+    } = product
+
+    const previousNotional = Big18Math.mul(prevPosition, Big18Math.abs(price))
+    const newNotional = Big18Math.mul(newPosition, Big18Math.abs(price))
+    const { quoteCurrency } = AssetMetadata[asset]
 
     return (
       <ModalDetailContainer>
-        <Flex flexDirection="column" mb={2}>
-          <Text variant="label" fontSize="12px">
-            {copy.side}
-          </Text>
-          <Text color={sideColor}>{orderDirection === OrderDirection.Long ? copy.long : copy.short}</Text>
-        </Flex>
-
-        <PositionValueDisplay title={copy.positionSize} newValue={newPosition} prevValue={prevPosition} asset={asset} />
+        <PositionValueDisplay
+          title={copy.side}
+          newValue={orderDirection === OrderDirection.Long ? copy.long : copy.short}
+        />
+        <PositionValueDisplay
+          title={copy.positionSizeAsset(asset)}
+          newValue={newPosition}
+          prevValue={prevPosition}
+          asset={asset}
+        />
+        <PositionValueDisplay
+          title={copy.positionSizeAsset(quoteCurrency)}
+          newValue={newNotional}
+          prevValue={previousNotional}
+          usd
+        />
         <PositionValueDisplay title={copy.collateral} newValue={newCollateral} prevValue={prevCollateral} usd />
         <PositionValueDisplay title={copy.leverage} newValue={newLeverage} prevValue={prevLeverage} leverage isLast />
+        {positionDelta !== undefined && (
+          <PositionValueDisplay title={copy.fees} newValue={calcPositionFee(price, positionDelta, takerFee)} usd />
+        )}
       </ModalDetailContainer>
     )
   },
