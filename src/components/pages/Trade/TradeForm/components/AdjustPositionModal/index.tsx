@@ -46,6 +46,7 @@ interface AdjustmentModalProps {
   orderValues: OrderValues
   leverage: string
   positionType: OpenPositionType
+  positionDelta?: bigint
   variant: 'close' | 'adjust' | 'withdraw'
 }
 
@@ -62,6 +63,7 @@ function AdjustPositionModal({
   crossProduct,
   usdcAllowance,
   leverage,
+  positionDelta,
   variant,
 }: AdjustmentModalProps) {
   const toast = useToast()
@@ -262,6 +264,8 @@ function AdjustPositionModal({
                 prevLeverage={prevLeverage}
                 asset={asset}
                 orderDirection={orderDirection}
+                product={product}
+                positionDelta={positionDelta}
                 frozen
               />
             ) : (
@@ -305,7 +309,7 @@ function AdjustPositionModal({
                 width="100%"
               />
             )}
-            <Button variant="secondary" onClick={onCancel} label={copy.cancel} width="100%" />
+            <Button variant="cancel" onClick={onCancel} label={copy.cancel} width="100%" />
           </VStack>
         </ModalFooter>
       </ModalContent>

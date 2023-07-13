@@ -11,7 +11,9 @@ export const useAdjustmentModalCopy = () => {
     side: intl.formatMessage({ defaultMessage: 'Side' }),
     long: intl.formatMessage({ defaultMessage: 'Long' }),
     short: intl.formatMessage({ defaultMessage: 'Short' }),
-    positionSize: intl.formatMessage({ defaultMessage: 'Size' }),
+    positionSizeAsset: (asset: string) =>
+      intl.formatMessage({ defaultMessage: 'Size ({asset})' }, { asset: asset.toUpperCase() }),
+    fees: intl.formatMessage({ defaultMessage: 'Fees' }),
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
     position: intl.formatMessage({ defaultMessage: 'Position' }),

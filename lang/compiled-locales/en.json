@@ -1051,6 +1051,20 @@
       "value": "Position settled"
     }
   ],
+  "Yb56RU": [
+    {
+      "type": 0,
+      "value": "Size ("
+    },
+    {
+      "type": 1,
+      "value": "asset"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
   "ZYuzsl": [
     {
       "type": 0,

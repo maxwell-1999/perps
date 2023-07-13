@@ -67,6 +67,7 @@ export const ModalDetailContainer = ({ children }: { children: React.ReactNode }
       py="12px"
       px="14px"
       width="100%"
+      gap={2}
     >
       {children}
     </Flex>

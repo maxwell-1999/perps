@@ -132,6 +132,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
           position={position}
           product={product}
           orderValues={orderValues}
+          positionDelta={positionDelta.positionDelta}
           usdcAllowance={0n}
           variant="close"
           leverage={leverage}

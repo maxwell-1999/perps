@@ -106,6 +106,13 @@ const Button: ComponentStyleConfig = {
       border: `1px solid ${mode(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])(props)}`,
       color: mode(colors.brand.blackAlpha[80], colors.brand.whiteAlpha[80])(props),
     }),
+    cancel: (props: StyleFunctionProps) => ({
+      border: `1px solid ${mode(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])(props)}`,
+      bg: mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props),
+      _hover: {
+        bg: mode(colors.brand.blackAlpha[15], colors.brand.whiteAlpha[15])(props),
+      },
+    }),
   },
 }
 
