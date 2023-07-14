@@ -385,6 +385,7 @@ const fetchUserPositionDetails = async (
       nextLeverage: collateral > 0n ? Big18Math.div(nextNotional, collateral) : 0n,
       maintenance,
       status: positionStatus(positionSize, nextPositionSize, collateral),
+      side,
     }
   }
   const { startBlock, depositAmount, fees: _fees, endBlock, lastUpdatedBlockNumber, valuePnl } = graphPosition
