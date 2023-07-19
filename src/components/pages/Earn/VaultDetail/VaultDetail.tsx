@@ -45,7 +45,7 @@ export default function VaultDetail({ vault, feeAPR }: { vault: VaultSnapshot; f
   const pnl = usePnl({ vault, vaultUserSnapshot })
 
   const alpha5 = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])
-  const metadata = VaultMetadata[chainId][vaultType]
+  const metadata = VaultMetadata[chainId]?.[vaultType]
   const vaultName = metadata?.name ?? name
   const hasClaimable = !Big18Math.isZero(vaultUserSnapshot?.claimable ?? 0n)
   const hasPendingRedemptions = !Big18Math.isZero(vaultUserSnapshot?.pendingRedemptionAmount ?? 0n)

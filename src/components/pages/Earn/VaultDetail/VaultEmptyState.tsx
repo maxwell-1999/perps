@@ -1,6 +1,6 @@
 import { ArrowBackIcon, InfoIcon } from '@chakra-ui/icons'
 import { Flex, Heading, Text, useColorModeValue } from '@chakra-ui/react'
-import { mainnet } from '@wagmi/chains'
+import { goerli, mainnet } from '@wagmi/chains'
 
 import { useChainId } from '@/hooks/network'
 
@@ -33,7 +33,7 @@ export default function VaultEmptyState() {
   const alpha50 = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const alpha80 = useColorModeValue(colors.brand.blackAlpha[80], colors.brand.whiteAlpha[80])
 
-  const isEthereum = chainId === mainnet.id
+  const isEthereum = chainId === mainnet.id || chainId === goerli.id
 
   return (
     <Flex height="100%" width="100%" p={5} justifyContent="center" alignItems="center">

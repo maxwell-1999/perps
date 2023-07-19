@@ -53,7 +53,7 @@ export default function VaultSelect() {
             </Flex>
           ) : (
             vaultSnapshots.map((snapshot, i) => {
-              const metadata = VaultMetadata[chainId][snapshot.vaultType]
+              const metadata = VaultMetadata[chainId]?.[snapshot.vaultType]
               if (!metadata) return null
               const feeAPR = feeAprs?.[snapshot.vaultType] ?? 0n
               return (

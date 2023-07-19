@@ -104,7 +104,7 @@ const SelectButtonLabel = ({ snapshot, feeAPR }: { snapshot: VaultSnapshot; feeA
   const intl = useIntl()
   const copy = useVaultSelectCopy()
   const chainId = useChainId()
-  const metadata = VaultMetadata[chainId][snapshot.vaultType]
+  const metadata = VaultMetadata[chainId]?.[snapshot.vaultType]
 
   const feeRate = feeAPR ?? 0n
   const apr = formatBig18(feeRate * 100n, { numSigFigs: 4, minDecimals: 2 })
