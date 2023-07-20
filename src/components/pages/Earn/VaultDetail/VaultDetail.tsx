@@ -1,5 +1,5 @@
 import { Flex, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { VaultMetadata } from '@/constants/vaults'
 import { useVaultContext } from '@/contexts/vaultContext'
@@ -15,6 +15,7 @@ import MobileVaultSelect from '../VaultSelect/MobileVaultSelector'
 import { useExposureAndFunding } from '../hooks'
 import { useVaultDescription } from '../hooks'
 import ClaimModal from './ClaimModal'
+import LpWarningModal from './LpWarningModal'
 import VaultForm from './VaultForm'
 import {
   APRCard,
@@ -31,11 +32,19 @@ export default function VaultDetail({ vault, feeAPR }: { vault: VaultSnapshot; f
   const chainId = useChainId()
   const isBase = useBreakpointValue({ base: true, md: false })
   const [showClaimModal, setShowClaimModal] = useState(false)
+  const [showLpModal, setShowLpModal] = useState(false)
   const vaultDescription = useVaultDescription()
   const { data: balances } = useBalances()
   const copy = useVaultDetailCopy()
   const { vaultUserSnapshots } = useVaultContext()
   const { name, totalAssets, maxCollateral, vaultType } = vault
+
+  useEffect(() => {
+    const lpWarningShown = localStorage.getItem(`${chainId}-lpWarning`)
+    if (!lpWarningShown) {
+      setShowLpModal(true)
+    }
+  }, [])
 
   const vaultUserSnapshot = vaultUserSnapshots && vaultUserSnapshots[vaultType]
 
@@ -71,6 +80,7 @@ export default function VaultDetail({ vault, feeAPR }: { vault: VaultSnapshot; f
           balances={balances}
         />
       )}
+      {showLpModal && <LpWarningModal onClose={() => setShowLpModal(false)} />}
       <Flex height="100%" width="100%" pt={10} px={14} bg={alpha5}>
         <Flex flexDirection="column" mr={isBase ? 0 : 9} width={isBase ? '100%' : '50%'}>
           <MobileVaultSelect />

@@ -299,6 +299,12 @@
       "value": "Trade"
     }
   ],
+  "913CBE": [
+    {
+      "type": 0,
+      "value": "I Understand"
+    }
+  ],
   "97+Dzc": [
     {
       "type": 0,
@@ -355,6 +361,12 @@
     {
       "type": 1,
       "value": "difference"
+    }
+  ],
+  "AwJFvy": [
+    {
+      "type": 0,
+      "value": "Perennial vaults take the opposite side of the net of traders, leading to directional (delta) exposure. Vaults earn funding and fees in exchange for the directional risk they take on, but there is no guarantee against this resulting in net losses."
     }
   ],
   "AxhyVR": [
@@ -415,6 +427,16 @@
     {
       "type": 0,
       "value": "Blue Chip Vaults (PVA) deploys liquidity to markets of major crypto assets. Currently, this includes 2 pools: ETH-long & ETH-short."
+    }
+  ],
+  "DNB9cg": [
+    {
+      "type": 1,
+      "value": "learnMore"
+    },
+    {
+      "type": 0,
+      "value": " about the strategy and risks involved."
     }
   ],
   "DRhXM2": [
@@ -879,6 +901,12 @@
       "value": "Await Settlement"
     }
   ],
+  "TdTXXf": [
+    {
+      "type": 0,
+      "value": "Learn more"
+    }
+  ],
   "TvI9L9": [
     {
       "type": 0,
@@ -1081,6 +1109,12 @@
     {
       "type": 0,
       "value": "Open position"
+    }
+  ],
+  "ZyEi9p": [
+    {
+      "type": 0,
+      "value": "Provide Liquidity"
     }
   ],
   "a8vnMh": [
