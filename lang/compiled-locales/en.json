@@ -387,12 +387,6 @@
       "value": "Value exceeds position amount."
     }
   ],
-  "BWAp9h": [
-    {
-      "type": 0,
-      "value": "Confirm withdraw"
-    }
-  ],
   "BY343C": [
     {
       "type": 0,
@@ -629,6 +623,12 @@
     {
       "type": 0,
       "value": "Claim shares"
+    }
+  ],
+  "JdkOCO": [
+    {
+      "type": 0,
+      "value": "Confirm withdrawal"
     }
   ],
   "JfG49w": [

@@ -225,6 +225,7 @@ export const ClaimCard = ({
   const intl = useIntl()
   const copy = useVaultDetailCopy()
   const alpha5 = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])
+  const bg = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
   const formattedClaimable = formatBig18USDPrice(claimable)
   const isPending = !Big18Math.isZero(pendingRedemptionAmount)
 
@@ -244,22 +245,26 @@ export const ClaimCard = ({
 
   return (
     <Container p={4} mb="22px" variant="vaultCard" bg={alpha5}>
-      <Flex flexDirection="column">
-        <Text mb={2} fontSize="16px">
-          {isPending ? copy.withdrawPending : copy.yourWithdrawIsReady}
-        </Text>
-        <Text fontSize="14px" variant="label" mb={2}>
+      <Flex flexDirection="column" gap={2}>
+        <Text fontSize="16px">{isPending ? copy.withdrawPending : copy.yourWithdrawIsReady}</Text>
+        <Text fontSize="14px" variant="label">
           {isPending ? copy.pendingWithdrawal : bodyText}
         </Text>
         <Flex>
           <TxButton
-            variant="text"
-            p={0}
+            width="100%"
+            variant="outline"
             height="initial"
+            p={2}
+            bg={bg}
             onClick={() => setShowClaimModal(true)}
             label={
-              <Text color={colors.brand.green} fontSize="14px">
+              <Text fontSize="14px">
                 {copy.confirmWithdraw}
+                {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+                <Text as="span" fontFamily="Inter" ml={1}>
+                  →
+                </Text>
               </Text>
             }
             isLoading={isPending}

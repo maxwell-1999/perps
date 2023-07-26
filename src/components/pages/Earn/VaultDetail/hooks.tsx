@@ -43,7 +43,7 @@ export const useVaultDetailCopy = () => {
     noValue: intl.formatMessage({ defaultMessage: '——' }),
     infinite: intl.formatMessage({ defaultMessage: '$∞' }),
     yourWithdrawIsReady: intl.formatMessage({ defaultMessage: 'Your withdraw is ready' }),
-    confirmWithdraw: intl.formatMessage({ defaultMessage: 'Confirm withdraw' }),
+    confirmWithdraw: intl.formatMessage({ defaultMessage: 'Confirm withdrawal' }),
     positionUpdating: intl.formatMessage({ defaultMessage: 'Your position is being updated' }),
     autonomous: intl.formatMessage({ defaultMessage: 'Autonomous' }),
     autonomousBody: intl.formatMessage({
