@@ -44,6 +44,7 @@ export default function VaultDetail({ vault, feeAPR }: { vault: VaultSnapshot; f
     if (!lpWarningShown) {
       setShowLpModal(true)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const vaultUserSnapshot = vaultUserSnapshots && vaultUserSnapshots[vaultType]
