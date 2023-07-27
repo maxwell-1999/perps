@@ -131,7 +131,7 @@ const ConnectWalletInner: React.FC<ConnectWalletInnerProps> = ({
           onClick={onClickConnect}
           variant="transparent"
         />
-        {accountConnected && !isBase && (
+        {accountConnected && (
           <Box position="relative">
             <IconButton
               aria-label={chainCopy}
