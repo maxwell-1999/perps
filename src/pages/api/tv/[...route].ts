@@ -16,8 +16,6 @@ export default async function handler(req: NextRequest) {
   const pythPath = url.pathname.replace('/api/tv/', '')
   if (!AllowedPythEndpoints.includes(pythPath)) return new Response('Method not allowed', { status: 405 })
 
-  const pythUrl = `${PythUrlBase}/${pythPath}${pythPath !== 'symbol_info' ? url.search : ''}`
-  const pythResponse = await fetch(pythUrl)
   if (pythPath === 'config') {
     return new Response(
       JSON.stringify({
@@ -38,6 +36,8 @@ export default async function handler(req: NextRequest) {
     )
   }
 
+  const pythUrl = `${PythUrlBase}/${pythPath}${pythPath !== 'symbol_info' ? url.search : ''}`
+  const pythResponse = await fetch(pythUrl)
   if (!pythResponse.ok) {
     console.error(`Error fetching ${pythUrl}. Status: ${pythResponse.status}. Status Text: ${pythResponse.statusText}`)
     return new Response(await pythResponse.text(), { status: 500 })
