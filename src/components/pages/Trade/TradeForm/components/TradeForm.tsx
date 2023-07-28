@@ -356,14 +356,7 @@ function TradeForm(props: TradeFormProps) {
         </Flex>
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
-          <TradeReceipt
-            mb="25px"
-            px="3px"
-            product={product}
-            positionDelta={positionDelta}
-            positionDetails={position}
-            leverage={leverage}
-          />
+          <TradeReceipt mb="25px" px="3px" product={product} positionDelta={positionDelta} positionDetails={position} />
           {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
             <ButtonGroup>
               <Button

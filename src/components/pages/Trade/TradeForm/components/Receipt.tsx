@@ -3,7 +3,7 @@ import { Flex, FlexProps } from '@chakra-ui/react'
 import { DataRow } from '@/components/design-system'
 import { TooltipText } from '@/components/design-system/Tooltip'
 import { useMarketContext } from '@/contexts/marketContext'
-import { PositionDetails, useChainLivePrices } from '@/hooks/markets'
+import { PositionDetails, useAsset7DayFees, useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { calcLeverage, calcLiquidationPrice, utilization } from '@/utils/positionUtils'
 import { Hour, Year } from '@/utils/timeUtils'
@@ -12,7 +12,7 @@ import { computeFundingRate } from '@/utils/utilizationRateUtils'
 import { ProductSnapshot } from '@t/perennial'
 
 import { useReceiptCopy } from '../hooks'
-import { calcPositionFee } from '../utils'
+import { calcPositionFee, calcTradeFeeApr } from '../utils'
 
 interface ReceiptProps {
   product: ProductSnapshot
@@ -24,7 +24,6 @@ interface ReceiptProps {
   }
   showCollateral?: boolean
   showLeverage?: boolean
-  leverage?: string
 }
 
 export function TradeReceipt({
@@ -33,12 +32,11 @@ export function TradeReceipt({
   positionDetails,
   showCollateral,
   showLeverage,
-  leverage,
   ...props
 }: ReceiptProps & FlexProps) {
   const copy = useReceiptCopy()
   const livePrices = useChainLivePrices()
-  const { isMaker } = useMarketContext()
+  const { isMaker, makerAsset, makerOrderDirection, selectedMakerMarketSnapshot: makerSnapshot } = useMarketContext()
 
   const {
     productInfo: { takerFee, utilizationCurve, makerFee },
@@ -70,18 +68,22 @@ export function TradeReceipt({
   const close = positionDelta.positionDelta < 0n
   const takerFeeRate = Big18Math.toFloatString(takerFee * 100n)
   const makerFeeRate = Big18Math.toFloatString(makerFee * 100n)
-  const exposure = Big18Math.mul(currentUtilization, leverage ? Big18Math.fromFloatString(leverage) : 0n)
+  const exposure = Big18Math.mul(currentUtilization, newLeverage ? newLeverage : 0n)
   const fundingFees = Big18Math.mul(fundingRate, exposure)
-  // const tradingFees = Big18Math.div(takerFee, position.maker)
+  const notional = Big18Math.mul(Big18Math.abs(price), newPosition)
+  const { data: fees } = useAsset7DayFees(makerAsset)
 
+  const fees7Day = fees?.[makerOrderDirection] ?? 0n
+  const makerOi = makerSnapshot?.openInterest?.maker ?? 0n
+  const tradingFees = calcTradeFeeApr({ fees7Day, makerOi, collateral: newCollateral, notional })
   return (
     <Flex flexDirection="column" {...props}>
       {isMaker && (
         <>
           <DataRow label={copy.currentExposure} value={formatBig18Percent(exposure)} />
           <DataRow label={copy.fundingFees} value={formatBig18Percent(fundingFees, { numDecimals: 4 })} />
-          {/* <DataRow label={copy.tradingFees} value={formatBig18Percent(tradingFees, { numDecimals: 4 })} />
-          <DataRow label={copy.totalAPR} value={formatBig18Percent(tradingFees + fundingFees, { numDecimals: 4 })} /> */}
+          <DataRow label={copy.tradingFees} value={formatBig18Percent(tradingFees, { numDecimals: 4 })} />
+          <DataRow label={copy.totalAPR} value={formatBig18Percent(tradingFees + fundingFees, { numDecimals: 4 })} />
         </>
       )}
       <DataRow

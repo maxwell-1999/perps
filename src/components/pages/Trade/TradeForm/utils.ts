@@ -205,3 +205,23 @@ export const getPositionFromSelectedMarket = ({
   }
   return positions?.[selectedMarket]?.[orderDirection]
 }
+
+export const calcTradeFeeApr = ({
+  fees7Day,
+  makerOi,
+  collateral,
+  notional,
+}: {
+  fees7Day: bigint
+  makerOi: bigint
+  collateral: bigint
+  notional: bigint
+}) => {
+  if (!fees7Day || !makerOi || !collateral || !notional) return 0n
+  const fees7DayFloat = Big18Math.toUnsafeFloat(fees7Day)
+  const makerOiFloat = Big18Math.toUnsafeFloat(makerOi)
+  const collateralFloat = Big18Math.toUnsafeFloat(collateral)
+  const notionalFloat = Big18Math.toUnsafeFloat(notional)
+  const dailyAvgFee = fees7DayFloat / 7
+  return Big18Math.fromFloatString(`${(dailyAvgFee * 52 * notionalFloat) / (makerOiFloat * collateralFloat)}`)
+}
