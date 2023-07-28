@@ -809,6 +809,12 @@
       "value": "APR"
     }
   ],
+  "O2pMpb": [
+    {
+      "type": 0,
+      "value": "7d Volume (L/S)"
+    }
+  ],
   "OGoI5F": [
     {
       "type": 1,

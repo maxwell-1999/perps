@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
 import { useMarketContext } from '@/contexts/marketContext'
-import { useAsset24hrData, useChainLivePrices } from '@/hooks/markets'
+import { useAsset7DayData, useAsset24hrData, useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { utilization } from '@/utils/positionUtils'
 import { Hour } from '@/utils/timeUtils'
@@ -25,6 +25,7 @@ export const useMarketBarCopy = () => {
     low: intl.formatMessage({ defaultMessage: '24h Low' }),
     high: intl.formatMessage({ defaultMessage: '24h High' }),
     volume: intl.formatMessage({ defaultMessage: '24h Volume' }),
+    volumeLS: intl.formatMessage({ defaultMessage: '7d Volume (L/S)' }),
     openInterest: intl.formatMessage({ defaultMessage: 'Open Interest (L/S)' }),
     liquidity: intl.formatMessage({ defaultMessage: 'Liquidity (L/S)' }),
     utilization: intl.formatMessage({ defaultMessage: 'Utilization (L/S)' }),
@@ -43,6 +44,7 @@ export const useFormattedMarketBarValues = () => {
   } = useMarketContext()
 
   const { data: dailyData } = useAsset24hrData(isMaker ? makerAsset : selectedMarket)
+  const { data: weeklyData } = useAsset7DayData(isMaker ? makerAsset : selectedMarket)
 
   const totalVolume = useMemo(() => {
     if (!dailyData?.volume) return 0n
@@ -94,5 +96,9 @@ export const useFormattedMarketBarValues = () => {
       compact: true,
     })} / ${formatBig18USDPrice(shortLiquidity, { compact: true })}`,
     utilization: `${longUtilization} / ${shortUtilization}`,
+    volumeLS: `${formatBig18USDPrice(weeklyData?.takerVolumes.Long ?? 0n, { compact: true })} / ${formatBig18USDPrice(
+      weeklyData?.takerVolumes.Short ?? 0n,
+      { compact: true },
+    )}`,
   }
 }

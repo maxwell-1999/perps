@@ -5,7 +5,7 @@ import { TooltipText } from '@/components/design-system/Tooltip'
 import { TooltipIcon } from '@/components/design-system/Tooltip'
 import colors from '@/components/design-system/theme/colors'
 import { useMarketContext } from '@/contexts/marketContext'
-import { PositionDetails, useAsset7DayFees, useChainLivePrices } from '@/hooks/markets'
+import { PositionDetails, useAsset7DayData, useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { calcLeverage, calcLiquidationPrice, calcNotional, utilization } from '@/utils/positionUtils'
 import { Hour, Year } from '@/utils/timeUtils'
@@ -73,8 +73,8 @@ export function TradeReceipt({
   const exposure = Big18Math.mul(currentUtilization, newLeverage ? newLeverage : 0n)
   const fundingFees = Big18Math.mul(fundingRate, exposure)
   const notional = calcNotional(newPosition, price)
-  const { data: fees } = useAsset7DayFees(makerAsset)
-
+  const { data: asset7DayData } = useAsset7DayData(makerAsset)
+  const fees = asset7DayData?.fees
   const fees7Day = fees?.[makerOrderDirection] ?? 0n
   const makerOi = makerSnapshot?.openInterest?.maker ?? 0n
   const tradingFees = calcTradeFeeApr({ fees7Day, makerOi, collateral: newCollateral, notional })
