@@ -141,9 +141,16 @@ export function useReceiptCopy() {
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
     currentExposure: intl.formatMessage({ defaultMessage: 'Current Exposure' }),
-    fundingFees: intl.formatMessage({ defaultMessage: 'Funding Fees' }),
-    tradingFees: intl.formatMessage({ defaultMessage: 'Trading Fees' }),
+    fundingFees: intl.formatMessage({ defaultMessage: 'Funding Fee APR' }),
+    tradingFees: intl.formatMessage({ defaultMessage: 'Trading Fee APR' }),
     totalAPR: intl.formatMessage({ defaultMessage: 'Total APR' }),
+    tradingFeeCalculation: intl.formatMessage({
+      defaultMessage:
+        'We calculate this using the formula: (7d Fee Avg * 52w * User Notional) / (Maker Notional * Collateral)',
+    }),
+    totalAprCalculation: intl.formatMessage({
+      defaultMessage: 'We calculate this using the formula: Funding Fee APR + Trading Fee APR',
+    }),
     tooltipFee: (rate: string) => intl.formatMessage({ defaultMessage: 'Open/Close Fee: {rate}%' }, { rate }),
   }
 }

@@ -329,6 +329,12 @@
       "value": "Sell"
     }
   ],
+  "9IuVXI": [
+    {
+      "type": 0,
+      "value": "Funding Fee APR"
+    }
+  ],
   "A3zdUJ": [
     {
       "type": 0,
@@ -397,6 +403,12 @@
     {
       "type": 0,
       "value": "Change"
+    }
+  ],
+  "Bo6BEb": [
+    {
+      "type": 0,
+      "value": "Trading Fee APR"
     }
   ],
   "C5rikK": [
@@ -951,6 +963,12 @@
       "value": "Collateral (after fees)"
     }
   ],
+  "UoLYUV": [
+    {
+      "type": 0,
+      "value": "We calculate this using the formula: Funding Fee APR + Trading Fee APR"
+    }
+  ],
   "Uq0c8S": [
     {
       "type": 0,
@@ -1005,6 +1023,12 @@
     {
       "type": 0,
       "value": "Resolved"
+    }
+  ],
+  "W91xEP": [
+    {
+      "type": 0,
+      "value": "We calculate this using the formula: (7d Fee Avg * 52w * User Notional) / (Maker Notional * Collateral)"
     }
   ],
   "WBB92z": [

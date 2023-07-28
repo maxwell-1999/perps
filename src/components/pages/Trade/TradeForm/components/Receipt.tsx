@@ -1,7 +1,9 @@
-import { Flex, FlexProps } from '@chakra-ui/react'
+import { Flex, FlexProps, Text, useColorModeValue } from '@chakra-ui/react'
 
 import { DataRow } from '@/components/design-system'
 import { TooltipText } from '@/components/design-system/Tooltip'
+import { TooltipIcon } from '@/components/design-system/Tooltip'
+import colors from '@/components/design-system/theme/colors'
 import { useMarketContext } from '@/contexts/marketContext'
 import { PositionDetails, useAsset7DayFees, useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
@@ -37,7 +39,7 @@ export function TradeReceipt({
   const copy = useReceiptCopy()
   const livePrices = useChainLivePrices()
   const { isMaker, makerAsset, makerOrderDirection, selectedMakerMarketSnapshot: makerSnapshot } = useMarketContext()
-
+  const alpha50 = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const {
     productInfo: { takerFee, utilizationCurve, makerFee },
     latestVersion: { price },
@@ -82,8 +84,34 @@ export function TradeReceipt({
         <>
           <DataRow label={copy.currentExposure} value={formatBig18Percent(exposure)} />
           <DataRow label={copy.fundingFees} value={formatBig18Percent(fundingFees, { numDecimals: 4 })} />
-          <DataRow label={copy.tradingFees} value={formatBig18Percent(tradingFees, { numDecimals: 4 })} />
-          <DataRow label={copy.totalAPR} value={formatBig18Percent(tradingFees + fundingFees, { numDecimals: 4 })} />
+          <DataRow
+            label={
+              <Flex alignItems="center" gap={2}>
+                <Text variant="label">{copy.tradingFees}</Text>
+                <TooltipIcon
+                  height="11px"
+                  width="11px"
+                  color={alpha50}
+                  tooltipText={<Text fontSize="11px">{copy.tradingFeeCalculation}</Text>}
+                />
+              </Flex>
+            }
+            value={formatBig18Percent(tradingFees, { numDecimals: 4 })}
+          />
+          <DataRow
+            label={
+              <Flex alignItems="center" gap={2}>
+                <Text variant="label">{copy.totalAPR}</Text>
+                <TooltipIcon
+                  height="11px"
+                  width="11px"
+                  color={alpha50}
+                  tooltipText={<Text fontSize="11px">{copy.totalAprCalculation}</Text>}
+                />
+              </Flex>
+            }
+            value={formatBig18Percent(tradingFees + fundingFees, { numDecimals: 4 })}
+          />
         </>
       )}
       <DataRow
