@@ -201,3 +201,7 @@ export const getTradeLimitations = (userProductSnapshot?: UserProductSnapshot) =
     canOpenMaker,
   }
 }
+
+export const calcNotional = (position: bigint, price: bigint) => {
+  return Big18Math.abs(Big18Math.mul(position, price))
+}
