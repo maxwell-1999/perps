@@ -218,10 +218,10 @@ export const calcTradeFeeApr = ({
   notional: bigint
 }) => {
   if (!fees7Day || !makerOi || !collateral || !notional) return 0n
-  const fees7DayFloat = Big18Math.toUnsafeFloat(fees7Day)
-  const makerOiFloat = Big18Math.toUnsafeFloat(makerOi)
-  const collateralFloat = Big18Math.toUnsafeFloat(collateral)
-  const notionalFloat = Big18Math.toUnsafeFloat(notional)
-  const dailyAvgFee = fees7DayFloat / 7
-  return Big18Math.fromFloatString(`${(dailyAvgFee * 52 * notionalFloat) / (makerOiFloat * collateralFloat)}`)
+  const dailyAvgFee = Big18Math.div(fees7Day, Big18Math.fromDecimals(7n, 0))
+  const annualFees = Big18Math.mul(dailyAvgFee, Big18Math.fromDecimals(52n, 0))
+  const annualFeesPerUser = Big18Math.mul(annualFees, notional)
+  const denominator = Big18Math.mul(makerOi, collateral)
+
+  return Big18Math.div(annualFeesPerUser, denominator)
 }
