@@ -28,7 +28,7 @@ import {
   positionStatus,
   size,
 } from '@/utils/positionUtils'
-import { last24hrBounds } from '@/utils/timeUtils'
+import { last7dBounds, last24hrBounds } from '@/utils/timeUtils'
 
 import { ICollateralAbi } from '@abi/ICollateral.abi'
 import { LensAbi } from '@abi/Lens.abi'
@@ -173,6 +173,55 @@ export const useAsset24hrData = (asset: SupportedAsset) => {
         from: from.toString(),
         to: to.toString(),
       })
+    },
+  })
+}
+
+export const useAsset7DayFees = (asset: SupportedAsset) => {
+  const chainId = useChainId()
+  const graphClient = useGraphClient()
+  const market = ChainMarkets[chainId][asset]
+
+  return useQuery({
+    queryKey: ['asset7DayFees', chainId, asset],
+    enabled: !!market,
+    queryFn: async () => {
+      if (!market) return
+
+      const { from, to } = last7dBounds()
+
+      const query = gql(`
+        query get7DayFees($products: [Bytes!]!, $from: BigInt!, $to: BigInt!) {
+          volume: bucketedVolumes(
+            where:{bucket: daily, product_in: $products, periodStartTimestamp_gte: $from, periodStartTimestamp_lte: $to}
+            orderBy: periodStartTimestamp
+            orderDirection: asc
+          ) {
+            product
+            takerFees
+            makerFees
+          }
+        }
+      `)
+
+      const graphResponse = await graphClient.request(query, {
+        products: [market.Long, market.Short].filter(notEmpty),
+        from: from.toString(),
+        to: to.toString(),
+      })
+
+      const fees = graphResponse.volume.reduce(
+        (acc, volume) => {
+          if (getAddress(volume.product) === market.Long)
+            acc.Long += BigInt(volume.takerFees) + BigInt(volume.makerFees)
+          if (getAddress(volume.product) === market.Short)
+            acc.Short += BigInt(volume.takerFees) + BigInt(volume.makerFees)
+          return acc
+        },
+        { [OrderDirection.Long]: 0n, [OrderDirection.Short]: 0n },
+      )
+
+      return fees
     },
   })
 }

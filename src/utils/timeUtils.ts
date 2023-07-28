@@ -1,4 +1,4 @@
-import { formatDistanceToNowStrict } from 'date-fns'
+import { formatDistanceToNowStrict, subDays } from 'date-fns'
 
 export const Second = 1n
 export const Minute = Second * 60n
@@ -12,6 +12,16 @@ export const last24hrBounds = () => {
 
   const to = Math.floor(now.setUTCHours(now.getUTCHours(), 59, 59, 999) / 1000)
   const from = Math.floor(yesterday.setUTCHours(yesterday.getUTCHours(), 0, 0, 0) / 1000)
+
+  return { to, from }
+}
+
+export const last7dBounds = () => {
+  const end = new Date()
+  const start = subDays(end, 7)
+
+  const to = Math.floor(end.setUTCHours(end.getUTCHours(), 59, 59, 999) / 1000)
+  const from = Math.floor(start.setUTCHours(start.getUTCHours(), 0, 0, 0) / 1000)
 
   return { to, from }
 }
