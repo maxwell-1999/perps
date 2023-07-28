@@ -375,6 +375,12 @@
       "value": "difference"
     }
   ],
+  "AfTEOU": [
+    {
+      "type": 0,
+      "value": "Calculated from: (7d Fee Avg * 52w * Notional) / (Total Maker Notional * Collateral)"
+    }
+  ],
   "AwJFvy": [
     {
       "type": 0,
@@ -737,6 +743,12 @@
       "value": "%"
     }
   ],
+  "MXS+LE": [
+    {
+      "type": 0,
+      "value": "Calculated from: Funding Fee APR + Trading Fee APR"
+    }
+  ],
   "N0eaIb": [
     {
       "type": 0,
@@ -963,12 +975,6 @@
       "value": "Collateral (after fees)"
     }
   ],
-  "UoLYUV": [
-    {
-      "type": 0,
-      "value": "We calculate this using the formula: Funding Fee APR + Trading Fee APR"
-    }
-  ],
   "Uq0c8S": [
     {
       "type": 0,
@@ -1023,12 +1029,6 @@
     {
       "type": 0,
       "value": "Resolved"
-    }
-  ],
-  "W91xEP": [
-    {
-      "type": 0,
-      "value": "We calculate this using the formula: (7d Fee Avg * 52w * User Notional) / (Maker Notional * Collateral)"
     }
   ],
   "WBB92z": [

@@ -82,7 +82,6 @@ export function TradeReceipt({
     <Flex flexDirection="column" {...props}>
       {isMaker && (
         <>
-          <DataRow label={copy.currentExposure} value={formatBig18Percent(exposure)} />
           <DataRow label={copy.fundingFees} value={formatBig18Percent(fundingFees, { numDecimals: 4 })} />
           <DataRow
             label={
@@ -112,6 +111,7 @@ export function TradeReceipt({
             }
             value={formatBig18Percent(tradingFees + fundingFees, { numDecimals: 4 })}
           />
+          <DataRow label={copy.currentExposure} value={formatBig18Percent(exposure)} />
         </>
       )}
       <DataRow
