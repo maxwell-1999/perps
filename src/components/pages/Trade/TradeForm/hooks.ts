@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import { useIntl } from 'react-intl'
 
-import { SupportedAsset } from '@/constants/assets'
+import { SupportedAsset, SupportedMakerMarket } from '@/constants/assets'
 import { FormState } from '@/contexts/tradeFormContext'
 import { isNumbersOnly } from '@/utils/formUtils'
 
@@ -17,19 +17,32 @@ import {
 
 type MarketChangeProps = {
   selectedMarket: SupportedAsset
+  selectedMakerMarket: SupportedMakerMarket
   formState: FormState
   setTradeFormState: (state: FormState) => void
+  isMaker?: boolean
 }
 
-export function useResetFormOnMarketChange({ selectedMarket, formState, setTradeFormState }: MarketChangeProps) {
+export function useResetFormOnMarketChange({
+  selectedMarket,
+  formState,
+  setTradeFormState,
+  selectedMakerMarket,
+  isMaker,
+}: MarketChangeProps) {
   const prevMarketRef = useRef(selectedMarket)
+  const prevMakerMarketRef = useRef(selectedMakerMarket)
 
   useEffect(() => {
-    if (prevMarketRef.current !== selectedMarket && formState !== FormState.trade) {
+    if (isMaker && prevMakerMarketRef.current !== selectedMakerMarket && formState !== FormState.trade) {
+      setTradeFormState(FormState.trade)
+    }
+    if (!isMaker && prevMarketRef.current !== selectedMarket && formState !== FormState.trade) {
       setTradeFormState(FormState.trade)
     }
     prevMarketRef.current = selectedMarket
-  }, [selectedMarket, formState, setTradeFormState])
+    prevMakerMarketRef.current = selectedMakerMarket
+  }, [selectedMarket, formState, setTradeFormState, selectedMakerMarket, isMaker])
 }
 
 export function useStyles() {
@@ -106,6 +119,13 @@ export function useTradeFormCopy() {
     close: intl.formatMessage({ defaultMessage: 'Close' }),
     switchLeverageInput: intl.formatMessage({ defaultMessage: 'switch-leverage-input' }),
     Slider: intl.formatMessage({ defaultMessage: 'Slider' }),
+    Make: intl.formatMessage({ defaultMessage: 'Make' }),
+    isRestricted: (isMaker?: boolean) => {
+      if (isMaker) {
+        return intl.formatMessage({ defaultMessage: '* Maker positions unavailable while taker position open' })
+      }
+      return intl.formatMessage({ defaultMessage: '* Taker positions unvailable while maker position open' })
+    },
   }
 }
 
@@ -120,6 +140,10 @@ export function useReceiptCopy() {
     hourlyFundingRate: intl.formatMessage({ defaultMessage: 'Funding Rate (1h)' }),
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
+    currentExposure: intl.formatMessage({ defaultMessage: 'Current Exposure' }),
+    fundingFees: intl.formatMessage({ defaultMessage: 'Funding Fees' }),
+    tradingFees: intl.formatMessage({ defaultMessage: 'Trading Fees' }),
+    totalAPR: intl.formatMessage({ defaultMessage: 'Total APR' }),
     tooltipFee: (rate: string) => intl.formatMessage({ defaultMessage: 'Open/Close Fee: {rate}%' }, { rate }),
   }
 }

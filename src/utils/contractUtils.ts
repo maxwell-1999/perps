@@ -26,3 +26,5 @@ export function getVaultForType(vaultType: PerennialVaultType, chainId: Supporte
 export function getProductContract(productAddress: Address, chainId: SupportedChainId) {
   return getContract({ abi: IProductAbi, address: productAddress, chainId })
 }
+
+export const bufferGasLimit = (estimatedGas: bigint) => (estimatedGas * 3n) / 2n

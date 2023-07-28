@@ -1,8 +1,15 @@
 import { Row } from 'react-table'
 
 import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import { AssetSnapshots, LivePrices, PositionDetails, UserCurrentPositions } from '@/hooks/markets'
+import {
+  AssetSnapshots,
+  LivePrices,
+  PositionDetails,
+  ProductSnapshotWithTradeLimitations,
+  UserCurrentPositions,
+} from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
+import { utilization } from '@/utils/positionUtils'
 
 import { FormattedPositionDetail } from './constants'
 
@@ -31,19 +38,23 @@ export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?:
   }
 }
 
-export const transformPositionDataToArray = (userPositions?: UserCurrentPositions) => {
+export const transformPositionDataToArray = (userPositions?: UserCurrentPositions, isMaker?: boolean) => {
   const result: FormattedPositionDetail[] = []
   if (!userPositions) return result
   for (const [_asset, positionData] of Object.entries(userPositions)) {
     const asset = _asset as SupportedAsset
     const symbol = AssetMetadata[asset].symbol
     if (positionData) {
-      if (positionData?.Long && positionData?.Long.side === 'taker' && positionData?.Long?.currentCollateral !== 0n) {
+      if (
+        positionData?.Long &&
+        positionData?.Long.side === (isMaker ? 'maker' : 'taker') &&
+        positionData?.Long?.currentCollateral !== 0n
+      ) {
         result.push({ asset, symbol, details: positionData?.Long })
       }
       if (
         positionData?.Short &&
-        positionData?.Short.side === 'taker' &&
+        positionData?.Short.side === (isMaker ? 'maker' : 'taker') &&
         positionData?.Short?.currentCollateral !== 0n
       ) {
         result.push({ asset, symbol, details: positionData?.Short })
@@ -110,4 +121,15 @@ export const numericColumnSort = (rowA: Row, rowB: Row, id: string) => {
     return -1
   }
   return 0
+}
+
+export const getMakerExposure = (
+  selectedMakerMarketSnapshot: ProductSnapshotWithTradeLimitations | undefined,
+  leverage: bigint | undefined,
+) => {
+  if (!selectedMakerMarketSnapshot || !leverage) return undefined
+
+  const { pre: globalPre, position } = selectedMakerMarketSnapshot
+  const utilizationResult = utilization(globalPre, position)
+  return Big18Math.mul(utilizationResult, leverage)
 }

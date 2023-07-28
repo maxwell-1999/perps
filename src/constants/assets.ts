@@ -3,12 +3,26 @@ import btcLogo from '@public/icons/btc.png'
 import linkLogo from '@public/icons/chainlink.png'
 import ethLogo from '@public/icons/eth.png'
 
+import { OrderDirection } from './markets'
+
 export enum SupportedAsset {
   btc = 'btc',
   eth = 'eth',
   arb = 'arb',
   link = 'link',
   msqth = 'msqth',
+}
+
+export enum SupportedMakerMarket {
+  btcLong = `${SupportedAsset.btc}-${OrderDirection.Long}`,
+  btcShort = `${SupportedAsset.btc}-${OrderDirection.Short}`,
+  ethLong = `${SupportedAsset.eth}-${OrderDirection.Long}`,
+  ethShort = `${SupportedAsset.eth}-${OrderDirection.Short}`,
+  arbLong = `${SupportedAsset.arb}-${OrderDirection.Long}`,
+  arbShort = `${SupportedAsset.arb}-${OrderDirection.Short}`,
+  linkLong = `${SupportedAsset.link}-${OrderDirection.Long}`,
+  linkShort = `${SupportedAsset.link}-${OrderDirection.Short}`,
+  msqthLong = `${SupportedAsset.msqth}-${OrderDirection.Long}`,
 }
 
 export enum QuoteCurrency {

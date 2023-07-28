@@ -17,6 +17,8 @@ function useErrorMessages() {
     insufficientPosition: intl.formatMessage({ defaultMessage: 'Value exceeds position amount.' }),
     insufficientCollateral: intl.formatMessage({ defaultMessage: 'Value exceeds collateral amount.' }),
     requiredField: intl.formatMessage({ defaultMessage: 'This field is required.' }),
+    exceedsMakerLimit: intl.formatMessage({ defaultMessage: 'Exceeds total maker limit' }),
+    belowMinMaker: intl.formatMessage({ defaultMessage: 'Below minimum maker requirements' }),
   }
 }
 
@@ -72,7 +74,21 @@ export function useCollateralValidators({
   }
 }
 
-export function usePositionValidators({ liquidity }: { liquidity: bigint }) {
+export function usePositionValidators({
+  liquidity,
+  isMaker,
+  totalMaker,
+  totalTaker,
+  currentPositionAmount,
+  makerLimit,
+}: {
+  liquidity: bigint
+  isMaker: boolean
+  totalMaker: bigint
+  totalTaker: bigint
+  currentPositionAmount: bigint
+  makerLimit: bigint
+}) {
   const copy = useErrorMessages()
   const isRequiredValidator = useIsRequiredValidator()
 
@@ -86,9 +102,35 @@ export function usePositionValidators({ liquidity }: { liquidity: bigint }) {
     }
   }, [liquidity, copy.insufficientLiquidity])
 
+  const maxMakerValidator = useMemo(() => {
+    return (value: string) => {
+      const inputValue = Big18Math.fromFloatString(value)
+      const positionDelta = inputValue - currentPositionAmount
+      if (totalMaker + positionDelta > makerLimit) {
+        return copy.exceedsMakerLimit
+      }
+      return true
+    }
+  }, [makerLimit, copy.exceedsMakerLimit, totalMaker, currentPositionAmount])
+
+  const minMakerValidator = useMemo(() => {
+    return (value: string) => {
+      const inputValue = Big18Math.fromFloatString(value)
+      const positionDelta = inputValue - currentPositionAmount
+
+      if (totalMaker + positionDelta < totalTaker) {
+        if (!(totalTaker > totalMaker && positionDelta > 0n)) {
+          return copy.belowMinMaker
+        }
+      }
+      return true
+    }
+  }, [totalMaker, totalTaker, copy.belowMinMaker, currentPositionAmount])
+
   return {
-    max: maxValidator,
+    max: isMaker ? maxMakerValidator : maxValidator,
     required: isRequiredValidator,
+    ...(isMaker ? { min: minMakerValidator } : {}),
   }
 }
 

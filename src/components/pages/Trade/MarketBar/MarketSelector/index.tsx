@@ -11,24 +11,18 @@ import {
 } from '@chakra-ui/react'
 import CloseX from '@public/icons/close-x.svg'
 
-import { TrackingEvents, useMixpanel } from '@/analytics'
 import { AssetIconWithText } from '@/components/shared/components'
-import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import { ChainMarkets } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 
 import { Button, IconButton } from '@ds/Button'
 
-import { Big18Math, formatBig18USDPrice } from '@utils/big18Utils'
-
 import { useSelectorCopy } from '../hooks'
-import { AssetButton } from './components'
+import { MakerButtonLabel, MakerOptions, TakerOptions } from './components'
 
 function MarketSelector() {
-  const { chainId, selectedMarket, setSelectedMarket, snapshots } = useMarketContext()
+  const { selectedMakerMarket, isMaker, assetMetadata } = useMarketContext()
   const { isOpen, onOpen, onClose } = useDisclosure({ id: 'marketSelector' })
   const copy = useSelectorCopy()
-  const { track } = useMixpanel()
 
   return (
     <Popover
@@ -42,7 +36,12 @@ function MarketSelector() {
     >
       <PopoverTrigger>
         <Button
-          label={<AssetIconWithText market={AssetMetadata[selectedMarket]} />}
+          label={
+            <AssetIconWithText
+              market={assetMetadata}
+              text={isMaker && <MakerButtonLabel makerMarket={selectedMakerMarket} />}
+            />
+          }
           variant="pairSelector"
           rightIcon={<HamburgerIcon height="20px" width="20px" />}
           minWidth={{ base: '160px', xs: '179px' }}
@@ -59,35 +58,7 @@ function MarketSelector() {
             <Text variant="label">{copy.priceLiquidity}</Text>
           </Flex>
         </PopoverHeader>
-        <PopoverBody>
-          {Object.keys(ChainMarkets[chainId]).map((market) => (
-            <AssetButton
-              key={market}
-              assetMetaData={AssetMetadata[market as SupportedAsset]}
-              price={formatBig18USDPrice(
-                Big18Math.abs(
-                  snapshots?.[market as SupportedAsset]?.Long?.latestVersion?.price ??
-                    snapshots?.[market as SupportedAsset]?.Short?.latestVersion?.price ??
-                    0n,
-                ),
-              )}
-              liquidity={`${formatBig18USDPrice(
-                snapshots?.[market as SupportedAsset]?.Long?.openInterest?.maker ?? 0n,
-                {
-                  compact: true,
-                },
-              )} / ${formatBig18USDPrice(snapshots?.[market as SupportedAsset]?.Short?.openInterest?.maker ?? 0n, {
-                compact: true,
-              })}`}
-              isSelected={market === selectedMarket}
-              onClick={() => {
-                setSelectedMarket(market as any)
-                track(TrackingEvents.selectMarket, { market: AssetMetadata[market as SupportedAsset].symbol })
-                onClose()
-              }}
-            />
-          ))}
-        </PopoverBody>
+        <PopoverBody>{isMaker ? <MakerOptions onClose={onClose} /> : <TakerOptions onClose={onClose} />}</PopoverBody>
       </PopoverContent>
     </Popover>
   )

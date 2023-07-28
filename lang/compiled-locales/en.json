@@ -11,12 +11,6 @@
       "value": "Liquidity provided to Perennial is autonomously provisioned, taking the other side against traders in exchange for funding."
     }
   ],
-  "+Q0YsT": [
-    {
-      "type": 0,
-      "value": "Perennial Vaults are not available on Ethereum L1. A new Pro LP maker experience is coming soon to all networks."
-    }
-  ],
   "+vVZ/G": [
     {
       "type": 0,
@@ -211,6 +205,12 @@
       "value": "Pricing"
     }
   ],
+  "6AAM0P": [
+    {
+      "type": 0,
+      "value": "Make"
+    }
+  ],
   "6B5Jtu": [
     {
       "type": 0,
@@ -251,6 +251,12 @@
     {
       "type": 0,
       "value": "Execution Price"
+    }
+  ],
+  "7E79dn": [
+    {
+      "type": 0,
+      "value": "* Taker positions unvailable while maker position open"
     }
   ],
   "7FnFRg": [
@@ -467,6 +473,20 @@
     {
       "type": 0,
       "value": "Add to vault"
+    }
+  ],
+  "EK9UyX": [
+    {
+      "type": 0,
+      "value": "Perennial Vaults are not available on Ethereum L1. Experienced users can use the "
+    },
+    {
+      "type": 1,
+      "value": "link"
+    },
+    {
+      "type": 0,
+      "value": " to open and manage Maker positions in markets directly."
     }
   ],
   "EL56mX": [
@@ -787,6 +807,12 @@
       "value": "Modify position"
     }
   ],
+  "OYOg2W": [
+    {
+      "type": 0,
+      "value": "Below minimum maker requirements"
+    }
+  ],
   "OcJKLC": [
     {
       "type": 0,
@@ -993,6 +1019,12 @@
       "value": "Approve"
     }
   ],
+  "Wacq3u": [
+    {
+      "type": 0,
+      "value": "* Maker positions unavailable while taker position open"
+    }
+  ],
   "WjiRhX": [
     {
       "type": 0,
@@ -1059,6 +1091,12 @@
     {
       "type": 0,
       "value": "Liquidated"
+    }
+  ],
+  "XuOjHZ": [
+    {
+      "type": 0,
+      "value": "Exposure"
     }
   ],
   "XviFuR": [
@@ -1205,6 +1243,12 @@
     {
       "type": 0,
       "value": "Position changed"
+    }
+  ],
+  "df+F6x": [
+    {
+      "type": 0,
+      "value": "Exceeds total maker limit"
     }
   ],
   "djJp6c": [
@@ -1613,6 +1657,12 @@
     {
       "type": 0,
       "value": "Select vault"
+    }
+  ],
+  "x/Bo/n": [
+    {
+      "type": 0,
+      "value": "Utilization (L/S)"
     }
   ],
   "x8Vy97": [

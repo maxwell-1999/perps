@@ -1,6 +1,8 @@
 import { Container, Flex, Spinner } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 
+import { useMarketContext } from '@/contexts/marketContext'
+
 import colors from '@ds/theme/colors'
 
 import {
@@ -25,6 +27,7 @@ const MarketSelector = dynamic(() => import('./MarketSelector'), {
 })
 
 export default function MarketBar() {
+  const { isMaker } = useMarketContext()
   const copy = useMarketBarCopy()
   const formattedValues = useFormattedMarketBarValues()
 
@@ -56,15 +59,23 @@ export default function MarketBar() {
             valueColor={formattedValues.changeIsNegative ? colors.brand.red : colors.brand.green}
           />
         </MarketContainer>
-        <MarketContainer>
-          <Stat label={copy.low} value={formattedValues.low} />
-        </MarketContainer>
-        <MarketContainer>
-          <Stat label={copy.high} value={formattedValues.high} />
-        </MarketContainer>
-        <MarketContainer>
-          <Stat label={copy.volume} value={formattedValues.volume} />
-        </MarketContainer>
+        {!isMaker ? (
+          <>
+            <MarketContainer>
+              <Stat label={copy.low} value={formattedValues.low} />
+            </MarketContainer>
+            <MarketContainer>
+              <Stat label={copy.high} value={formattedValues.high} />
+            </MarketContainer>
+            <MarketContainer>
+              <Stat label={copy.volume} value={formattedValues.volume} />
+            </MarketContainer>
+          </>
+        ) : (
+          <MarketContainer>
+            <Stat label={copy.utilization} value={formattedValues.utilization} />
+          </MarketContainer>
+        )}
         <MarketContainer>
           <Stat label={copy.hourlyFunding} value={formattedValues.hourlyFunding} />
         </MarketContainer>

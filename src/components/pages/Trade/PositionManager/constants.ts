@@ -25,4 +25,5 @@ export type PositionTableData = {
   details: PositionDetails
   unformattedNotional: string
   unformattedLiquidationPrice: string
+  makerExposure?: string
 }

@@ -17,7 +17,7 @@ import { InvokerAction, buildInvokerAction } from '@/utils/multiinvoker'
 import { BalancedVaultAbi } from '@abi/BalancedVault.abi'
 import { LensProductSnapshotAbi, LensUserProductSnapshotAbi } from '@abi/Lens.abi'
 
-import { getProductContract, getVaultAddressForType, getVaultForType } from '../utils/contractUtils'
+import { bufferGasLimit, getProductContract, getVaultAddressForType, getVaultForType } from '../utils/contractUtils'
 import { useDSU, useLensProductSnapshot, useLensUserProductSnapshot, useMultiInvoker, useUSDC } from './contracts'
 import { useRefreshKeysOnPriceUpdates } from './markets'
 import { useAddress, useChainId } from './network'
@@ -463,8 +463,6 @@ const convertAssetsToShares = async ({
 
   return shares
 }
-
-const bufferGasLimit = (estimatedGas: bigint) => (estimatedGas * 3n) / 2n
 
 const trySync = async (
   vault: GetContractResult<typeof BalancedVaultAbi>,

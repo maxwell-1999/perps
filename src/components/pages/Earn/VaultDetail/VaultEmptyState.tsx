@@ -1,6 +1,7 @@
 import { ArrowBackIcon, InfoIcon } from '@chakra-ui/icons'
 import { Flex, Heading, Text, useColorModeValue } from '@chakra-ui/react'
 import { goerli, mainnet } from '@wagmi/chains'
+import Link from 'next/link'
 
 import { useChainId } from '@/hooks/network'
 
@@ -68,21 +69,19 @@ export default function VaultEmptyState() {
         ) : (
           <Flex flexDirection="column" mb={4}>
             <Text color={alpha50} mb={4}>
-              {copy.ethereumUnavailable}
-            </Text>
-            <Text color={alpha50}>
-              {copy.ethereumUnavailableLink}
-              <Text
-                color="initial"
-                ml={1}
-                as="a"
-                href="https://v1app.perennial.finance/ethereum"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {/* eslint-disable formatjs/no-literal-string-in-jsx */}
-                https://v1app.perennial.finance.
-              </Text>
+              {copy.ethereumUnavailable(
+                <Link href="/make">
+                  {/* eslint-disable formatjs/no-literal-string-in-jsx */}
+                  <Text
+                    color="white"
+                    _hover={{ color: colors.brand.whiteAlpha[80] }}
+                    as="span"
+                    textDecoration="underline"
+                  >
+                    Pro Maker UI
+                  </Text>
+                </Link>,
+              )}
             </Text>
           </Flex>
         )}

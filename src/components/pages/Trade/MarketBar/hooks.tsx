@@ -4,6 +4,7 @@ import { useIntl } from 'react-intl'
 import { useMarketContext } from '@/contexts/marketContext'
 import { useAsset24hrData, useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
+import { utilization } from '@/utils/positionUtils'
 import { Hour } from '@/utils/timeUtils'
 
 export const useSelectorCopy = () => {
@@ -26,25 +27,55 @@ export const useMarketBarCopy = () => {
     volume: intl.formatMessage({ defaultMessage: '24h Volume' }),
     openInterest: intl.formatMessage({ defaultMessage: 'Open Interest (L/S)' }),
     liquidity: intl.formatMessage({ defaultMessage: 'Liquidity (L/S)' }),
+    utilization: intl.formatMessage({ defaultMessage: 'Utilization (L/S)' }),
   }
 }
 
 export const useFormattedMarketBarValues = () => {
   const livePrices = useChainLivePrices()
-  const { selectedMarket, selectedMarketSnapshot: snapshot } = useMarketContext()
-  const { data: dailyData } = useAsset24hrData(selectedMarket)
+  const {
+    selectedMarket,
+    selectedMarketSnapshot: snapshot,
+    selectedMakerMarketSnapshot: makerSnapshot,
+    snapshots,
+    isMaker,
+    makerAsset,
+  } = useMarketContext()
+
+  const { data: dailyData } = useAsset24hrData(isMaker ? makerAsset : selectedMarket)
 
   const totalVolume = useMemo(() => {
     if (!dailyData?.volume) return 0n
     return dailyData.volume.reduce((acc, cur) => acc + BigInt(cur.takerNotional), 0n)
   }, [dailyData?.volume])
 
-  const longRate = (snapshot?.Long?.rate ?? 0n) * Hour
-  const shortRate = (snapshot?.Short?.rate ?? 0n) * Hour
-  const currentPrice = Big18Math.abs(
-    livePrices[selectedMarket] ?? snapshot?.Long?.latestVersion?.price ?? snapshot?.Short?.latestVersion?.price ?? 0n,
-  )
+  const longRate = (isMaker ? makerSnapshot?.rate ?? 0n : snapshot?.Long?.rate ?? 0n) * Hour
+  const shortRate = (isMaker ? makerSnapshot?.rate ?? 0n : snapshot?.Short?.rate ?? 0n) * Hour
+  const currentPrice = isMaker
+    ? Big18Math.abs(
+        livePrices[makerAsset] ?? makerSnapshot?.latestVersion?.price ?? makerSnapshot?.latestVersion?.price ?? 0n,
+      )
+    : Big18Math.abs(
+        livePrices[selectedMarket] ??
+          snapshot?.Long?.latestVersion?.price ??
+          snapshot?.Short?.latestVersion?.price ??
+          0n,
+      )
   const change = currentPrice - BigInt(dailyData?.start?.at(0)?.price ?? currentPrice)
+  const longMakerSnapshot = snapshots?.[makerAsset]?.Long
+  const longUtilization = longMakerSnapshot?.pre
+    ? formatBig18Percent(utilization(longMakerSnapshot?.pre, longMakerSnapshot?.position))
+    : '--'
+  const shortMakerSnapshot = snapshots?.[makerAsset]?.Short
+  const shortUtilization = shortMakerSnapshot?.pre
+    ? formatBig18Percent(utilization(shortMakerSnapshot?.pre, shortMakerSnapshot?.position))
+    : '--'
+
+  const longOpenInterest = isMaker ? longMakerSnapshot?.openInterest?.taker : snapshot?.Long?.openInterest?.taker
+  const shortOpenInterest = isMaker ? shortMakerSnapshot?.openInterest?.taker : snapshot?.Short?.openInterest?.taker
+
+  const longLiquidity = isMaker ? longMakerSnapshot?.openInterest?.maker : snapshot?.Long?.openInterest?.maker
+  const shortLiquidity = isMaker ? shortMakerSnapshot?.openInterest?.maker : snapshot?.Short?.openInterest?.maker
 
   return {
     price: formatBig18USDPrice(currentPrice),
@@ -56,11 +87,12 @@ export const useFormattedMarketBarValues = () => {
     low: formatBig18USDPrice(BigInt(dailyData?.low?.at(0)?.price || 0)),
     high: formatBig18USDPrice(BigInt(dailyData?.high?.at(0)?.price || 0)),
     volume: formatBig18USDPrice(totalVolume, { compact: true }),
-    openInterest: `${formatBig18USDPrice(snapshot?.Long?.openInterest?.taker, {
+    openInterest: `${formatBig18USDPrice(longOpenInterest, {
       compact: true,
-    })} / ${formatBig18USDPrice(snapshot?.Short?.openInterest?.taker, { compact: true })}`,
-    liquidity: `${formatBig18USDPrice(snapshot?.Long?.openInterest?.maker, {
+    })} / ${formatBig18USDPrice(shortOpenInterest, { compact: true })}`,
+    liquidity: `${formatBig18USDPrice(longLiquidity, {
       compact: true,
-    })} / ${formatBig18USDPrice(snapshot?.Short?.openInterest?.maker, { compact: true })}`,
+    })} / ${formatBig18USDPrice(shortLiquidity, { compact: true })}`,
+    utilization: `${longUtilization} / ${shortUtilization}`,
   }
 }

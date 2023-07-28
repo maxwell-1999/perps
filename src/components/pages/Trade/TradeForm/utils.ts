@@ -1,5 +1,9 @@
+import { SupportedAsset, SupportedMakerMarket } from '@/constants/assets'
+import { OrderDirection } from '@/constants/markets'
 import { FormState } from '@/contexts/tradeFormContext'
+import { UserCurrentPositions } from '@/hooks/markets'
 import { Big18Math } from '@/utils/big18Utils'
+import { getMakerAssetAndDirection } from '@/utils/makerMarketUtils'
 import { calcLeverage } from '@/utils/positionUtils'
 
 export const calcMaintenance = (price: bigint, position: bigint, maintenanceRate: bigint) => {
@@ -180,4 +184,24 @@ export const getContainerVariant = (formState: FormState, isClosedOrResolved: bo
     return 'pink'
   }
   return 'active'
+}
+
+export const getPositionFromSelectedMarket = ({
+  isMaker,
+  positions,
+  selectedMarket,
+  orderDirection,
+  selectedMakerMarket,
+}: {
+  isMaker?: boolean
+  positions?: UserCurrentPositions
+  selectedMarket: SupportedAsset
+  orderDirection: OrderDirection
+  selectedMakerMarket: SupportedMakerMarket
+}) => {
+  if (isMaker) {
+    const { asset, orderDirection } = getMakerAssetAndDirection(selectedMakerMarket)
+    return positions?.[asset]?.[orderDirection]
+  }
+  return positions?.[selectedMarket]?.[orderDirection]
 }

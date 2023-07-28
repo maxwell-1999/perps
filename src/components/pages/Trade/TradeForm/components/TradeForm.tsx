@@ -13,7 +13,7 @@ import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails, useProtocolSnapshot } from '@/hooks/markets'
+import { PositionDetails, ProductSnapshotWithTradeLimitations, useProtocolSnapshot } from '@/hooks/markets'
 import { useAddress, useChainId } from '@/hooks/network'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
@@ -23,8 +23,6 @@ import { closedOrResolved, next } from '@/utils/positionUtils'
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import colors from '@ds/theme/colors'
-
-import { ProductSnapshot } from '@t/perennial'
 
 import { FormNames, OrderValues, orderDirections } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
@@ -38,7 +36,7 @@ interface TradeFormProps {
   asset: SupportedAsset
   orderDirection: OrderDirection
   setOrderDirection: (orderDirection: OrderDirection) => void
-  product: ProductSnapshot
+  product: ProductSnapshotWithTradeLimitations
   position?: PositionDetails
   crossCollateral: bigint
   crossProduct?: Address
@@ -64,10 +62,9 @@ function TradeForm(props: TradeFormProps) {
   const { setTradeFormState } = useTradeFormState()
   const { address } = useAddress()
   const prevAddress = usePrevious(address)
-  const { assetMetadata } = useMarketContext()
+  const { assetMetadata, isMaker } = useMarketContext()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
   const positionStatus = position?.status ?? PositionStatus.resolved
-
   const hasPosition = positionStatus !== PositionStatus.resolved
   const positionOrderDirection = hasPosition ? position?.direction : undefined
   const currentPositionAmount = position?.nextPosition ?? 0n
@@ -175,8 +172,10 @@ function TradeForm(props: TradeFormProps) {
     [collateral, amount, currentCollateral, currentPositionAmount],
   )
 
+  const isRestricted = isMaker ? !product.canOpenMaker : !product.canOpenTaker
   const hasFormErrors = Object.keys(errors).length > 0
-  const disableTradeBtn = (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors
+  const disableTradeBtn =
+    (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors || isRestricted
 
   const collateralValidators = useCollateralValidators({
     usdcBalance: balances?.usdc ?? 0n,
@@ -187,6 +186,11 @@ function TradeForm(props: TradeFormProps) {
   const globalNext = next(globalPre, product.position)
   const amountValidators = usePositionValidators({
     liquidity: Big18Math.max(0n, globalNext.maker - globalNext.taker),
+    isMaker: isMaker,
+    totalMaker: globalNext.maker,
+    totalTaker: globalNext.taker,
+    currentPositionAmount,
+    makerLimit: product.productInfo.makerLimit,
   })
   const leverageValidators = useLeverageValidators({
     maxLeverage,
@@ -202,7 +206,7 @@ function TradeForm(props: TradeFormProps) {
           onClose={closeAdjustmentModal}
           onCancel={cancelAdjustmentModal}
           title={isNewPosition ? copy.confirmOrder : copy.confirmChanges}
-          positionType={OpenPositionType.taker}
+          positionType={isMaker ? OpenPositionType.maker : OpenPositionType.taker}
           asset={props.asset}
           position={position}
           product={product}
@@ -218,7 +222,11 @@ function TradeForm(props: TradeFormProps) {
         <Flex flexDirection="column" p="16px" pb="8px">
           <Flex justifyContent="space-between" mb="14px">
             <Text color={textColor}>
-              {hasPosition && positionStatus !== PositionStatus.closed ? copy.modifyPosition : copy.trade}
+              {hasPosition && positionStatus !== PositionStatus.closed
+                ? copy.modifyPosition
+                : isMaker
+                ? copy.Make
+                : copy.trade}
             </Text>
             {!!address && hasPosition && (
               <TxButton
@@ -236,21 +244,30 @@ function TradeForm(props: TradeFormProps) {
               />
             )}
           </Flex>
-          <Flex mb="14px">
-            <Toggle<OrderDirection>
-              labels={orderDirections}
-              activeLabel={positionOrderDirection ? positionOrderDirection : orderDirection}
-              onChange={setOrderDirection}
-              overrideValue={
-                !closedOrResolved(positionStatus)
-                  ? positionOrderDirection
-                  : singleDirection
-                  ? orderDirection
-                  : undefined
-              }
-              activeColor={orderDirection === OrderDirection.Long ? colors.brand.green : colors.brand.red}
-            />
-          </Flex>
+          {isRestricted && (
+            <Flex mb="12px">
+              <Text fontSize="11px" color={colors.brand.red}>
+                {copy.isRestricted(isMaker)}
+              </Text>
+            </Flex>
+          )}
+          {!isMaker && (
+            <Flex mb="14px">
+              <Toggle<OrderDirection>
+                labels={orderDirections}
+                activeLabel={positionOrderDirection ? positionOrderDirection : orderDirection}
+                onChange={setOrderDirection}
+                overrideValue={
+                  !closedOrResolved(positionStatus)
+                    ? positionOrderDirection
+                    : singleDirection
+                    ? orderDirection
+                    : undefined
+                }
+                activeColor={orderDirection === OrderDirection.Long ? colors.brand.green : colors.brand.red}
+              />
+            </Flex>
+          )}
           <Flex flexDirection="column" gap="13px">
             <Input
               key={FormNames.collateral}
@@ -339,7 +356,14 @@ function TradeForm(props: TradeFormProps) {
         </Flex>
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
-          <TradeReceipt mb="25px" px="3px" product={product} positionDelta={positionDelta} positionDetails={position} />
+          <TradeReceipt
+            mb="25px"
+            px="3px"
+            product={product}
+            positionDelta={positionDelta}
+            positionDetails={position}
+            leverage={leverage}
+          />
           {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
             <ButtonGroup>
               <Button

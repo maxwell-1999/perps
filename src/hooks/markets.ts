@@ -20,7 +20,14 @@ import { Big18Math } from '@/utils/big18Utils'
 import { getProductContract } from '@/utils/contractUtils'
 import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
 import { InvokerAction, buildInvokerAction } from '@/utils/multiinvoker'
-import { calcLiquidationPrice, next, side as positionSide, positionStatus, size } from '@/utils/positionUtils'
+import {
+  calcLiquidationPrice,
+  getTradeLimitations,
+  next,
+  side as positionSide,
+  positionStatus,
+  size,
+} from '@/utils/positionUtils'
 import { last24hrBounds } from '@/utils/timeUtils'
 
 import { ICollateralAbi } from '@abi/ICollateral.abi'
@@ -42,15 +49,22 @@ import {
 import { useAddress, useChainId, useGraphClient, useWsProvider } from './network'
 import { usePyth } from './network'
 
+export type ProductSnapshotWithTradeLimitations = ProductSnapshot & {
+  canOpenMaker: boolean
+  canOpenTaker: boolean
+}
+
 export type AssetSnapshots = {
   [key in SupportedAsset]?: {
-    [OrderDirection.Long]?: ProductSnapshot
-    [OrderDirection.Short]?: ProductSnapshot
+    [OrderDirection.Long]?: ProductSnapshotWithTradeLimitations
+    [OrderDirection.Short]?: ProductSnapshotWithTradeLimitations
   }
 }
 export const useChainAssetSnapshots = () => {
   const chainId = useChainId()
   const lens = useLensProductSnapshot()
+  const userLens = useLensUserProductSnapshot()
+  const { address } = useAddress()
 
   return useQuery({
     queryKey: ['assetSnapshots', chainId],
@@ -63,18 +77,27 @@ export const useChainAssetSnapshots = () => {
         .flat()
 
       const snapshots = await lens.read.snapshots([markets])
+      const accountSnapshots = address && (await userLens.read.snapshots([address, markets]))
 
       return assets.reduce((acc, asset) => {
         const longSnapshot = snapshots.find((s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Long)
         const shortSnapshot = snapshots.find(
           (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Short,
         )
+        const userLongSnapshot = accountSnapshots?.find(
+          (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Long,
+        )
+        const userShortSnapshot = accountSnapshots?.find(
+          (s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Short,
+        )
+        const longTradeLimitations = getTradeLimitations(userLongSnapshot)
+        const shortTradeLimitations = getTradeLimitations(userShortSnapshot)
         // Since we're directly returning the ethers result, we need to convert it to a POJO
         // so that react-query can correctly serialize it
         // TODO: when we switch to viem, we should be able to remove this
         acc[asset] = {
-          [OrderDirection.Long]: longSnapshot ? longSnapshot : undefined,
-          [OrderDirection.Short]: shortSnapshot ? shortSnapshot : undefined,
+          [OrderDirection.Long]: longSnapshot ? { ...longSnapshot, ...longTradeLimitations } : undefined,
+          [OrderDirection.Short]: shortSnapshot ? { ...shortSnapshot, ...shortTradeLimitations } : undefined,
         }
 
         return acc

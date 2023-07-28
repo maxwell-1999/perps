@@ -34,7 +34,7 @@ function CurrentPosition() {
   const copy = usePositionManagerCopy()
   const { noValue } = copy
   const { borderColor, green, red, alpha75, subheaderTextColor, alpha50 } = useStyles()
-  const { assetMetadata, selectedMarket } = useMarketContext()
+  const { assetMetadata, isMaker } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
   const { positionDetails, formattedValues } = useFormatPosition()
   const {
@@ -50,6 +50,7 @@ function CurrentPosition() {
     nextNotional,
     nextLeverage,
     liquidationFee,
+    makerExposure,
   } = formattedValues
   const status = positionDetails?.status ?? PositionStatus.resolved
 
@@ -66,7 +67,7 @@ function CurrentPosition() {
           <ActivePositionHeader borderColor={borderColor}>
             <AssetIconWithText
               market={assetMetadata}
-              text={selectedMarket.toUpperCase()}
+              text={assetMetadata.baseCurrency.toUpperCase()}
               textProps={{ fontSize: '15px', textTransform: 'capitalize' }}
             />
             <Flex alignItems="center" gap="12px">
@@ -159,14 +160,25 @@ function CurrentPosition() {
             />
           )}
         </HiddenOnLargeScreen>
-        <DataRow
-          label={copy.liquidationPrice}
-          value={
-            <Text fontSize="14px" color={alpha75}>
-              {hasPosition ? liquidationPrice : noValue}
-            </Text>
-          }
-        />
+        {isMaker ? (
+          <DataRow
+            label={copy.currentExposure}
+            value={
+              <Text fontSize="14px" color={alpha75}>
+                {hasPosition ? makerExposure : noValue}
+              </Text>
+            }
+          />
+        ) : (
+          <DataRow
+            label={copy.liquidationPrice}
+            value={
+              <Text fontSize="14px" color={alpha75}>
+                {hasPosition ? liquidationPrice : noValue}
+              </Text>
+            }
+          />
+        )}
         <DataRow
           label={copy.averageEntry}
           value={

@@ -32,7 +32,7 @@ interface ClosePositionFormProps {
 
 function ClosePositionForm({ position, product, asset }: ClosePositionFormProps) {
   const { setTradeFormState } = useTradeFormState()
-  const { assetMetadata } = useMarketContext()
+  const { assetMetadata, isMaker } = useMarketContext()
   const copy = useTradeFormCopy()
   const { percentBtnBg } = useStyles()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
@@ -127,7 +127,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
           onClose={closeAdjustmentModal}
           onCancel={cancelAdjustmentModal}
           title={copy.closePosition}
-          positionType={OpenPositionType.taker}
+          positionType={isMaker ? OpenPositionType.maker : OpenPositionType.taker}
           asset={asset}
           position={position}
           product={product}

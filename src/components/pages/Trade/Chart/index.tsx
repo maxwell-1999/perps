@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
 
 import { TrackingEvents, useMixpanel } from '@/analytics'
+import { useMarketContext } from '@/contexts/marketContext'
 
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@ds/Tabs'
 
@@ -12,6 +13,7 @@ import { useChartCopy } from './hooks'
 const AdvancedRealTimeChart = dynamic(() => import('./TradingviewWidget'), { ssr: false })
 
 function Chart() {
+  const { isMaker } = useMarketContext()
   const { priceChart, marketInfo } = useChartCopy()
   const [canRender, setCanRender] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -35,7 +37,7 @@ function Chart() {
         <TabPanel display="flex" flexDirection="column" flex={1}>
           <Box height="100%" p={0}>
             <div id="tv-widget-container" style={{ height: '100%' }} ref={containerRef} />
-            {canRender && <AdvancedRealTimeChart theme="dark" containerId="tv-widget-container" />}
+            {canRender && <AdvancedRealTimeChart theme="dark" containerId="tv-widget-container" isMaker={isMaker} />}
           </Box>
         </TabPanel>
         <TabPanel>

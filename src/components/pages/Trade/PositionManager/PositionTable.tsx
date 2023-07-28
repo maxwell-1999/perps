@@ -15,6 +15,7 @@ import {
 import { TooltipIcon, TooltipText } from '@/components/design-system/Tooltip'
 import { AssetMetadata } from '@/constants/assets'
 import { ExplorerURLs } from '@/constants/network'
+import { useMarketContext } from '@/contexts/marketContext'
 import { useChainId } from '@/hooks/network'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
 import { formatDateRelative } from '@/utils/timeUtils'
@@ -36,6 +37,7 @@ export const PositionTable = ({
   onClick?: (row: PositionTableData) => void
   emptyStateMessage: string
 }) => {
+  const { isMaker } = useMarketContext()
   const { background } = useStyles()
   const copy = usePositionManagerCopy()
 
@@ -66,6 +68,11 @@ export const PositionTable = ({
         <Text variant="label" flex="2">
           {copy.pnl}
         </Text>
+        {currentPosition && isMaker && (
+          <Text variant="label" flex="2">
+            {copy.exposure}
+          </Text>
+        )}
         {currentPosition && (
           <Text variant="label" flex="2">
             {copy.status}
@@ -106,6 +113,7 @@ const PositionTableRow = ({
   currentPosition: boolean
   onClick?: (row: PositionTableData) => void
 }) => {
+  const { isMaker } = useMarketContext()
   const copy = usePositionManagerCopy()
   const { green, red, borderColor, alpha5 } = useStyles()
   const market = AssetMetadata[row.asset]
@@ -173,6 +181,11 @@ const PositionTableRow = ({
               </Text>
             </Flex>
           </Box>
+          {currentPosition && isMaker && (
+            <Box flex="2">
+              <Text fontSize="14px">{row.makerExposure || copy.noValue}</Text>
+            </Box>
+          )}
           {currentPosition && (
             <Box flex="2">
               <Status status={row.details.status} liquidated={!!row.details.liquidations?.length} />

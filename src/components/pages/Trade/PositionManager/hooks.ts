@@ -18,7 +18,13 @@ import { Day, Hour, Year } from '@/utils/timeUtils'
 
 import { PositionSide } from '@t/gql/graphql'
 
-import { calculatePnl, getCurrentPriceDelta, getFormattedPositionDetails, transformPositionDataToArray } from './utils'
+import {
+  calculatePnl,
+  getCurrentPriceDelta,
+  getFormattedPositionDetails,
+  getMakerExposure,
+  transformPositionDataToArray,
+} from './utils'
 
 export const useStyles = () => {
   const theme = useTheme()
@@ -85,6 +91,8 @@ export const usePositionManagerCopy = () => {
     liquidationFee: intl.formatMessage({ defaultMessage: 'Liquidation Fee' }),
     connectWalletPositions: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your positions' }),
     connectWalletHistory: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your position history' }),
+    currentExposure: intl.formatMessage({ defaultMessage: 'Current Exposure' }),
+    exposure: intl.formatMessage({ defaultMessage: 'Exposure' }),
     liquidationFeeTooltip: (feeAmount: bigint) =>
       intl.formatMessage(
         { defaultMessage: 'Liquidation Fee: {feeAmount}' },
@@ -94,18 +102,35 @@ export const usePositionManagerCopy = () => {
 }
 
 export const useFormatPosition = () => {
-  const { assetMetadata, selectedMarket, orderDirection, selectedMarketSnapshot } = useMarketContext()
+  const {
+    assetMetadata,
+    selectedMarket,
+    orderDirection,
+    selectedMarketSnapshot,
+    isMaker,
+    makerAsset,
+    makerOrderDirection,
+    selectedMakerMarketSnapshot,
+  } = useMarketContext()
   const { data: positions } = useUserCurrentPositions()
   const { noValue, long, short } = usePositionManagerCopy()
-  let position = positions?.[selectedMarket]?.[orderDirection]
-  // if this is a maker position, don't show it
-  if (position?.side === PositionSide.Maker) position = undefined
+  let position = isMaker
+    ? positions?.[makerAsset]?.[makerOrderDirection]
+    : positions?.[selectedMarket]?.[orderDirection]
+
+  if (isMaker) {
+    position = position?.side === PositionSide.Maker ? position : undefined
+  } else {
+    position = position?.side === PositionSide.Taker ? position : undefined
+  }
   const numSigFigs = assetMetadata.displayDecimals
 
   const fundingRate =
     position?.direction === OrderDirection.Long
       ? selectedMarketSnapshot?.Long?.rate
       : selectedMarketSnapshot?.Short?.rate
+
+  const makerExposure = getMakerExposure(selectedMakerMarketSnapshot, position?.nextLeverage)
 
   return {
     positionDetails: position,
@@ -115,6 +140,8 @@ export const useFormatPosition = () => {
       hourlyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Hour, { numDecimals: 4 }) : noValue,
       eightHourFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Hour * 8n, { numDecimals: 4 }) : noValue,
       yearlyFundingRate: position ? formatBig18Percent((fundingRate ?? 0n) * Year, { numDecimals: 4 }) : noValue,
+      makerExposure:
+        isMaker && makerExposure !== undefined ? formatBig18Percent(makerExposure, { numDecimals: 4 }) : noValue,
       ...getFormattedPositionDetails({ positionDetails: position, placeholderString: noValue, numSigFigs }),
     },
   }
@@ -122,17 +149,21 @@ export const useFormatPosition = () => {
 
 export const useOpenPositionTableData = () => {
   const { data: positionData, status } = useUserCurrentPositions()
+  const { isMaker, snapshots } = useMarketContext()
   const { noValue } = usePositionManagerCopy()
-  const transformedPositions = transformPositionDataToArray(positionData)
+  const transformedPositions = transformPositionDataToArray(positionData, isMaker)
 
   const positions = transformedPositions
     .map((position) => {
       const numSigFigs = AssetMetadata[position.asset]?.displayDecimals ?? 2
-
+      const makerSnapshot = snapshots?.[position.asset]?.[position.details?.direction]
+      const makerExposure = getMakerExposure(makerSnapshot, position.details?.nextLeverage)
       return {
         details: position.details,
         asset: position.asset,
         symbol: position.symbol,
+        makerExposure:
+          isMaker && makerExposure !== undefined ? formatBig18Percent(makerExposure, { numDecimals: 4 }) : noValue,
         ...getFormattedPositionDetails({ positionDetails: position.details, placeholderString: noValue, numSigFigs }),
       }
     })
@@ -146,6 +177,7 @@ export const useOpenPositionTableData = () => {
 
 export const usePositionHistoryTableData = () => {
   const { noValue } = usePositionManagerCopy()
+  const { isMaker } = useMarketContext()
   const {
     data: positionHistory,
     hasNextPage,
@@ -153,7 +185,7 @@ export const usePositionHistoryTableData = () => {
     isLoading,
     isFetchingNextPage,
     status,
-  } = useUserChainPositionHistory(PositionSide.Taker)
+  } = useUserChainPositionHistory(isMaker ? PositionSide.Maker : PositionSide.Taker)
 
   const positions = (positionHistory?.pages.flatMap((page) => page?.positions).filter(notEmpty) ?? []).map(
     (position) => {

@@ -29,6 +29,7 @@ type TradingViewWidgetProps = {
   overrides?: any
   theme?: 'light' | 'dark'
   containerId: string
+  isMaker?: boolean
 }
 
 const ChartOverrides = {
@@ -48,11 +49,15 @@ let tvChartReady = false
 let datafeed: Datafeed | null = null
 let tvScriptLoadingPromise: Promise<void> | null = null
 
-const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ overrides, theme, containerId }) => {
+const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ overrides, theme, containerId, isMaker }) => {
   const pyth = usePyth()
-  const { selectedMarket } = useMarketContext()
+  const { selectedMarket, makerAsset } = useMarketContext()
 
-  const { tvTicker, displayDecimals } = useMemo(() => AssetMetadata[selectedMarket], [selectedMarket])
+  const { tvTicker, displayDecimals } = useMemo(
+    () => AssetMetadata[isMaker ? makerAsset : selectedMarket],
+    [isMaker, makerAsset, selectedMarket],
+  )
+
   const { data: positions } = useUserCurrentPositions()
 
   const prevTicker = usePrevious(tvTicker)
@@ -104,13 +109,15 @@ const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ overrides, theme,
       else datafeed.positions = positions
 
       if (!tvWidget) createWidget()
-      else if (tvWidget && tvChartReady && prevTicker !== tvTicker) {
-        tvWidget.setSymbol(tvTicker, '5' as ResolutionString, () => {})
-      }
     }
-
     setup()
   }, [createWidget, prevTicker, tvTicker, pyth, positions])
+
+  useEffect(() => {
+    if (tvWidget && prevTicker !== tvTicker) {
+      tvWidget.setSymbol(tvTicker, '5' as ResolutionString, () => {})
+    }
+  }, [tvTicker, prevTicker])
 
   useEffect(() => {
     return () => {

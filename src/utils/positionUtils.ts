@@ -2,7 +2,7 @@ import colors from '@/components/design-system/theme/colors'
 import { PositionStatus } from '@/constants/markets'
 
 import { PositionSide } from '@t/gql/graphql'
-import { Position, PrePosition, ProductSnapshot } from '@t/perennial'
+import { Position, PrePosition, ProductSnapshot, UserProductSnapshot } from '@t/perennial'
 
 import { Big18Math } from './big18Utils'
 
@@ -180,3 +180,24 @@ export const getStatusDetails = (status: PositionStatus, liquidated?: boolean) =
 
 export const closedOrResolved = (status?: PositionStatus) =>
   status && [PositionStatus.closed, PositionStatus.resolved].includes(status)
+
+export const getTradeLimitations = (userProductSnapshot?: UserProductSnapshot) => {
+  if (!userProductSnapshot) {
+    return {
+      canOpenTaker: true,
+      canOpenMaker: true,
+    }
+  }
+  const { pre, position } = userProductSnapshot
+  const canOpenMaker = [pre.openPosition['taker'], pre.closePosition['taker'], position['taker']].every((num) =>
+    Big18Math.isZero(num),
+  )
+  const canOpenTaker = [pre.openPosition['maker'], pre.closePosition['maker'], position['maker']].every((num) =>
+    Big18Math.isZero(num),
+  )
+
+  return {
+    canOpenTaker,
+    canOpenMaker,
+  }
+}

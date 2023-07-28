@@ -33,7 +33,7 @@ interface WithdrawCollateralFormProps {
 
 function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateralFormProps) {
   const { setTradeFormState } = useTradeFormState()
-  const { assetMetadata } = useMarketContext()
+  const { assetMetadata, isMaker } = useMarketContext()
   const copy = useTradeFormCopy()
   const { percentBtnBg } = useStyles()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
@@ -134,7 +134,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
           onClose={closeAdjustmentModal}
           onCancel={cancelAdjustmentModal}
           title={copy.withdrawCollateral}
-          positionType={OpenPositionType.taker}
+          positionType={isMaker ? OpenPositionType.maker : OpenPositionType.taker}
           asset={asset}
           position={position}
           product={product}

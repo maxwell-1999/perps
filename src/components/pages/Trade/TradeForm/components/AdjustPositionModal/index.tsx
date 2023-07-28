@@ -76,7 +76,7 @@ function AdjustPositionModal({
   const [orderTxLoading, setOrderTxLoading] = useState(false)
   const [isTransactionCompleted, setIsTransactionCompleted] = useState(false)
   const [isSettlementCompleted, setIsSettlementCompleted] = useState(false)
-  const { orderDirection } = useMarketContext()
+  const { orderDirection, isMaker, makerOrderDirection } = useMarketContext()
   const { track } = useMixpanel()
 
   const { productAddress } = product
@@ -132,7 +132,7 @@ function AdjustPositionModal({
       // If this requires two-step, then the collateral should stay the same
       const collateralModification = requiresTwoStep ? 0n : collateralDifference
       const { action, message, title, actionColor } = getOrderToastProps({
-        orderDirection,
+        orderDirection: isMaker ? makerOrderDirection : orderDirection,
         variant,
         asset,
         amount: orderValues.amount,
@@ -156,10 +156,10 @@ function AdjustPositionModal({
           />
         ),
       })
-      track(TrackingEvents.trade, {
+      track(isMaker ? TrackingEvents.make : TrackingEvents.trade, {
         asset,
         leverage,
-        orderDirection,
+        orderDirection: isMaker ? makerOrderDirection : orderDirection,
         orderType: title,
         collateral: orderValues.collateral,
         amount: orderValues.amount,
