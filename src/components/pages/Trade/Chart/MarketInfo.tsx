@@ -25,10 +25,14 @@ import { DashedLine, MarketInfoContent } from './styles'
 function MarketInfo() {
   const copy = useChartCopy()
   const chainId = useChainId()
-  const { selectedMarket, selectedMarketSnapshot } = useMarketContext()
+  const { selectedMarket, selectedMarketSnapshot, makerAsset, selectedMakerMarketSnapshot, isMaker, snapshots } =
+    useMarketContext()
   const { data: protocoSnapshot } = useProtocolSnapshot()
 
-  const marketSnapshot = selectedMarketSnapshot?.Long ?? selectedMarketSnapshot?.Short
+  const marketSnapshot = isMaker
+    ? selectedMakerMarketSnapshot
+    : selectedMarketSnapshot?.Long ?? selectedMarketSnapshot?.Short
+
   const { data: marketOwner } = useContractRead({
     chainId,
     enabled: !!marketSnapshot,
@@ -37,7 +41,9 @@ function MarketInfo() {
     address: ControllerAddresses[chainId],
     args: [marketSnapshot?.productAddress || zeroAddress],
   })
+
   const utilizationCurve = marketSnapshot?.productInfo.utilizationCurve
+
   const chartData = useMemo(() => {
     if (!utilizationCurve) return []
     return [
@@ -49,11 +55,10 @@ function MarketInfo() {
       { x: 1, y: Big18Math.toUnsafeFloat(utilizationCurve.maxRate) },
     ]
   }, [utilizationCurve])
-  const longUtilization =
-    selectedMarketSnapshot?.Long && utilization(selectedMarketSnapshot.Long.pre, selectedMarketSnapshot.Long.position)
-  const shortUtilization =
-    selectedMarketSnapshot?.Short &&
-    utilization(selectedMarketSnapshot.Short.pre, selectedMarketSnapshot.Short.position)
+
+  const snapshot = isMaker ? snapshots?.[makerAsset] : selectedMarketSnapshot
+  const longUtilization = snapshot?.Long && utilization(snapshot.Long.pre, snapshot.Long.position)
+  const shortUtilization = snapshot?.Short && utilization(snapshot.Short.pre, snapshot.Short.position)
 
   const borderColor = useColorModeValue(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])
   const chartBg = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])
@@ -64,7 +69,12 @@ function MarketInfo() {
     <Flex flex={1} height="100%" alignItems="center" justifyContent="center">
       <MarketInfoContent>
         <Flex flexDirection="column" flex={1} py={4} minWidth="230px">
-          <DataRow label={copy.market} value={AssetMetadata[selectedMarket].symbol} size="lg" bordered />
+          <DataRow
+            label={copy.market}
+            value={AssetMetadata[isMaker ? makerAsset : selectedMarket].symbol}
+            size="lg"
+            bordered
+          />
           <DataRow
             label={copy.coordinator}
             value={

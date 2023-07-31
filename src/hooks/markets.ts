@@ -141,6 +141,7 @@ export const useAsset24hrData = (asset: SupportedAsset) => {
           ) {
             periodStartTimestamp
             takerNotional
+            product
           }
           low: productVersions(
             where: { product: $long, timestamp_gte: $from, timestamp_lte: $to }
@@ -177,7 +178,7 @@ export const useAsset24hrData = (asset: SupportedAsset) => {
   })
 }
 
-export const useAsset7DayFees = (asset: SupportedAsset) => {
+export const useAsset7DayData = (asset: SupportedAsset) => {
   const chainId = useChainId()
   const graphClient = useGraphClient()
   const market = ChainMarkets[chainId][asset]
@@ -200,6 +201,7 @@ export const useAsset7DayFees = (asset: SupportedAsset) => {
             product
             takerFees
             makerFees
+            takerNotional
           }
         }
       `)
@@ -221,7 +223,16 @@ export const useAsset7DayFees = (asset: SupportedAsset) => {
         { [OrderDirection.Long]: 0n, [OrderDirection.Short]: 0n },
       )
 
-      return fees
+      const takerVolumes = graphResponse.volume.reduce(
+        (acc, volume) => {
+          if (getAddress(volume.product) === market.Long) acc.Long += BigInt(volume.takerNotional)
+          if (getAddress(volume.product) === market.Short) acc.Short += BigInt(volume.takerNotional)
+          return acc
+        },
+        { [OrderDirection.Long]: 0n, [OrderDirection.Short]: 0n },
+      )
+
+      return { fees, takerVolumes }
     },
   })
 }

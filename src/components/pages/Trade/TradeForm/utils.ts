@@ -205,3 +205,22 @@ export const getPositionFromSelectedMarket = ({
   }
   return positions?.[selectedMarket]?.[orderDirection]
 }
+
+export const calcTradeFeeApr = ({
+  fees7Day,
+  makerOi,
+  collateral,
+  notional,
+}: {
+  fees7Day: bigint
+  makerOi: bigint
+  collateral: bigint
+  notional: bigint
+}) => {
+  if (!fees7Day || !makerOi || !collateral || !notional) return 0n
+  const dailyAvgFee = Big18Math.div(fees7Day, Big18Math.fromDecimals(7n, 0))
+  const annualFees = Big18Math.mul(dailyAvgFee, Big18Math.fromDecimals(365n, 0))
+  const annualFeesPerUser = Big18Math.mul(annualFees, notional)
+  const denominator = Big18Math.mul(makerOi, collateral)
+  return Big18Math.div(annualFeesPerUser, denominator)
+}

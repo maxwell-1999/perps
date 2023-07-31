@@ -18,7 +18,7 @@ import { useAddress, useChainId } from '@/hooks/network'
 import { useBalances } from '@/hooks/wallet'
 import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
 import { usePrevious } from '@/utils/hooks'
-import { closedOrResolved, next } from '@/utils/positionUtils'
+import { calcNotional, closedOrResolved, next } from '@/utils/positionUtils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
@@ -195,7 +195,7 @@ function TradeForm(props: TradeFormProps) {
   const leverageValidators = useLeverageValidators({
     maxLeverage,
   })
-  const notional = Big18Math.mul(Big18Math.fromFloatString(amount), Big18Math.abs(price))
+  const notional = calcNotional(Big18Math.fromFloatString(amount), price)
   const userBalance = formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
 
   return (
@@ -356,14 +356,7 @@ function TradeForm(props: TradeFormProps) {
         </Flex>
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
-          <TradeReceipt
-            mb="25px"
-            px="3px"
-            product={product}
-            positionDelta={positionDelta}
-            positionDetails={position}
-            leverage={leverage}
-          />
+          <TradeReceipt mb="25px" px="3px" product={product} positionDelta={positionDelta} positionDetails={position} />
           {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
             <ButtonGroup>
               <Button

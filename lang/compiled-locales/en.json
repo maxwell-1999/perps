@@ -329,6 +329,12 @@
       "value": "Sell"
     }
   ],
+  "9IuVXI": [
+    {
+      "type": 0,
+      "value": "Funding Fee APR"
+    }
+  ],
   "A3zdUJ": [
     {
       "type": 0,
@@ -369,6 +375,12 @@
       "value": "difference"
     }
   ],
+  "AfTEOU": [
+    {
+      "type": 0,
+      "value": "Calculated from: (7d Fee Avg * 52w * Notional) / (Total Maker Notional * Collateral)"
+    }
+  ],
   "AwJFvy": [
     {
       "type": 0,
@@ -397,6 +409,12 @@
     {
       "type": 0,
       "value": "Change"
+    }
+  ],
+  "Bo6BEb": [
+    {
+      "type": 0,
+      "value": "Trading Fee APR"
     }
   ],
   "C5rikK": [
@@ -725,6 +743,12 @@
       "value": "%"
     }
   ],
+  "MXS+LE": [
+    {
+      "type": 0,
+      "value": "Calculated from: Funding Fee APR + Trading Fee APR"
+    }
+  ],
   "N0eaIb": [
     {
       "type": 0,
@@ -783,6 +807,12 @@
     {
       "type": 0,
       "value": "APR"
+    }
+  ],
+  "O2pMpb": [
+    {
+      "type": 0,
+      "value": "7d Volume (L/S)"
     }
   ],
   "OGoI5F": [
