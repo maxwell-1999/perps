@@ -1,10 +1,12 @@
 import colors from '@/components/design-system/theme/colors'
 import { PositionStatus } from '@/constants/markets'
+import { ProductSnapshotWithTradeLimitations } from '@/hooks/markets'
 
 import { PositionSide } from '@t/gql/graphql'
 import { Position, PrePosition, ProductSnapshot, UserProductSnapshot } from '@t/perennial'
 
 import { Big18Math } from './big18Utils'
+import { computeFundingRate } from './utilizationRateUtils'
 
 export function next(pre: PrePosition, pos: Position) {
   return {
@@ -204,4 +206,64 @@ export const getTradeLimitations = (userProductSnapshot?: UserProductSnapshot) =
 
 export const calcNotional = (position: bigint, price: bigint) => {
   return Big18Math.abs(Big18Math.mul(position, price))
+}
+
+export const calcTradeFeeApr = ({
+  fees7Day,
+  makerOi,
+  collateral,
+  notional,
+}: {
+  fees7Day: bigint
+  makerOi: bigint
+  collateral: bigint
+  notional: bigint
+}) => {
+  if (!fees7Day || !makerOi || !collateral || !notional) return 0n
+  const dailyAvgFee = Big18Math.div(fees7Day, Big18Math.fromDecimals(7n, 0))
+  const annualFees = Big18Math.mul(dailyAvgFee, Big18Math.fromDecimals(365n, 0))
+  const annualFeesPerUser = Big18Math.mul(annualFees, notional)
+  const denominator = Big18Math.mul(makerOi, collateral)
+  return Big18Math.div(annualFeesPerUser, denominator)
+}
+
+export const getMakerStats = ({
+  product,
+  leverage,
+  userPosition,
+  collateral,
+  snapshot,
+  fees7Day,
+  positionDelta,
+}: {
+  product: ProductSnapshot
+  leverage: bigint
+  userPosition: bigint
+  collateral: bigint
+  snapshot: ProductSnapshotWithTradeLimitations | undefined
+  fees7Day: bigint
+  positionDelta?: bigint
+}) => {
+  const {
+    productInfo: { utilizationCurve },
+    latestVersion: { price },
+    pre: globalPre,
+    position,
+  } = product
+
+  const globalPosition = {
+    taker: position.taker,
+    maker: position.maker + (positionDelta ? positionDelta : 0n),
+  }
+  const currentUtilization = utilization(globalPre, globalPosition)
+  const fundingRate = computeFundingRate(utilizationCurve, currentUtilization)
+  const exposure = Big18Math.mul(currentUtilization, leverage)
+  const notional = calcNotional(userPosition, price)
+  const makerOi = snapshot?.openInterest?.maker ?? 0n
+
+  const fundingFeeAPR = Big18Math.mul(fundingRate, exposure)
+  const tradingFeeAPR = calcTradeFeeApr({ fees7Day, makerOi, collateral, notional })
+  const totalAPR = tradingFeeAPR + fundingFeeAPR
+
+  return { fundingFeeAPR, tradingFeeAPR, totalAPR, exposure }
 }

@@ -187,31 +187,33 @@ function CurrentPosition() {
             </Text>
           }
         />
-        <DataRow
-          label={
-            <Flex alignItems="center" gap={2}>
-              <Text variant="label">{copy.fundingRate1hr}</Text>
-              <TooltipIcon
-                height="11px"
-                width="11px"
-                color={alpha50}
-                tooltipText={
-                  <FundingRateTooltip
-                    dailyFunding={dailyFunding}
-                    hourlyFunding={hourlyFunding}
-                    yearlyFunding={yearlyFundingRate}
-                    eightHourFunding={eightHourFunding}
-                  />
-                }
-              />
-            </Flex>
-          }
-          value={
-            <Text fontSize="14px" color={alpha75}>
-              {hourlyFunding}
-            </Text>
-          }
-        />
+        {!isMaker && (
+          <DataRow
+            label={
+              <Flex alignItems="center" gap={2}>
+                <Text variant="label">{copy.fundingRate1hr}</Text>
+                <TooltipIcon
+                  height="11px"
+                  width="11px"
+                  color={alpha50}
+                  tooltipText={
+                    <FundingRateTooltip
+                      dailyFunding={dailyFunding}
+                      hourlyFunding={hourlyFunding}
+                      yearlyFunding={yearlyFundingRate}
+                      eightHourFunding={eightHourFunding}
+                    />
+                  }
+                />
+              </Flex>
+            }
+            value={
+              <Text fontSize="14px" color={alpha75}>
+                {hourlyFunding}
+              </Text>
+            }
+          />
+        )}
         <DataRow
           label={copy.collateral}
           value={
