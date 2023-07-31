@@ -1,8 +1,7 @@
 import { Flex, FlexProps, Text, useColorModeValue } from '@chakra-ui/react'
 
 import { DataRow } from '@/components/design-system'
-import { TooltipText } from '@/components/design-system/Tooltip'
-import { TooltipIcon } from '@/components/design-system/Tooltip'
+import { TooltipIcon, TooltipText } from '@/components/design-system/Tooltip'
 import colors from '@/components/design-system/theme/colors'
 import { useMarketContext } from '@/contexts/marketContext'
 import { PositionDetails, useAsset7DayData, useChainLivePrices } from '@/hooks/markets'
@@ -74,10 +73,9 @@ export function TradeReceipt({
   const takerFeeRate = Big18Math.toFloatString(takerFee * 100n)
   const makerFeeRate = Big18Math.toFloatString(makerFee * 100n)
   const { data: asset7DayData } = useAsset7DayData(makerAsset)
-  const fees = asset7DayData?.fees
-  const fees7Day = fees?.[makerOrderDirection] ?? 0n
+  const fees7Day = asset7DayData?.fees?.[makerOrderDirection] ?? 0n
 
-  const { fundingFeeAPR, tradingFeeAPR, totalAPR, exposure } = getMakerStats({
+  const makerStats = getMakerStats({
     product,
     leverage: newLeverage,
     userPosition: newPosition,
@@ -91,7 +89,10 @@ export function TradeReceipt({
     <Flex flexDirection="column" {...props}>
       {isMaker && (
         <>
-          <DataRow label={copy.fundingFees} value={formatBig18Percent(fundingFeeAPR, { numDecimals: 4 })} />
+          <DataRow
+            label={copy.fundingFees}
+            value={formatBig18Percent(makerStats?.fundingFeeAPR ?? 0n, { numDecimals: 4 })}
+          />
           <DataRow
             label={
               <Flex alignItems="center" gap={2}>
@@ -104,7 +105,7 @@ export function TradeReceipt({
                 />
               </Flex>
             }
-            value={formatBig18Percent(tradingFeeAPR, { numDecimals: 4 })}
+            value={formatBig18Percent(makerStats?.tradingFeeAPR ?? 0n, { numDecimals: 4 })}
           />
           <DataRow
             label={
@@ -118,9 +119,9 @@ export function TradeReceipt({
                 />
               </Flex>
             }
-            value={formatBig18Percent(totalAPR, { numDecimals: 4 })}
+            value={formatBig18Percent(makerStats?.totalAPR ?? 0n, { numDecimals: 4 })}
           />
-          <DataRow label={copy.currentExposure} value={formatBig18Percent(exposure)} />
+          <DataRow label={copy.currentExposure} value={formatBig18Percent(makerStats?.exposure ?? 0n)} />
         </>
       )}
       <DataRow

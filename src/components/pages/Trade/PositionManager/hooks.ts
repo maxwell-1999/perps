@@ -6,6 +6,7 @@ import { OrderDirection } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import {
   PositionDetails,
+  useAsset7DayData,
   useChainAssetSnapshots,
   useChainLivePrices,
   useUserChainPositionHistory,
@@ -13,7 +14,7 @@ import {
 } from '@/hooks/markets'
 import { notEmpty } from '@/utils/arrayUtils'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
-import { socialization, utilization } from '@/utils/positionUtils'
+import { getMakerStats, socialization, utilization } from '@/utils/positionUtils'
 import { Day, Hour, Year } from '@/utils/timeUtils'
 
 import { PositionSide } from '@t/gql/graphql'
@@ -93,6 +94,9 @@ export const usePositionManagerCopy = () => {
     connectWalletHistory: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your position history' }),
     currentExposure: intl.formatMessage({ defaultMessage: 'Current Exposure' }),
     exposure: intl.formatMessage({ defaultMessage: 'Exposure' }),
+    fundingFeeAPR: intl.formatMessage({ defaultMessage: 'Funding Fee APR' }),
+    tradingFeeAPR: intl.formatMessage({ defaultMessage: 'Trading Fee APR' }),
+    totalAPR: intl.formatMessage({ defaultMessage: 'Total APR' }),
     liquidationFeeTooltip: (feeAmount: bigint) =>
       intl.formatMessage(
         { defaultMessage: 'Liquidation Fee: {feeAmount}' },
@@ -130,7 +134,17 @@ export const useFormatPosition = () => {
       ? selectedMarketSnapshot?.Long?.rate
       : selectedMarketSnapshot?.Short?.rate
 
-  const makerExposure = getMakerExposure(selectedMakerMarketSnapshot, position?.nextLeverage)
+  const { data: asset7DayData } = useAsset7DayData(makerAsset)
+  const fees7Day = asset7DayData?.fees?.[makerOrderDirection] ?? 0n
+
+  const makerStats = getMakerStats({
+    product: selectedMakerMarketSnapshot,
+    leverage: position?.nextLeverage,
+    userPosition: position?.nextPosition,
+    collateral: position?.currentCollateral,
+    snapshot: selectedMakerMarketSnapshot,
+    fees7Day,
+  })
 
   return {
     positionDetails: position,
@@ -141,7 +155,17 @@ export const useFormatPosition = () => {
       eightHourFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Hour * 8n, { numDecimals: 4 }) : noValue,
       yearlyFundingRate: position ? formatBig18Percent((fundingRate ?? 0n) * Year, { numDecimals: 4 }) : noValue,
       makerExposure:
-        isMaker && makerExposure !== undefined ? formatBig18Percent(makerExposure, { numDecimals: 4 }) : noValue,
+        isMaker && makerStats !== undefined ? formatBig18Percent(makerStats.exposure, { numDecimals: 2 }) : noValue,
+      fundingFeeAPR:
+        isMaker && makerStats !== undefined
+          ? formatBig18Percent(makerStats.fundingFeeAPR, { numDecimals: 4 })
+          : noValue,
+      tradingFeeAPR:
+        isMaker && makerStats !== undefined
+          ? formatBig18Percent(makerStats.tradingFeeAPR, { numDecimals: 4 })
+          : noValue,
+      totalAPR:
+        isMaker && makerStats !== undefined ? formatBig18Percent(makerStats.totalAPR, { numDecimals: 4 }) : noValue,
       ...getFormattedPositionDetails({ positionDetails: position, placeholderString: noValue, numSigFigs }),
     },
   }

@@ -236,14 +236,25 @@ export const getMakerStats = ({
   fees7Day,
   positionDelta,
 }: {
-  product: ProductSnapshot
-  leverage: bigint
-  userPosition: bigint
-  collateral: bigint
-  snapshot: ProductSnapshotWithTradeLimitations | undefined
-  fees7Day: bigint
+  product?: ProductSnapshot
+  leverage?: bigint
+  userPosition?: bigint
+  collateral?: bigint
+  snapshot?: ProductSnapshotWithTradeLimitations
+  fees7Day?: bigint
   positionDelta?: bigint
 }) => {
+  if (
+    !product ||
+    !snapshot ||
+    leverage === undefined ||
+    userPosition === undefined ||
+    collateral == undefined ||
+    fees7Day === undefined
+  ) {
+    return undefined
+  }
+
   const {
     productInfo: { utilizationCurve },
     latestVersion: { price },

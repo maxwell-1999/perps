@@ -51,6 +51,9 @@ function CurrentPosition() {
     nextLeverage,
     liquidationFee,
     makerExposure,
+    fundingFeeAPR,
+    tradingFeeAPR,
+    totalAPR,
   } = formattedValues
   const status = positionDetails?.status ?? PositionStatus.resolved
 
@@ -116,7 +119,6 @@ function CurrentPosition() {
               </Flex>
               {isOpenPosition && (
                 <ButtonGroup>
-                  <Button size="sm" label={copy.modify} onClick={() => setTradeFormState(FormState.modify)} />
                   <Button
                     size="sm"
                     leftIcon={<ClosePositionIcon />}
@@ -161,14 +163,61 @@ function CurrentPosition() {
           )}
         </HiddenOnLargeScreen>
         {isMaker ? (
-          <DataRow
-            label={copy.currentExposure}
-            value={
-              <Text fontSize="14px" color={alpha75}>
-                {hasPosition ? makerExposure : noValue}
-              </Text>
-            }
-          />
+          <>
+            <DataRow
+              label={
+                <Flex alignItems="center" gap={2}>
+                  <Text variant="label">{copy.totalAPR}</Text>
+                  <TooltipIcon
+                    height="11px"
+                    width="11px"
+                    color={alpha50}
+                    tooltipText={
+                      <Flex pt={2} flexDirection="column">
+                        <DataRow
+                          label={
+                            <Text fontSize="11px" mr={2}>
+                              {copy.fundingFeeAPR}
+                            </Text>
+                          }
+                          value={
+                            <Text fontSize="12px" color={alpha75}>
+                              {hasPosition ? fundingFeeAPR : noValue}
+                            </Text>
+                          }
+                        />
+                        <DataRow
+                          label={
+                            <Text fontSize="11px" mr={2}>
+                              {copy.tradingFeeAPR}
+                            </Text>
+                          }
+                          value={
+                            <Text fontSize="12px" color={alpha75}>
+                              {hasPosition ? tradingFeeAPR : noValue}
+                            </Text>
+                          }
+                        />
+                      </Flex>
+                    }
+                  />
+                </Flex>
+              }
+              value={
+                <Text fontSize="14px" color={alpha75}>
+                  {hasPosition ? totalAPR : noValue}
+                </Text>
+              }
+            />
+            <DataRow
+              label={copy.currentExposure}
+              value={
+                <Text fontSize="14px" color={alpha75}>
+                  {hasPosition ? makerExposure : noValue}
+                </Text>
+              }
+            />
+          </>
         ) : (
           <DataRow
             label={copy.liquidationPrice}
