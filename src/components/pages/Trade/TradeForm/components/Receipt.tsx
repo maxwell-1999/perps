@@ -63,7 +63,10 @@ export function TradeReceipt({
       taker: isMaker ? 0n : positionDelta.positionDelta,
     },
   )
-  const globalPosition = { ...position, taker: position.taker + positionDelta.positionDelta }
+  const globalPosition = {
+    taker: !isMaker ? position.taker + positionDelta.positionDelta : position.taker,
+    maker: !isMaker ? position.maker : position.maker + positionDelta.positionDelta,
+  }
   const currentUtilization = utilization(globalPre, globalPosition)
   const fundingRate = computeFundingRate(utilizationCurve, currentUtilization)
   const hourlyFundingRate = (fundingRate / Year) * Hour
