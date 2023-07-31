@@ -52,15 +52,22 @@ function TradeContainer() {
   useEffect(() => {
     if (isMaker) return
     // If this position is closed/resolve and the other side is not, switch to that side
-    if (closedOrResolved(position?.status) && !closedOrResolved(oppositeSidePosition?.status))
+    if (
+      closedOrResolved(position?.status) &&
+      position?.side === PositionSide.Taker &&
+      !closedOrResolved(oppositeSidePosition?.status) &&
+      oppositeSidePosition?.side === PositionSide.Taker
+    ) {
       setOrderDirection(orderDirection === Long ? Short : Long)
+    }
   }, [orderDirection, position, oppositeSidePosition, setOrderDirection, isMaker])
 
   // If data is loaded and one side is undefined, switch to the other side. This happens when only one side of the market is available
   useEffect(() => {
     if (isMaker) return
-    if (!product && !!selectedMarketSnapshot?.[orderDirection === Long ? Short : Long])
+    if (!product && !!selectedMarketSnapshot?.[orderDirection === Long ? Short : Long]) {
       setOrderDirection(orderDirection === Long ? Short : Long)
+    }
   }, [product, orderDirection, selectedMarketSnapshot, setOrderDirection, isMaker])
 
   const crossCollateral = useMemo(() => {
