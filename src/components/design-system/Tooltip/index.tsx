@@ -1,5 +1,6 @@
 import { IconProps, QuestionOutlineIcon } from '@chakra-ui/icons'
 import { TextProps as ChakraTextProps, Text, Tooltip, TooltipProps } from '@chakra-ui/react'
+import { useState } from 'react'
 
 export const TooltipText = ({
   tooltipText,
@@ -7,11 +8,20 @@ export const TooltipText = ({
   ...props
 }: {
   tooltipText: string | React.ReactNode
-  tooltipProps?: Omit<TooltipProps, 'children'>
+  tooltipProps?: Omit<TooltipProps, 'children' | 'isOpen'>
 } & ChakraTextProps) => {
+  const [isOpen, setIsOpen] = useState(false)
   return (
-    <Tooltip label={tooltipText} placement="top" size="sm" pointerEvents="all" {...tooltipProps}>
-      <Text {...props} textDecoration="underline dashed" textUnderlineOffset="2px" cursor="pointer">
+    <Tooltip label={tooltipText} placement="top" size="sm" pointerEvents="all" isOpen={isOpen} {...tooltipProps}>
+      <Text
+        {...props}
+        textDecoration="underline dashed"
+        textUnderlineOffset="2px"
+        cursor="pointer"
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+        onClick={() => setIsOpen(true)}
+      >
         {props.children}
       </Text>
     </Tooltip>
@@ -24,11 +34,20 @@ export const TooltipIcon = ({
   ...props
 }: {
   tooltipText: string | React.ReactNode
-  tooltipProps?: Omit<TooltipProps, 'children'>
+  tooltipProps?: Omit<TooltipProps, 'children' | 'isOpen'>
 } & IconProps) => {
+  const [isOpen, setIsOpen] = useState(false)
   return (
-    <Tooltip label={tooltipText} placement="top" size="sm" pointerEvents="all" {...tooltipProps}>
-      <QuestionOutlineIcon cursor="pointer" height="13px" width="13px" {...props} />
+    <Tooltip label={tooltipText} placement="top" size="sm" pointerEvents="all" isOpen={isOpen} {...tooltipProps}>
+      <QuestionOutlineIcon
+        cursor="pointer"
+        height="13px"
+        width="13px"
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
+        onClick={() => setIsOpen(true)}
+        {...props}
+      />
     </Tooltip>
   )
 }
