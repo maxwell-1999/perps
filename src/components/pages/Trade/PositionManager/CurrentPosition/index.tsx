@@ -34,7 +34,7 @@ function CurrentPosition() {
   const copy = usePositionManagerCopy()
   const { noValue } = copy
   const { borderColor, green, red, alpha75, subheaderTextColor, alpha50 } = useStyles()
-  const { assetMetadata, isMaker } = useMarketContext()
+  const { assetMetadata, isMaker, makerOrderDirection } = useMarketContext()
   const { setTradeFormState } = useTradeFormState()
   const { positionDetails, formattedValues } = useFormatPosition()
   const {
@@ -210,7 +210,9 @@ function CurrentPosition() {
               }
             />
             <DataRow
-              label={copy.currentExposure}
+              label={copy.currentExposure(
+                makerOrderDirection === OrderDirection.Long ? OrderDirection.Short : OrderDirection.Long,
+              )}
               value={
                 <Text fontSize="14px" color={alpha75}>
                   {hasPosition ? makerExposure : noValue}
