@@ -119,7 +119,7 @@ export function useTradeFormCopy() {
     close: intl.formatMessage({ defaultMessage: 'Close' }),
     switchLeverageInput: intl.formatMessage({ defaultMessage: 'switch-leverage-input' }),
     Slider: intl.formatMessage({ defaultMessage: 'Slider' }),
-    Make: intl.formatMessage({ defaultMessage: 'Make' }),
+    Make: intl.formatMessage({ defaultMessage: 'Advanced LP' }),
     isRestricted: (isMaker?: boolean) => {
       if (isMaker) {
         return intl.formatMessage({ defaultMessage: '* Maker positions unavailable while taker position open' })

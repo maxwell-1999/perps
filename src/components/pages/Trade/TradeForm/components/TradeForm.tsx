@@ -1,6 +1,8 @@
 import { RepeatIcon } from '@chakra-ui/icons'
+import { QuestionOutlineIcon } from '@chakra-ui/icons'
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
 import { arbitrum } from '@wagmi/chains'
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Address } from 'viem'
@@ -221,13 +223,28 @@ function TradeForm(props: TradeFormProps) {
       <Form onSubmit={handleSubmit(onConfirm)}>
         <Flex flexDirection="column" p="16px" pb="8px">
           <Flex justifyContent="space-between" mb="14px">
-            <Text color={textColor}>
-              {hasPosition && positionStatus !== PositionStatus.closed
-                ? copy.modifyPosition
-                : isMaker
-                ? copy.Make
-                : copy.trade}
-            </Text>
+            <Flex alignItems="center">
+              <Text color={textColor} mr={2}>
+                {hasPosition && positionStatus !== PositionStatus.closed
+                  ? copy.modifyPosition
+                  : isMaker
+                  ? copy.Make
+                  : copy.trade}
+              </Text>
+              {isMaker && (
+                <Link
+                  href="https://docs.perennial.finance/lps-makers/advanced-liquidity-provisioning"
+                  target="_blank"
+                  style={{
+                    display: 'flex',
+                    height: 'initial',
+                    color: textColor,
+                  }}
+                >
+                  <QuestionOutlineIcon cursor="pointer" height="13px" width="13px" />
+                </Link>
+              )}
+            </Flex>
             {!!address && hasPosition && (
               <TxButton
                 variant="text"

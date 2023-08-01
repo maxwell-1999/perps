@@ -145,6 +145,12 @@
       "value": "All Positions"
     }
   ],
+  "3ODU58": [
+    {
+      "type": 0,
+      "value": "This UI is for Advanced liquidity providers only. Please review Perennial's documentation to understand the risks."
+    }
+  ],
   "3cJGM2": [
     {
       "type": 0,
@@ -203,12 +209,6 @@
     {
       "type": 0,
       "value": "Pricing"
-    }
-  ],
-  "6AAM0P": [
-    {
-      "type": 0,
-      "value": "Make"
     }
   ],
   "6B5Jtu": [
@@ -297,6 +297,12 @@
     {
       "type": 0,
       "value": "As of now"
+    }
+  ],
+  "8ksRh+": [
+    {
+      "type": 0,
+      "value": "Risk Management"
     }
   ],
   "90axO4": [
@@ -391,6 +397,12 @@
     {
       "type": 0,
       "value": "Open Interest (L/S)"
+    }
+  ],
+  "Az0JPN": [
+    {
+      "type": 0,
+      "value": "Advanced LP"
     }
   ],
   "B2R6X1": [
@@ -563,6 +575,12 @@
     {
       "type": 0,
       "value": "Chain"
+    }
+  ],
+  "FdXKjQ": [
+    {
+      "type": 0,
+      "value": "Advanced Liquidity Provisioning"
     }
   ],
   "Fv1ZSz": [
@@ -937,6 +955,12 @@
       "value": "Deploy liquidity to both long & short sides of the market, reducing net exposure."
     }
   ],
+  "RIrR6d": [
+    {
+      "type": 0,
+      "value": "WARNING"
+    }
+  ],
   "RoqJiX": [
     {
       "type": 0,
@@ -1187,6 +1211,28 @@
     {
       "type": 0,
       "value": "Provide Liquidity"
+    }
+  ],
+  "a+brLy": [
+    {
+      "type": 0,
+      "value": "See: "
+    },
+    {
+      "type": 1,
+      "value": "advancedLiquidityProvisioning"
+    },
+    {
+      "type": 0,
+      "value": " & "
+    },
+    {
+      "type": 1,
+      "value": "riskManagement"
+    },
+    {
+      "type": 0,
+      "value": "."
     }
   ],
   "a/5CSv": [
@@ -1725,6 +1771,12 @@
     {
       "type": 0,
       "value": "Price / Liquidity"
+    }
+  ],
+  "ybNS8r": [
+    {
+      "type": 0,
+      "value": "Advanced LP Interface"
     }
   ],
   "yeHZsK": [
