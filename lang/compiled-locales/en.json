@@ -621,16 +621,6 @@
       "value": "Maker Fees"
     }
   ],
-  "HpDope": [
-    {
-      "type": 0,
-      "value": "Perennial - "
-    },
-    {
-      "type": 1,
-      "value": "title"
-    }
-  ],
   "HrHmba": [
     {
       "type": 1,
@@ -1183,6 +1173,16 @@
     {
       "type": 0,
       "value": "Provide Liquidity"
+    }
+  ],
+  "a/5CSv": [
+    {
+      "type": 1,
+      "value": "title"
+    },
+    {
+      "type": 0,
+      "value": " | Perennial"
     }
   ],
   "a8vnMh": [
