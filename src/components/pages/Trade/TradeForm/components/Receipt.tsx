@@ -1,20 +1,19 @@
 import { Flex, FlexProps, Text, useColorModeValue } from '@chakra-ui/react'
 
 import { DataRow } from '@/components/design-system'
-import { TooltipText } from '@/components/design-system/Tooltip'
-import { TooltipIcon } from '@/components/design-system/Tooltip'
+import { TooltipIcon, TooltipText } from '@/components/design-system/Tooltip'
 import colors from '@/components/design-system/theme/colors'
 import { useMarketContext } from '@/contexts/marketContext'
 import { PositionDetails, useAsset7DayData, useChainLivePrices } from '@/hooks/markets'
 import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
-import { calcLeverage, calcLiquidationPrice, calcNotional, utilization } from '@/utils/positionUtils'
+import { calcLeverage, calcLiquidationPrice, getMakerStats, utilization } from '@/utils/positionUtils'
 import { Hour, Year } from '@/utils/timeUtils'
 import { computeFundingRate } from '@/utils/utilizationRateUtils'
 
 import { ProductSnapshot } from '@t/perennial'
 
 import { useReceiptCopy } from '../hooks'
-import { calcPositionFee, calcTradeFeeApr } from '../utils'
+import { calcPositionFee } from '../utils'
 
 interface ReceiptProps {
   product: ProductSnapshot
@@ -63,26 +62,37 @@ export function TradeReceipt({
       taker: isMaker ? 0n : positionDelta.positionDelta,
     },
   )
-  const globalPosition = { ...position, taker: position.taker + positionDelta.positionDelta }
+  const globalPosition = {
+    taker: !isMaker ? position.taker + positionDelta.positionDelta : position.taker,
+    maker: isMaker ? position.maker + positionDelta.positionDelta : position.maker,
+  }
   const currentUtilization = utilization(globalPre, globalPosition)
   const fundingRate = computeFundingRate(utilizationCurve, currentUtilization)
   const hourlyFundingRate = (fundingRate / Year) * Hour
   const close = positionDelta.positionDelta < 0n
   const takerFeeRate = Big18Math.toFloatString(takerFee * 100n)
   const makerFeeRate = Big18Math.toFloatString(makerFee * 100n)
-  const exposure = Big18Math.mul(currentUtilization, newLeverage ? newLeverage : 0n)
-  const fundingFees = Big18Math.mul(fundingRate, exposure)
-  const notional = calcNotional(newPosition, price)
   const { data: asset7DayData } = useAsset7DayData(makerAsset)
-  const fees = asset7DayData?.fees
-  const fees7Day = fees?.[makerOrderDirection] ?? 0n
-  const makerOi = makerSnapshot?.openInterest?.maker ?? 0n
-  const tradingFees = calcTradeFeeApr({ fees7Day, makerOi, collateral: newCollateral, notional })
+  const fees7Day = asset7DayData?.fees?.[makerOrderDirection] ?? 0n
+
+  const makerStats = getMakerStats({
+    product,
+    leverage: newLeverage,
+    userPosition: newPosition,
+    collateral: newCollateral,
+    snapshot: makerSnapshot,
+    fees7Day,
+    positionDelta: positionDelta.positionDelta,
+  })
+
   return (
     <Flex flexDirection="column" {...props}>
       {isMaker && (
         <>
-          <DataRow label={copy.fundingFees} value={formatBig18Percent(fundingFees, { numDecimals: 4 })} />
+          <DataRow
+            label={copy.fundingFees}
+            value={formatBig18Percent(makerStats?.fundingFeeAPR ?? 0n, { numDecimals: 4 })}
+          />
           <DataRow
             label={
               <Flex alignItems="center" gap={2}>
@@ -95,7 +105,7 @@ export function TradeReceipt({
                 />
               </Flex>
             }
-            value={formatBig18Percent(tradingFees, { numDecimals: 4 })}
+            value={formatBig18Percent(makerStats?.tradingFeeAPR ?? 0n, { numDecimals: 4 })}
           />
           <DataRow
             label={
@@ -109,9 +119,9 @@ export function TradeReceipt({
                 />
               </Flex>
             }
-            value={formatBig18Percent(tradingFees + fundingFees, { numDecimals: 4 })}
+            value={formatBig18Percent(makerStats?.totalAPR ?? 0n, { numDecimals: 4 })}
           />
-          <DataRow label={copy.currentExposure} value={formatBig18Percent(exposure)} />
+          <DataRow label={copy.currentExposure} value={formatBig18Percent(makerStats?.exposure ?? 0n)} />
         </>
       )}
       <DataRow
