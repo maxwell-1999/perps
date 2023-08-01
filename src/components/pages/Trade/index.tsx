@@ -6,6 +6,7 @@ import {
   TradeFormGridItem,
   TradeLayout,
 } from '@/components/layout/TradeLayout'
+import { HeadWithLivePrices } from '@/components/shared/Head'
 import NavBar from '@/components/shared/NavBar'
 import { MarketProvider } from '@/contexts/marketContext'
 import { SettlementToastProvider } from '@/contexts/settlementToastContext'
@@ -21,6 +22,7 @@ export default function Trade() {
     <MarketProvider>
       <TradeFormProvider>
         <SettlementToastProvider>
+          <HeadWithLivePrices />
           <TradeLayout>
             <HeaderGridItem>
               <NavBar />

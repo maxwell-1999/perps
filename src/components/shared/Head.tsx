@@ -1,6 +1,10 @@
 import NextHead from 'next/head'
 import { useIntl } from 'react-intl'
 
+import { useMarketContext } from '@/contexts/marketContext'
+
+import { useFormattedMarketBarValues } from '../pages/Trade/MarketBar/hooks'
+
 interface HeadProps {
   title: string
   description?: string
@@ -14,7 +18,7 @@ export default function Head({ title, children, description }: HeadProps) {
   })
   const perennialTitle = intl.formatMessage(
     {
-      defaultMessage: 'Perennial - {title}',
+      defaultMessage: '{title} | Perennial',
     },
     { title },
   )
@@ -28,4 +32,11 @@ export default function Head({ title, children, description }: HeadProps) {
       {children}
     </NextHead>
   )
+}
+
+export const HeadWithLivePrices = () => {
+  const formattedValues = useFormattedMarketBarValues()
+  const { assetMetadata } = useMarketContext()
+  const { symbol } = assetMetadata
+  return <Head title={`${formattedValues.price} ${symbol}`} />
 }
