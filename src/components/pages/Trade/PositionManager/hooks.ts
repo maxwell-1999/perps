@@ -92,7 +92,8 @@ export const usePositionManagerCopy = () => {
     liquidationFee: intl.formatMessage({ defaultMessage: 'Liquidation Fee' }),
     connectWalletPositions: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your positions' }),
     connectWalletHistory: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your position history' }),
-    currentExposure: intl.formatMessage({ defaultMessage: 'Current Exposure' }),
+    currentExposure: (side: OrderDirection) =>
+      intl.formatMessage({ defaultMessage: 'Current Exposure ({side})' }, { side }),
     exposure: intl.formatMessage({ defaultMessage: 'Exposure' }),
     fundingFeeAPR: intl.formatMessage({ defaultMessage: 'Funding Fee APR' }),
     tradingFeeAPR: intl.formatMessage({ defaultMessage: 'Trading Fee APR' }),

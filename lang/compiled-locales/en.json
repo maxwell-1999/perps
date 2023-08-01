@@ -651,6 +651,20 @@
       "value": "Funding Rate (24h)"
     }
   ],
+  "IKld9r": [
+    {
+      "type": 0,
+      "value": "Current Exposure ("
+    },
+    {
+      "type": 1,
+      "value": "side"
+    },
+    {
+      "type": 0,
+      "value": ")"
+    }
+  ],
   "IXw0x/": [
     {
       "type": 0,
