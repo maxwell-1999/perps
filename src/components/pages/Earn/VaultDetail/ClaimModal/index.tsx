@@ -100,7 +100,7 @@ export default function ClaimModal({
   }
 
   const dsuApprovalSuggestion = formatBig18(
-    Big18Math.add(Big18Math.fromFloatString('0.001'), vaultUserSnapshot.claimable),
+    Big18Math.add(Big18Math.fromFloatString('0.01'), vaultUserSnapshot.claimable),
     { minDecimals: 2 },
   )
 
