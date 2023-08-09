@@ -11,7 +11,7 @@ import { IntlProvider } from 'react-intl'
 // eslint-disable-next-line no-restricted-imports
 import { WagmiConfig, useAccount, useDisconnect } from 'wagmi'
 
-import { MixpanelProvider, useMixpanel } from '@/analytics'
+import { DatadogProvider, MixpanelProvider, useMixpanel } from '@/analytics'
 import SanctionModal from '@/components/SanctionModal'
 import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
@@ -112,7 +112,9 @@ export default function App(props: AppProps) {
           <WagmiConfig config={wagmiConfig}>
             <AuthStatusProvider>
               <MixpanelProvider>
-                <AppWithAuth {...props} />
+                <DatadogProvider>
+                  <AppWithAuth {...props} />
+                </DatadogProvider>
               </MixpanelProvider>
             </AuthStatusProvider>
           </WagmiConfig>

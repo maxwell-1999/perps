@@ -2326,6 +2326,18 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
+"@datadog/browser-core@4.46.0":
+  version "4.46.0"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-core/-/browser-core-4.46.0.tgz#7661ff43262c8357696c06f670d8708117af64d3"
+  integrity sha512-lZzn6E/vdZul4sPOAAGjzCiUsLeO/XsXGn5kzaroPAmzevPztm8C7twcaISFWUg5sE04FG9hOLK0+LI61AABhA==
+
+"@datadog/browser-logs@^4.46.0":
+  version "4.46.0"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-logs/-/browser-logs-4.46.0.tgz#0cc3211ae902df3626b450cafebfe34943827607"
+  integrity sha512-K1lznxVtqpEnLXvWLnjTxAQN7vPEs7mOHgY0k1+iQ7aX7oHMIFu3uiS7WkhZR1+Zy9wYbRO3SThDpNWLLRjOMw==
+  dependencies:
+    "@datadog/browser-core" "4.46.0"
+
 "@discoveryjs/json-ext@^0.5.3":
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.7.tgz#1d572bfbbe14b7704e0ba0f39b74815b84870d70"

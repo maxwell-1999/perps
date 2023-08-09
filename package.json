@@ -29,6 +29,7 @@
   "dependencies": {
     "@chakra-ui/icons": "^2.0.19",
     "@chakra-ui/react": "^2.5.5",
+    "@datadog/browser-logs": "^4.46.0",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@pythnetwork/pyth-evm-js": "^1.16.1",

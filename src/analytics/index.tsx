@@ -1,3 +1,4 @@
+import { datadogLogs } from '@datadog/browser-logs'
 import mixpanel, { Mixpanel } from 'mixpanel-browser'
 import { useRouter } from 'next/router'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
@@ -7,6 +8,7 @@ import { LocalDev } from '@/constants/auth'
 import { EventMap, TrackingEvents } from './constants'
 
 const mixpanelToken = process.env.NEXT_PUBLIC_MIXPANEL_ID || ''
+const datadogToken = process.env.NEXT_PUBLIC_DATADOG_TOKEN || ''
 
 type MixpanelContext = {
   mixpanel: Mixpanel | null
@@ -78,6 +80,44 @@ export const useMixpanel = () => {
   const context = useContext(MixpanelContext)
   if (context === undefined) {
     throw new Error('useMixpanel must be used within a MixpanelProvider')
+  }
+  return context
+}
+
+const DatadogContext = createContext<{ logger: typeof datadogLogs.logger | null; isInitialized: boolean }>({
+  logger: null,
+  isInitialized: false,
+})
+export const DatadogProvider = ({ children }: { children: React.ReactNode }) => {
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  useEffect(() => {
+    if (!datadogToken || LocalDev) {
+      setIsInitialized(false)
+      return
+    }
+
+    if (!isInitialized) {
+      datadogLogs.init({
+        clientToken: datadogToken,
+        site: 'us5.datadoghq.com',
+        forwardErrorsToLogs: true,
+        service: 'app.perennial.finance',
+        silentMultipleInit: true,
+      })
+      setIsInitialized(true)
+    }
+  }, [isInitialized])
+
+  return (
+    <DatadogContext.Provider value={{ logger: datadogLogs.logger, isInitialized }}>{children}</DatadogContext.Provider>
+  )
+}
+
+export const useDatadog = () => {
+  const context = useContext(DatadogContext)
+  if (context === undefined) {
+    throw new Error('useDatadog must be used within a DatadogProvider')
   }
   return context
 }

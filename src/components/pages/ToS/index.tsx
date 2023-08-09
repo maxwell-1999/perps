@@ -3,7 +3,7 @@ import { TextPageLayout } from '@/components/layout/TextPageLayout'
 
 export default function ToS() {
   return (
-    <TextPageLayout header="Perennial User Terms of Service" subheader="Last Updated: October 13, 2022">
+    <TextPageLayout header="Perennial User Terms of Service" subheader="Last Updated: August 09, 2023">
       <p>1. Introduction</p>
 
       <p>
@@ -156,9 +156,9 @@ export default function ToS() {
         The only information we collect from you is your blockchain wallet address, completed transaction hashes, and
         the digital asset names, symbols, or other blockchain identifiers of the digital assets that you use for
         transactions. We do not collect any personal information from you (e.g., your name or other identifiers that can
-        be linked to you). We do, however, use third-party service providers, like Alchemy and Mixpanel. We do not
-        control how these third parties handle your data and you should review their privacy policies to understand how
-        they collect, use, and share your personal information. For more information, please see our Privacy Policy.
+        be linked to you). We do, however, use third-party service providers, like Alchemy, Datadog, and Mixpanel. We do
+        not control how these third parties handle your data and you should review their privacy policies to understand
+        how they collect, use, and share your personal information. For more information, please see our Privacy Policy.
       </p>
 
       <p>
