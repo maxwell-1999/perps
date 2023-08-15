@@ -1,8 +1,11 @@
-import { HamburgerIcon } from '@chakra-ui/icons'
 import { Popover, PopoverBody, PopoverContent, PopoverHeader, PopoverTrigger, useDisclosure } from '@chakra-ui/react'
 import { Text } from '@chakra-ui/react'
+import Image from 'next/image'
 
 import { IconButton } from '@/components/design-system'
+import colors from '@/components/design-system/theme/colors'
+import { idToNetworkSymbol } from '@/constants/assets'
+import { AssetMetadata } from '@/constants/assets'
 import { mainnetChains } from '@/constants/network'
 import { useDefaultChain } from '@/contexts/chainContext'
 
@@ -14,29 +17,38 @@ export default function SwitchNetworkButton() {
   const { setDefaultChain, defaultChain } = useDefaultChain()
   const { isOpen, onOpen, onClose } = useDisclosure({ id: 'networkSelector' })
   const copy = useNavCopy()
+  const symbol = idToNetworkSymbol[defaultChain.id]
+  const icon = AssetMetadata[symbol].icon
 
   return (
     <Popover placement="bottom-start" variant="assetSelector" isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
       <PopoverTrigger>
-        <IconButton icon={<HamburgerIcon />} variant="ghost" size="sm" aria-label={copy.switchNetwork} />
+        <IconButton
+          icon={<Image src={icon} alt={defaultChain.name} height={26} width={26} />}
+          variant="transparent"
+          aria-label={copy.switchNetwork}
+        />
       </PopoverTrigger>
-      <PopoverContent>
-        <PopoverHeader>{copy.switchNetwork}</PopoverHeader>
-        <PopoverBody>
-          {mainnetChains.map((option) => {
+      <PopoverContent width="200px">
+        <PopoverHeader bg={colors.brand.blackAlpha[60]} borderTopLeftRadius="6px" borderTopRightRadius="6px">
+          {copy.switchNetwork}
+        </PopoverHeader>
+        <PopoverBody bg={colors.brand.blackAlpha[60]} borderBottomLeftRadius="6px" borderBottomRightRadius="6px">
+          {mainnetChains.map((option, index) => {
             const isActive = option.id === defaultChain.id
+            const symbol = idToNetworkSymbol[option.id]
             return (
               <Button
-                variant="text"
+                variant="ghost"
                 key={option.id}
+                borderBottom={index !== mainnetChains.length - 1 ? `1px solid ${colors.brand.whiteAlpha[10]}` : 'none'}
                 onClick={() => {
                   setDefaultChain(option)
                   onClose()
                 }}
                 isDisabled={isActive}
-                size="sm"
-                width="full"
-                label={<Text>{option.name}</Text>}
+                leftIcon={<Image src={AssetMetadata[symbol].icon} alt={option.name} height={12} width={12} />}
+                label={<Text color="white">{option.name}</Text>}
               />
             )
           })}

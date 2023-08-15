@@ -2,6 +2,7 @@ import arbLogo from '@public/icons/arb.png'
 import btcLogo from '@public/icons/btc.png'
 import linkLogo from '@public/icons/chainlink.png'
 import ethLogo from '@public/icons/eth.png'
+import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from '@wagmi/chains'
 
 import { OrderDirection } from './markets'
 
@@ -32,6 +33,14 @@ export enum QuoteCurrency {
 export enum Currency {
   USDC = 'USDC',
   DSU = 'DSU',
+}
+
+export const idToNetworkSymbol = {
+  [mainnet.id]: SupportedAsset.eth,
+  [goerli.id]: SupportedAsset.eth,
+  [arbitrum.id]: SupportedAsset.arb,
+  [arbitrumGoerli.id]: SupportedAsset.arb,
+  [baseGoerli.id]: SupportedAsset.eth, // TODO
 }
 
 export type AssetMetadata = {
