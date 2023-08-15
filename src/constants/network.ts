@@ -16,7 +16,6 @@ if (!WalletConnectProjectId) throw new Error('Missing walletconnect project id')
 
 // Random select a key from available keys
 export const AlchemyActiveKey = AlchemyProdKeys[Math.floor(Math.random() * AlchemyProdKeys.length)]
-
 export const SupportedChainIds = [arbitrum.id, mainnet.id, arbitrumGoerli.id, goerli.id, baseGoerli.id] as const
 export type SupportedChainId = (typeof SupportedChainIds)[number]
 export const isSupportedChain = (chainId?: number) =>

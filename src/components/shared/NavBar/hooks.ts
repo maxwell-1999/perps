@@ -11,5 +11,6 @@ export const useNavCopy = () => {
     connect: intl.formatMessage({ defaultMessage: 'Connect' }),
     chain: intl.formatMessage({ defaultMessage: 'Chain' }),
     testnet: intl.formatMessage({ defaultMessage: 'TESTNET' }),
+    switchNetwork: intl.formatMessage({ defaultMessage: 'Switch Network' }),
   }
 }

@@ -6,7 +6,8 @@ import { getAddress } from 'viem'
 // eslint-disable-next-line no-restricted-imports
 import { useNetwork, usePublicClient, useAccount as useWagmiAccount } from 'wagmi'
 
-import { DefaultChain, GraphUrls, SupportedChainId, isSupportedChain } from '@/constants/network'
+import { GraphUrls, SupportedChainId, isSupportedChain } from '@/constants/network'
+import { useDefaultChain } from '@/contexts/chainContext'
 
 export const useAddress = () => {
   const { address: wagmiAddress } = useWagmiAccount()
@@ -18,9 +19,10 @@ export const useAddress = () => {
 
 export const useChainId = () => {
   let { chain } = useNetwork()
-  chain = chain ?? DefaultChain
+  const { defaultChain } = useDefaultChain()
+  chain = chain ?? defaultChain
 
-  if (chain === undefined || !isSupportedChain(chain.id)) return DefaultChain.id
+  if (chain === undefined || !isSupportedChain(chain.id)) return defaultChain.id
 
   return chain.id as SupportedChainId
 }
