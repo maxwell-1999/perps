@@ -20,7 +20,7 @@ function NavBar() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const theme = useTheme()
   const linkUnderlineColor = useColorModeValue(theme.colors.brand.blackAlpha[10], theme.colors.brand.whiteAlpha[10])
-  const { address } = useAddress()
+  const { address, overriding } = useAddress()
   const copy = useNavCopy()
 
   return (
@@ -56,7 +56,7 @@ function NavBar() {
         </HiddenOnDesktop>
       </Flex>
       <ButtonGroup>
-        {!address && <SwitchNetworkButton />}
+        {(!address || overriding) && <SwitchNetworkButton />}
         <ConnectWalletButton />
       </ButtonGroup>
     </Nav>
