@@ -1,3 +1,6 @@
+import arbLogo from '@public/icons/arb.png'
+import baseLogo from '@public/icons/base.png'
+import ethLogo from '@public/icons/eth.png'
 import { getDefaultWallets } from '@rainbow-me/rainbowkit'
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from '@wagmi/chains'
 import { configureChains, createConfig } from 'wagmi'
@@ -76,4 +79,12 @@ export const ExplorerURLs: { [chainId in SupportedChainId]: string } = {
   [arbitrum.id]: 'https://arbiscan.io',
   [arbitrumGoerli.id]: 'https://goerli.arbiscan.io',
   [baseGoerli.id]: 'https://goerli.basescan.org',
+}
+
+export const networkToIcon: { [chainId in SupportedChainId]: string } = {
+  [mainnet.id]: ethLogo,
+  [goerli.id]: ethLogo,
+  [arbitrum.id]: arbLogo,
+  [arbitrumGoerli.id]: arbLogo,
+  [baseGoerli.id]: baseLogo,
 }

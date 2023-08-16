@@ -4,9 +4,7 @@ import Image from 'next/image'
 
 import { IconButton } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
-import { idToNetworkSymbol } from '@/constants/assets'
-import { AssetMetadata } from '@/constants/assets'
-import { mainnetChains } from '@/constants/network'
+import { mainnetChains, networkToIcon } from '@/constants/network'
 import { useDefaultChain } from '@/contexts/chainContext'
 
 import { Button } from '@ds/Button'
@@ -17,8 +15,8 @@ export default function SwitchNetworkButton() {
   const { setDefaultChain, defaultChain } = useDefaultChain()
   const { isOpen, onOpen, onClose } = useDisclosure({ id: 'networkSelector' })
   const copy = useNavCopy()
-  const symbol = idToNetworkSymbol[defaultChain.id]
-  const icon = AssetMetadata[symbol].icon
+
+  const icon = networkToIcon[defaultChain.id]
 
   return (
     <Popover placement="bottom-start" variant="assetSelector" isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
@@ -36,7 +34,8 @@ export default function SwitchNetworkButton() {
         <PopoverBody bg={colors.brand.blackAlpha[60]} borderBottomLeftRadius="6px" borderBottomRightRadius="6px">
           {mainnetChains.map((option, index) => {
             const isActive = option.id === defaultChain.id
-            const symbol = idToNetworkSymbol[option.id]
+            const icon = networkToIcon[option.id]
+
             return (
               <Button
                 variant="ghost"
@@ -47,7 +46,7 @@ export default function SwitchNetworkButton() {
                   onClose()
                 }}
                 isDisabled={isActive}
-                leftIcon={<Image src={AssetMetadata[symbol].icon} alt={option.name} height={12} width={12} />}
+                leftIcon={<Image src={icon} alt={option.name} height={12} width={12} />}
                 label={<Text color="white">{option.name}</Text>}
               />
             )
