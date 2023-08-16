@@ -2,6 +2,7 @@ import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
 import { WebSocketProvider } from 'ethers'
 import { GraphQLClient } from 'graphql-request'
 import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import { getAddress } from 'viem'
 // eslint-disable-next-line no-restricted-imports
 import { useNetwork, usePublicClient, useAccount as useWagmiAccount } from 'wagmi'
@@ -11,10 +12,22 @@ import { useDefaultChain } from '@/contexts/chainContext'
 
 export const useAddress = () => {
   const { address: wagmiAddress } = useWagmiAccount()
-  const { query } = useRouter()
-  const addressOverride = query.a ? (Array.isArray(query.a) ? getAddress(query.a[0]) : getAddress(query.a)) : undefined
+  const [addressInfo, setAddressInfo] = useState<{ address: `0x${string}` | undefined; overriding: boolean }>({
+    address: undefined,
+    overriding: false,
+  })
+  const { query, isReady } = useRouter()
+  useEffect(() => {
+    if (!isReady) return
+    const addressOverride = query.a
+      ? Array.isArray(query.a)
+        ? getAddress(query.a[0])
+        : getAddress(query.a)
+      : undefined
+    setAddressInfo({ address: addressOverride ?? wagmiAddress, overriding: !!addressOverride })
+  }, [isReady, query.a, wagmiAddress])
 
-  return { address: addressOverride ?? wagmiAddress, overriding: !!addressOverride }
+  return addressInfo
 }
 
 export const useChainId = () => {
