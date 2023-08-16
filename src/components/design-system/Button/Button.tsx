@@ -39,8 +39,10 @@ export interface IconButtonProps extends ChakraIconButtonProps {
   icon: ReactElement<any, string | JSXElementConstructor<any>>
 }
 
-export const IconButton: React.FC<IconButtonProps> = ({ ...props }) => {
-  return <ChakraIconButton variant="transparent" {...props} />
-}
+export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>((props, ref) => {
+  return <ChakraIconButton ref={ref} variant="transparent" {...props} />
+})
+
+IconButton.displayName = 'IconButton'
 
 export { ButtonGroup } from '@chakra-ui/react'

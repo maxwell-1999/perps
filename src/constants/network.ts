@@ -1,3 +1,6 @@
+import arbLogo from '@public/icons/arb.png'
+import baseLogo from '@public/icons/base.png'
+import ethLogo from '@public/icons/eth.png'
 import { getDefaultWallets } from '@rainbow-me/rainbowkit'
 import { arbitrum, arbitrumGoerli, baseGoerli, goerli, mainnet } from '@wagmi/chains'
 import { configureChains, createConfig } from 'wagmi'
@@ -16,7 +19,6 @@ if (!WalletConnectProjectId) throw new Error('Missing walletconnect project id')
 
 // Random select a key from available keys
 export const AlchemyActiveKey = AlchemyProdKeys[Math.floor(Math.random() * AlchemyProdKeys.length)]
-
 export const SupportedChainIds = [arbitrum.id, mainnet.id, arbitrumGoerli.id, goerli.id, baseGoerli.id] as const
 export type SupportedChainId = (typeof SupportedChainIds)[number]
 export const isSupportedChain = (chainId?: number) =>
@@ -72,9 +74,17 @@ export const GraphUrls: { [chainId in SupportedChainId]: string } = {
 }
 
 export const ExplorerURLs: { [chainId in SupportedChainId]: string } = {
-  [mainnet.id]: 'https://etherscan.io',
-  [goerli.id]: 'https://goerli.etherscan.io',
-  [arbitrum.id]: 'https://arbiscan.io',
-  [arbitrumGoerli.id]: 'https://goerli.arbiscan.io',
-  [baseGoerli.id]: 'https://goerli.basescan.org',
+  [mainnet.id]: mainnet.blockExplorers.default.url,
+  [goerli.id]: goerli.blockExplorers.default.url,
+  [arbitrum.id]: arbitrum.blockExplorers.default.url,
+  [arbitrumGoerli.id]: arbitrumGoerli.blockExplorers.default.url,
+  [baseGoerli.id]: baseGoerli.blockExplorers.default.url,
+}
+
+export const networkToIcon: { [chainId in SupportedChainId]: string } = {
+  [mainnet.id]: ethLogo,
+  [goerli.id]: ethLogo,
+  [arbitrum.id]: arbLogo,
+  [arbitrumGoerli.id]: arbLogo,
+  [baseGoerli.id]: baseLogo,
 }

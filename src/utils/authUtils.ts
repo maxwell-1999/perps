@@ -110,8 +110,7 @@ export const createAuthAdapter = ({ address, onVerify }: { address?: Address; on
     },
 
     signOut: async () => {
-      if (!address) throw new Error('No address provided')
-
+      if (!address) return
       removeJwt(address)
     },
   })

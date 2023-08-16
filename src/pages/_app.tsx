@@ -16,6 +16,7 @@ import SanctionModal from '@/components/SanctionModal'
 import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
 import { AuthStatusProvider, StartingAuthStatus, useAuthStatus } from '@/contexts/authStatusContext'
+import { ChainProvider } from '@/contexts/chainContext'
 import '@/styles/globals.css'
 import { createAuthAdapter, getJwt, login } from '@/utils/authUtils'
 import { usePrevious } from '@/utils/hooks'
@@ -110,13 +111,15 @@ export default function App(props: AppProps) {
       <IntlProvider locale={locale} defaultLocale={defaultLocale} messages={messages}>
         <QueryClientProvider client={queryClient}>
           <WagmiConfig config={wagmiConfig}>
-            <AuthStatusProvider>
-              <MixpanelProvider>
-                <DatadogProvider>
-                  <AppWithAuth {...props} />
-                </DatadogProvider>
-              </MixpanelProvider>
-            </AuthStatusProvider>
+            <ChainProvider>
+              <AuthStatusProvider>
+                <MixpanelProvider>
+                  <DatadogProvider>
+                    <AppWithAuth {...props} />
+                  </DatadogProvider>
+                </MixpanelProvider>
+              </AuthStatusProvider>
+            </ChainProvider>
           </WagmiConfig>
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>

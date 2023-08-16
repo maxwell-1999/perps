@@ -4,12 +4,14 @@ import Logo from '@public/logoTransparent.svg'
 import Link from 'next/link'
 
 import { HiddenOnDesktop, HiddenOnMobile } from '@/components/shared/responsive'
+import { useAddress } from '@/hooks/network'
 
 import { Button, ButtonGroup, IconButton } from '@ds/Button'
 import { MobileDrawer } from '@ds/MobileDrawer'
 
 import ConnectWalletButton from './ConnectWalletButton'
 import LinkSwitcher from './LinkSwitcher'
+import SwitchNetworkButton from './SwitchNetworkButton'
 import { links } from './constants'
 import { useNavCopy } from './hooks'
 import { MobileButtonLabel, Nav } from './styles'
@@ -18,7 +20,7 @@ function NavBar() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const theme = useTheme()
   const linkUnderlineColor = useColorModeValue(theme.colors.brand.blackAlpha[10], theme.colors.brand.whiteAlpha[10])
-
+  const { address, overriding } = useAddress()
   const copy = useNavCopy()
 
   return (
@@ -54,6 +56,7 @@ function NavBar() {
         </HiddenOnDesktop>
       </Flex>
       <ButtonGroup>
+        {(!address || overriding) && <SwitchNetworkButton />}
         <ConnectWalletButton />
       </ButtonGroup>
     </Nav>
