@@ -2,8 +2,8 @@ import NextHead from 'next/head'
 import { useIntl } from 'react-intl'
 
 import { useMarketContext } from '@/contexts/marketContext'
-
-import { useFormattedMarketBarValues } from '../pages/Trade/MarketBar/hooks'
+import { useChainLivePrices } from '@/hooks/markets'
+import { formatBig18USDPrice } from '@/utils/big18Utils'
 
 interface HeadProps {
   title: string
@@ -35,8 +35,21 @@ export default function Head({ title, children, description }: HeadProps) {
 }
 
 export const HeadWithLivePrices = () => {
-  const formattedValues = useFormattedMarketBarValues()
-  const { assetMetadata } = useMarketContext()
+  const livePrices = useChainLivePrices()
+  const {
+    assetMetadata,
+    selectedMarket,
+    selectedMakerMarketSnapshot,
+    selectedMarketSnapshot,
+    orderDirection,
+    makerAsset,
+    isMaker,
+  } = useMarketContext()
+  const chainPrice = isMaker
+    ? selectedMakerMarketSnapshot?.latestVersion?.price ?? 0n
+    : selectedMarketSnapshot?.[orderDirection]?.latestVersion?.price ?? 0n
+  const price = livePrices[isMaker ? makerAsset : selectedMarket] ?? chainPrice
   const { symbol } = assetMetadata
-  return <Head title={`${formattedValues.price} ${symbol}`} />
+  const title = price ? `${formatBig18USDPrice(price)} ${symbol}` : symbol
+  return <Head title={title} />
 }
