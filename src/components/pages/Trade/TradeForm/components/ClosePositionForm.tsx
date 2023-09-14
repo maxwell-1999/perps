@@ -10,6 +10,7 @@ import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails } from '@/hooks/markets'
 import { Big18Math } from '@/utils/big18Utils'
+import { next } from '@/utils/positionUtils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
@@ -115,8 +116,12 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
   const hasFormErrors = Object.keys(errors).length > 0
   const disableCloseBtn = (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors
 
+  const globalNext = next(product.pre, product.position)
   const amountValidator = useCloseAmountValidator({
-    quantity: nextPosition ?? 0n,
+    currentPositionAmount: nextPosition ?? 0n,
+    isMaker,
+    totalMaker: globalNext.maker,
+    totalTaker: globalNext.taker,
   })
 
   return (

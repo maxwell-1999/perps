@@ -153,21 +153,48 @@ export function useLeverageValidators({ maxLeverage }: { maxLeverage: number }) 
   }
 }
 
-export function useCloseAmountValidator({ quantity }: { quantity: bigint }) {
+export function useCloseAmountValidator({
+  currentPositionAmount,
+  isMaker,
+  totalMaker,
+  totalTaker,
+}: {
+  currentPositionAmount: bigint
+  isMaker: boolean
+  totalMaker: bigint
+  totalTaker: bigint
+}) {
   const copy = useErrorMessages()
   const isRequiredValidator = useIsRequiredValidator()
 
   const maxValidator = useMemo(() => {
     return (value: string) => {
       const inputValue = Big18Math.fromFloatString(value)
-      if (inputValue > quantity) {
+      if (inputValue > currentPositionAmount) {
         return copy.insufficientPosition
       }
       return true
     }
-  }, [quantity, copy.insufficientPosition])
+  }, [currentPositionAmount, copy.insufficientPosition])
 
-  return { max: maxValidator, required: isRequiredValidator }
+  const maxMakerValidator = useMemo(() => {
+    return (value: string) => {
+      const inputValue = Big18Math.fromFloatString(value)
+      const positionDelta = -inputValue
+
+      if (inputValue > currentPositionAmount) {
+        return copy.insufficientPosition
+      }
+
+      if (totalMaker + positionDelta < totalTaker) {
+        if (!(totalTaker > totalMaker && positionDelta > 0n)) {
+          return copy.belowMinMaker
+        }
+      }
+      return true
+    }
+  }, [totalMaker, totalTaker, currentPositionAmount, copy.insufficientPosition, copy.belowMinMaker])
+  return { max: isMaker ? maxMakerValidator : maxValidator, required: isRequiredValidator }
 }
 
 export function useCloseCollateralValidator({
