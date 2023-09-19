@@ -8,14 +8,12 @@ import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails } from '@/hooks/markets'
+import { PositionDetails, ProductSnapshotWithTradeLimitations } from '@/hooks/markets'
 import { Big18Math } from '@/utils/big18Utils'
 import { next } from '@/utils/positionUtils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
-
-import { ProductSnapshot } from '@t/perennial'
 
 import { FormNames, OrderValues, buttonPercentValues } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
@@ -28,7 +26,7 @@ import { useCloseAmountValidator } from './validatorHooks'
 interface ClosePositionFormProps {
   asset: SupportedAsset
   position: PositionDetails
-  product: ProductSnapshot
+  product: ProductSnapshotWithTradeLimitations
 }
 
 function ClosePositionForm({ position, product, asset }: ClosePositionFormProps) {
@@ -40,6 +38,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
 
   const {
     latestVersion: { price },
+    closed,
   } = product
   const { nextPosition, nextLeverage, currentCollateral } = position
 
@@ -122,6 +121,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
     isMaker,
     totalMaker: globalNext.maker,
     totalTaker: globalNext.taker,
+    marketClosed: closed,
   })
 
   return (
@@ -192,7 +192,14 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
           />
           <ButtonGroup>
             <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
-            <TxButton flex={1} label={copy.closePosition} type="submit" isDisabled={disableCloseBtn} overrideLabel />
+            <TxButton
+              flex={1}
+              label={copy.closePosition}
+              type="submit"
+              isDisabled={disableCloseBtn}
+              overrideLabel
+              actionAllowedInGeoblock // allow closes in geoblock
+            />
           </ButtonGroup>
         </Flex>
       </Form>

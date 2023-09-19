@@ -126,6 +126,10 @@ export function useTradeFormCopy() {
       }
       return intl.formatMessage({ defaultMessage: '* Taker positions unvailable while maker position open' })
     },
+    marketClosed: intl.formatMessage({ defaultMessage: '* Market is closed. Only close positions allowed' }),
+    geoblocked: intl.formatMessage({
+      defaultMessage: 'Application not available in your location. Only close positions allowed',
+    }),
   }
 }
 

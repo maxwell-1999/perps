@@ -191,12 +191,9 @@ export const getTradeLimitations = (userProductSnapshot?: UserProductSnapshot) =
     }
   }
   const { pre, position } = userProductSnapshot
-  const canOpenMaker = [pre.openPosition['taker'], pre.closePosition['taker'], position['taker']].every((num) =>
-    Big18Math.isZero(num),
-  )
-  const canOpenTaker = [pre.openPosition['maker'], pre.closePosition['maker'], position['maker']].every((num) =>
-    Big18Math.isZero(num),
-  )
+  const nextPosition = next(pre, position)
+  const canOpenMaker = nextPosition.taker === 0n
+  const canOpenTaker = nextPosition.maker === 0n
 
   return {
     canOpenTaker,

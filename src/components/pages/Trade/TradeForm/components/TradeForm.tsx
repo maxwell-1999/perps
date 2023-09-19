@@ -13,6 +13,7 @@ import { FormattedBig18USDPrice, USDCETooltip } from '@/components/shared/compon
 import { Form } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/markets'
+import { useAuthStatus } from '@/contexts/authStatusContext'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails, ProductSnapshotWithTradeLimitations, useProtocolSnapshot } from '@/hooks/markets'
@@ -46,12 +47,14 @@ interface TradeFormProps {
 }
 
 function TradeForm(props: TradeFormProps) {
+  const { geoblocked } = useAuthStatus()
   const { orderDirection, setOrderDirection, product, position, singleDirection } = props
   const {
     productAddress,
     latestVersion: { price },
     maintenance,
     pre: globalPre,
+    closed,
   } = product
 
   const prevProductAddress = usePrevious(productAddress)
@@ -193,6 +196,7 @@ function TradeForm(props: TradeFormProps) {
     totalTaker: globalNext.taker,
     currentPositionAmount,
     makerLimit: product.productInfo.makerLimit,
+    marketClosed: closed,
   })
   const leverageValidators = useLeverageValidators({
     maxLeverage,
@@ -258,6 +262,7 @@ function TradeForm(props: TradeFormProps) {
                 onClick={onWithdrawCollateral}
                 isLoading={positionStatus === PositionStatus.closing}
                 loadingText={copy.withdrawCollateral}
+                actionAllowedInGeoblock
               />
             )}
           </Flex>
@@ -265,6 +270,13 @@ function TradeForm(props: TradeFormProps) {
             <Flex mb="12px">
               <Text fontSize="11px" color={colors.brand.red}>
                 {copy.isRestricted(isMaker)}
+              </Text>
+            </Flex>
+          )}
+          {closed && (
+            <Flex mb="12px">
+              <Text fontSize="11px" color={colors.brand.purple[250]}>
+                {copy.marketClosed}
               </Text>
             </Flex>
           )}
@@ -374,6 +386,13 @@ function TradeForm(props: TradeFormProps) {
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
           <TradeReceipt mb="25px" px="3px" product={product} positionDelta={positionDelta} positionDetails={position} />
+          {geoblocked && hasPosition && (
+            <Flex mb="12px">
+              <Text fontSize="11px" color={colors.brand.purple[250]}>
+                {copy.geoblocked}
+              </Text>
+            </Flex>
+          )}
           {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
             <ButtonGroup>
               <Button
@@ -381,15 +400,17 @@ function TradeForm(props: TradeFormProps) {
                 label={copy.closePosition}
                 onClick={() => setTradeFormState(FormState.close)}
               />
-              <TxButton flex={1} label={copy.modifyPosition} type="submit" isDisabled={disableTradeBtn} overrideLabel />
+              <TxButton
+                flex={1}
+                label={copy.modifyPosition}
+                type="submit"
+                isDisabled={disableTradeBtn}
+                overrideLabel
+                actionAllowedInGeoblock={positionDelta.positionDelta <= 0n} // allow closes and collateral changes in geoblock
+              />
             </ButtonGroup>
           ) : (
-            <TxButton
-              type="submit"
-              isDisabled={disableTradeBtn}
-              label={address ? copy.placeTrade : copy.connectWallet}
-              overrideLabel
-            />
+            <TxButton type="submit" isDisabled={disableTradeBtn} label={copy.placeTrade} overrideLabel />
           )}
         </Flex>
       </Form>

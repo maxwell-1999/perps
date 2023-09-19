@@ -19,6 +19,7 @@ function useErrorMessages() {
     requiredField: intl.formatMessage({ defaultMessage: 'This field is required.' }),
     exceedsMakerLimit: intl.formatMessage({ defaultMessage: 'Exceeds total maker limit' }),
     belowMinMaker: intl.formatMessage({ defaultMessage: 'Below minimum maker requirements' }),
+    marketClosed: intl.formatMessage({ defaultMessage: 'Market is closed. Only close positions allowed' }),
   }
 }
 
@@ -81,6 +82,7 @@ export function usePositionValidators({
   totalTaker,
   currentPositionAmount,
   makerLimit,
+  marketClosed,
 }: {
   liquidity: bigint
   isMaker: boolean
@@ -88,6 +90,7 @@ export function usePositionValidators({
   totalTaker: bigint
   currentPositionAmount: bigint
   makerLimit: bigint
+  marketClosed: boolean
 }) {
   const copy = useErrorMessages()
   const isRequiredValidator = useIsRequiredValidator()
@@ -98,9 +101,12 @@ export function usePositionValidators({
       if (inputValue > liquidity) {
         return copy.insufficientLiquidity
       }
+      if (marketClosed && inputValue - currentPositionAmount > 0n) {
+        return copy.marketClosed
+      }
       return true
     }
-  }, [liquidity, copy.insufficientLiquidity])
+  }, [liquidity, marketClosed, currentPositionAmount, copy.insufficientLiquidity, copy.marketClosed])
 
   const maxMakerValidator = useMemo(() => {
     return (value: string) => {
@@ -109,15 +115,19 @@ export function usePositionValidators({
       if (totalMaker + positionDelta > makerLimit) {
         return copy.exceedsMakerLimit
       }
+      if (marketClosed && positionDelta > 0n) {
+        return copy.marketClosed
+      }
       return true
     }
-  }, [makerLimit, copy.exceedsMakerLimit, totalMaker, currentPositionAmount])
+  }, [makerLimit, copy.exceedsMakerLimit, totalMaker, currentPositionAmount, marketClosed, copy.marketClosed])
 
   const minMakerValidator = useMemo(() => {
     return (value: string) => {
       const inputValue = Big18Math.fromFloatString(value)
       const positionDelta = inputValue - currentPositionAmount
 
+      if (marketClosed) return true // socialization does not apply in closed markets
       if (totalMaker + positionDelta < totalTaker) {
         if (!(totalTaker > totalMaker && positionDelta > 0n)) {
           return copy.belowMinMaker
@@ -125,7 +135,7 @@ export function usePositionValidators({
       }
       return true
     }
-  }, [totalMaker, totalTaker, copy.belowMinMaker, currentPositionAmount])
+  }, [totalMaker, totalTaker, marketClosed, copy.belowMinMaker, currentPositionAmount])
 
   return {
     max: isMaker ? maxMakerValidator : maxValidator,
@@ -158,11 +168,13 @@ export function useCloseAmountValidator({
   isMaker,
   totalMaker,
   totalTaker,
+  marketClosed,
 }: {
   currentPositionAmount: bigint
   isMaker: boolean
   totalMaker: bigint
   totalTaker: bigint
+  marketClosed: boolean
 }) {
   const copy = useErrorMessages()
   const isRequiredValidator = useIsRequiredValidator()
@@ -186,6 +198,7 @@ export function useCloseAmountValidator({
         return copy.insufficientPosition
       }
 
+      if (marketClosed) return true // socialization does not apply in closed markets
       if (totalMaker + positionDelta < totalTaker) {
         if (!(totalTaker > totalMaker && positionDelta > 0n)) {
           return copy.belowMinMaker
@@ -193,7 +206,7 @@ export function useCloseAmountValidator({
       }
       return true
     }
-  }, [totalMaker, totalTaker, currentPositionAmount, copy.insufficientPosition, copy.belowMinMaker])
+  }, [totalMaker, totalTaker, currentPositionAmount, marketClosed, copy.insufficientPosition, copy.belowMinMaker])
   return { max: isMaker ? maxMakerValidator : maxValidator, required: isRequiredValidator }
 }
 

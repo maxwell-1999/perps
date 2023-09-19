@@ -1539,6 +1539,12 @@
       "value": "Place your trade."
     }
   ],
+  "mKgVo/": [
+    {
+      "type": 0,
+      "value": "Application not available in your location. Only close positions allowed"
+    }
+  ],
   "nF4Glg": [
     {
       "type": 0,
@@ -1585,6 +1591,12 @@
     {
       "type": 0,
       "value": "x"
+    }
+  ],
+  "pPOJSE": [
+    {
+      "type": 0,
+      "value": "* Market is closed. Only close positions allowed"
     }
   ],
   "pWaCcp": [
@@ -1649,6 +1661,12 @@
     {
       "type": 0,
       "value": "Vaults"
+    }
+  ],
+  "sadUub": [
+    {
+      "type": 0,
+      "value": "Market is closed. Only close positions allowed"
     }
   ],
   "suM3EE": [

@@ -199,6 +199,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
               type="submit"
               isDisabled={disableWithdrawBtn}
               overrideLabel
+              actionAllowedInGeoblock // allow collateral withdrawal in geoblock
             />
           </ButtonGroup>
         </Flex>

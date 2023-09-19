@@ -52,6 +52,7 @@ import { usePyth } from './network'
 export type ProductSnapshotWithTradeLimitations = ProductSnapshot & {
   canOpenMaker: boolean
   canOpenTaker: boolean
+  closed: boolean
 }
 
 export type AssetSnapshots = {
@@ -67,7 +68,7 @@ export const useChainAssetSnapshots = () => {
   const { address } = useAddress()
 
   return useQuery({
-    queryKey: ['assetSnapshots', chainId],
+    queryKey: ['assetSnapshots', chainId, address],
     queryFn: async () => {
       const assets = Object.keys(ChainMarkets[chainId]) as SupportedAsset[]
       const markets = assets
@@ -78,6 +79,12 @@ export const useChainAssetSnapshots = () => {
 
       const snapshots = await lens.read.snapshots([markets])
       const accountSnapshots = address && (await userLens.read.snapshots([address, markets]))
+      const closedStatus = await Promise.all(
+        markets.map(async (market) => ({
+          market,
+          closed: await getProductContract(market, chainId).read.closed(),
+        })),
+      )
 
       return assets.reduce((acc, asset) => {
         const longSnapshot = snapshots.find((s) => getAddress(s.productAddress) === ChainMarkets[chainId][asset]?.Long)
@@ -92,12 +99,26 @@ export const useChainAssetSnapshots = () => {
         )
         const longTradeLimitations = getTradeLimitations(userLongSnapshot)
         const shortTradeLimitations = getTradeLimitations(userShortSnapshot)
-        // Since we're directly returning the ethers result, we need to convert it to a POJO
-        // so that react-query can correctly serialize it
-        // TODO: when we switch to viem, we should be able to remove this
+
         acc[asset] = {
-          [OrderDirection.Long]: longSnapshot ? { ...longSnapshot, ...longTradeLimitations } : undefined,
-          [OrderDirection.Short]: shortSnapshot ? { ...shortSnapshot, ...shortTradeLimitations } : undefined,
+          [OrderDirection.Long]: longSnapshot
+            ? {
+                ...longSnapshot,
+                ...longTradeLimitations,
+                closed:
+                  closedStatus.find((s) => getAddress(s.market) === ChainMarkets[chainId][asset]?.Long)?.closed ??
+                  false,
+              }
+            : undefined,
+          [OrderDirection.Short]: shortSnapshot
+            ? {
+                ...shortSnapshot,
+                ...shortTradeLimitations,
+                closed:
+                  closedStatus.find((s) => getAddress(s.market) === ChainMarkets[chainId][asset]?.Short)?.closed ??
+                  false,
+              }
+            : undefined,
         }
 
         return acc
