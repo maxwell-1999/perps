@@ -26,3 +26,7 @@ export const RestrictedCountries = [
   'SY', // syria
   'ZW', // zimbabwe
 ]
+
+export const RestrictedRegions: { [key: string]: string[] } = {
+  UA: ['43'], // crimea
+}
