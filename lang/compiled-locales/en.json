@@ -29,6 +29,12 @@
       "value": "Amount"
     }
   ],
+  "/79RJe": [
+    {
+      "type": 0,
+      "value": "Unsupported region"
+    }
+  ],
   "/G+9dE": [
     {
       "type": 0,
@@ -241,6 +247,12 @@
       "value": "Insufficient funds"
     }
   ],
+  "6dxjgh": [
+    {
+      "type": 0,
+      "value": "Modify Collateral"
+    }
+  ],
   "73CDRG": [
     {
       "type": 0,
@@ -297,6 +309,12 @@
     {
       "type": 0,
       "value": "As of now"
+    }
+  ],
+  "8hk1wT": [
+    {
+      "type": 0,
+      "value": "Perennial is not supported in your region of use, as is made clear with our Terms of Use."
     }
   ],
   "8ksRh+": [
@@ -831,6 +849,12 @@
       "value": "APR"
     }
   ],
+  "O/z9Pd": [
+    {
+      "type": 0,
+      "value": "This market has closed. Please close your position."
+    }
+  ],
   "O2pMpb": [
     {
       "type": 0,
@@ -1279,6 +1303,12 @@
     {
       "type": 1,
       "value": "amount"
+    }
+  ],
+  "bW7B87": [
+    {
+      "type": 0,
+      "value": "New"
     }
   ],
   "bYFLPY": [
@@ -1755,6 +1785,12 @@
       "value": "Please check your wallet, and confirm the following request to close your trade."
     }
   ],
+  "wSZR47": [
+    {
+      "type": 0,
+      "value": "Submit"
+    }
+  ],
   "wTQgO8": [
     {
       "type": 0,
@@ -1789,6 +1825,12 @@
     {
       "type": 0,
       "value": "will not be recognized by the UI."
+    }
+  ],
+  "yDYkIj": [
+    {
+      "type": 0,
+      "value": "Market Closed"
     }
   ],
   "yR4V5C": [

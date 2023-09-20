@@ -130,6 +130,15 @@ export function useTradeFormCopy() {
     geoblocked: intl.formatMessage({
       defaultMessage: 'Application not available in your location. Only close positions allowed',
     }),
+    modifyCollateral: intl.formatMessage({ defaultMessage: 'Modify Collateral' }),
+    submit: intl.formatMessage({ defaultMessage: 'Submit' }),
+    unsupportedRegion: intl.formatMessage({ defaultMessage: 'Unsupported region' }),
+    unsupportedRegionMessage: intl.formatMessage({
+      defaultMessage: 'Perennial is not supported in your region of use, as is made clear with our Terms of Use.',
+    }),
+    new: intl.formatMessage({ defaultMessage: 'New' }),
+    marketClosedTitle: intl.formatMessage({ defaultMessage: 'Market Closed' }),
+    marketClosedMessage: intl.formatMessage({ defaultMessage: 'This market has closed. Please close your position.' }),
   }
 }
 

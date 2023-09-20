@@ -1,4 +1,6 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+
+import { useMarketContext } from './marketContext'
 
 export enum FormState {
   trade = 'trade',
@@ -16,9 +18,31 @@ const TradeFormOverlayContext = createContext({
 })
 
 export const TradeFormProvider = ({ children }: { children: React.ReactNode }) => {
+  const {
+    selectedMarketSnapshot,
+    orderDirection,
+    selectedMakerMarketSnapshot,
+    selectedMakerMarket,
+    selectedMarket,
+    isMaker,
+  } = useMarketContext()
+  const isCloseOnly = isMaker
+    ? selectedMakerMarketSnapshot?.closed ?? false
+    : selectedMarketSnapshot?.[orderDirection]?.closed ?? false
   const [formState, _setTradeFormState] = useState(FormState.trade)
 
+  useEffect(() => {
+    if (isCloseOnly) {
+      _setTradeFormState(FormState.close)
+    }
+  }, [isCloseOnly, selectedMarket, selectedMakerMarket])
+
   const setTradeFormState = (state: FormState) => {
+    const closeOnlyStates = [FormState.withdraw, FormState.close]
+    if (isCloseOnly && !closeOnlyStates.includes(state)) {
+      _setTradeFormState(FormState.close)
+      return
+    }
     _setTradeFormState(state)
   }
 

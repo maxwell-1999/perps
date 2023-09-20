@@ -112,7 +112,12 @@ function TradeContainer() {
         />
       )}
       {formState === FormState.close && position && (
-        <ClosePositionForm asset={isMaker ? makerAsset : selectedMarket} position={position} product={product} />
+        <ClosePositionForm
+          asset={isMaker ? makerAsset : selectedMarket}
+          position={position}
+          product={product}
+          crossCollateral={crossCollateral}
+        />
       )}
       {formState === FormState.withdraw && position && (
         <WithdrawCollateralForm asset={isMaker ? makerAsset : selectedMarket} position={position} product={product} />
