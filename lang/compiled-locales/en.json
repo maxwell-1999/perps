@@ -843,12 +843,6 @@
       "value": "APR"
     }
   ],
-  "O/z9Pd": [
-    {
-      "type": 0,
-      "value": "This market has closed. Please close your position."
-    }
-  ],
   "O2pMpb": [
     {
       "type": 0,
@@ -1495,6 +1489,12 @@
     {
       "type": 0,
       "value": " position is closing"
+    }
+  ],
+  "iVj2cr": [
+    {
+      "type": 0,
+      "value": "This market has closed. Only closing positions is allowed."
     }
   ],
   "iv4B8O": [

@@ -141,7 +141,9 @@ export function useTradeFormCopy() {
     termsOfService: intl.formatMessage({ defaultMessage: 'terms of service' }),
     new: intl.formatMessage({ defaultMessage: 'New' }),
     marketClosedTitle: intl.formatMessage({ defaultMessage: 'Market Closed' }),
-    marketClosedMessage: intl.formatMessage({ defaultMessage: 'This market has closed. Please close your position.' }),
+    marketClosedMessage: intl.formatMessage({
+      defaultMessage: 'This market has closed. Only closing positions is allowed.',
+    }),
   }
 }
 
