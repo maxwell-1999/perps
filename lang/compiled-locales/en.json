@@ -967,6 +967,28 @@
       "value": "You will get..."
     }
   ],
+  "QdKsNG": [
+    {
+      "type": 0,
+      "value": "Perennial is not supported in your region of use, only "
+    },
+    {
+      "type": 1,
+      "value": "closingPositions"
+    },
+    {
+      "type": 0,
+      "value": " is allowed. Please refer to our "
+    },
+    {
+      "type": 1,
+      "value": "tosLink"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
   "QpKFvn": [
     {
       "type": 0,
@@ -1455,6 +1477,12 @@
       "value": " vault."
     }
   ],
+  "i+8o6T": [
+    {
+      "type": 0,
+      "value": "closing positions"
+    }
+  ],
   "iTSlRJ": [
     {
       "type": 0,
@@ -1479,20 +1507,6 @@
     {
       "type": 0,
       "value": "Decrease"
-    }
-  ],
-  "jeeViU": [
-    {
-      "type": 0,
-      "value": "Perennial is not supported in your region of use. Please refer to our "
-    },
-    {
-      "type": 1,
-      "value": "tosLink"
-    },
-    {
-      "type": 0,
-      "value": "."
     }
   ],
   "jm/spn": [
@@ -1695,10 +1709,10 @@
       "value": "Vaults"
     }
   ],
-  "sadUub": [
+  "sHq6mE": [
     {
       "type": 0,
-      "value": "Market is closed. Only close positions allowed"
+      "value": "Close only mode enabled. Only close positions allowed."
     }
   ],
   "suM3EE": [

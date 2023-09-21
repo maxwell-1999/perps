@@ -129,13 +129,15 @@ export function useTradeFormCopy() {
     modifyCollateral: intl.formatMessage({ defaultMessage: 'Modify Collateral' }),
     submit: intl.formatMessage({ defaultMessage: 'Submit' }),
     unsupportedRegion: intl.formatMessage({ defaultMessage: 'Unsupported region' }),
-    unsupportedRegionMessage: (tosLink: React.ReactNode) =>
+    unsupportedRegionMessage: (tosLink: React.ReactNode, closingPositions: React.ReactNode) =>
       intl.formatMessage(
         {
-          defaultMessage: 'Perennial is not supported in your region of use. Please refer to our {tosLink}.',
+          defaultMessage:
+            'Perennial is not supported in your region of use, only {closingPositions} is allowed. Please refer to our {tosLink}.',
         },
-        { tosLink },
+        { tosLink, closingPositions },
       ),
+    closingPositions: intl.formatMessage({ defaultMessage: 'closing positions' }),
     termsOfService: intl.formatMessage({ defaultMessage: 'terms of service' }),
     new: intl.formatMessage({ defaultMessage: 'New' }),
     marketClosedTitle: intl.formatMessage({ defaultMessage: 'Market Closed' }),

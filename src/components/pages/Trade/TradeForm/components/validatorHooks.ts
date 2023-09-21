@@ -19,7 +19,7 @@ function useErrorMessages() {
     requiredField: intl.formatMessage({ defaultMessage: 'This field is required.' }),
     exceedsMakerLimit: intl.formatMessage({ defaultMessage: 'Exceeds total maker limit' }),
     belowMinMaker: intl.formatMessage({ defaultMessage: 'Below minimum maker requirements' }),
-    marketClosed: intl.formatMessage({ defaultMessage: 'Market is closed. Only close positions allowed' }),
+    marketClosed: intl.formatMessage({ defaultMessage: 'Close only mode enabled. Only close positions allowed.' }),
   }
 }
 

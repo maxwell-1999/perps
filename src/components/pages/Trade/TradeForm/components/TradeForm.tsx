@@ -197,7 +197,7 @@ function TradeForm(props: TradeFormProps) {
     totalTaker: globalNext.taker,
     currentPositionAmount,
     makerLimit: product.productInfo.makerLimit,
-    marketClosed: closed,
+    marketClosed: closed || geoblocked,
   })
   const leverageValidators = useLeverageValidators({
     maxLeverage,

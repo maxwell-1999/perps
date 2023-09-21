@@ -53,12 +53,18 @@ export const GeoBlockedMessage = (props: FlexProps) => {
       </Text>
     </Link>
   )
+
+  const ClosingPositions = (
+    <Text as="span" fontWeight={700} color={colors.brand.whiteAlpha[80]}>
+      {copy.closingPositions}
+    </Text>
+  )
   return (
     <Container borderColor="white" {...props}>
       <Flex flexDirection="column" p={2} gap={2}>
         <Text>{copy.unsupportedRegion}</Text>
         <Text fontSize="12px" color={colors.brand.whiteAlpha[50]}>
-          {copy.unsupportedRegionMessage(TosLink)}
+          {copy.unsupportedRegionMessage(TosLink, ClosingPositions)}
         </Text>
       </Flex>
     </Container>
