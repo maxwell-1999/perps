@@ -311,12 +311,6 @@
       "value": "As of now"
     }
   ],
-  "8hk1wT": [
-    {
-      "type": 0,
-      "value": "Perennial is not supported in your region of use, as is made clear with our Terms of Use."
-    }
-  ],
   "8ksRh+": [
     {
       "type": 0,
@@ -1487,6 +1481,20 @@
       "value": "Decrease"
     }
   ],
+  "jeeViU": [
+    {
+      "type": 0,
+      "value": "Perennial is not supported in your region of use. Please refer to our "
+    },
+    {
+      "type": 1,
+      "value": "tosLink"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
   "jm/spn": [
     {
       "type": 0,
@@ -1509,6 +1517,12 @@
     {
       "type": 0,
       "value": "Approve shares for redemption"
+    }
+  ],
+  "kBCiRj": [
+    {
+      "type": 0,
+      "value": "terms of service"
     }
   ],
   "kkjl2v": [
@@ -1569,12 +1583,6 @@
       "value": "Place your trade."
     }
   ],
-  "mKgVo/": [
-    {
-      "type": 0,
-      "value": "Application not available in your location. Only close positions allowed"
-    }
-  ],
   "nF4Glg": [
     {
       "type": 0,
@@ -1621,12 +1629,6 @@
     {
       "type": 0,
       "value": "x"
-    }
-  ],
-  "pPOJSE": [
-    {
-      "type": 0,
-      "value": "* Market is closed. Only close positions allowed"
     }
   ],
   "pWaCcp": [

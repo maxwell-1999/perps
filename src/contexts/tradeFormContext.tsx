@@ -1,7 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-
-import { useAuthStatus } from './authStatusContext'
-import { useMarketContext } from './marketContext'
+import { createContext, useContext, useState } from 'react'
 
 export enum FormState {
   trade = 'trade',
@@ -19,33 +16,9 @@ const TradeFormOverlayContext = createContext({
 })
 
 export const TradeFormProvider = ({ children }: { children: React.ReactNode }) => {
-  const {
-    selectedMarketSnapshot,
-    orderDirection,
-    selectedMakerMarketSnapshot,
-    selectedMakerMarket,
-    selectedMarket,
-    isMaker,
-  } = useMarketContext()
-  const { geoblocked } = useAuthStatus()
-
-  const isCloseOnly = isMaker
-    ? selectedMakerMarketSnapshot?.closed ?? false
-    : selectedMarketSnapshot?.[orderDirection]?.closed ?? false
   const [formState, _setTradeFormState] = useState(FormState.trade)
 
-  useEffect(() => {
-    if (isCloseOnly || geoblocked) {
-      _setTradeFormState(FormState.close)
-    }
-  }, [isCloseOnly, selectedMarket, selectedMakerMarket, geoblocked])
-
   const setTradeFormState = (state: FormState) => {
-    const closeOnlyStates = [FormState.withdraw, FormState.close]
-    if (isCloseOnly && !closeOnlyStates.includes(state)) {
-      _setTradeFormState(FormState.close)
-      return
-    }
     _setTradeFormState(state)
   }
 
