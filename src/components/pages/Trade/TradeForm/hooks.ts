@@ -126,9 +126,23 @@ export function useTradeFormCopy() {
       }
       return intl.formatMessage({ defaultMessage: '* Taker positions unvailable while maker position open' })
     },
-    marketClosed: intl.formatMessage({ defaultMessage: '* Market is closed. Only close positions allowed' }),
-    geoblocked: intl.formatMessage({
-      defaultMessage: 'Application not available in your location. Only close positions allowed',
+    modifyCollateral: intl.formatMessage({ defaultMessage: 'Modify Collateral' }),
+    submit: intl.formatMessage({ defaultMessage: 'Submit' }),
+    unsupportedRegion: intl.formatMessage({ defaultMessage: 'Unsupported region' }),
+    unsupportedRegionMessage: (tosLink: React.ReactNode, closingPositions: React.ReactNode) =>
+      intl.formatMessage(
+        {
+          defaultMessage:
+            'Perennial is not supported in your region of use, only {closingPositions} is allowed. Please refer to our {tosLink}.',
+        },
+        { tosLink, closingPositions },
+      ),
+    closingPositions: intl.formatMessage({ defaultMessage: 'closing positions' }),
+    termsOfService: intl.formatMessage({ defaultMessage: 'terms of service' }),
+    new: intl.formatMessage({ defaultMessage: 'New' }),
+    marketClosedTitle: intl.formatMessage({ defaultMessage: 'Market Closed' }),
+    marketClosedMessage: intl.formatMessage({
+      defaultMessage: 'This market has closed. Only closing positions is allowed.',
     }),
   }
 }

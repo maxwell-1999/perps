@@ -29,6 +29,12 @@
       "value": "Amount"
     }
   ],
+  "/79RJe": [
+    {
+      "type": 0,
+      "value": "Unsupported region"
+    }
+  ],
   "/G+9dE": [
     {
       "type": 0,
@@ -239,6 +245,12 @@
     {
       "type": 0,
       "value": "Insufficient funds"
+    }
+  ],
+  "6dxjgh": [
+    {
+      "type": 0,
+      "value": "Modify Collateral"
     }
   ],
   "73CDRG": [
@@ -949,6 +961,28 @@
       "value": "You will get..."
     }
   ],
+  "QdKsNG": [
+    {
+      "type": 0,
+      "value": "Perennial is not supported in your region of use, only "
+    },
+    {
+      "type": 1,
+      "value": "closingPositions"
+    },
+    {
+      "type": 0,
+      "value": " is allowed. Please refer to our "
+    },
+    {
+      "type": 1,
+      "value": "tosLink"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
   "QpKFvn": [
     {
       "type": 0,
@@ -1281,6 +1315,12 @@
       "value": "amount"
     }
   ],
+  "bW7B87": [
+    {
+      "type": 0,
+      "value": "New"
+    }
+  ],
   "bYFLPY": [
     {
       "type": 0,
@@ -1431,6 +1471,12 @@
       "value": " vault."
     }
   ],
+  "i+8o6T": [
+    {
+      "type": 0,
+      "value": "closing positions"
+    }
+  ],
   "iTSlRJ": [
     {
       "type": 0,
@@ -1443,6 +1489,12 @@
     {
       "type": 0,
       "value": " position is closing"
+    }
+  ],
+  "iVj2cr": [
+    {
+      "type": 0,
+      "value": "This market has closed. Only closing positions is allowed."
     }
   ],
   "iv4B8O": [
@@ -1479,6 +1531,12 @@
     {
       "type": 0,
       "value": "Approve shares for redemption"
+    }
+  ],
+  "kBCiRj": [
+    {
+      "type": 0,
+      "value": "terms of service"
     }
   ],
   "kkjl2v": [
@@ -1539,12 +1597,6 @@
       "value": "Place your trade."
     }
   ],
-  "mKgVo/": [
-    {
-      "type": 0,
-      "value": "Application not available in your location. Only close positions allowed"
-    }
-  ],
   "nF4Glg": [
     {
       "type": 0,
@@ -1591,12 +1643,6 @@
     {
       "type": 0,
       "value": "x"
-    }
-  ],
-  "pPOJSE": [
-    {
-      "type": 0,
-      "value": "* Market is closed. Only close positions allowed"
     }
   ],
   "pWaCcp": [
@@ -1663,10 +1709,10 @@
       "value": "Vaults"
     }
   ],
-  "sadUub": [
+  "sHq6mE": [
     {
       "type": 0,
-      "value": "Market is closed. Only close positions allowed"
+      "value": "Close only mode enabled. Only close positions allowed."
     }
   ],
   "suM3EE": [
@@ -1755,6 +1801,12 @@
       "value": "Please check your wallet, and confirm the following request to close your trade."
     }
   ],
+  "wSZR47": [
+    {
+      "type": 0,
+      "value": "Submit"
+    }
+  ],
   "wTQgO8": [
     {
       "type": 0,
@@ -1789,6 +1841,12 @@
     {
       "type": 0,
       "value": "will not be recognized by the UI."
+    }
+  ],
+  "yDYkIj": [
+    {
+      "type": 0,
+      "value": "Market Closed"
     }
   ],
   "yR4V5C": [

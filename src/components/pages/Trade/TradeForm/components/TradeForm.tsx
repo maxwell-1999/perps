@@ -33,6 +33,7 @@ import { calcMaxLeverage, formatInitialInputs } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import LeverageInput from './LeverageInput'
 import { TradeReceipt } from './Receipt'
+import { GeoBlockedMessage, MarketClosedMessage } from './styles'
 import { useCollateralValidators, useLeverageValidators, usePositionValidators } from './validatorHooks'
 
 interface TradeFormProps {
@@ -196,7 +197,7 @@ function TradeForm(props: TradeFormProps) {
     totalTaker: globalNext.taker,
     currentPositionAmount,
     makerLimit: product.productInfo.makerLimit,
-    marketClosed: closed,
+    marketClosed: closed || geoblocked,
   })
   const leverageValidators = useLeverageValidators({
     maxLeverage,
@@ -266,17 +267,12 @@ function TradeForm(props: TradeFormProps) {
               />
             )}
           </Flex>
+          {geoblocked && <GeoBlockedMessage mb={4} />}
+          {closed && <MarketClosedMessage mb={4} />}
           {isRestricted && (
             <Flex mb="12px">
               <Text fontSize="11px" color={colors.brand.red}>
                 {copy.isRestricted(isMaker)}
-              </Text>
-            </Flex>
-          )}
-          {closed && (
-            <Flex mb="12px">
-              <Text fontSize="11px" color={colors.brand.purple[250]}>
-                {copy.marketClosed}
               </Text>
             </Flex>
           )}
@@ -386,13 +382,6 @@ function TradeForm(props: TradeFormProps) {
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
           <TradeReceipt mb="25px" px="3px" product={product} positionDelta={positionDelta} positionDetails={position} />
-          {geoblocked && hasPosition && (
-            <Flex mb="12px">
-              <Text fontSize="11px" color={colors.brand.purple[250]}>
-                {copy.geoblocked}
-              </Text>
-            </Flex>
-          )}
           {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
             <ButtonGroup>
               <Button

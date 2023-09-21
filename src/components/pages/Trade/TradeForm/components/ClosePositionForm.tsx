@@ -6,6 +6,7 @@ import { TxButton } from '@/components/shared/TxButton'
 import { Form, FormattedBig18 } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/assets'
 import { OpenPositionType } from '@/constants/markets'
+import { useAuthStatus } from '@/contexts/authStatusContext'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { PositionDetails, ProductSnapshotWithTradeLimitations } from '@/hooks/markets'
@@ -20,7 +21,7 @@ import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
 import { isFullClose } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import { TradeReceipt } from './Receipt'
-import { FormOverlayHeader } from './styles'
+import { FormOverlayHeader, GeoBlockedMessage, MarketClosedMessage } from './styles'
 import { useCloseAmountValidator } from './validatorHooks'
 
 interface ClosePositionFormProps {
@@ -32,6 +33,7 @@ interface ClosePositionFormProps {
 function ClosePositionForm({ position, product, asset }: ClosePositionFormProps) {
   const { setTradeFormState } = useTradeFormState()
   const { assetMetadata, isMaker } = useMarketContext()
+  const { geoblocked } = useAuthStatus()
   const copy = useTradeFormCopy()
   const { percentBtnBg } = useStyles()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
@@ -59,6 +61,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
   const amount = watch(FormNames.amount)
   const collateral = watch(FormNames.collateral)
   const leverage = watch(FormNames.leverage)
+  const isRestricted = isMaker ? !product.canOpenMaker : !product.canOpenTaker
 
   const { onChangeAmount: amountChangeHandler } = useOnChangeHandlers({
     setValue,
@@ -113,7 +116,8 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
   }
 
   const hasFormErrors = Object.keys(errors).length > 0
-  const disableCloseBtn = (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors
+  const disableCloseBtn =
+    (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors || isRestricted
 
   const globalNext = next(product.pre, product.position)
   const amountValidator = useCloseAmountValidator({
@@ -146,6 +150,8 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
       <Form onSubmit={handleSubmit(onConfirm)}>
         <FormOverlayHeader title={copy.closePosition} onClose={() => setTradeFormState(FormState.trade)} />
         <Flex flexDirection="column" px="16px" mb="12px" gap="12px">
+          {geoblocked && <GeoBlockedMessage />}
+          {closed && <MarketClosedMessage />}
           <Input
             name={FormNames.amount}
             label={copy.amount}
