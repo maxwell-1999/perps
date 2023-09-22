@@ -289,6 +289,28 @@
       "value": "Approve vault deposits for withdrawal"
     }
   ],
+  "8ELrUm": [
+    {
+      "type": 0,
+      "value": "This application is not supported in your region, only "
+    },
+    {
+      "type": 1,
+      "value": "closingPositions"
+    },
+    {
+      "type": 0,
+      "value": " is allowed. Please refer to our "
+    },
+    {
+      "type": 1,
+      "value": "tosLink"
+    },
+    {
+      "type": 0,
+      "value": "."
+    }
+  ],
   "8K400D": [
     {
       "type": 1,
@@ -961,28 +983,6 @@
       "value": "You will get..."
     }
   ],
-  "QdKsNG": [
-    {
-      "type": 0,
-      "value": "Perennial is not supported in your region of use, only "
-    },
-    {
-      "type": 1,
-      "value": "closingPositions"
-    },
-    {
-      "type": 0,
-      "value": " is allowed. Please refer to our "
-    },
-    {
-      "type": 1,
-      "value": "tosLink"
-    },
-    {
-      "type": 0,
-      "value": "."
-    }
-  ],
   "QpKFvn": [
     {
       "type": 0,
@@ -1283,6 +1283,12 @@
     {
       "type": 0,
       "value": "Please check your wallet, and confirm the following requests."
+    }
+  ],
+  "aAYWLY": [
+    {
+      "type": 0,
+      "value": "VPN Detected"
     }
   ],
   "aYqugF": [
@@ -1613,6 +1619,28 @@
     {
       "type": 0,
       "value": "Withdraw collateral"
+    }
+  ],
+  "oQBbLs": [
+    {
+      "type": 0,
+      "value": "This application cannot be used with VPN or Proxy software. Only "
+    },
+    {
+      "type": 1,
+      "value": "closingPositions"
+    },
+    {
+      "type": 0,
+      "value": " is allowed. Please refer to our "
+    },
+    {
+      "type": 1,
+      "value": "tosLink"
+    },
+    {
+      "type": 0,
+      "value": "."
     }
   ],
   "oUp3nU": [

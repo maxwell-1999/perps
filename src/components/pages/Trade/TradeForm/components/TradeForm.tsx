@@ -33,7 +33,7 @@ import { calcMaxLeverage, formatInitialInputs } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import LeverageInput from './LeverageInput'
 import { TradeReceipt } from './Receipt'
-import { GeoBlockedMessage, MarketClosedMessage } from './styles'
+import { GeoBlockedMessage, MarketClosedMessage, VpnDetectedMessage } from './styles'
 import { useCollateralValidators, useLeverageValidators, usePositionValidators } from './validatorHooks'
 
 interface TradeFormProps {
@@ -48,7 +48,7 @@ interface TradeFormProps {
 }
 
 function TradeForm(props: TradeFormProps) {
-  const { geoblocked } = useAuthStatus()
+  const { geoblocked, vpnDetected } = useAuthStatus()
   const { orderDirection, setOrderDirection, product, position, singleDirection } = props
   const {
     productAddress,
@@ -267,7 +267,8 @@ function TradeForm(props: TradeFormProps) {
               />
             )}
           </Flex>
-          {geoblocked && <GeoBlockedMessage mb={4} />}
+          {geoblocked && !vpnDetected && <GeoBlockedMessage mb={4} />}
+          {geoblocked && vpnDetected && <VpnDetectedMessage mb={4} />}
           {closed && <MarketClosedMessage mb={4} />}
           {isRestricted && (
             <Flex mb="12px">

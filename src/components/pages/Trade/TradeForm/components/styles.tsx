@@ -70,3 +70,31 @@ export const GeoBlockedMessage = (props: FlexProps) => {
     </Container>
   )
 }
+
+export const VpnDetectedMessage = (props: FlexProps) => {
+  const copy = useTradeFormCopy()
+
+  const TosLink = (
+    <Link href="/tos" target="_blank" rel="noopener noferrer">
+      <Text as="span" textDecoration="underline" _hover={{ color: colors.brand.whiteAlpha[60] }}>
+        {copy.termsOfService}
+      </Text>
+    </Link>
+  )
+
+  const ClosingPositions = (
+    <Text as="span" fontWeight={700} color={colors.brand.whiteAlpha[80]}>
+      {copy.closingPositions}
+    </Text>
+  )
+  return (
+    <Container borderColor="white" {...props}>
+      <Flex flexDirection="column" p={2} gap={2}>
+        <Text>{copy.vpnDetected}</Text>
+        <Text fontSize="12px" color={colors.brand.whiteAlpha[50]}>
+          {copy.vpnDetectedMessage(TosLink, ClosingPositions)}
+        </Text>
+      </Flex>
+    </Container>
+  )
+}

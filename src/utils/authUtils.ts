@@ -19,10 +19,12 @@ export const login = debounce(
   async ({
     address,
     setAuthStatus,
+    setVpnDetected,
     disconnect,
   }: {
     address: string
     setAuthStatus: (status: AuthStatus) => void
+    setVpnDetected: (detected: boolean) => void
     disconnect: () => void
   }) => {
     const ip = getIPFromCookie()
@@ -46,6 +48,12 @@ export const login = debounce(
       if (!loginRes.ok) throw new Error('Login failed')
 
       setAuthStatus('authenticated')
+      try {
+        const loginJson = await loginRes.json()
+        setVpnDetected(loginJson?.ipMeta.proxy && loginJson?.ipMeta.type === 'VPN')
+      } catch {
+        setVpnDetected(false)
+      }
     } catch {
       setAuthStatus('unauthenticated')
       disconnect()

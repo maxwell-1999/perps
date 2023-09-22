@@ -16,11 +16,15 @@ const AuthStatusOverlayContext = createContext({
   setTosAccepted: (tosAccepted: boolean) => {
     tosAccepted
   },
-  geoblocked: false,
+  vpnDetected: false,
+  setVpnDetected: (vpnDetected: boolean) => {
+    vpnDetected
+  },
   authStatus: StartingAuthStatus as AuthStatus,
   setAuthStatus: (status: AuthStatus) => {
     status
   },
+  geoblocked: false,
   sanctioned: false,
 })
 
@@ -35,6 +39,7 @@ export const AuthStatusProvider = ({ children }: { children: React.ReactNode }) 
       RestrictedRegions[country]?.includes(getCookie(GeolocationRegionCookie)?.toString() ?? '')
     )
   })
+  const [vpnDetected, setVpnDetected] = useState<boolean>(false)
   const [tosAccepted, _setTosAccepted] = useState<boolean>(() => {
     return typeof window !== 'undefined' && localStorage.getItem('tos_accepted') === 'true'
   })
@@ -44,12 +49,24 @@ export const AuthStatusProvider = ({ children }: { children: React.ReactNode }) 
     _setTosAccepted(tosAccepted)
   }
 
-  const geoblocked = useMemo(() => (isTestnet(chainId) ? false : _geoblocked), [chainId, _geoblocked])
+  const geoblocked = useMemo(
+    () => (isTestnet(chainId) ? false : _geoblocked || vpnDetected),
+    [chainId, _geoblocked, vpnDetected],
+  )
   const { data: sanctioned } = useIsSanctioned()
 
   return (
     <AuthStatusOverlayContext.Provider
-      value={{ authStatus, setAuthStatus, tosAccepted, setTosAccepted, geoblocked, sanctioned: Boolean(sanctioned) }}
+      value={{
+        authStatus,
+        setAuthStatus,
+        tosAccepted,
+        setTosAccepted,
+        vpnDetected,
+        setVpnDetected,
+        geoblocked,
+        sanctioned: Boolean(sanctioned),
+      }}
     >
       {children}
     </AuthStatusOverlayContext.Provider>

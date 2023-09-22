@@ -133,7 +133,16 @@ export function useTradeFormCopy() {
       intl.formatMessage(
         {
           defaultMessage:
-            'Perennial is not supported in your region of use, only {closingPositions} is allowed. Please refer to our {tosLink}.',
+            'This application is not supported in your region, only {closingPositions} is allowed. Please refer to our {tosLink}.',
+        },
+        { tosLink, closingPositions },
+      ),
+    vpnDetected: intl.formatMessage({ defaultMessage: 'VPN Detected' }),
+    vpnDetectedMessage: (tosLink: React.ReactNode, closingPositions: React.ReactNode) =>
+      intl.formatMessage(
+        {
+          defaultMessage:
+            'This application cannot be used with VPN or Proxy software. Only {closingPositions} is allowed. Please refer to our {tosLink}.',
         },
         { tosLink, closingPositions },
       ),
