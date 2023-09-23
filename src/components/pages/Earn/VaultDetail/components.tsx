@@ -270,6 +270,7 @@ export const ClaimCard = ({
             isLoading={isPending}
             loadingText={copy.confirmWithdraw}
             overrideLabel
+            actionAllowedInGeoblock // allow claims in geoblock
           />
         </Flex>
       </Flex>

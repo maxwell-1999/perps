@@ -208,6 +208,7 @@ export default function VaultForm({
             isDisabled={buttonDisabled}
             label={vaultOption === VaultFormOption.Deposit ? copy.Deposit : copy.Redeem}
             overrideLabel
+            actionAllowedInGeoblock={vaultOption === VaultFormOption.Redeem} // allow redeem in geoblock
           />
         </Form>
       </Container>
