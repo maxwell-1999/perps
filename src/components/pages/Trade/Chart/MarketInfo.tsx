@@ -56,7 +56,13 @@ function MarketInfo() {
   return (
     <Flex flex={1} height="100%" alignItems="center" justifyContent="center">
       <MarketInfoContent>
-        <Flex flexDirection="column" flex={1} py={4} minWidth="230px">
+        <Flex
+          flexDirection="column"
+          flex={1}
+          py={{ base: 0, tableBreak: 4 }}
+          pt={{ base: 4, tableBreak: 4 }}
+          minWidth="230px"
+        >
           <DataRow
             label={copy.market}
             value={AssetMetadata[isMaker ? selectedMakerMarket : selectedMarket].symbol}
@@ -110,7 +116,7 @@ function MarketInfo() {
           <DataRow label={copy.takerFees} value={<PercentRange max={takerFeeMax} />} size="lg" bordered />
           <DataRow label={copy.makerFees} value={<PercentRange max={makerFeeMax} />} size="lg" bordered />
         </Flex>
-        <Flex flexDirection="column" flex={1} py={4} minWidth="230px">
+        <Flex flexDirection="column" flex={1} py={{ base: 0, tableBreak: 4 }} pt={{ base: 0 }} minWidth="230px">
           <DataRow label={copy.latestPrice} value={<FormattedBig6USDPrice value={latestPrice} />} size="lg" bordered />
           <DataRow
             label={copy.liquidationFee}

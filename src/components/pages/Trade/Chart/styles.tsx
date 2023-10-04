@@ -13,11 +13,18 @@ export const DashedLine = styled.span<{ color: string }>`
 `
 
 export const MarketInfoContent = styled(Flex)`
-  flex: 1;
-  padding: 16px;
-  gap: 3%;
-  max-height: 350px;
+  flex-direction: column;
   width: 100%;
+  padding: 0 16px;
+  max-height: 350px;
+
+  @media (min-width: ${breakpoints.tableBreak}) {
+    flex-direction: row;
+    flex: 1;
+    padding: 16px;
+    gap: 3%;
+    width: 100%;
+  }
 
   @media (min-width: ${breakpoints.xl}) {
     max-width: 70%;
