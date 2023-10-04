@@ -33,6 +33,7 @@ import { calculateFundingForSides } from '@/utils/fundingAndInterestUtils'
 import { buildCommitPrice, buildInterfaceFee, buildUpdateMarket } from '@/utils/multiinvoker2'
 import { calcLeverage, calcNotional, getSideFromPosition, getStatusForSnapshot } from '@/utils/positionUtils'
 import { buildCommitmentsForOracles, getRecentVaa } from '@/utils/pythUtils'
+import { nowSeconds } from '@/utils/timeUtils'
 
 import { Lens2Abi } from '@abi/v2/Lens2.abi'
 import { PythOracleAbi } from '@abi/v2/PythOracle.abi'
@@ -435,7 +436,7 @@ export const useMarketTransactions2 = (productAddress: Address) => {
         pendingPositions,
       } = marketSnapshots.market[asset]
       const lastUpdated = await getOracleContract(oracleInfo.address, chainId).read.latest()
-      isPriceStale = BigInt(Math.floor(Date.now() / 1000)) - lastUpdated.timestamp > staleAfter - 10n
+      isPriceStale = BigInt(nowSeconds()) - lastUpdated.timestamp > staleAfter / 2n
       // If there is a backlog of pending positions, we need to commit the price
       isPriceStale = isPriceStale || BigInt(pendingPositions.length) >= maxPendingGlobal
       // If there is a backlog of pending positions for this user, we need to commit the price

@@ -36,6 +36,7 @@ import { Big6Math } from '@/utils/big6Utils'
 import { Big18Math } from '@/utils/big18Utils'
 import { buildCommitPrice, buildUpdateVault } from '@/utils/multiinvoker2'
 import { buildCommitmentsForOracles } from '@/utils/pythUtils'
+import { nowSeconds } from '@/utils/timeUtils'
 
 import { VaultAbi } from '@abi/v2/Vault.abi'
 import { VaultLens2Abi } from '@abi/v2/VaultLens2.abi'
@@ -499,11 +500,11 @@ const commitmentsForVaultAction = async ({
   marketOracles: MarketOracles
 }) => {
   // Commit required oracle versions for stale markets
-  const now = BigInt(Math.floor(Date.now() / 1000))
+  const now = BigInt(nowSeconds())
   const oracles = preMarketSnapshots
     .map((marketSnapshot) => {
       const priceStale =
-        now - marketSnapshot.latestOracleVersion.timestamp > marketSnapshot.riskParameter.staleAfter - 5n
+        now - marketSnapshot.latestOracleVersion.timestamp > marketSnapshot.riskParameter.staleAfter / 2n
       const oracle = Object.values(marketOracles).find((o) => o.address === marketSnapshot.oracle)
       if (!priceStale || !oracle) return
       return oracle
