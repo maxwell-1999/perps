@@ -60,7 +60,7 @@ export default function VaultForm({
   useEffect(() => {
     if (withdrawnAmount > 0n && !!balances?.usdcAllowance) {
       setVaultOption(VaultFormOption.Deposit)
-      setFormValues({ amount: Big18Math.toFloatString(withdrawnAmount) })
+      setFormValues({ amount: Big6Math.max6Decimals(Big18Math.toFloatString(withdrawnAmount)) })
       setWithdrawnAmount(0n)
       reset()
     }
