@@ -169,7 +169,7 @@ export const PnlPositionDetail = ({ asDataRow }: { asDataRow?: boolean }) => {
       <Box fontSize={asDataRow ? '14px' : { lg: '26px', base: '18px' }}>{pnlNotional}</Box>
     </RealizedAccumulationsTooltip>
   ) : (
-    <Box fontSize="14px">{pnlNotional}</Box>
+    <Box fontSize={asDataRow ? '14px' : { lg: '26px', base: '18px' }}>{pnlNotional}</Box>
   )
 
   if (asDataRow) {

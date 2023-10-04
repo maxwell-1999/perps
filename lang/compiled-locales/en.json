@@ -1039,12 +1039,6 @@
       "value": "Deposited"
     }
   ],
-  "LpwptN": [
-    {
-      "type": 0,
-      "value": "Deposit Collateral"
-    }
-  ],
   "LzlMDx": [
     {
       "type": 0,
@@ -1763,12 +1757,6 @@
       "value": "Connect Wallet"
     }
   ],
-  "csFLe1": [
-    {
-      "type": 0,
-      "value": "Approve Shares"
-    }
-  ],
   "cyR7Kh": [
     {
       "type": 0,
@@ -2217,12 +2205,6 @@
       "value": "Remove collateral"
     }
   ],
-  "oynltk": [
-    {
-      "type": 0,
-      "value": "Redeem Collateral"
-    }
-  ],
   "p2+VKY": [
     {
       "type": 0,
@@ -2363,12 +2345,6 @@
     {
       "type": 0,
       "value": "Menu"
-    }
-  ],
-  "tLsiTt": [
-    {
-      "type": 0,
-      "value": "Claim Collateral"
     }
   ],
   "tNTSVo": [
