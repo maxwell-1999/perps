@@ -54,9 +54,8 @@ export const useFormattedMarketBarValues = () => {
     return dailyData.volume.reduce((acc, cur) => acc + BigInt(cur.longNotional) + BigInt(cur.shortNotional), 0n)
   }, [dailyData?.volume])
 
-  // Coerce to 18 decimals to match pyth price
   const chainPrice = selectedMarketSnapshot2?.global?.latestPrice ?? 0n
-  const currentPrice = livePrices[selectedMarket] ?? 0n ?? chainPrice ?? 0n
+  const currentPrice = livePrices[selectedMarket] ?? chainPrice ?? 0n
   const change = currentPrice - BigInt(priceData?.open ?? currentPrice)
 
   const latestPrice = selectedMarketSnapshot2?.global?.latestPrice ?? 0n
