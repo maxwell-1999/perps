@@ -475,6 +475,7 @@ export const useMarketTransactions2 = (productAddress: Address) => {
       })
       // Refresh after a timeout to catch missed events
       setTimeout(() => refresh(), 15000)
+      setTimeout(() => refresh(), 30000)
       // TODO: non-blocking waitForTransaction and show an error if the tx reverts on chain
       return hash
     } catch (err: any) {

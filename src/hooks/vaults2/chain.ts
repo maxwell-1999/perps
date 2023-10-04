@@ -429,7 +429,8 @@ export const useVaultTransactions = (vaultAddress: Address): VaultTransactions =
       })
 
       // Refresh after a timeout to catch missed events
-      setTimeout(() => refresh(), 5000)
+      setTimeout(() => refresh(), 15000)
+      setTimeout(() => refresh(), 30000)
 
       return receipt
     } catch (err) {
