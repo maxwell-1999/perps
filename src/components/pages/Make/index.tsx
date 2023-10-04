@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 
 import {
   ChartGridItem,
+  FlexibleGridItem,
   HeaderGridItem,
   MarketBarGridItem,
+  MobileTradeButtonsGridItem,
   PositionManagerGridItem,
-  TradeFormGridItem,
   TradeLayout,
 } from '@/components/layout/TradeLayout'
 import Chart from '@/components/pages/Trade/Chart'
@@ -17,10 +18,14 @@ import NavBar from '@/components/shared/NavBar'
 import { MarketProvider } from '@/contexts/marketContext'
 import { SettlementToastProvider } from '@/contexts/settlementToastContext'
 import { TradeFormProvider } from '@/contexts/tradeFormContext'
+import { useRefreshKeysOnPriceUpdates2 } from '@/hooks/markets2'
 
+import MobileTradeButtons from '../Trade/MobileTradeButtons'
+import MobileTradeForm from '../Trade/TradeForm/MobileTradeForm'
 import MakerWarningModal from './MakerWarningModal'
 
 export default function Make() {
+  useRefreshKeysOnPriceUpdates2()
   const [hasSeenModal, setHasSeenModal] = useState(true)
 
   useEffect(() => {
@@ -36,22 +41,26 @@ export default function Make() {
         <TradeFormProvider>
           <SettlementToastProvider>
             <HeadWithLivePrices />
-            <TradeLayout>
+            <TradeLayout isMaker>
               <HeaderGridItem>
                 <NavBar />
               </HeaderGridItem>
               <MarketBarGridItem>
                 <MarketBar />
               </MarketBarGridItem>
-              <TradeFormGridItem>
+              <FlexibleGridItem gridArea="tradeForm" desktopOnly>
                 <TradeForm />
-              </TradeFormGridItem>
+              </FlexibleGridItem>
               <ChartGridItem>
                 <Chart />
               </ChartGridItem>
               <PositionManagerGridItem>
                 <PositionManager />
               </PositionManagerGridItem>
+              <MobileTradeButtonsGridItem>
+                <MobileTradeButtons isMaker />
+              </MobileTradeButtonsGridItem>
+              <MobileTradeForm />
             </TradeLayout>
           </SettlementToastProvider>
         </TradeFormProvider>

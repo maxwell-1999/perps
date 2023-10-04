@@ -11,6 +11,7 @@ export interface Props {
   min: number
   max: number
   step: number
+  labelColor?: string
   name: string
   control: Control<any>
   ariaLabel: string
@@ -30,6 +31,7 @@ export const Slider: React.FC<Props> = ({
   control,
   ariaLabel,
   label,
+  labelColor,
   rightLabel,
   containerProps,
   onChange,
@@ -68,7 +70,9 @@ export const Slider: React.FC<Props> = ({
   return (
     <Flex flexDirection="column" {...containerProps}>
       <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
-        <Text variant="label">{label}</Text>
+        <Text variant="label" color={labelColor}>
+          {label}
+        </Text>
         {rightLabel}
       </Flex>
       <Flex justifyContent="center">
@@ -108,21 +112,21 @@ export const Slider: React.FC<Props> = ({
               size="13px"
               onClick={() => actions.stepTo(min)}
               color={textColor}
-              label={`${min}x`}
+              label={`${formatNumber(min)}x`}
             />
             <Button
               variant="text"
               size="13px"
               onClick={() => actions.stepTo(min + (max - min) / 2)}
               color={textColor}
-              label={`${min + (max - min) / 2}x`}
+              label={`${formatNumber(min + (max - min) / 2)}x`}
             />
             <Button
               variant="text"
               size="13px"
               onClick={() => actions.stepTo(max)}
               color={textColor}
-              label={`${max}x`}
+              label={`${formatNumber(max)}x`}
             />
           </Flex>
         </Flex>
@@ -134,4 +138,12 @@ export const Slider: React.FC<Props> = ({
       )}
     </Flex>
   )
+}
+
+function formatNumber(num: number): number {
+  if (Number.isInteger(num)) {
+    return num
+  } else {
+    return Math.round(num * 10) / 10
+  }
 }

@@ -13,19 +13,12 @@ import { fadeIn } from './VaultCard/styles'
 import { useVaultSelectCopy } from './hooks'
 
 export default function VaultSelect() {
+  const chainId = useChainId()
   const copy = useVaultSelectCopy()
   const vaultDescription = useVaultDescription()
   const borderColor = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
   const titleSpanColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
-  const chainId = useChainId()
-  const {
-    vaultSnapshots,
-    status,
-    setSelectedVault,
-    feeAPRs: feeAprs,
-    vaultUserSnapshots,
-    selectedVault,
-  } = useVaultContext()
+  const { status, setSelectedVault, vaultSnapshots, selectedVault } = useVaultContext()
 
   return (
     <Flex
@@ -52,28 +45,24 @@ export default function VaultSelect() {
               <Spinner />
             </Flex>
           ) : (
-            vaultSnapshots.map((snapshot, i) => {
-              const metadata = VaultMetadata[chainId]?.[snapshot.vaultType]
+            Object.values(vaultSnapshots?.vault ?? {}).map((vaultSnapshot, i) => {
+              const { vaultType, vault } = vaultSnapshot
+              const metadata = VaultMetadata[chainId]?.[vaultType]
               if (!metadata) return null
-              const feeAPR = feeAprs?.[snapshot.vaultType] ?? 0n
               return (
-                <Box
-                  opacity={0}
-                  animation={`${fadeIn} 0.1s ease forwards ${i * 0.1}s`}
-                  key={`animate-${snapshot.address}`}
-                >
+                <Box opacity={0} animation={`${fadeIn} 0.1s ease forwards ${i * 0.1}s`} key={`animate-${vault}`}>
                   <VaultCard
                     onClick={() => {
-                      setSelectedVault(`${i}`)
+                      setSelectedVault(vaultType)
                     }}
-                    vault={snapshot}
-                    key={snapshot.address}
-                    feeAPR={feeAPR}
+                    vaultType={vaultType}
+                    key={vault}
                     name={metadata.name}
-                    assets={metadata.assets}
-                    description={vaultDescription[snapshot.vaultType]}
-                    vaultUserSnapshot={vaultUserSnapshots?.[snapshot.vaultType]}
-                    isSelected={selectedVault === `${i}`}
+                    assets={vaultSnapshot.assets}
+                    description={vaultDescription[vaultType]}
+                    vaultSnapshot={vaultSnapshot}
+                    vaultAccountSnapshot={vaultSnapshots?.user?.[vaultType]}
+                    isSelected={selectedVault === vaultType}
                   />
                 </Box>
               )

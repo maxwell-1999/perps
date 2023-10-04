@@ -14,6 +14,7 @@ enum InputType {
 
 interface LeverageInputProps {
   label: string
+  labelColor?: string
   min: number
   max: number
   step: number
@@ -23,7 +24,7 @@ interface LeverageInputProps {
   validate?: Validate<any, any> | Record<string, Validate<any, any>> | undefined
 }
 
-function LeverageInput({ label, min, max, step, control, name, onChange, validate }: LeverageInputProps) {
+function LeverageInput({ label, min, max, step, control, name, onChange, validate, labelColor }: LeverageInputProps) {
   const [inputType, setInputType] = useState<InputType>(InputType.Slider)
 
   return (
@@ -31,6 +32,7 @@ function LeverageInput({ label, min, max, step, control, name, onChange, validat
       {inputType === InputType.Slider ? (
         <Slider
           label={label}
+          labelColor={labelColor}
           rightLabel={<LeverageToggle onClick={setInputType} inputType={inputType} />}
           ariaLabel="leverage-slider"
           min={min}
@@ -44,6 +46,7 @@ function LeverageInput({ label, min, max, step, control, name, onChange, validat
       ) : (
         <Input
           label={label}
+          labelColor={labelColor}
           rightLabel={<LeverageToggle onClick={setInputType} inputType={inputType} />}
           placeholder="0.0"
           rightEl={<Pill text="X" />}

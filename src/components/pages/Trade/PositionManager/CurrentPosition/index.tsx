@@ -1,29 +1,29 @@
-import { ButtonGroup, Flex, Text } from '@chakra-ui/react'
+import { ButtonGroup, Flex, Text, useBreakpointValue } from '@chakra-ui/react'
 import ClosePositionIcon from '@public/icons/closePositionIcon.svg'
 import React from 'react'
 
 import { TooltipIcon } from '@/components/design-system/Tooltip'
 import { AssetIconWithText } from '@/components/shared/components'
-import { OrderDirection, PositionStatus } from '@/constants/markets'
+import { PositionSide2 } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails } from '@/hooks/markets'
+import { useActivePositionMarketPnls } from '@/hooks/markets2'
 
 import { Button } from '@ds/Button'
 import { DataRow } from '@ds/DataRow'
 
-import { getStatusDetails } from '@utils/positionUtils'
+import { getStatusDetails, isFailedClose } from '@utils/positionUtils'
 
 import { useFormatPosition, usePositionManagerCopy, useStyles } from '../hooks'
 import {
   ActivePositionDetail,
   ActivePositionHeader,
+  AverageEntryRow,
   DesktopButtonContainer,
   FundingRateTooltip,
   HiddenOnLargeScreen,
   LeftContainer,
   LeverageBadge,
-  PnlDataRow,
   PnlPositionDetail,
   ResponsiveContainer,
   RightContainer,
@@ -33,10 +33,12 @@ import {
 function CurrentPosition() {
   const copy = usePositionManagerCopy()
   const { noValue } = copy
-  const { borderColor, green, red, alpha75, subheaderTextColor, alpha50 } = useStyles()
-  const { assetMetadata, isMaker, makerOrderDirection } = useMarketContext()
-  const { setTradeFormState } = useTradeFormState()
+  const { borderColor, alpha75, subheaderTextColor, alpha50 } = useStyles()
+  const { assetMetadata, isMaker, selectedMarketSnapshot2 } = useMarketContext()
+  const { setTradeFormState, setMobileTradeFormOpen } = useTradeFormState()
   const { positionDetails, formattedValues } = useFormatPosition()
+  const { data: pnlData } = useActivePositionMarketPnls()
+  const isBase = useBreakpointValue({ base: true, sm: false })
   const {
     direction,
     dailyFunding,
@@ -45,24 +47,37 @@ function CurrentPosition() {
     yearlyFundingRate,
     currentCollateral,
     nextPosition,
-    averageEntry,
     liquidationPrice,
+    notional,
     nextNotional,
+    leverage,
     nextLeverage,
     liquidationFee,
     makerExposure,
+    exposureSide,
     fundingFeeAPR,
     tradingFeeAPR,
     totalAPR,
+    position,
+    isOpening,
   } = formattedValues
-  const status = positionDetails?.status ?? PositionStatus.resolved
 
-  const hasPosition = status !== PositionStatus.resolved
-  const liquidated = !!positionDetails?.liquidations?.length
-  const directionTextColor = direction === OrderDirection.Long ? green : red
-  const { isOpenPosition, statusColor } = getStatusDetails(status, liquidated)
+  const isSocialized =
+    position !== noValue && selectedMarketSnapshot2?.isSocialized && direction === selectedMarketSnapshot2.majorSide
+
+  const liquidated = positionDetails ? !!pnlData?.[positionDetails.asset]?.liquidation : false
+  const { isOpenPosition, statusColor, status, directionTextColor, hasPosition, isClosing } = getStatusDetails({
+    userMarketSnapshot: positionDetails,
+    liquidated,
+    isMaker,
+  })
+
+  const closingOrFailed = isClosing || isFailedClose(positionDetails)
 
   const statusLabel = liquidated ? copy.liquidated : copy[status]
+  const exposure = hasPosition ? `${makerExposure} ${exposureSide}` : noValue
+  const displayDirection = hasPosition && direction !== PositionSide2.none ? direction : noValue
+
   return (
     <ResponsiveContainer>
       <LeftContainer borderColor={borderColor}>
@@ -70,35 +85,42 @@ function CurrentPosition() {
           <ActivePositionHeader borderColor={borderColor}>
             <AssetIconWithText
               market={assetMetadata}
+              size="md"
               text={assetMetadata.baseCurrency.toUpperCase()}
-              textProps={{ fontSize: '15px', textTransform: 'capitalize' }}
+              textProps={{ fontSize: { base: '14px', lg: '15px' }, textTransform: 'capitalize' }}
             />
             <Flex alignItems="center" gap="12px">
-              <Text fontSize="15px">{statusLabel}</Text> <StatusLight color={statusColor} glow={isOpenPosition} />
+              <Text fontSize="15px">{statusLabel}</Text>
+              <StatusLight color={statusColor} glow={Boolean(hasPosition)} />
             </Flex>
           </ActivePositionHeader>
           <ActivePositionDetail
             label={copy.size}
-            value={isOpenPosition ? nextPosition : noValue}
-            valueSubheader={isOpenPosition ? nextNotional : copy.noPositionOpen}
+            value={closingOrFailed ? position : hasPosition ? nextPosition : noValue}
+            valueSubheader={closingOrFailed ? notional : hasPosition ? nextNotional : copy.noPositionOpen}
             valueColor={isOpenPosition ? 'initial' : subheaderTextColor}
+            showSocializationWarning={isSocialized}
           />
         </Flex>
         <Flex width="50%" flexDirection="column">
           <ActivePositionHeader borderColor={borderColor}>
-            <Text fontSize="17px" color={isOpenPosition ? directionTextColor : subheaderTextColor}>
-              {direction}
+            <Text
+              fontSize="17px"
+              color={isOpenPosition ? directionTextColor : subheaderTextColor}
+              textTransform="capitalize"
+            >
+              {displayDirection}
             </Text>
             {hasPosition ? (
-              <LeverageBadge leverage={nextLeverage} />
+              <LeverageBadge leverage={closingOrFailed ? leverage : nextLeverage} />
             ) : (
               <Text variant="label" fontSize="15px">
                 {noValue}
               </Text>
             )}
           </ActivePositionHeader>
-          {hasPosition ? (
-            <PnlPositionDetail positionDetails={positionDetails as PositionDetails} />
+          {hasPosition && !isOpening ? (
+            <PnlPositionDetail />
           ) : (
             <ActivePositionDetail
               label={copy.pnl}
@@ -124,18 +146,23 @@ function CurrentPosition() {
                     leftIcon={<ClosePositionIcon />}
                     variant="transparent"
                     label={copy.close}
-                    onClick={() => setTradeFormState(FormState.close)}
+                    onClick={() => {
+                      setTradeFormState(FormState.close)
+                      if (isBase) {
+                        setMobileTradeFormOpen(true)
+                      }
+                    }}
                   />
                 </ButtonGroup>
               )}
             </Flex>
           )}
-
+          <DataRow label={copy.market} value={<Text fontSize="14px">{assetMetadata.symbol.toUpperCase()}</Text>} />
           <DataRow
             label={copy.direction}
             value={
               <Text fontSize="14px" color={directionTextColor}>
-                {direction}
+                {displayDirection}
               </Text>
             }
           />
@@ -143,13 +170,15 @@ function CurrentPosition() {
             label={copy.size}
             value={
               <Text fontSize="14px" color={alpha75}>
-                {/*eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
-                {isOpenPosition ? `${nextPosition} / ${nextNotional}` : noValue}
+                {hasPosition
+                  ? /*eslint-disable-next-line formatjs/no-literal-string-in-jsx */
+                    `${closingOrFailed ? position : nextPosition} / ${closingOrFailed ? notional : nextNotional}`
+                  : noValue}
               </Text>
             }
           />
           {hasPosition ? (
-            <PnlDataRow positionDetails={positionDetails as PositionDetails} />
+            <PnlPositionDetail asDataRow />
           ) : (
             <DataRow
               label={copy.pnl}
@@ -210,12 +239,10 @@ function CurrentPosition() {
               }
             />
             <DataRow
-              label={copy.currentExposure(
-                makerOrderDirection === OrderDirection.Long ? OrderDirection.Short : OrderDirection.Long,
-              )}
+              label={copy.exposure}
               value={
                 <Text fontSize="14px" color={alpha75}>
-                  {hasPosition ? makerExposure : noValue}
+                  {exposure}
                 </Text>
               }
             />
@@ -230,41 +257,33 @@ function CurrentPosition() {
             }
           />
         )}
+        {!isMaker && <AverageEntryRow hasPosition={Boolean(hasPosition)} />}
         <DataRow
-          label={copy.averageEntry}
+          label={
+            <Flex alignItems="center" gap={2}>
+              <Text variant="label">{copy.fundingRate1hr}</Text>
+              <TooltipIcon
+                height="11px"
+                width="11px"
+                color={alpha50}
+                tooltipText={
+                  <FundingRateTooltip
+                    dailyFunding={dailyFunding}
+                    hourlyFunding={hourlyFunding}
+                    yearlyFunding={yearlyFundingRate}
+                    eightHourFunding={eightHourFunding}
+                  />
+                }
+              />
+            </Flex>
+          }
           value={
             <Text fontSize="14px" color={alpha75}>
-              {hasPosition ? averageEntry : noValue}
+              {hourlyFunding}
             </Text>
           }
         />
-        {!isMaker && (
-          <DataRow
-            label={
-              <Flex alignItems="center" gap={2}>
-                <Text variant="label">{copy.fundingRate1hr}</Text>
-                <TooltipIcon
-                  height="11px"
-                  width="11px"
-                  color={alpha50}
-                  tooltipText={
-                    <FundingRateTooltip
-                      dailyFunding={dailyFunding}
-                      hourlyFunding={hourlyFunding}
-                      yearlyFunding={yearlyFundingRate}
-                      eightHourFunding={eightHourFunding}
-                    />
-                  }
-                />
-              </Flex>
-            }
-            value={
-              <Text fontSize="14px" color={alpha75}>
-                {hourlyFunding}
-              </Text>
-            }
-          />
-        )}
+
         <DataRow
           label={copy.collateral}
           value={
@@ -293,7 +312,7 @@ function CurrentPosition() {
                   variant="transparent"
                   label={copy.close}
                   onClick={() => setTradeFormState(FormState.close)}
-                  isLoading={status === PositionStatus.closing}
+                  isLoading={isClosing}
                   loadingText={copy.closing}
                 />
               </ButtonGroup>

@@ -17,9 +17,8 @@ import { InvokerAction, buildInvokerAction } from '@/utils/multiinvoker'
 import { BalancedVaultAbi } from '@abi/BalancedVault.abi'
 import { LensProductSnapshotAbi, LensUserProductSnapshotAbi } from '@abi/Lens.abi'
 
-import { bufferGasLimit, getProductContract, getVaultAddressForType, getVaultForType } from '../utils/contractUtils'
+import { bufferGasLimit, getProductContract, getVaultAddressForType, getVaultForTypeV1 } from '../utils/contractUtils'
 import { useDSU, useLensProductSnapshot, useLensUserProductSnapshot, useMultiInvoker, useUSDC } from './contracts'
-import { useRefreshKeysOnPriceUpdates } from './markets'
 import { useAddress, useChainId } from './network'
 
 export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
@@ -50,7 +49,7 @@ const vaultFetcher = async (
   lensProduct: GetContractResult<typeof LensProductSnapshotAbi>,
   lensUserProduct: GetContractResult<typeof LensUserProductSnapshotAbi>,
 ) => {
-  const vaultContract = getVaultForType(vaultType, chainId)
+  const vaultContract = getVaultForTypeV1(vaultType, chainId)
   if (!vaultContract) return
 
   const vaultAddress = vaultContract.address
@@ -99,11 +98,13 @@ export const useVaultUserSnapshots = (vaultTypes: PerennialVaultType[]) => {
   const client = usePublicClient()
   const { address } = useAddress()
   const vaultContracts = vaultTypes
-    .map((vaultType) => ({ contract: getVaultForType(vaultType, chainId), type: vaultType }))
+    .map((vaultType) => ({ contract: getVaultForTypeV1(vaultType, chainId), type: vaultType }))
     .filter(({ contract }) => contract !== undefined)
+
   return useQuery({
     queryKey: ['vaultUserSnapshot', chainId, ...vaultTypes, address],
     enabled: !!chainId && !!address && !!vaultTypes.length && !!vaultContracts.length,
+    refetchInterval: 10000,
     queryFn: async () => {
       if (!address || !chainId || !vaultContracts.length) return
       const vaultUserSnapshots = await Promise.all(
@@ -262,11 +263,6 @@ const useVaultTransactionCopy = () => {
   }
 }
 
-export const useRefreshVaultsOnPriceUpdates = () => {
-  const keys = ['vaultSnapshots', 'vaultUserSnapshot']
-  useRefreshKeysOnPriceUpdates(keys)
-}
-
 export type VaultTransactions = {
   onApproveUSDC: () => Promise<`0x${string}`>
   onApproveDSU: () => Promise<`0x${string}`>
@@ -324,7 +320,7 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
 
   const onApproveShares = async () => {
     if (!walletClient) return
-    const vaultContract = getVaultForType(vaultType, chainId, walletClient)
+    const vaultContract = getVaultForTypeV1(vaultType, chainId, walletClient)
     if (!vaultContract) return
 
     const hash = await vaultContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
@@ -361,7 +357,7 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
   }
 
   const onRedeem = async (amount: bigint, { assets = true, max = false }) => {
-    const vaultContract = getVaultForType(vaultType, chainId)
+    const vaultContract = getVaultForTypeV1(vaultType, chainId)
     if (!address || !chainId || !walletClient || !vaultContract) {
       return
     }
@@ -392,7 +388,7 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
   }
 
   const onClaim = async (unwrapAmount?: bigint) => {
-    const vaultContract = getVaultForType(vaultType, chainId)
+    const vaultContract = getVaultForTypeV1(vaultType, chainId)
     if (!address || !vaultContract) {
       return
     }
@@ -444,7 +440,7 @@ const convertAssetsToShares = async ({
   assets: bigint
   chainId: SupportedChainId
 }): Promise<bigint> => {
-  const vault = getVaultForType(vaultType, chainId)
+  const vault = getVaultForTypeV1(vaultType, chainId)
   if (!vault) {
     return 0n
   }

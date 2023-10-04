@@ -79,9 +79,10 @@ interface ModalDetailProps {
   action: string
   detail: string | React.ReactNode
   color: string
+  subDetail?: string | React.ReactNode
 }
 
-export const ModalDetail: React.FC<ModalDetailProps> = ({ title, action, detail, color }) => {
+export const ModalDetail: React.FC<ModalDetailProps> = ({ title, action, detail, color, subDetail }) => {
   return (
     <ModalDetailContainer>
       <Text variant="label" fontSize="12px" mb="5px">
@@ -93,6 +94,7 @@ export const ModalDetail: React.FC<ModalDetailProps> = ({ title, action, detail,
         </Text>
         {detail}
       </Text>
+      {subDetail && <Text fontSize="13px">{subDetail}</Text>}
     </ModalDetailContainer>
   )
 }

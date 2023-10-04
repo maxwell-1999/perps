@@ -29,7 +29,7 @@ export default function LpWarningModal({ onClose }: LpWarningModalProps) {
     },
     {
       learnMore: (
-        <Link href="https://docs.perennial.finance/lps-makers/vaults" target="_blank">
+        <Link href="https://docs.perennial.finance/protocol-design/vaults" target="_blank">
           <Text as="span" textDecoration="underline">
             {learnMore}
           </Text>

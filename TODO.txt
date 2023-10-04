@@ -1,0 +1,12 @@
+* SDK Package
+  * Encapsulates graph + sleuth/lens + data fetchers
+* Should we be using `next` values everywhere instead of current?
+* Approve MultiInvoker as Operator on connect or on first tx
+* cleanup isMaker flags where possible
+* Receipt
+* Vaults
+* MarketBar
+* PositionManager
+* Historical data
+* Settlement fee for vaults
+* Sub-position pagination

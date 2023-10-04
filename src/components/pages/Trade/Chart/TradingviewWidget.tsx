@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
 
 import colors from '@/components/design-system/theme/colors'
-import { AssetMetadata } from '@/constants/assets'
+import { AssetMetadata } from '@/constants/markets'
+import { PythDatafeedUrl } from '@/constants/network'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useUserCurrentPositions } from '@/hooks/markets'
+import { useActiveSubPositionHistory } from '@/hooks/markets2'
 import { usePyth } from '@/hooks/network'
-import { Big18Math, formatBig18 } from '@/utils/big18Utils'
+import { Big6Math, formatBig6 } from '@/utils/big6Utils'
 import { usePrevious } from '@/utils/hooks'
 
 import {
@@ -51,14 +52,15 @@ let tvScriptLoadingPromise: Promise<void> | null = null
 
 const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ overrides, theme, containerId, isMaker }) => {
   const pyth = usePyth()
-  const { selectedMarket, makerAsset } = useMarketContext()
+  const { selectedMarket, selectedMakerMarket } = useMarketContext()
 
   const { tvTicker, displayDecimals } = useMemo(
-    () => AssetMetadata[isMaker ? makerAsset : selectedMarket],
-    [isMaker, makerAsset, selectedMarket],
+    () => AssetMetadata[isMaker ? selectedMakerMarket : selectedMarket],
+    [isMaker, selectedMakerMarket, selectedMarket],
   )
 
-  const { data: positions } = useUserCurrentPositions()
+  const { data: positions } = useActiveSubPositionHistory(isMaker ? selectedMakerMarket : selectedMarket)
+  const positionChanges = useMemo(() => positions?.pages.map((p) => p?.changes ?? []).flat(), [positions])
 
   const prevTicker = usePrevious(tvTicker)
 
@@ -84,7 +86,7 @@ const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ overrides, theme,
       custom_formatters: {
         priceFormatterFactory: () => ({
           format: (price: number) =>
-            formatBig18(Big18Math.fromFloatString(price.toString()), {
+            formatBig6(Big6Math.fromFloatString(price.toString()), {
               numSigFigs: displayDecimals + 2,
               useGrouping: false,
             }),
@@ -105,13 +107,13 @@ const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ overrides, theme,
 
       await tvScriptLoadingPromise
 
-      if (datafeed === null) datafeed = new Datafeed('/api/tv', pyth, positions)
-      else datafeed.positions = positions
+      if (datafeed === null) datafeed = new Datafeed(PythDatafeedUrl ?? '', pyth, positionChanges)
+      else datafeed.positions = positionChanges
 
       if (!tvWidget) createWidget()
     }
     setup()
-  }, [createWidget, prevTicker, tvTicker, pyth, positions])
+  }, [createWidget, prevTicker, tvTicker, pyth, positionChanges])
 
   useEffect(() => {
     if (tvWidget && prevTicker !== tvTicker) {

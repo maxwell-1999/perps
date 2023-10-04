@@ -1,17 +1,16 @@
-import { Box, Flex, Text, useColorModeValue } from '@chakra-ui/react'
+import { Flex, Text, useColorModeValue } from '@chakra-ui/react'
 import { memo } from 'react'
 
 import { ModalDetailContainer } from '@/components/shared/ModalComponents'
-import { FormattedBig18, FormattedBig18USDPrice } from '@/components/shared/components'
-import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import { OrderDirection } from '@/constants/markets'
-import { Big18Math } from '@/utils/big18Utils'
+import { FormattedBig6, FormattedBig6USDPrice } from '@/components/shared/components'
+import { AssetMetadata, PositionSide2, SupportedAsset } from '@/constants/markets'
+import { useMarketContext } from '@/contexts/marketContext'
+import { MarketSnapshot } from '@/hooks/markets2'
+import { Big6Math, formatBig6Percent } from '@/utils/big6Utils'
+import { calcEstExecutionPrice } from '@/utils/positionUtils'
 
 import colors from '@ds/theme/colors'
 
-import { ProductSnapshot } from '@t/perennial'
-
-import { calcPositionFee } from '../../utils'
 import { useAdjustmentModalCopy } from './hooks'
 
 const PositionValueDisplay = ({
@@ -37,14 +36,14 @@ const PositionValueDisplay = ({
       <Text variant="label" fontSize="13px">
         {title}
       </Text>
-      <Flex alignItems="center">
+      <Flex alignItems="center" flexWrap="wrap" justifyContent="flex-end">
         {prevValue !== undefined && (
           <>
             <Flex mr={1} alignItems="center">
               {!!usd ? (
-                <FormattedBig18USDPrice fontSize="14px" color={previousColor} value={prevValue} />
+                <FormattedBig6USDPrice fontSize="14px" color={previousColor} value={prevValue} />
               ) : (
-                <FormattedBig18
+                <FormattedBig6
                   fontSize="14px"
                   color={previousColor}
                   value={prevValue}
@@ -58,15 +57,15 @@ const PositionValueDisplay = ({
             </Flex>
           </>
         )}
-        <Box>
+        <Flex>
           {typeof newValue === 'string' ? (
             <Text fontSize="14px">{newValue}</Text>
           ) : !!usd ? (
-            <FormattedBig18USDPrice fontSize="14px" value={newValue} />
+            <FormattedBig6USDPrice fontSize="14px" value={newValue} />
           ) : (
-            <FormattedBig18 fontSize="14px" value={newValue} asset={asset} leverage={leverage} />
+            <FormattedBig6 fontSize="14px" value={newValue} asset={asset} leverage={leverage} />
           )}
-        </Box>
+        </Flex>
       </Flex>
     </Flex>
   )
@@ -82,9 +81,12 @@ interface PositionInfoProps {
   positionDelta?: bigint
   asset: SupportedAsset
   isPrevious?: boolean
-  orderDirection: OrderDirection
-  product: ProductSnapshot
+  positionSide: PositionSide2
+  market: MarketSnapshot
   frozen: boolean
+  interfaceFee: bigint
+  tradeFee: bigint
+  settlementFee: bigint
 }
 
 export const PositionInfo = memo(
@@ -97,25 +99,45 @@ export const PositionInfo = memo(
     prevPosition,
     positionDelta,
     asset,
-    product,
-    orderDirection,
+    market,
+    positionSide,
+    interfaceFee,
+    tradeFee,
+    settlementFee,
   }: PositionInfoProps) {
     const copy = useAdjustmentModalCopy()
+    const { isMaker, orderDirection } = useMarketContext()
 
     const {
-      latestVersion: { price },
-      productInfo: { takerFee },
-    } = product
+      global: { latestPrice: price },
+      parameter: { positionFee },
+    } = market
 
-    const previousNotional = Big18Math.mul(prevPosition, Big18Math.abs(price))
-    const newNotional = Big18Math.mul(newPosition, Big18Math.abs(price))
+    const previousNotional = Big6Math.mul(prevPosition, Big6Math.abs(price))
+    const newNotional = Big6Math.mul(newPosition, Big6Math.abs(price))
     const { quoteCurrency } = AssetMetadata[asset]
+    const estExecutionPrice =
+      positionDelta && !Big6Math.isZero(positionDelta)
+        ? calcEstExecutionPrice({
+            orderDirection,
+            oraclePrice: price,
+            positionDelta: Big6Math.abs(positionDelta),
+            calculatedFee: tradeFee,
+            positionFee,
+          })
+        : { total: price, priceImpact: 0n, nonPriceImpactFee: 0n, priceImpactPercentage: 0n }
 
     return (
       <ModalDetailContainer>
         <PositionValueDisplay
           title={copy.side}
-          newValue={orderDirection === OrderDirection.Long ? copy.long : copy.short}
+          newValue={
+            positionSide === PositionSide2.maker
+              ? copy.maker
+              : positionSide === PositionSide2.long
+              ? copy.long
+              : copy.short
+          }
         />
         <PositionValueDisplay
           title={copy.positionSizeAsset(asset)}
@@ -131,8 +153,22 @@ export const PositionInfo = memo(
         />
         <PositionValueDisplay title={copy.collateral} newValue={newCollateral} prevValue={prevCollateral} usd />
         <PositionValueDisplay title={copy.leverage} newValue={newLeverage} prevValue={prevLeverage} leverage isLast />
-        {positionDelta !== undefined && (
-          <PositionValueDisplay title={copy.fees} newValue={calcPositionFee(price, positionDelta, takerFee)} usd />
+        {positionDelta !== undefined && !isMaker && (
+          <>
+            <PositionValueDisplay
+              title={copy.priceImpact}
+              newValue={formatBig6Percent(estExecutionPrice.priceImpactPercentage, { numDecimals: 4 })}
+              usd
+            />
+            <PositionValueDisplay
+              title={copy.fee}
+              newValue={interfaceFee + settlementFee + estExecutionPrice.nonPriceImpactFee}
+              usd
+            />
+          </>
+        )}
+        {positionDelta !== undefined && isMaker && (
+          <PositionValueDisplay title={copy.fee} newValue={tradeFee + interfaceFee + settlementFee} usd />
         )}
       </ModalDetailContainer>
     )

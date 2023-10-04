@@ -1,7 +1,8 @@
 import { MaxUint256 } from '@/constants/units'
-import { Big18Math } from '@/utils/big18Utils'
+import { Big6Math } from '@/utils/big6Utils'
 
-export function formatValueForProgressBar(value: bigint, total: bigint) {
-  if (Big18Math.eq(total, MaxUint256)) return 0
-  return Math.floor(Big18Math.toUnsafeFloat(Big18Math.div(value, total)) * 100)
+export function formatValueForProgressBar(value?: bigint, total?: bigint) {
+  if (!value || !total) return 0
+  if (Big6Math.eq(total, MaxUint256)) return 0
+  return Math.floor(Big6Math.toUnsafeFloat(Big6Math.div(value, total)) * 100)
 }

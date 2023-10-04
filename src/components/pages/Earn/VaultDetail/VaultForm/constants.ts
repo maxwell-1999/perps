@@ -21,8 +21,8 @@ export type TxState = {
 export type TransactionState = {
   approveUSDCLoading: boolean
   approveUSDCCompleted: boolean
-  approveSharesLoading: boolean
-  approveSharesCompleted: boolean
+  approveOperatorLoading: boolean
+  approveOperatorCompleted: boolean
   approveDSULoading: boolean
   approveDSUCompleted: boolean
   depositLoading: boolean
@@ -36,8 +36,8 @@ export type TransactionState = {
 export const initialTransactionState: TransactionState = {
   approveUSDCLoading: false,
   approveUSDCCompleted: false,
-  approveSharesLoading: false,
-  approveSharesCompleted: false,
+  approveOperatorLoading: false,
+  approveOperatorCompleted: false,
   approveDSULoading: false,
   approveDSUCompleted: false,
   depositLoading: false,

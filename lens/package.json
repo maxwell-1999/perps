@@ -1,0 +1,12 @@
+{
+  "name": "perennial-interface-v2-lens",
+  "dependencies": {
+    "@equilibria/perennial-v2": "1.0.0-rc4",
+    "@equilibria/perennial-v2-vault": "1.0.0-rc4",
+    "@equilibria/root": "^2.0.0-rc0",
+    "hardhat": "^2.17.0"
+  },
+  "resolutions": {
+    "@equilibria/perennial-v2": "1.0.0-rc4"
+  }
+}

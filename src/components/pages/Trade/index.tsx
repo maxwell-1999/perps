@@ -1,9 +1,10 @@
 import {
   ChartGridItem,
+  FlexibleGridItem,
   HeaderGridItem,
   MarketBarGridItem,
+  MobileTradeButtonsGridItem,
   PositionManagerGridItem,
-  TradeFormGridItem,
   TradeLayout,
 } from '@/components/layout/TradeLayout'
 import { HeadWithLivePrices } from '@/components/shared/Head'
@@ -11,13 +12,17 @@ import NavBar from '@/components/shared/NavBar'
 import { MarketProvider } from '@/contexts/marketContext'
 import { SettlementToastProvider } from '@/contexts/settlementToastContext'
 import { TradeFormProvider } from '@/contexts/tradeFormContext'
+import { useRefreshKeysOnPriceUpdates2 } from '@/hooks/markets2'
 
 import Chart from './Chart'
 import MarketBar from './MarketBar'
+import MobileTradeButtons from './MobileTradeButtons'
 import PositionManager from './PositionManager'
 import TradeForm from './TradeForm'
+import MobileTradeForm from './TradeForm/MobileTradeForm'
 
 export default function Trade() {
+  useRefreshKeysOnPriceUpdates2()
   return (
     <MarketProvider>
       <TradeFormProvider>
@@ -30,15 +35,19 @@ export default function Trade() {
             <MarketBarGridItem>
               <MarketBar />
             </MarketBarGridItem>
-            <TradeFormGridItem>
+            <FlexibleGridItem gridArea="tradeForm" desktopOnly>
               <TradeForm />
-            </TradeFormGridItem>
+            </FlexibleGridItem>
             <ChartGridItem>
               <Chart />
             </ChartGridItem>
             <PositionManagerGridItem>
               <PositionManager />
             </PositionManagerGridItem>
+            <MobileTradeButtonsGridItem>
+              <MobileTradeButtons />
+            </MobileTradeButtonsGridItem>
+            <MobileTradeForm />
           </TradeLayout>
         </SettlementToastProvider>
       </TradeFormProvider>

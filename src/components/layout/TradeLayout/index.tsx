@@ -1,12 +1,15 @@
 import { GridItem } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 
+import colors from '@ds/theme/colors'
 import { breakpoints } from '@ds/theme/styles'
 
 const mobileLayout = `
   "header"
   "marketBar"
-  "tradeForm"
+  "chart"
+  "positionManager"
+  "mobileTradeButtons"
 `
 
 const desktopLayout = `
@@ -23,7 +26,7 @@ const largeScreenLayout = `
   ". positionManager"
 `
 
-const GridContainer = styled.div`
+const GridContainer = styled.div<{ isMaker?: boolean }>`
   display: grid;
   grid-gap: 15px;
   min-height: 100dvh;
@@ -32,7 +35,7 @@ const GridContainer = styled.div`
 
   grid-template-areas: ${mobileLayout};
   grid-template-columns: 1fr;
-  grid-template-rows: 54px 54px 1fr;
+  grid-template-rows: 54px 54px 350px 315px 79px;
 
   @media (min-width: ${breakpoints.md}) {
     grid-template-areas: ${desktopLayout};
@@ -50,20 +53,44 @@ const GridContainer = styled.div`
 const DesktopOnlyGridItem = styled(GridItem)`
   display: none;
   @media (min-width: ${breakpoints.md}) {
-    display: Grid;
+    display: initial;
+  }
+`
+
+const MobileFixedGridItem = styled(GridItem)`
+  display: grid;
+  background: ${colors.brand.blackAlpha[80]};
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 79px;
+  z-index: 1;
+  @media (min-width: ${breakpoints.md}) {
+    display: none;
   }
 `
 
 interface LayoutProps {
   children: React.ReactNode
+  isMaker?: boolean
 }
 
-export const TradeLayout: React.FC<LayoutProps> = ({ children }) => {
-  return <GridContainer>{children}</GridContainer>
+export const TradeLayout: React.FC<LayoutProps> = ({ children, isMaker }) => {
+  return <GridContainer isMaker={isMaker}>{children}</GridContainer>
 }
 
 interface GridItemProps {
   children: React.ReactNode
+  gridArea?: string
+  desktopOnly?: boolean
+}
+
+export const FlexibleGridItem: React.FC<GridItemProps> = ({ children, gridArea, desktopOnly }) => {
+  if (desktopOnly) {
+    return <DesktopOnlyGridItem gridArea={gridArea}>{children}</DesktopOnlyGridItem>
+  }
+  return <GridItem gridArea={gridArea}>{children}</GridItem>
 }
 
 export const HeaderGridItem: React.FC<GridItemProps> = ({ children }) => (
@@ -74,14 +101,12 @@ export const MarketBarGridItem: React.FC<GridItemProps> = ({ children }) => (
   <GridItem gridArea="marketBar">{children}</GridItem>
 )
 
-export const TradeFormGridItem: React.FC<GridItemProps> = ({ children }) => (
-  <GridItem gridArea="tradeForm">{children}</GridItem>
-)
-
-export const ChartGridItem: React.FC<GridItemProps> = ({ children }) => (
-  <DesktopOnlyGridItem gridArea="chart">{children}</DesktopOnlyGridItem>
-)
+export const ChartGridItem: React.FC<GridItemProps> = ({ children }) => <GridItem gridArea="chart">{children}</GridItem>
 
 export const PositionManagerGridItem: React.FC<GridItemProps> = ({ children }) => (
-  <DesktopOnlyGridItem gridArea="positionManager">{children}</DesktopOnlyGridItem>
+  <GridItem gridArea="positionManager">{children}</GridItem>
+)
+
+export const MobileTradeButtonsGridItem: React.FC<GridItemProps> = ({ children }) => (
+  <MobileFixedGridItem gridArea="mobileTradeButtons">{children}</MobileFixedGridItem>
 )

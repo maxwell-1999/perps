@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import { useIntl } from 'react-intl'
 
-import { Big18Math } from '@/utils/big18Utils'
+import { Big6Math } from '@/utils/big6Utils'
 import { isNumbersOnly } from '@/utils/formUtils'
 
 import { FormNames, FormValues, VaultFormOption } from './constants'
@@ -15,6 +15,7 @@ export function useVaultFormCopy() {
     Redeem: intl.formatMessage({ defaultMessage: 'Redeem' }),
     Amount: intl.formatMessage({ defaultMessage: 'Amount' }),
     ChangeInValue: intl.formatMessage({ defaultMessage: 'Change in Value' }),
+    SettlementFee: intl.formatMessage({ defaultMessage: 'Settlement Fee' }),
     ChangeInPnL: intl.formatMessage({ defaultMessage: 'Change in P&L' }),
     zeroUsd: intl.formatMessage({ defaultMessage: '$0.00' }),
     max: intl.formatMessage({ defaultMessage: 'Max' }),
@@ -37,8 +38,8 @@ export function useVaultFormCopy() {
     withdrawCollateral: intl.formatMessage({ defaultMessage: 'Withdraw collateral' }),
     redeemFromVault: intl.formatMessage({ defaultMessage: 'Redeem from vault' }),
     cancel: intl.formatMessage({ defaultMessage: 'Cancel' }),
-    approveShares: intl.formatMessage({ defaultMessage: 'Approve shares' }),
-    approveSharesBody: intl.formatMessage({ defaultMessage: 'Approve shares for redemption' }),
+    approveOperator: intl.formatMessage({ defaultMessage: 'Approve operator' }),
+    approveOperatorBody: intl.formatMessage({ defaultMessage: 'Approve operator to deposit to vault' }),
     redeemShares: intl.formatMessage({ defaultMessage: 'Redeem shares' }),
     claimShares: intl.formatMessage({ defaultMessage: 'Claim shares' }),
     noValue: intl.formatMessage({ defaultMessage: '——' }),
@@ -52,6 +53,7 @@ export function useVaultFormCopy() {
     depositToast: (amount: string, vaultName: string) =>
       intl.formatMessage({ defaultMessage: '{amount} to {vaultName}' }, { amount, vaultName }),
     requiredField: intl.formatMessage({ defaultMessage: 'This field is required.' }),
+    approveShares: intl.formatMessage({ defaultMessage: 'Approve shares' }),
   }
 }
 
@@ -68,8 +70,8 @@ export function useVaultFormValidators({
   const maxValidator = useMemo(() => {
     if (vaultFormOption === VaultFormOption.Deposit) {
       return (value: string) => {
-        const inputValue = Big18Math.fromFloatString(value)
-        const balance = Big18Math.fromDecimals(usdcBalance, 6)
+        const inputValue = Big6Math.fromFloatString(value)
+        const balance = Big6Math.fromDecimals(usdcBalance, 6)
         if (inputValue > balance) {
           return copy.insufficientFunds
         }
@@ -77,7 +79,7 @@ export function useVaultFormValidators({
       }
     } else {
       return (value: string) => {
-        const inputValue = Big18Math.fromFloatString(value)
+        const inputValue = Big6Math.fromFloatString(value)
         if (inputValue > vaultAssets) {
           return copy.insufficientShares
         }

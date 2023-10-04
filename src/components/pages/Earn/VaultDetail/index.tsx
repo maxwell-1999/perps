@@ -6,7 +6,7 @@ import VaultDetail from './VaultDetail'
 import VaultEmptyState from './VaultEmptyState'
 
 export default function VaultDetailContainer() {
-  const { selectedVault, vaultSnapshots, status, feeAPRs } = useVaultContext()
+  const { selectedVault, vaultSnapshots, status } = useVaultContext()
 
   if (status !== 'success') {
     return (
@@ -15,9 +15,9 @@ export default function VaultDetailContainer() {
       </Flex>
     )
   }
-  if (!selectedVault || !vaultSnapshots[selectedVault]) {
+  if (!selectedVault || !vaultSnapshots?.vault[selectedVault]) {
     return <VaultEmptyState />
   }
-  const snapshot = vaultSnapshots[selectedVault]
-  return <VaultDetail vault={snapshot} feeAPR={feeAPRs?.[snapshot.vaultType]} />
+  const snapshot = vaultSnapshots?.vault[selectedVault]
+  return <VaultDetail vault={snapshot} vaultAccountSnapshot={vaultSnapshots?.user?.[selectedVault]} />
 }

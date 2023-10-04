@@ -1,7 +1,8 @@
-import { Flex } from '@chakra-ui/react'
+import { Flex, Text } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 
 import { breakpoints } from '@/components/design-system/theme/styles'
+import { FormattedBig6Percent } from '@/components/shared/components'
 
 export const DashedLine = styled.span<{ color: string }>`
   height: 20px;
@@ -23,3 +24,10 @@ export const MarketInfoContent = styled(Flex)`
     gap: 4%;
   }
 `
+export const PercentRange = ({ max }: { max: bigint }) => (
+  <Flex>
+    {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+    <Text mr={1}>0% -</Text>
+    <FormattedBig6Percent value={max} />
+  </Flex>
+)

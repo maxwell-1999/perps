@@ -1,94 +1,128 @@
 import { RepeatIcon } from '@chakra-ui/icons'
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
-import { arbitrum } from '@wagmi/chains'
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Address } from 'viem'
+import { arbitrum } from 'viem/chains'
 
 import Toggle from '@/components/shared/Toggle'
 import { TxButton } from '@/components/shared/TxButton'
-import { FormattedBig18USDPrice, USDCETooltip } from '@/components/shared/components'
+import { FormattedBig6USDPrice, USDCETooltip } from '@/components/shared/components'
 import { Form } from '@/components/shared/components'
-import { SupportedAsset } from '@/constants/assets'
-import { OpenPositionType, OrderDirection, PositionStatus } from '@/constants/markets'
+import { PositionSide2, PositionStatus, SupportedAsset } from '@/constants/markets'
 import { useAuthStatus } from '@/contexts/authStatusContext'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails, ProductSnapshotWithTradeLimitations, useProtocolSnapshot } from '@/hooks/markets'
+import { MarketSnapshot, UserMarketSnapshot, useMarketTransactions2 } from '@/hooks/markets2'
 import { useAddress, useChainId } from '@/hooks/network'
 import { useBalances } from '@/hooks/wallet'
-import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
+import { Big6Math, formatBig6USDPrice } from '@/utils/big6Utils'
 import { usePrevious } from '@/utils/hooks'
-import { calcNotional, closedOrResolved, next } from '@/utils/positionUtils'
+import {
+  calcNotional,
+  calcTakerLiquidity,
+  closedOrResolved,
+  getPositionFromSelectedMarket,
+  isFailedClose,
+} from '@/utils/positionUtils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import colors from '@ds/theme/colors'
 
-import { FormNames, OrderValues, orderDirections } from '../constants'
+import { FormNames, OrderTypes, OrderValues } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
 import { calcMaxLeverage, formatInitialInputs } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import LeverageInput from './LeverageInput'
+import OrderTypeSelector from './OrderTypeSelector'
 import { TradeReceipt } from './Receipt'
-import { GeoBlockedMessage, MarketClosedMessage, VpnDetectedMessage } from './styles'
+import {
+  GeoBlockedMessage,
+  MarketClosedMessage,
+  PaddedContainer,
+  RestrictionMessage,
+  SocializationMessage,
+  VpnDetectedMessage,
+} from './styles'
 import { useCollateralValidators, useLeverageValidators, usePositionValidators } from './validatorHooks'
 
 interface TradeFormProps {
   asset: SupportedAsset
-  orderDirection: OrderDirection
-  setOrderDirection: (orderDirection: OrderDirection) => void
-  product: ProductSnapshotWithTradeLimitations
-  position?: PositionDetails
-  crossCollateral: bigint
-  crossProduct?: Address
-  singleDirection?: boolean
+  orderSide: PositionSide2.long | PositionSide2.short | PositionSide2.maker
+  setOrderDirection: (orderDirection: PositionSide2.long | PositionSide2.short) => void
+  market: MarketSnapshot
+  position?: UserMarketSnapshot
+  isRestricted: boolean
+  isMobile?: boolean
 }
 
 function TradeForm(props: TradeFormProps) {
+  const formRef = useRef<HTMLFormElement>(null)
   const { geoblocked, vpnDetected } = useAuthStatus()
-  const { orderDirection, setOrderDirection, product, position, singleDirection } = props
+  const { orderSide: positionSide, setOrderDirection, market, position, isRestricted } = props
   const {
-    productAddress,
-    latestVersion: { price },
-    maintenance,
-    pre: globalPre,
-    closed,
-  } = product
+    market: marketAddress,
+    global: { latestPrice },
+    riskParameter: { margin, minMargin },
+    parameter: { closed },
+  } = market
 
-  const prevProductAddress = usePrevious(productAddress)
+  const prevProductAddress = usePrevious(marketAddress)
   const chainId = useChainId()
+  const failedClose = isFailedClose(position)
 
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles()
+  const [selectedOrderType, setSelectedOrderType] = useState<OrderTypes>(OrderTypes.market)
   const copy = useTradeFormCopy()
   const { data: balances } = useBalances()
-  const { data: protocolSnapshot } = useProtocolSnapshot()
   const { setTradeFormState } = useTradeFormState()
   const { address } = useAddress()
   const prevAddress = usePrevious(address)
-  const { assetMetadata, isMaker } = useMarketContext()
+  const {
+    assetMetadata,
+    isMaker,
+    orderDirection,
+    snapshots2,
+    selectedMarket,
+    selectedMakerMarket,
+    overrideValues,
+    setOverrideValues,
+    manualCommitment,
+  } = useMarketContext()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
   const positionStatus = position?.status ?? PositionStatus.resolved
-  const hasPosition = positionStatus !== PositionStatus.resolved
-  const positionOrderDirection = hasPosition ? position?.direction : undefined
-  const currentPositionAmount = position?.nextPosition ?? 0n
-  const currentCollateral = (position?.currentCollateral ?? 0n) + props.crossCollateral
-  const isNewPosition = Big18Math.isZero(currentPositionAmount)
-  const maxLeverage = useMemo(() => calcMaxLeverage(maintenance), [maintenance])
+  const hasPosition = !!getPositionFromSelectedMarket({
+    isMaker,
+    userMarketSnapshots: snapshots2?.user,
+    selectedMarket,
+    selectedMakerMarket,
+  })
+  const positionOrderDirection = hasPosition ? position?.nextSide : undefined
+  const takerPositionDirection =
+    positionOrderDirection === PositionSide2.long || positionOrderDirection === PositionSide2.short
+      ? positionOrderDirection
+      : undefined
+  const currentPositionAmount = hasPosition ? position?.nextMagnitude ?? 0n : 0n
+  const currentCollateral = position?.local.collateral ?? 0n
+  const isNewPosition = Big6Math.isZero(currentPositionAmount) && Big6Math.isZero(currentCollateral)
   const userMaintenance = position?.maintenance ?? 0n
+  const isSocialized = market.isSocialized && orderDirection === market.majorSide
+  const prevOrderDirection = usePrevious(orderDirection)
+  const { onSubmitVaa } = useMarketTransactions2(props.market.market)
 
   const initialFormState = useMemo(
     () =>
       formatInitialInputs({
         userCollateral: currentCollateral,
         amount: currentPositionAmount,
-        price,
+        price: latestPrice,
         isNewPosition,
         isConnected: !!address,
+        isFailedClose: failedClose,
       }),
-    [currentCollateral, currentPositionAmount, price, isNewPosition, address],
+    [currentCollateral, currentPositionAmount, latestPrice, isNewPosition, address, failedClose],
   )
 
   const {
@@ -108,6 +142,11 @@ function TradeForm(props: TradeFormProps) {
   const amount = watch(FormNames.amount)
   const leverage = watch(FormNames.leverage)
 
+  const maxLeverage = useMemo(
+    () => calcMaxLeverage({ margin, minMargin, collateral: Big6Math.fromFloatString(collateral) }),
+    [margin, minMargin, collateral],
+  )
+
   const resetInputs = useCallback(() => {
     reset({ ...initialFormState })
   }, [initialFormState, reset])
@@ -115,29 +154,34 @@ function TradeForm(props: TradeFormProps) {
   useEffect(() => {
     const userDisconnected = !address && !!prevAddress
     const userConnected = !!address && !prevAddress
-    const changedProducts = productAddress !== prevProductAddress
+    const changedProducts = marketAddress !== prevProductAddress
     const userSwitchedAcct = address !== prevAddress
+    const changedDirection = market.isSocialized && orderDirection !== prevOrderDirection
 
-    const resetRequired = userConnected || userDisconnected || changedProducts || userSwitchedAcct
+    const resetRequired = userConnected || userDisconnected || changedProducts || userSwitchedAcct || changedDirection
 
     if (resetRequired) {
       resetInputs()
     }
 
     const collateralChanged = initialFormState.collateral !== collateral
-    if (!collateralHasInput && collateralChanged) {
-      setValue(FormNames.collateral, initialFormState.collateral, { shouldValidate: true })
+    if (!collateralHasInput && collateralChanged && !orderValues) {
+      setValue(FormNames.collateral, initialFormState.collateral, { shouldValidate: false })
     }
   }, [
     address,
     prevAddress,
-    productAddress,
+    marketAddress,
     prevProductAddress,
     collateralHasInput,
     initialFormState.collateral,
     collateral,
     setValue,
     resetInputs,
+    orderValues,
+    market.isSocialized,
+    orderDirection,
+    prevOrderDirection,
   ])
 
   const { onChangeAmount, onChangeLeverage, onChangeCollateral } = useOnChangeHandlers({
@@ -146,11 +190,15 @@ function TradeForm(props: TradeFormProps) {
     leverage,
     collateral,
     amount,
-    price: product.latestVersion.price,
+    currentPosition: currentPositionAmount,
+    marketSnapshot: market,
+    chainId,
+    positionStatus: position?.status ?? PositionStatus.resolved,
+    direction: isMaker ? PositionSide2.maker : orderDirection,
   })
 
   const onConfirm = (orderData: { collateral: string; amount: string }) => {
-    setOrderValues({ ...orderData, crossCollateral: props.crossCollateral })
+    setOrderValues({ ...orderData })
   }
 
   const onWithdrawCollateral = () => {
@@ -158,78 +206,106 @@ function TradeForm(props: TradeFormProps) {
   }
 
   const closeAdjustmentModal = () => {
+    if (overrideValues) {
+      setOverrideValues(undefined)
+      return
+    }
     setOrderValues(null)
   }
 
   const cancelAdjustmentModal = () => {
+    if (overrideValues) {
+      setOverrideValues(undefined)
+      return
+    }
     setOrderValues(null)
     reset()
   }
 
   const onClickMaxCollateral = () => {
-    onChangeCollateral(Big18Math.toFloatString(currentCollateral + Big18Math.fromDecimals(balances?.usdc ?? 0n, 6)))
+    onChangeCollateral(Big6Math.toFloatString(currentCollateral + Big6Math.fromDecimals(balances?.usdc ?? 0n, 6)))
   }
 
   const positionDelta = useMemo(
     () => ({
-      collateralDelta: Big18Math.fromFloatString(collateral) - currentCollateral,
-      positionDelta: Big18Math.fromFloatString(amount) - currentPositionAmount,
+      collateralDelta: Big6Math.fromFloatString(collateral) - currentCollateral,
+      positionDelta: Big6Math.fromFloatString(amount) - currentPositionAmount,
     }),
     [collateral, amount, currentCollateral, currentPositionAmount],
   )
 
-  const isRestricted = isMaker ? !product.canOpenMaker : !product.canOpenTaker
   const hasFormErrors = Object.keys(errors).length > 0
   const disableTradeBtn =
-    (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors || isRestricted
+    (!positionDelta.positionDelta && !positionDelta.collateralDelta && position?.status !== PositionStatus.failed) ||
+    hasFormErrors ||
+    isRestricted
 
   const collateralValidators = useCollateralValidators({
     usdcBalance: balances?.usdc ?? 0n,
     requiredMaintenance: userMaintenance ?? 0n,
-    minCollateral: protocolSnapshot?.minCollateral ?? 0n,
     currentCollateral,
+    minMargin,
   })
-  const globalNext = next(globalPre, product.position)
+
+  const availableLiquidity = calcTakerLiquidity(market)
   const amountValidators = usePositionValidators({
-    liquidity: Big18Math.max(0n, globalNext.maker - globalNext.taker),
     isMaker: isMaker,
-    totalMaker: globalNext.maker,
-    totalTaker: globalNext.taker,
+    takerLiquidity:
+      positionSide === 'long' ? availableLiquidity.totalLongLiquidity : availableLiquidity.totalShortLiquidity,
+    makerLiquidity: market.nextPosition.maker + market.nextMinor,
+    taker: market.nextPosition[positionSide],
+    maker: market.nextPosition.maker,
+    major: market.nextMajor,
     currentPositionAmount,
-    makerLimit: product.productInfo.makerLimit,
+    makerLimit: market.riskParameter.makerLimit,
+    efficiencyLimit: market.riskParameter.efficiencyLimit,
     marketClosed: closed || geoblocked,
+    isSocialized: isSocialized,
   })
   const leverageValidators = useLeverageValidators({
     maxLeverage,
   })
-  const notional = calcNotional(Big18Math.fromFloatString(amount), price)
-  const userBalance = formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
+  const notional = calcNotional(Big6Math.fromFloatString(amount), latestPrice)
+  const userBalance = formatBig6USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
+
+  const modalProps = overrideValues
+    ? {
+        orderValues: overrideValues.orderValues,
+        asset: overrideValues.asset,
+        positionDelta: overrideValues.positionDelta,
+        positionSide: overrideValues.positionSide,
+        market: overrideValues.market,
+        position: overrideValues.position,
+        isRetry: true,
+      }
+    : {
+        title: isNewPosition ? copy.confirmOrder : copy.confirmChanges,
+        orderValues: orderValues || { collateral: '0', amount: '0', leverage: '0' },
+        asset: props.asset,
+        positionDelta: positionDelta.positionDelta,
+        positionSide,
+        position,
+        market,
+      }
 
   return (
     <>
-      {orderValues && (
+      {(orderValues || overrideValues) && (
         <AdjustPositionModal
-          isOpen={!!orderValues}
+          isOpen={!!orderValues || !!overrideValues}
           onClose={closeAdjustmentModal}
           onCancel={cancelAdjustmentModal}
           title={isNewPosition ? copy.confirmOrder : copy.confirmChanges}
-          positionType={isMaker ? OpenPositionType.maker : OpenPositionType.taker}
-          asset={props.asset}
-          position={position}
-          product={product}
-          crossProduct={props.crossProduct}
-          orderValues={orderValues}
           usdcAllowance={balances?.usdcAllowance ?? 0n}
-          leverage={leverage}
-          positionDelta={positionDelta.positionDelta}
           variant="adjust"
+          {...modalProps}
         />
       )}
-      <Form onSubmit={handleSubmit(onConfirm)}>
-        <Flex flexDirection="column" p="16px" pb="8px">
-          <Flex justifyContent="space-between" mb="14px">
+      <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
+        <PaddedContainer pb={3}>
+          <Flex justifyContent="space-between">
             <Flex alignItems="center">
-              <Text color={textColor} mr={2}>
+              <Text color={textColor} mr={1}>
                 {hasPosition && positionStatus !== PositionStatus.closed
                   ? copy.modifyPosition
                   : isMaker
@@ -238,7 +314,7 @@ function TradeForm(props: TradeFormProps) {
               </Text>
               {isMaker && (
                 <Link
-                  href="https://docs.perennial.finance/lps-makers/advanced-liquidity-provisioning"
+                  href="https://docs.perennial.finance/protocol-design/advanced-lp"
                   target="_blank"
                   style={{
                     display: 'flex',
@@ -246,11 +322,26 @@ function TradeForm(props: TradeFormProps) {
                     color: textColor,
                   }}
                 >
-                  <QuestionOutlineIcon cursor="pointer" height="13px" width="13px" />
+                  <QuestionOutlineIcon cursor="pointer" height="12px" width="12px" />
                 </Link>
               )}
             </Flex>
-            {!!address && hasPosition && (
+            {!!manualCommitment && (
+              <TxButton
+                variant="text"
+                label={copy.submitCommitment}
+                p={0}
+                lineHeight={1}
+                height="initial"
+                fontSize="13px"
+                color={textBtnColor}
+                _hover={{ color: textBtnHoverColor }}
+                onClick={onSubmitVaa}
+                loadingText={copy.submitCommitment}
+                actionAllowedInGeoblock
+              />
+            )}
+            {!!address && !Big6Math.isZero(currentCollateral) && (
               <TxButton
                 variant="text"
                 label={copy.withdrawCollateral}
@@ -267,38 +358,44 @@ function TradeForm(props: TradeFormProps) {
               />
             )}
           </Flex>
+        </PaddedContainer>
+        <OrderTypeSelector onClick={setSelectedOrderType} selectedOrderType={selectedOrderType} />
+        <PaddedContainer>
           {geoblocked && !vpnDetected && <GeoBlockedMessage mb={4} />}
           {geoblocked && vpnDetected && <VpnDetectedMessage mb={4} />}
           {closed && <MarketClosedMessage mb={4} />}
-          {isRestricted && (
-            <Flex mb="12px">
-              <Text fontSize="11px" color={colors.brand.red}>
-                {copy.isRestricted(isMaker)}
-              </Text>
-            </Flex>
+          {isRestricted && <RestrictionMessage message={copy.isRestricted(isMaker)} />}
+          {position?.status === PositionStatus.failed && !failedClose && (
+            <RestrictionMessage message={copy.settlementFailureBody} />
           )}
+          {failedClose && <RestrictionMessage message={copy.closeFailure} />}
           {!isMaker && (
             <Flex mb="14px">
-              <Toggle<OrderDirection>
-                labels={orderDirections}
-                activeLabel={positionOrderDirection ? positionOrderDirection : orderDirection}
+              <Toggle<PositionSide2.long | PositionSide2.short>
+                labels={[PositionSide2.long, PositionSide2.short]}
+                activeLabel={takerPositionDirection ? takerPositionDirection : orderDirection}
                 onChange={setOrderDirection}
-                overrideValue={
-                  !closedOrResolved(positionStatus)
-                    ? positionOrderDirection
-                    : singleDirection
-                    ? orderDirection
-                    : undefined
+                overrideValue={!closedOrResolved(positionStatus) ? takerPositionDirection : undefined}
+                activeColor={
+                  takerPositionDirection
+                    ? takerPositionDirection === PositionSide2.long
+                      ? colors.brand.green
+                      : colors.brand.red
+                    : positionSide === PositionSide2.long
+                    ? colors.brand.green
+                    : colors.brand.red
                 }
-                activeColor={orderDirection === OrderDirection.Long ? colors.brand.green : colors.brand.red}
               />
             </Flex>
           )}
+          {isSocialized && <SocializationMessage mb={4} minorSide={market.minorSide} hasPosition={hasPosition} />}
+
           <Flex flexDirection="column" gap="13px">
             <Input
               key={FormNames.collateral}
               // eslint-disable-next-line formatjs/no-literal-string-in-jsx
-              label={`${copy.collateral}${props.crossCollateral > 0n ? '*' : ''}`}
+              label={copy.collateral}
+              labelColor="white"
               title={copy.collateral}
               placeholder="0.0000"
               rightLabel={
@@ -308,7 +405,7 @@ function TradeForm(props: TradeFormProps) {
                       {chainId === arbitrum.id ? (
                         <USDCETooltip userBalance={userBalance} />
                       ) : (
-                        <Text variant="label">{userBalance}</Text>
+                        <Text fontSize="12px">{userBalance}</Text>
                       )}
                       <Button
                         variant="text"
@@ -329,21 +426,14 @@ function TradeForm(props: TradeFormProps) {
               onChange={(e) => onChangeCollateral(e.target.value)}
               validate={!!address ? collateralValidators : {}}
             />
-            {props.crossCollateral > 0n && (
-              <Text variant="label" fontSize="11px" m={1} mt={0}>
-                {copy.crossCollateralInfo(
-                  formatBig18USDPrice(props.crossCollateral),
-                  orderDirection === OrderDirection.Long ? 'short' : 'long',
-                )}
-              </Text>
-            )}
             <Input
               key={FormNames.amount}
               label={copy.amount}
+              labelColor="white"
               placeholder="0.0000"
               rightLabel={
                 <FormLabel mr={0} mb={0}>
-                  {notional > 0n && <FormattedBig18USDPrice variant="label" value={notional} />}
+                  {notional > 0n && <FormattedBig6USDPrice variant="label" color="white" value={notional} />}
                 </FormLabel>
               }
               rightEl={<Pill text={assetMetadata.baseCurrency} />}
@@ -354,6 +444,7 @@ function TradeForm(props: TradeFormProps) {
             />
             <LeverageInput
               label={copy.leverage}
+              labelColor="white"
               min={0}
               max={maxLeverage}
               step={0.1}
@@ -379,10 +470,17 @@ function TradeForm(props: TradeFormProps) {
               />
             )}
           </Flex>
-        </Flex>
+        </PaddedContainer>
         <Divider mt="auto" />
         <Flex flexDirection="column" p="16px">
-          <TradeReceipt mb="25px" px="3px" product={product} positionDelta={positionDelta} positionDetails={position} />
+          <TradeReceipt
+            mb="25px"
+            px="3px"
+            product={market}
+            positionDelta={positionDelta}
+            positionDetails={position}
+            leverage={parseFloat(leverage)}
+          />
           {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
             <ButtonGroup>
               <Button
@@ -391,8 +489,9 @@ function TradeForm(props: TradeFormProps) {
                 onClick={() => setTradeFormState(FormState.close)}
               />
               <TxButton
+                formRef={formRef}
                 flex={1}
-                label={copy.modifyPosition}
+                label={position?.status === PositionStatus.failed ? copy.tryAgain : copy.modifyPosition}
                 type="submit"
                 isDisabled={disableTradeBtn}
                 overrideLabel
@@ -400,7 +499,19 @@ function TradeForm(props: TradeFormProps) {
               />
             </ButtonGroup>
           ) : (
-            <TxButton type="submit" isDisabled={disableTradeBtn} label={copy.placeTrade} overrideLabel />
+            <TxButton
+              formRef={formRef}
+              type="submit"
+              isDisabled={disableTradeBtn}
+              label={
+                address
+                  ? position?.status === PositionStatus.failed
+                    ? copy.tryAgain
+                    : copy.placeTrade
+                  : copy.connectWallet
+              }
+              overrideLabel
+            />
           )}
         </Flex>
       </Form>

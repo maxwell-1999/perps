@@ -1,17 +1,17 @@
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { TxButton } from '@/components/shared/TxButton'
-import { Form, FormattedBig18 } from '@/components/shared/components'
-import { SupportedAsset } from '@/constants/assets'
-import { OpenPositionType } from '@/constants/markets'
-import { useAuthStatus } from '@/contexts/authStatusContext'
+import { Form, FormattedBig6 } from '@/components/shared/components'
+import { PositionSide2, SupportedAsset } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails, ProductSnapshotWithTradeLimitations } from '@/hooks/markets'
-import { Big18Math } from '@/utils/big18Utils'
-import { next } from '@/utils/positionUtils'
+import { MarketSnapshot, UserMarketSnapshot } from '@/hooks/markets2'
+import { useChainId } from '@/hooks/network'
+import { useBalances } from '@/hooks/wallet'
+import { Big6Math } from '@/utils/big6Utils'
+import { isFailedClose } from '@/utils/positionUtils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
@@ -21,63 +21,76 @@ import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
 import { isFullClose } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import { TradeReceipt } from './Receipt'
-import { FormOverlayHeader, GeoBlockedMessage, MarketClosedMessage } from './styles'
+import { FormOverlayHeader } from './styles'
 import { useCloseAmountValidator } from './validatorHooks'
 
 interface ClosePositionFormProps {
   asset: SupportedAsset
-  position: PositionDetails
-  product: ProductSnapshotWithTradeLimitations
+  position: UserMarketSnapshot
+  product: MarketSnapshot
 }
 
 function ClosePositionForm({ position, product, asset }: ClosePositionFormProps) {
+  const chainId = useChainId()
+  const formRef = useRef<HTMLFormElement>(null)
+
   const { setTradeFormState } = useTradeFormState()
-  const { assetMetadata, isMaker } = useMarketContext()
-  const { geoblocked } = useAuthStatus()
+  const { assetMetadata, orderDirection, isMaker } = useMarketContext()
   const copy = useTradeFormCopy()
   const { percentBtnBg } = useStyles()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
+  const { data: balances } = useBalances()
 
   const {
-    latestVersion: { price },
-    closed,
+    parameter: { closed },
   } = product
-  const { nextPosition, nextLeverage, currentCollateral } = position
+  const {
+    magnitude,
+    nextMagnitude,
+    nextLeverage,
+    local: { collateral: currentCollateral },
+  } = position
+
+  const failedClose = isFailedClose(position)
+
+  const magnitudeForForm = failedClose ? magnitude : nextMagnitude
 
   const {
     control,
     watch,
     setValue,
     handleSubmit,
-    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
-      [FormNames.leverage]: Big18Math.toFloatString(nextLeverage ?? 0n),
+      [FormNames.leverage]: Big6Math.toFloatString(nextLeverage ?? 0n),
     },
   })
   const amount = watch(FormNames.amount)
   const collateral = watch(FormNames.collateral)
   const leverage = watch(FormNames.leverage)
-  const isRestricted = isMaker ? !product.canOpenMaker : !product.canOpenTaker
 
   const { onChangeAmount: amountChangeHandler } = useOnChangeHandlers({
     setValue,
     leverage,
     collateral,
     amount,
-    price,
+    currentPosition: magnitudeForForm,
     leverageFixed: true,
+    marketSnapshot: product,
+    chainId,
+    positionStatus: position.status,
+    direction: isMaker ? PositionSide2.maker : orderDirection,
   })
 
   const onPerecentClick = useCallback(
     (percent: number) => {
-      const newAmount = ((nextPosition ?? 0n) * BigInt(percent)) / 100n
-      amountChangeHandler(Big18Math.toFloatString(newAmount))
+      const newAmount = ((magnitudeForForm ?? 0n) * BigInt(percent)) / 100n
+      amountChangeHandler(Big6Math.toFloatString(newAmount))
     },
-    [nextPosition, amountChangeHandler],
+    [magnitudeForForm, amountChangeHandler],
   )
 
   const onChangeAmount = (value: string) => {
@@ -96,36 +109,35 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
 
   const positionDelta = useMemo(() => {
     return {
-      collateralDelta: -Big18Math.fromFloatString(collateral),
-      positionDelta: -Big18Math.fromFloatString(amount),
-      fullClose: isFullClose(amount, nextPosition ?? 0n),
+      collateralDelta: -Big6Math.fromFloatString(collateral),
+      positionDelta: -Big6Math.fromFloatString(amount),
+      fullClose: isFullClose(amount, magnitudeForForm ?? 0n),
     }
-  }, [collateral, amount, nextPosition])
+  }, [collateral, amount, magnitudeForForm])
 
   const onConfirm = (orderData: { collateral: string; amount: string }) => {
-    const fullClose = isFullClose(orderData.amount, nextPosition ?? 0n)
+    const fullClose = isFullClose(orderData.amount, magnitudeForForm ?? 0n)
 
     setOrderValues({
-      collateral: Big18Math.toFloatString(
-        fullClose ? 0n : Big18Math.sub(currentCollateral, Big18Math.fromFloatString(orderData.collateral)),
+      collateral: Big6Math.toFloatString(
+        fullClose ? 0n : Big6Math.sub(currentCollateral, Big6Math.fromFloatString(orderData.collateral)),
       ),
-      amount: Big18Math.toFloatString(Big18Math.sub(nextPosition ?? 0n, Big18Math.fromFloatString(orderData.amount))),
+      amount: Big6Math.toFloatString(Big6Math.sub(magnitudeForForm ?? 0n, Big6Math.fromFloatString(orderData.amount))),
       fullClose,
     })
-    reset()
   }
 
   const hasFormErrors = Object.keys(errors).length > 0
-  const disableCloseBtn =
-    (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors || isRestricted
+  const disableCloseBtn = (!positionDelta.positionDelta && !positionDelta.collateralDelta) || hasFormErrors
 
-  const globalNext = next(product.pre, product.position)
   const amountValidator = useCloseAmountValidator({
-    currentPositionAmount: nextPosition ?? 0n,
+    currentPositionAmount: magnitudeForForm ?? 0n,
     isMaker,
-    totalMaker: globalNext.maker,
-    totalTaker: globalNext.taker,
+    liquidity: product.nextPosition.maker + product.nextMinor,
+    maker: product.nextPosition.maker,
+    major: product.nextMajor,
     marketClosed: closed,
+    efficiencyLimit: product.riskParameter.efficiencyLimit,
   })
 
   return (
@@ -136,22 +148,19 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
           onClose={closeAdjustmentModal}
           onCancel={cancelAdjustmentModal}
           title={copy.closePosition}
-          positionType={isMaker ? OpenPositionType.maker : OpenPositionType.taker}
+          positionSide={position.side}
           asset={asset}
           position={position}
-          product={product}
+          market={product}
           orderValues={orderValues}
           positionDelta={positionDelta.positionDelta}
-          usdcAllowance={0n}
+          usdcAllowance={balances?.usdcAllowance ?? 0n}
           variant="close"
-          leverage={leverage}
         />
       )}
-      <Form onSubmit={handleSubmit(onConfirm)}>
+      <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
         <FormOverlayHeader title={copy.closePosition} onClose={() => setTradeFormState(FormState.trade)} />
         <Flex flexDirection="column" px="16px" mb="12px" gap="12px">
-          {geoblocked && <GeoBlockedMessage />}
-          {closed && <MarketClosedMessage />}
           <Input
             name={FormNames.amount}
             label={copy.amount}
@@ -159,7 +168,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             rightLabel={
               <FormLabel mr={0} mb={0}>
                 <Text variant="label">
-                  <FormattedBig18 value={nextPosition ?? 0n} asset={position.asset} as="span" />
+                  <FormattedBig6 value={magnitudeForForm ?? 0n} asset={position.asset} as="span" />
                 </Text>
               </FormLabel>
             }
@@ -199,6 +208,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
           <ButtonGroup>
             <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
             <TxButton
+              formRef={formRef}
               flex={1}
               label={copy.closePosition}
               type="submit"

@@ -1,15 +1,14 @@
-import { SupportedAsset } from '@/constants/assets'
-import { PositionDetails } from '@/hooks/markets'
+import { SupportedAsset } from '@/constants/markets'
+import { UserMarketSnapshot } from '@/hooks/markets2'
 
 export type FormattedPositionDetail = {
   asset: SupportedAsset
   symbol: string
-  details: PositionDetails
+  details: UserMarketSnapshot
 }
 
 export type PositionTableData = {
   asset: SupportedAsset
-  averageEntry: string
   currentCollateral: string
   leverage: string
   nextLeverage: string
@@ -22,8 +21,12 @@ export type PositionTableData = {
   symbol: string
   fees: string
   liquidationFee: string
-  details: PositionDetails
+  details: UserMarketSnapshot
   unformattedNotional: string
   unformattedLiquidationPrice: string
   makerExposure?: string
+  exposureSide?: string
+  isClosed: boolean
+  isClosing: boolean
+  failedClose: boolean
 }

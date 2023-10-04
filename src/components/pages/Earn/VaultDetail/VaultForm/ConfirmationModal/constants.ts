@@ -1,6 +1,6 @@
 export enum RequiredApprovals {
   usdc = 'usdc',
-  shares = 'shares',
+  operator = 'operator',
 }
 
 export type TxState = {
@@ -11,8 +11,8 @@ export type TxState = {
 export type TransactionState = {
   approveUSDCLoading: boolean
   approveUSDCCompleted: boolean
-  approveSharesLoading: boolean
-  approveSharesCompleted: boolean
+  approveOperatorLoading: boolean
+  approveOperatorCompleted: boolean
   depositLoading: boolean
   depositCompleted: boolean
   redemptionLoading: boolean
@@ -22,8 +22,8 @@ export type TransactionState = {
 export const initialTransactionState: TransactionState = {
   approveUSDCLoading: false,
   approveUSDCCompleted: false,
-  approveSharesLoading: false,
-  approveSharesCompleted: false,
+  approveOperatorLoading: false,
+  approveOperatorCompleted: false,
   depositLoading: false,
   depositCompleted: false,
   redemptionLoading: false,

@@ -3,7 +3,7 @@ import { TextPageLayout } from '@/components/layout/TextPageLayout'
 
 export default function ToS() {
   return (
-    <TextPageLayout header="Perennial User Terms of Service" subheader="Last Updated: August 09, 2023">
+    <TextPageLayout header="Perennial User Terms of Service" subheader="Last Updated: October 03, 2023">
       <p>1. Introduction</p>
 
       <p>
@@ -15,6 +15,14 @@ export default function ToS() {
         (“you”, “your” or “user(s)”), a user of the Interface. Where you enter into this Agreement on behalf of a legal
         entity or organization you represent and warrant that you have the authority to bind such legal entity or
         organization to this Agreement.
+      </p>
+
+      <p>
+        Perennial is a developer of software. Perennial does not operate a Digital Asset nor the Protocol and has no
+        oversight, involvement, or control concerning your transactions using the Services. All transactions between
+        users of the Protocol are executed peer-to-peer directly between the users’ addresses through a smart contract.
+        You are responsible for complying with all Applicable Laws that govern your Digital Assets. No Restricted Person
+        may enter and use the Interface.
       </p>
 
       <p>PLEASE BE AWARE THAT THERE ARE ARBITRATION AND CLASS ACTION PROVISIONS THAT MAY AFFECT YOUR RIGHTS.</p>
@@ -540,6 +548,15 @@ export default function ToS() {
         warranties.
       </p>
 
+      <p>
+        You acknowledge that data you provide while accessing or using the Interface may become irretrievably lost or
+        corrupted or temporarily unavailable due to a variety of causes, and agree that, to the maximum extent permitted
+        under Applicable Law, we will not be liable for any loss or damage caused by denial-of- service attacks,
+        software failures, viruses or other technologically harmful materials (including those which may infect your
+        computer equipment), protocol changes by third-party providers, Internet outages, force majeure events or other
+        disasters, scheduled or unscheduled maintenance, or other causes either within or outside of our control.
+      </p>
+
       <p>27. Choice of Law</p>
 
       <p>This Agreement shall be governed by the laws in force in the state of California.</p>
@@ -600,29 +617,7 @@ export default function ToS() {
         nearest to San Francisco, CA .
       </p>
 
-      <p>28.3 Opt-Out</p>
-
-      <p>
-        You have the right to opt out of binding arbitration within thirty (30) days of the date you first accepted this
-        Agreement by notifying us with a communication labeled “Arbitration Opt Out” to legal@perennial.finance or by
-        mail at Perennial, Inc. 548 Market St. Suite 69611, San Francisco, CA 94104. In order to be effective, the opt
-        out notice must include your full name, any identifying information, and must clearly indicate your intent to
-        opt out of binding arbitration. If you have decided to opt out of Binding Arbitration, all Disputes shall be
-        heard in a court of competent jurisdiction located in San Francisco County, CA.
-      </p>
-
-      <p>28.4 Exceptions to Arbitration</p>
-
-      <p>
-        User agrees that all Disputes shall be arbitrated, except for as provided above and as follows: (i) any claim
-        related to actual or threatened infringement, misappropriation or violation of a party’s copyrights, trademarks,
-        trade secrets, patents, or other intellectual property rights; and (ii) any claim seeking emergency injunctive
-        relief based on exigent circumstances such as, imminent danger or commission of a crime. Such claims shall be
-        brought before a judicial proceeding in a court of competent jurisdiction located within San Francisco County,
-        CA .
-      </p>
-
-      <p>28.5 Class Action</p>
+      <p>28.3 Class Action</p>
 
       <p>
         YOU UNDERSTAND AND AGREE THAT YOU AND Perennial MAY EACH BRING CLAIMS IN ARBITRATION AGAINST THE OTHER ONLY IN

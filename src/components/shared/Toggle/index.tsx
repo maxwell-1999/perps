@@ -47,7 +47,9 @@ function Toggle<T extends string>({
           // disable the button if the overrideValue prop is present and does not match this label
           isDisabled={overrideValue !== undefined && label !== overrideValue}
         >
-          <Text color={label === activeLabel ? activeColor : inactiveColor}>{label}</Text>
+          <Text color={label === activeLabel ? activeColor : inactiveColor} textTransform="capitalize">
+            {label}
+          </Text>
         </Button>
       ))}
     </ButtonGroup>

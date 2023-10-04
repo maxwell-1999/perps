@@ -1,7 +1,7 @@
 import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
 
-import { AssetMetadata } from '@/constants/assets'
-import { UserCurrentPositions } from '@/hooks/markets'
+import { AssetMetadata } from '@/constants/markets'
+import { ActiveSubPositionHistory } from '@/hooks/markets2'
 import { Big18Math } from '@/utils/big18Utils'
 import { Minute, Second } from '@/utils/timeUtils'
 
@@ -29,19 +29,21 @@ declare global {
   }
 }
 class Datafeed {
-  public positions?: UserCurrentPositions
+  public positions?: ActiveSubPositionHistory
 
   private baseFeed: UDFCompatibleDatafeed
   private pyth: EvmPriceServiceConnection
 
-  constructor(url: string, pyth: EvmPriceServiceConnection, positions?: UserCurrentPositions) {
+  constructor(url: string, pyth: EvmPriceServiceConnection, positions?: ActiveSubPositionHistory) {
     this.baseFeed = new window.Datafeeds.UDFCompatibleDatafeed(url, Number(60n * Second))
     this.pyth = pyth
     this.positions = positions
   }
 
   onReady(callback: OnReadyCallback) {
-    this.baseFeed.onReady(callback)
+    this.baseFeed.onReady((config) => {
+      callback({ ...config, supports_marks: true })
+    })
   }
 
   searchSymbols(userInput: string, exchange: string, symbolType: string, onResult: SearchSymbolsCallback) {
@@ -67,12 +69,11 @@ class Datafeed {
     this.baseFeed.getBars(symbolInfo, resolution, periodParams, onResult, onError)
   }
 
-  subscribeBars(symbolInfo: LibrarySymbolInfo, resolution: ResolutionString, onTick: SubscribeBarsCallback) {
+  async subscribeBars(symbolInfo: LibrarySymbolInfo, resolution: ResolutionString, onTick: SubscribeBarsCallback) {
     const metadata = this.metadataForSymbol(symbolInfo.ticker)
     if (!metadata?.pythFeedId) return
-    const pythFeedId = metadata.pythFeedId
 
-    this.pyth.subscribePriceFeedUpdates([pythFeedId], (priceFeed) => {
+    this.pyth.subscribePriceFeedUpdates([metadata.pythFeedId, metadata.pythFeedIdTestnet ?? ''], (priceFeed) => {
       const price = priceFeed.getPriceNoOlderThan(60)
       if (price) {
         const floatPrice = Number(price.price) * 10 ** price.expo
@@ -100,38 +101,25 @@ class Datafeed {
   ) {
     const marks: Mark[] = []
     const metadata = this.metadataForSymbol(symbolInfo.ticker)
-    if (!metadata || !this.positions?.[metadata.baseCurrency]) return
-    const position = this.positions[metadata.baseCurrency]
+    if (!metadata || !this.positions) return
 
-    position?.Long?.subPositions?.forEach((subPosition, i) => {
-      const timestamp = Number(Big18Math.max(subPosition.settleTimestamp, subPosition.blockTimestamp))
-      if (timestamp >= from && timestamp <= to) {
-        marks.push({
-          id: subPosition.blockNumber.toString(),
-          time: Math.round(timestamp / Number(BigInt(resolution) * Minute)) * Number(BigInt(resolution) * Minute),
-          color: 'green',
-          labelFontColor: 'white',
-          text: i === 0 ? 'Position Opened' : 'Position Modified',
-          label: i === 0 ? 'O' : 'M',
-          minSize: 14,
-        })
-      }
-    })
-
-    position?.Short?.subPositions?.forEach((subPosition, i) => {
-      const timestamp = Number(Big18Math.max(subPosition.settleTimestamp, subPosition.blockTimestamp))
-      if (timestamp >= from && timestamp <= to) {
-        marks.push({
-          id: subPosition.blockNumber.toString(),
-          time: Math.round(timestamp / Number(BigInt(resolution) * Minute)) * Number(BigInt(resolution) * Minute),
-          color: 'red',
-          labelFontColor: 'white',
-          text: i === 0 ? 'Position Opened' : 'Position Modified',
-          label: i === 0 ? 'O' : 'M',
-          minSize: 14,
-        })
-      }
-    })
+    this.positions
+      .filter((p, i) => p.valid || i === 0)
+      .filter((p) => !p.collateralOnly)
+      .forEach((subPosition, i, self) => {
+        const timestamp = Number(Big18Math.max(BigInt(subPosition.version), BigInt(subPosition.blockTimestamp)))
+        if (timestamp >= from && timestamp <= to) {
+          marks.push({
+            id: subPosition.blockNumber.toString(),
+            time: Math.round(timestamp / Number(BigInt(resolution) * Minute)) * Number(BigInt(resolution) * Minute),
+            color: 'green',
+            labelFontColor: 'white',
+            text: i === self.length - 1 ? 'Position Opened' : 'Position Modified',
+            label: i === self.length - 1 ? 'O' : 'M',
+            minSize: 14,
+          })
+        }
+      })
 
     onDataCallback(marks)
   }

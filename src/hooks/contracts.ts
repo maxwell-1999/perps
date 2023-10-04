@@ -5,8 +5,11 @@ import {
   CollateralAddresses,
   DSUAddresses,
   LensAddresses,
+  MarketFactoryAddresses,
+  MultiInvoker2Addresses,
   MultiInvokerAddresses,
   USDCAddresses,
+  VaultFactoryAddresses,
 } from '@/constants/contracts'
 import { useChainId } from '@/hooks/network'
 
@@ -14,6 +17,9 @@ import { ERC20Abi } from '@abi/ERC20.abi'
 import { ICollateralAbi } from '@abi/ICollateral.abi'
 import { LensAbi, LensProductSnapshotAbi, LensProtocolSnapshotAbi, LensUserProductSnapshotAbi } from '@abi/Lens.abi'
 import { MultiInvokerAbi } from '@abi/MultiInvoker.abi'
+import { MarketFactoryAbi } from '@abi/v2/MarketFactory.abi'
+import { MultiInvoker2Abi } from '@abi/v2/MultiInvoker2.abi'
+import { VaultFactoryAbi } from '@abi/v2/VaultFactory.abi'
 
 export const useLens = () => {
   const chainId = useChainId()
@@ -87,6 +93,39 @@ export const useMultiInvoker = (signer?: WalletClient) => {
   return getContract({
     address: MultiInvokerAddresses[chainId],
     abi: MultiInvokerAbi,
+    chainId,
+    walletClient: signer,
+  })
+}
+
+export const useMultiInvoker2 = (signer?: WalletClient) => {
+  const chainId = useChainId()
+
+  return getContract({
+    address: MultiInvoker2Addresses[chainId],
+    abi: MultiInvoker2Abi,
+    chainId,
+    walletClient: signer,
+  })
+}
+
+export const useMarketFactory = (signer?: WalletClient) => {
+  const chainId = useChainId()
+
+  return getContract({
+    address: MarketFactoryAddresses[chainId],
+    abi: MarketFactoryAbi,
+    chainId,
+    walletClient: signer,
+  })
+}
+
+export const useVaultFactory = (signer?: WalletClient) => {
+  const chainId = useChainId()
+
+  return getContract({
+    address: VaultFactoryAddresses[chainId],
+    abi: VaultFactoryAbi,
     chainId,
     walletClient: signer,
   })

@@ -15,3 +15,8 @@ export function equal<T>(a: T[], b: T[]) {
   const set2 = new Set(b)
   return a.every((i) => set2.has(i)) && b.every((i) => set1.has(i))
 }
+
+export function range(start: bigint | number, end: bigint | number) {
+  const length = Number(BigInt(end) - BigInt(start))
+  return Array.from({ length }, (_, i) => BigInt(start) + BigInt(i))
+}

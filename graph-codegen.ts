@@ -1,7 +1,11 @@
 import { CodegenConfig } from '@graphql-codegen/cli'
+import { config as dotenvConfig } from 'dotenv'
+
+dotenvConfig({ path: './.env.local' })
 
 const config: CodegenConfig = {
-  schema: 'https://subgraph.satsuma-prod.com/4b3062a029bc/equilibria/perennial-arbitrum/api',
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  schema: [process.env.GRAPH_URL_ARBITRUM!, process.env.GRAPH_URL_ARBITRUM_2!],
   documents: ['src/**/*.{ts,tsx}'],
   generates: {
     './types/gql/': {
@@ -11,6 +15,7 @@ const config: CodegenConfig = {
         gqlTagName: 'gql',
       },
       config: {
+        skipTypename: true,
         scalars: {
           BigInt: 'string',
           Bytes: 'string',

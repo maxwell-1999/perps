@@ -5,14 +5,16 @@ const colors = {
   },
   brand: {
     green: '#68FAD7',
+    hoverGreen: '#50c9ab',
     darkGreen: '#49756A',
     red: '#ED6A5E',
     purple: {
       240: '#EA5CF7',
       250: '#dc5bea',
       300: '#E254EF',
-      alpha: 'rgba(234, 92, 247, 0.3)',
     },
+    greenAlpha: { 10: 'rgba(62, 217, 164, 0.1)' },
+    purpleAlpha: { 10: 'rgba(234, 92, 247, 0.1)', 30: 'rgba(234, 92, 247, 0.3)', 100: 'rgba(234, 92, 247, 1)' },
     gray: {
       100: '#929292',
       150: '#545356',

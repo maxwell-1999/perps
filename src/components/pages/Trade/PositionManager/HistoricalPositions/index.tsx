@@ -3,16 +3,20 @@ import React from 'react'
 
 import { Button } from '@/components/design-system'
 import { LoadingScreen } from '@/components/shared/components'
+import { useMarketContext } from '@/contexts/marketContext'
+import { useHistoricalPositions } from '@/hooks/markets2'
 import { useAddress } from '@/hooks/network'
+import { notEmpty } from '@/utils/arrayUtils'
 
-import { PositionTable } from '../PositionTable'
 import { TableEmptyScreen } from '../components'
-import { usePositionHistoryTableData, usePositionManagerCopy } from '../hooks'
+import { usePositionManagerCopy } from '../hooks'
+import { HistoricalPositionsTable } from './HistoricalPositionTable'
 
 function AllPositions() {
+  const { isMaker } = useMarketContext()
   const copy = usePositionManagerCopy()
   const { address } = useAddress()
-  const { positions, hasNextPage, fetchNextPage, isLoading, isFetchingNextPage, status } = usePositionHistoryTableData()
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, status } = useHistoricalPositions(isMaker)
 
   if (!address) return <TableEmptyScreen message={copy.connectWalletHistory} />
 
@@ -20,10 +24,16 @@ function AllPositions() {
     return <LoadingScreen />
   }
 
+  const positions =
+    data?.pages
+      .map((page) => page?.positions)
+      .flat()
+      .filter(notEmpty) ?? []
+
   return (
     <Box>
       <Box>
-        <PositionTable positions={positions} emptyStateMessage={copy.noHistoryPositions} />
+        <HistoricalPositionsTable positions={positions} emptyStateMessage={copy.noHistoryPositions} />
       </Box>
       <Flex justifyContent="center" alignContent="center">
         {(hasNextPage || isLoading) && (

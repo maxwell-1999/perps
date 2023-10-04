@@ -28,6 +28,7 @@ export const breakpoints = {
   mdd: '54em',
   lg: '62em',
   xl: '95em',
+  tableBreak: '57em',
 }
 
 export default styles

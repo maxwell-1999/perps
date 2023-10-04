@@ -1,5 +1,4 @@
-import { SupportedAsset } from '@/constants/assets'
-import { OrderDirection } from '@/constants/markets'
+import { PositionSide2, SupportedAsset } from '@/constants/markets'
 
 export enum TrackingEvents {
   pageview = 'Page View',
@@ -24,7 +23,7 @@ interface TradeEvent {
   amount: string
   leverage: string
   collateral: string
-  orderDirection: OrderDirection
+  orderDirection: PositionSide2
   orderType: string
   orderAction: string
 }

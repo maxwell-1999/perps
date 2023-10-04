@@ -2,14 +2,15 @@ type CollateralDetails = {
   prevCollateral: bigint
   newCollateral: bigint
   difference: bigint
-  crossCollateral: bigint
 }
 
 type PositionDetails = {
   prevPosition: bigint
   newPosition: bigint
   difference: bigint
-  fee: bigint
+  tradeFee: bigint
+  interfaceFee: bigint
+  settlementFee: bigint
 }
 
 type LeverageDetails = {

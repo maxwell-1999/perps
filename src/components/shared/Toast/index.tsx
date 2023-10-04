@@ -7,18 +7,27 @@ interface ToastProps {
   title: string
   body: string | React.ReactNode
   onClose: () => void
+  error?: boolean
+  titleColor?: string
 }
 
-export default function Toast({ title, body, onClose }: ToastProps) {
+export default function Toast({ title, body, onClose, error, titleColor }: ToastProps) {
   const bg = useColorModeValue(colors.brand.gray[200], colors.brand.gray[200])
   const iconColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const iconHoverColor = useColorModeValue(colors.brand.blackAlpha[70], colors.brand.whiteAlpha[70])
-  const titleColor = useColorModeValue(colors.brand.blackAlpha[70], colors.brand.whiteAlpha[70])
+  const defaultTitleColor = useColorModeValue(colors.brand.blackAlpha[70], colors.brand.whiteAlpha[70])
 
   return (
-    <Flex flexDirection="column" bg={bg} borderRadius="6px" p={3}>
+    <Flex
+      flexDirection="column"
+      bg={bg}
+      borderRadius="6px"
+      p={3}
+      border={error ? `1px solid ${colors.brand.red}` : 'none'}
+      maxWidth="300px"
+    >
       <Flex justifyContent="space-between" alignItems="center" flex={1}>
-        <Text variant="label" fontSize="12px" color={titleColor}>
+        <Text variant="label" fontSize="12px" color={titleColor ? titleColor : defaultTitleColor}>
           {title}
         </Text>
         <CloseIcon

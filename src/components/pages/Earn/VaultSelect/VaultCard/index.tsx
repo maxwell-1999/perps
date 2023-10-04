@@ -3,10 +3,12 @@ import { useIntl } from 'react-intl'
 
 import colors from '@/components/design-system/theme/colors'
 import { AssetIconWithText } from '@/components/shared/components'
-import { FormattedBig18USDPrice } from '@/components/shared/components'
-import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
-import { formatBig18 } from '@/utils/big18Utils'
+import { FormattedBig6USDPrice } from '@/components/shared/components'
+import { AssetMetadata, SupportedAsset } from '@/constants/markets'
+import { PerennialVaultType } from '@/constants/vaults'
+import { VaultAccountSnapshot2, VaultSnapshot2 } from '@/hooks/vaults2'
+import { useVaults7dAccumulations } from '@/hooks/vaults2'
+import { formatBig6 } from '@/utils/big6Utils'
 
 import { Container } from '@ds/Container'
 
@@ -16,13 +18,13 @@ import { useVaultSelectCopy } from '../hooks'
 import { CapacityRow, DescriptionRow, TitleRow, VaultUserStats } from './styles'
 
 interface VaultCardProps {
-  feeAPR: bigint
   name: string
   assets: SupportedAsset[]
-  vault: VaultSnapshot
+  vaultType: PerennialVaultType
   description: string
   onClick: () => void
-  vaultUserSnapshot?: VaultUserSnapshot
+  vaultSnapshot: VaultSnapshot2
+  vaultAccountSnapshot?: VaultAccountSnapshot2
   isSelected: boolean
 }
 
@@ -30,14 +32,14 @@ export default function VaultCard({
   name,
   assets,
   description,
-  vault,
-  feeAPR,
+  vaultSnapshot,
   onClick,
-  vaultUserSnapshot,
+  vaultAccountSnapshot,
   isSelected,
 }: VaultCardProps) {
   const intl = useIntl()
   const copy = useVaultSelectCopy()
+  const vaultAccumulations = useVaults7dAccumulations()
   const grayTextColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
   const descriptionTextColor = useColorModeValue(colors.brand.blackAlpha[70], colors.brand.whiteAlpha[70])
   const alpha10 = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
@@ -45,14 +47,23 @@ export default function VaultCard({
   const hoverBorderColor = useColorModeValue(colors.brand.blackAlpha[40], colors.brand.whiteAlpha[40])
   const cardBorder = `1px solid ${alpha10}`
 
-  const exposureAndFunding = useExposureAndFunding({ vault })
-  const apr = formatBig18((feeAPR + (exposureAndFunding?.totalFundingAPR ?? 0n)) * 100n, {
-    numSigFigs: 4,
-    minDecimals: 2,
+  const exposureAndFunding = useExposureAndFunding({
+    vault: vaultSnapshot,
+    accumulations: vaultAccumulations.find((v) => v.data?.vaultAddress === vaultSnapshot.vault)?.data,
   })
+  const apr = formatBig6(
+    ((exposureAndFunding?.totalFeeAPR ?? 0n) + (exposureAndFunding?.totalFundingAPR ?? 0n)) * 100n,
+    {
+      numSigFigs: 4,
+      minDecimals: 2,
+    },
+  )
   const aprPercent = intl.formatMessage({ defaultMessage: '{apr}%' }, { apr })
 
-  const progressbarCollateral = formatValueForProgressBar(vault.totalAssets, vault.maxCollateral)
+  const progressbarCollateral = formatValueForProgressBar(
+    vaultSnapshot?.totalAssets ?? 0n,
+    vaultSnapshot?.parameter.cap ?? 0n,
+  )
   const progressPercent = intl.formatMessage({ defaultMessage: '{progressbarCollateral}%' }, { progressbarCollateral })
 
   return (
@@ -108,7 +119,7 @@ export default function VaultCard({
       <CapacityRow>
         <Progress value={progressbarCollateral} width="100%" size="sm" mb={2} />
         <Flex justifyContent="space-between" width="100%">
-          <FormattedBig18USDPrice value={vault.totalAssets} fontSize="12px" fontWeight={500} />
+          <FormattedBig6USDPrice value={vaultSnapshot?.totalAssets ?? 0n} fontSize="12px" fontWeight={500} />
           <Text fontSize="12px" fontWeight={500} color={grayTextColor}>
             <Text as="span" mr={1} color={descriptionTextColor}>
               {progressPercent}
@@ -117,7 +128,9 @@ export default function VaultCard({
           </Text>
         </Flex>
       </CapacityRow>
-      {vaultUserSnapshot && <VaultUserStats vault={vault} vaultUserSnapshot={vaultUserSnapshot} />}
+      {vaultSnapshot && vaultAccountSnapshot && (
+        <VaultUserStats vault={vaultSnapshot} vaultAccountSnapshot={vaultAccountSnapshot} />
+      )}
     </Container>
   )
 }

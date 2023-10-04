@@ -6,8 +6,8 @@
     "node": "18"
   },
   "scripts": {
-    "dev": "yarn gen:gql-typings && next dev",
-    "build": "yarn gen:gql-typings && next build",
+    "dev": "yarn gen:gql-typings && yarn gen:lens-artifact && next dev",
+    "build": "yarn gen:gql-typings && yarn gen:lens-artifact && next build",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "test": "jest",
@@ -24,6 +24,7 @@
     "localize": "yarn localize:extract && yarn localize:compile",
     "gen:gql-typings": "graphql-codegen --config graph-codegen.ts",
     "gen:gql-typings:watch": "graphql-codegen --watch --config graph-codegen.ts",
+    "gen:lens-artifact": "cd lens && yarn && yarn hardhat compile && node ../scripts/lensAbiCopy.js && prettier --write ../abi/v2/*Lens2.abi.ts",
     "postinstall": "husky install && patch-package"
   },
   "dependencies": {
@@ -45,6 +46,7 @@
     "connectkit": "^1.2.3",
     "cookies-next": "^2.1.2",
     "date-fns": "^2.30.0",
+    "dotenv": "^16.3.1",
     "eslint": "8.39.0",
     "eslint-config-next": "13.3.1",
     "ethers": "^6.3.0",
@@ -61,9 +63,10 @@
     "react-table": "^7.8.0",
     "recharts": "^2.7.2",
     "siwe": "^2.1.4",
+    "type-fest": "^4.2.0",
     "typescript": "5.0.4",
-    "viem": "^1.1.4",
-    "wagmi": "^1",
+    "viem": "^1.14.0",
+    "wagmi": "^1.4.0",
     "yarn": "^1.22.19"
   },
   "devDependencies": {

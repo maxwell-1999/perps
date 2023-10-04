@@ -2,6 +2,7 @@ import { type ThemeConfig, extendTheme } from '@chakra-ui/react'
 import { Hanken_Grotesk } from 'next/font/google'
 
 import colors from './colors'
+import Badge from './components/badge'
 import Button from './components/button'
 import Container from './components/container'
 import Divider from './components/divider'
@@ -48,6 +49,7 @@ const theme = extendTheme({
     Progress,
     Tooltip,
     Switch,
+    Badge,
   },
 })
 

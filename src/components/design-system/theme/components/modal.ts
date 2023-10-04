@@ -9,7 +9,6 @@ const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpe
 const baseStyle = definePartsStyle({
   dialog: {
     borderRadius: '9px',
-    width: 'initial',
   },
 })
 
@@ -17,6 +16,7 @@ const confirmation = definePartsStyle((props) => ({
   dialog: {
     bg: mode('white', colors.brand.blackSolid[10])(props),
     border: `1px solid ${mode(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])(props)}`,
+    width: 'initial',
   },
   body: {
     pt: '26px',

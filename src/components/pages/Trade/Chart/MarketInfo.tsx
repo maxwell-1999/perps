@@ -1,69 +1,57 @@
 import { ExternalLinkIcon } from '@chakra-ui/icons'
-import { Flex, Link, Text, useColorModeValue } from '@chakra-ui/react'
-import { useMemo } from 'react'
-import { Label, LabelList, Line, LineChart, ReferenceLine, ResponsiveContainer, XAxis, YAxis } from 'recharts'
-import { parseAbi, zeroAddress } from 'viem'
-import { useContractRead } from 'wagmi'
+import { Flex, Link, Text } from '@chakra-ui/react'
 import { arbitrum } from 'wagmi/chains'
 
 import { DataRow } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
-import { FormattedBig18Percent, FormattedBig18USDPrice, LoadingScreen } from '@/components/shared/components'
-import { AssetMetadata } from '@/constants/assets'
-import { ControllerAddresses } from '@/constants/contracts'
+import { FormattedBig6Percent, FormattedBig6USDPrice, LoadingScreen } from '@/components/shared/components'
+import { AssetMetadata } from '@/constants/markets'
 import { ExplorerURLs } from '@/constants/network'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useProtocolSnapshot } from '@/hooks/markets'
 import { useChainId } from '@/hooks/network'
 import { shortenAddress } from '@/utils/addressUtils'
-import { Big18Math, formatBig18Percent } from '@/utils/big18Utils'
-import { utilization } from '@/utils/positionUtils'
+import { formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
 
 import { useChartCopy } from './hooks'
-import { DashedLine, MarketInfoContent } from './styles'
+import { MarketInfoContent, PercentRange } from './styles'
 
 function MarketInfo() {
   const copy = useChartCopy()
   const chainId = useChainId()
-  const { selectedMarket, selectedMarketSnapshot, makerAsset, selectedMakerMarketSnapshot, isMaker, snapshots } =
-    useMarketContext()
-  const { data: protocoSnapshot } = useProtocolSnapshot()
+  const {
+    selectedMarket,
 
-  const marketSnapshot = isMaker
-    ? selectedMakerMarketSnapshot
-    : selectedMarketSnapshot?.Long ?? selectedMarketSnapshot?.Short
+    selectedMakerMarket,
+    selectedMarketSnapshot2,
+    isMaker,
+  } = useMarketContext()
 
-  const { data: marketOwner } = useContractRead({
-    chainId,
-    enabled: !!marketSnapshot,
-    abi: parseAbi(['function owner(address) view returns (address)'] as const),
-    functionName: 'owner',
-    address: ControllerAddresses[chainId],
-    args: [marketSnapshot?.productAddress || zeroAddress],
-  })
+  if (!selectedMarketSnapshot2) return <LoadingScreen />
 
-  const utilizationCurve = marketSnapshot?.productInfo.utilizationCurve
+  const {
+    market,
+    oracle,
+    riskParameter: {
+      takerFee,
+      makerFee,
+      makerImpactFee,
+      liquidationFee,
+      margin,
+      minMargin,
+      maintenance,
+      minMaintenance,
+      maxLiquidationFee,
+      takerSkewFee,
+      takerImpactFee,
+      minLiquidationFee,
+      efficiencyLimit,
+    },
+    parameter: { fundingFee, interestFee, settlementFee },
+    global: { latestPrice },
+  } = selectedMarketSnapshot2
 
-  const chartData = useMemo(() => {
-    if (!utilizationCurve) return []
-    return [
-      { x: 0, y: Big18Math.toUnsafeFloat(utilizationCurve.minRate) },
-      {
-        x: Big18Math.toUnsafeFloat(utilizationCurve.targetUtilization),
-        y: Big18Math.toUnsafeFloat(utilizationCurve.targetRate),
-      },
-      { x: 1, y: Big18Math.toUnsafeFloat(utilizationCurve.maxRate) },
-    ]
-  }, [utilizationCurve])
-
-  const snapshot = isMaker ? snapshots?.[makerAsset] : selectedMarketSnapshot
-  const longUtilization = snapshot?.Long && utilization(snapshot.Long.pre, snapshot.Long.position)
-  const shortUtilization = snapshot?.Short && utilization(snapshot.Short.pre, snapshot.Short.position)
-
-  const borderColor = useColorModeValue(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])
-  const chartBg = useColorModeValue(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])
-
-  if (!marketSnapshot || !protocoSnapshot || !utilizationCurve) return <LoadingScreen />
+  const takerFeeMax = takerFee + takerSkewFee + takerImpactFee
+  const makerFeeMax = makerFee + makerImpactFee
 
   return (
     <Flex flex={1} height="100%" alignItems="center" justifyContent="center">
@@ -71,16 +59,16 @@ function MarketInfo() {
         <Flex flexDirection="column" flex={1} py={4} minWidth="230px">
           <DataRow
             label={copy.market}
-            value={AssetMetadata[isMaker ? makerAsset : selectedMarket].symbol}
+            value={AssetMetadata[isMaker ? selectedMakerMarket : selectedMarket].symbol}
             size="lg"
             bordered
           />
           <DataRow
-            label={copy.coordinator}
+            label={copy.address}
             value={
-              <Link href={`${ExplorerURLs[chainId]}/address/${marketOwner}`} isExternal>
+              <Link href={`${ExplorerURLs[chainId]}/address/${market}`} isExternal>
                 <Text as="span" size="14px">
-                  {shortenAddress(marketOwner || '')}
+                  {shortenAddress(market || '')}
                 </Text>
                 <ExternalLinkIcon ml={1} mt={-1} color={colors.brand.purple[240]} />
               </Link>
@@ -91,9 +79,9 @@ function MarketInfo() {
           <DataRow
             label={copy.priceFeed}
             value={
-              <Link href={`${ExplorerURLs[chainId]}/address/${marketSnapshot.productInfo.oracle}`} isExternal>
+              <Link href={`${ExplorerURLs[chainId]}/address/${oracle}`} isExternal>
                 <Text as="span" size="14px">
-                  {shortenAddress(marketSnapshot.productInfo.oracle)}
+                  {shortenAddress(oracle)}
                 </Text>
                 <ExternalLinkIcon ml={1} mt={-1} color={colors.brand.purple[240]} />
               </Link>
@@ -108,125 +96,54 @@ function MarketInfo() {
             bordered
           />
           <DataRow
-            label={copy.minCollateral}
-            value={<FormattedBig18USDPrice value={protocoSnapshot.minCollateral} />}
+            label={copy.margin}
+            value={`${formatBig6Percent(margin)} (${formatBig6USDPrice(minMargin)})`}
             size="lg"
             bordered
           />
           <DataRow
-            label={copy.takerFees}
-            value={<FormattedBig18Percent value={marketSnapshot.productInfo.takerFee} />}
+            label={copy.maintenance}
+            value={`${formatBig6Percent(maintenance)} (${formatBig6USDPrice(minMaintenance)})`}
             size="lg"
             bordered
           />
-          <DataRow
-            label={copy.makerFees}
-            value={<FormattedBig18Percent value={marketSnapshot.productInfo.makerFee} />}
-            size="lg"
-            bordered
-          />
+          <DataRow label={copy.takerFees} value={<PercentRange max={takerFeeMax} />} size="lg" bordered />
+          <DataRow label={copy.makerFees} value={<PercentRange max={makerFeeMax} />} size="lg" bordered />
+        </Flex>
+        <Flex flexDirection="column" flex={1} py={4} minWidth="230px">
+          <DataRow label={copy.latestPrice} value={<FormattedBig6USDPrice value={latestPrice} />} size="lg" bordered />
           <DataRow
             label={copy.liquidationFee}
-            value={<FormattedBig18Percent value={protocoSnapshot.liquidationFee} />}
+            value={<FormattedBig6Percent value={liquidationFee} />}
             size="lg"
             bordered
           />
           <DataRow
-            label={copy.liquidationLeverage}
-            value={`${(1 / Big18Math.toUnsafeFloat(marketSnapshot.productInfo.maintenance)).toString()}x`}
+            label={copy.minLiquidationFee}
+            value={<FormattedBig6USDPrice compact value={minLiquidationFee} />}
             size="lg"
+            bordered
           />
-        </Flex>
-        <Flex
-          flexDirection="column"
-          flex={1}
-          gap={4}
-          p={2}
-          paddingRight={3}
-          border={`1px solid ${borderColor}`}
-          borderRadius="6px"
-          bg={chartBg}
-        >
-          <Flex justifyContent="space-between">
-            <Text px={4} variant="label">
-              {copy.utilizationCurve}
-            </Text>
-            <Flex direction="row" gap={2}>
-              <Text variant="label">{copy.current}</Text>
-              <Flex gap={2}>
-                <DashedLine color={colors.brand.green} />
-                <Text variant="label" color={colors.brand.green}>
-                  {copy.longUtilization}
-                </Text>
-              </Flex>
-              <Flex gap={2}>
-                <DashedLine color={colors.brand.red} />
-                <Text variant="label" color={colors.brand.red}>
-                  {copy.shortUtilization}
-                </Text>
-              </Flex>
-            </Flex>
-          </Flex>
-          <ResponsiveContainer width="99%">
-            <LineChart data={chartData}>
-              <XAxis
-                dataKey="x"
-                tickFormatter={(x) => (x === 0 ? '' : `${x * 100}%`)}
-                tick={{ fill: colors.brand.gray[100] }}
-                ticks={chartData.map(({ x }) => x)}
-                type="number"
-              >
-                <Label offset={24} position="insideLeft" style={{ fill: colors.brand.gray[100], fontWeight: 600 }}>
-                  {copy.utilization}
-                </Label>
-              </XAxis>
-              <YAxis tickFormatter={(y) => `${y * 100}%`} tick={{ fill: colors.brand.gray[100] }}>
-                <Label
-                  offset={-6}
-                  position="left"
-                  angle={-90}
-                  style={{ fill: colors.brand.gray[100], fontWeight: 600 }}
-                >
-                  {copy.funding}
-                </Label>
-              </YAxis>
-              {longUtilization && (
-                <ReferenceLine
-                  x={Big18Math.toUnsafeFloat(longUtilization)}
-                  stroke={colors.brand.green}
-                  strokeDasharray="5 5"
-                  isFront
-                />
-              )}
-              {shortUtilization && (
-                <ReferenceLine
-                  x={Big18Math.toUnsafeFloat(shortUtilization)}
-                  stroke={colors.brand.red}
-                  strokeDasharray="5 5"
-                  isFront
-                />
-              )}
-              <Line
-                type="linear"
-                isAnimationActive={false}
-                dataKey="y"
-                stroke={colors.brand.purple[240]}
-                strokeWidth={3}
-                dot={{ r: 6, strokeWidth: 4, stroke: colors.brand.gray[360] }}
-              >
-                <LabelList
-                  dataKey="x"
-                  formatter={(value: number) =>
-                    value === Big18Math.toUnsafeFloat(utilizationCurve.targetUtilization)
-                      ? `${formatBig18Percent(utilizationCurve.targetRate)}`
-                      : ''
-                  }
-                  position="insideBottomRight"
-                  style={{ fill: colors.brand.gray[100] }}
-                />
-              </Line>
-            </LineChart>
-          </ResponsiveContainer>
+          <DataRow
+            label={copy.maxLiquidationFee}
+            value={<FormattedBig6USDPrice compact value={maxLiquidationFee} />}
+            size="lg"
+            bordered
+          />
+          <DataRow label={copy.fundingFee} value={<FormattedBig6Percent value={fundingFee} />} size="lg" bordered />
+          <DataRow label={copy.interestFee} value={<FormattedBig6Percent value={interestFee} />} size="lg" bordered />
+          <DataRow
+            label={copy.settlementFee}
+            value={<FormattedBig6USDPrice compact value={settlementFee} />}
+            size="lg"
+            bordered
+          />
+          <DataRow
+            label={copy.efficiencyLimit}
+            value={<FormattedBig6Percent value={efficiencyLimit} />}
+            size="lg"
+            bordered
+          />
         </Flex>
       </MarketInfoContent>
     </Flex>

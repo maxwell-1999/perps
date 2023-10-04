@@ -1,6 +1,6 @@
-import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
+import { VaultAccountSnapshot2 } from '@/hooks/vaults2'
 import { Balances } from '@/hooks/wallet'
-import { Big18Math } from '@/utils/big18Utils'
+import { Big6Math } from '@/utils/big6Utils'
 
 import { VaultFormOption } from '../constants'
 import { RequiredApprovals } from './constants'
@@ -9,29 +9,24 @@ export const getRequiredApprovals = ({
   amount,
   balances,
   vaultOption,
-  vaultSnapshot,
+  vaultAccountSnapshot,
 }: {
   amount: bigint
   balances: Balances
   vaultOption: VaultFormOption
-  vaultSnapshot: VaultSnapshot
+  vaultAccountSnapshot?: VaultAccountSnapshot2
 }): RequiredApprovals[] => {
   if (!balances) {
     return []
   }
   const approvals = []
-  if (vaultOption === VaultFormOption.Deposit) {
-    if (amount > Big18Math.fromDecimals(balances.usdcAllowance, 6)) {
-      approvals.push(RequiredApprovals.usdc)
-    }
+  if (!vaultAccountSnapshot?.multiInvokerApproved) {
+    approvals.push(RequiredApprovals.operator)
   }
-  if (vaultOption === VaultFormOption.Redeem) {
-    const approximateShares = Big18Math.div(Big18Math.mul(amount, vaultSnapshot.totalSupply), vaultSnapshot.totalAssets)
-    const sharesAllowance = balances.sharesAllowance[vaultSnapshot.vaultType] ?? 0n
-    const requiresSharesApproval = approximateShares > sharesAllowance
 
-    if (requiresSharesApproval) {
-      approvals.push(RequiredApprovals.shares)
+  if (vaultOption === VaultFormOption.Deposit) {
+    if (amount > Big6Math.fromDecimals(balances.usdcAllowance, 6)) {
+      approvals.push(RequiredApprovals.usdc)
     }
   }
   return approvals
@@ -44,11 +39,11 @@ export const setAmountForConfirmation = ({
 }: {
   maxWithdrawal: boolean
   amount: string
-  vaultUserSnapshot: VaultUserSnapshot
+  vaultUserSnapshot: VaultAccountSnapshot2
 }) => {
   const { assets } = vaultUserSnapshot
   if (assets && maxWithdrawal) {
     return assets
   }
-  return Big18Math.fromFloatString(amount)
+  return Big6Math.fromFloatString(amount)
 }

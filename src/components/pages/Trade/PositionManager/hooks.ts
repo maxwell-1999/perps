@@ -1,31 +1,20 @@
 import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
-import { AssetMetadata } from '@/constants/assets'
-import { OrderDirection } from '@/constants/markets'
-import { useMarketContext } from '@/contexts/marketContext'
+import { AssetMetadata, PositionSide2, PositionStatus } from '@/constants/markets'
+import { PositionsTab, useMarketContext } from '@/contexts/marketContext'
 import {
-  PositionDetails,
-  useAsset7DayData,
-  useChainAssetSnapshots,
-  useChainLivePrices,
-  useUserChainPositionHistory,
-  useUserCurrentPositions,
-} from '@/hooks/markets'
-import { notEmpty } from '@/utils/arrayUtils'
-import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
-import { getMakerStats, socialization, utilization } from '@/utils/positionUtils'
-import { Day, Hour, Year } from '@/utils/timeUtils'
+  LivePrices,
+  MarketSnapshot,
+  UserMarketSnapshot,
+  useActivePositionMarketPnls,
+  useMarket7dData,
+} from '@/hooks/markets2'
+import { Big6Math, formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
+import { calcFundingRates, calcMakerExposure, calcMakerStats2 } from '@/utils/positionUtils'
 
-import { PositionSide } from '@t/gql/graphql'
-
-import {
-  calculatePnl,
-  getCurrentPriceDelta,
-  getFormattedPositionDetails,
-  getMakerExposure,
-  transformPositionDataToArray,
-} from './utils'
+import { PositionTableData } from './constants'
+import { getFormattedPositionDetails, transformPositionDataToArray } from './utils'
 
 export const useStyles = () => {
   const theme = useTheme()
@@ -35,11 +24,27 @@ export const useStyles = () => {
   const alpha90 = useColorModeValue(theme.colors.brand.blackAlpha[90], theme.colors.brand.whiteAlpha[90])
   const alpha50 = useColorModeValue(theme.colors.brand.blackAlpha[50], theme.colors.brand.whiteAlpha[50])
   const alpha5 = useColorModeValue(theme.colors.brand.blackAlpha[5], theme.colors.brand.whiteAlpha[5])
+  const alpha20 = useColorModeValue(theme.colors.brand.blackAlpha[20], theme.colors.brand.whiteAlpha[20])
+  const alpha10 = useColorModeValue(theme.colors.brand.blackAlpha[10], theme.colors.brand.whiteAlpha[10])
   // TODO: light color theme background
   const background = useColorModeValue(theme.colors.brand.blackSolid[5], theme.colors.brand.blackSolid[5])
   const green = theme.colors.brand.green
   const red = theme.colors.brand.red
-  return { borderColor, green, red, subheaderTextColor, alpha75, alpha90, alpha5, alpha50, background }
+  const purple = theme.colors.brand.purple[240]
+  return {
+    borderColor,
+    green,
+    red,
+    subheaderTextColor,
+    alpha75,
+    alpha90,
+    alpha5,
+    alpha50,
+    alpha10,
+    alpha20,
+    background,
+    purple,
+  }
 }
 
 export const usePositionManagerCopy = () => {
@@ -54,9 +59,12 @@ export const usePositionManagerCopy = () => {
     closing: intl.formatMessage({ defaultMessage: 'Closing' }),
     pricing: intl.formatMessage({ defaultMessage: 'Pricing' }),
     resolved: intl.formatMessage({ defaultMessage: 'Resolved' }),
+    failed: intl.formatMessage({ defaultMessage: 'Failed' }),
+    failedTooltip: intl.formatMessage({ defaultMessage: 'Oracle Version not found for this order' }),
     liquidated: intl.formatMessage({ defaultMessage: 'Liquidated' }),
     long: intl.formatMessage({ defaultMessage: 'Long' }),
     short: intl.formatMessage({ defaultMessage: 'Short' }),
+    maker: intl.formatMessage({ defaultMessage: 'Maker' }),
     size: intl.formatMessage({ defaultMessage: 'Size' }),
     openSize: intl.formatMessage({ defaultMessage: 'Open Size' }),
     pnl: intl.formatMessage({ defaultMessage: 'P&L' }),
@@ -92,107 +100,113 @@ export const usePositionManagerCopy = () => {
     liquidationFee: intl.formatMessage({ defaultMessage: 'Liquidation Fee' }),
     connectWalletPositions: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your positions' }),
     connectWalletHistory: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your position history' }),
-    currentExposure: (side: OrderDirection) =>
-      intl.formatMessage({ defaultMessage: 'Current Exposure ({side})' }, { side }),
     exposure: intl.formatMessage({ defaultMessage: 'Exposure' }),
     fundingFeeAPR: intl.formatMessage({ defaultMessage: 'Funding Fee APR' }),
     tradingFeeAPR: intl.formatMessage({ defaultMessage: 'Trading Fee APR' }),
     totalAPR: intl.formatMessage({ defaultMessage: 'Total APR' }),
+    unsettled: intl.formatMessage({ defaultMessage: 'Unsettled' }),
+    unsettledTooltip: intl.formatMessage({
+      defaultMessage:
+        'This position has not yet been settled. PNL values will be available the next time you settle your position.',
+    }),
     liquidationFeeTooltip: (feeAmount: bigint) =>
       intl.formatMessage(
         { defaultMessage: 'Liquidation Fee: {feeAmount}' },
-        { feeAmount: formatBig18USDPrice(feeAmount) },
+        { feeAmount: formatBig6USDPrice(feeAmount) },
       ),
+    orders: intl.formatMessage({ defaultMessage: 'Orders' }),
+    type: intl.formatMessage({ defaultMessage: 'Type' }),
+    noCurrentOrdersToShow: intl.formatMessage({ defaultMessage: 'No current orders to show' }),
+    retry: intl.formatMessage({ defaultMessage: 'Retry' }),
+    temporarilyLower: intl.formatMessage({ defaultMessage: 'Temporarily Lower' }),
+    profitLoss: intl.formatMessage({ defaultMessage: 'Profit/Loss' }),
+    funding: intl.formatMessage({ defaultMessage: 'Funding' }),
+    marketFees: intl.formatMessage({ defaultMessage: 'Market Fees' }),
+    tradingFees: intl.formatMessage({ defaultMessage: 'Trading Fees' }),
+    sizeNotional: intl.formatMessage({ defaultMessage: 'Size (Notional)' }),
+    plus: intl.formatMessage({ defaultMessage: '+' }),
+    realized: intl.formatMessage({ defaultMessage: 'Realized' }),
+    unrealized: intl.formatMessage({ defaultMessage: 'Unrealized' }),
+    totalPNL: intl.formatMessage({ defaultMessage: 'Total P/L' }),
   }
 }
 
 export const useFormatPosition = () => {
-  const {
-    assetMetadata,
-    selectedMarket,
-    orderDirection,
-    selectedMarketSnapshot,
-    isMaker,
-    makerAsset,
-    makerOrderDirection,
-    selectedMakerMarketSnapshot,
-  } = useMarketContext()
-  const { data: positions } = useUserCurrentPositions()
-  const { noValue, long, short } = usePositionManagerCopy()
-  let position = isMaker
-    ? positions?.[makerAsset]?.[makerOrderDirection]
-    : positions?.[selectedMarket]?.[orderDirection]
+  const { assetMetadata, isMaker, userCurrentPosition, selectedMarketSnapshot2, selectedMakerMarket, orderDirection } =
+    useMarketContext()
+  const { noValue } = usePositionManagerCopy()
+  const { data: market7dData } = useMarket7dData(selectedMakerMarket)
 
-  if (isMaker) {
-    position = position?.side === PositionSide.Maker ? position : undefined
-  } else {
-    position = position?.side === PositionSide.Taker ? position : undefined
-  }
   const numSigFigs = assetMetadata.displayDecimals
+  const minorSide = selectedMarketSnapshot2?.minorSide
+  const { hourlyFunding, dailyFunding, eightHourFunding, yearlyFunding } = calcFundingRates(
+    selectedMarketSnapshot2?.fundingRate[
+      isMaker ? (minorSide as PositionSide2.long | PositionSide2.short) : orderDirection
+    ],
+  )
 
-  const fundingRate =
-    position?.direction === OrderDirection.Long
-      ? selectedMarketSnapshot?.Long?.rate
-      : selectedMarketSnapshot?.Short?.rate
+  const makerStats = isMaker
+    ? calcMakerStats2({
+        funding: market7dData?.makerAccumulation.funding ?? 0n,
+        interest: market7dData?.makerAccumulation.interest ?? 0n,
+        positionFee: market7dData?.makerAccumulation.positionFee ?? 0n,
+        positionSize: userCurrentPosition?.nextPosition?.maker ?? 0n,
+        collateral: userCurrentPosition?.local?.collateral ?? 0n,
+      })
+    : undefined
 
-  const { data: asset7DayData } = useAsset7DayData(makerAsset)
-  const fees7Day = asset7DayData?.fees?.[makerOrderDirection] ?? 0n
-
-  const makerStats = getMakerStats({
-    product: selectedMakerMarketSnapshot,
-    leverage: position?.nextLeverage,
-    userPosition: position?.nextPosition,
-    collateral: position?.currentCollateral,
-    snapshot: selectedMakerMarketSnapshot,
-    fees7Day,
-  })
+  const direction =
+    userCurrentPosition?.status === PositionStatus.closing ? userCurrentPosition?.side : userCurrentPosition?.nextSide
 
   return {
-    positionDetails: position,
+    positionDetails: userCurrentPosition,
     formattedValues: {
-      direction: position ? (position.direction === OrderDirection.Long ? long : short) : noValue,
-      dailyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Day, { numDecimals: 4 }) : noValue,
-      hourlyFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Hour, { numDecimals: 4 }) : noValue,
-      eightHourFunding: position ? formatBig18Percent((fundingRate ?? 0n) * Hour * 8n, { numDecimals: 4 }) : noValue,
-      yearlyFundingRate: position ? formatBig18Percent((fundingRate ?? 0n) * Year, { numDecimals: 4 }) : noValue,
-      makerExposure:
-        isMaker && makerStats !== undefined ? formatBig18Percent(makerStats.exposure, { numDecimals: 2 }) : noValue,
-      fundingFeeAPR:
-        isMaker && makerStats !== undefined
-          ? formatBig18Percent(makerStats.fundingFeeAPR, { numDecimals: 4 })
-          : noValue,
-      tradingFeeAPR:
-        isMaker && makerStats !== undefined
-          ? formatBig18Percent(makerStats.tradingFeeAPR, { numDecimals: 4 })
-          : noValue,
-      totalAPR:
-        isMaker && makerStats !== undefined ? formatBig18Percent(makerStats.totalAPR, { numDecimals: 4 }) : noValue,
-      ...getFormattedPositionDetails({ positionDetails: position, placeholderString: noValue, numSigFigs }),
+      direction,
+      dailyFunding: userCurrentPosition ? formatBig6Percent(dailyFunding, { numDecimals: 4 }) : noValue,
+      hourlyFunding: userCurrentPosition ? formatBig6Percent(hourlyFunding, { numDecimals: 4 }) : noValue,
+      eightHourFunding: userCurrentPosition ? formatBig6Percent(eightHourFunding, { numDecimals: 4 }) : noValue,
+      yearlyFundingRate: userCurrentPosition ? formatBig6Percent(yearlyFunding, { numDecimals: 2 }) : noValue,
+      fundingFeeAPR: !!makerStats ? formatBig6Percent(makerStats.fundingAPR, { numDecimals: 4 }) : noValue,
+      tradingFeeAPR: !!makerStats ? formatBig6Percent(makerStats.positionFeeAPR, { numDecimals: 4 }) : noValue,
+      isOpening: userCurrentPosition?.status === PositionStatus.opening,
+      totalAPR: !!makerStats
+        ? formatBig6Percent(makerStats.fundingAPR + makerStats.interestAPR + makerStats.positionFeeAPR, {
+            numDecimals: 4,
+          })
+        : noValue,
+      ...getFormattedPositionDetails({
+        marketSnapshot: selectedMarketSnapshot2,
+        userMarketSnapshot: userCurrentPosition,
+        placeholderString: noValue,
+        numSigFigs,
+      }),
     },
   }
 }
 
 export const useOpenPositionTableData = () => {
-  const { data: positionData, status } = useUserCurrentPositions()
-  const { isMaker, snapshots } = useMarketContext()
+  const { isMaker, snapshots2 } = useMarketContext()
   const { noValue } = usePositionManagerCopy()
-  const transformedPositions = transformPositionDataToArray(positionData, isMaker)
+  const transformedPositions = transformPositionDataToArray(snapshots2?.user, isMaker)
 
   const positions = transformedPositions
     .map((position) => {
       const numSigFigs = AssetMetadata[position.asset]?.displayDecimals ?? 2
-      const makerSnapshot = snapshots?.[position.asset]?.[position.details?.direction]
-      const makerExposure = getMakerExposure(makerSnapshot, position.details?.nextLeverage)
       return {
-        details: position.details,
+        details: position.details as UserMarketSnapshot,
         asset: position.asset,
         symbol: position.symbol,
-        makerExposure:
-          isMaker && makerExposure !== undefined ? formatBig18Percent(makerExposure, { numDecimals: 4 }) : noValue,
-        ...getFormattedPositionDetails({ positionDetails: position.details, placeholderString: noValue, numSigFigs }),
+        isClosed: position.details.status === PositionStatus.closed,
+        isClosing: position.details.status === PositionStatus.closing,
+        ...getFormattedPositionDetails({
+          marketSnapshot: snapshots2?.market[position.asset],
+          userMarketSnapshot: position.details,
+          placeholderString: noValue,
+          numSigFigs,
+        }),
       }
     })
-    .sort((a, b) => Big18Math.cmp(b.details?.nextNotional ?? 0n, a.details?.nextNotional ?? 0n))
+    .sort((a, b) => Big6Math.cmp(b.details?.nextMagnitude ?? 0n, a.details?.nextMagnitude ?? 0n))
 
   return {
     positions,
@@ -200,75 +214,96 @@ export const useOpenPositionTableData = () => {
   }
 }
 
-export const usePositionHistoryTableData = () => {
-  const { noValue } = usePositionManagerCopy()
-  const { isMaker } = useMarketContext()
+export const usePnl2 = (
+  userMarketSnapshot?: UserMarketSnapshot,
+  marketSnapshot?: MarketSnapshot,
+  livePrices?: LivePrices,
+  failedClose?: boolean,
+) => {
+  const { data: pnlData } = useActivePositionMarketPnls()
+
+  if (!pnlData || !userMarketSnapshot) return undefined
+  const { asset, side, nextSide, nextMagnitude, magnitude } = userMarketSnapshot
+
+  if (!asset) return undefined
+  const { realtime, realtimePercent, realtimePercentDenominator, averageEntryPrice } = pnlData?.[asset]
+  const averageEntryPriceFormatted = formatBig6USDPrice(averageEntryPrice)
+
+  let livePnl = realtime
+  let livePnlPercent = realtimePercent
+  if (marketSnapshot && livePrices) {
+    const {
+      global: { latestPrice },
+      nextPosition,
+    } = marketSnapshot
+    const livePrice = livePrices[asset]
+    const liveDelta = livePrice ? livePrice - latestPrice : 0n
+    const magnitudeForCalc = failedClose ? magnitude : nextMagnitude
+
+    let livePnlDelta = Big6Math.mul(magnitudeForCalc, liveDelta)
+    if (side === PositionSide2.maker || nextSide === PositionSide2.maker) {
+      const makerExposure = calcMakerExposure(
+        magnitudeForCalc,
+        nextPosition.maker,
+        nextPosition.long,
+        nextPosition.short,
+      )
+      // Maker positions are dampened by exposure
+      livePnlDelta = Big6Math.mul(liveDelta, makerExposure)
+    } else if (side === PositionSide2.short || nextSide === PositionSide2.short) {
+      // Shorts are negative
+      livePnlDelta = Big6Math.mul(liveDelta, magnitudeForCalc * -1n)
+    }
+
+    livePnl = livePnl + livePnlDelta
+    livePnlPercent =
+      realtimePercentDenominator > 0n ? Big6Math.abs(Big6Math.div(livePnl, realtimePercentDenominator)) : 0n
+  }
+
+  let positionFees = pnlData[asset].positionFees
+  // Subtract price impact fees if taker
+  if (side !== PositionSide2.maker && nextSide !== PositionSide2.maker)
+    positionFees = positionFees - pnlData[asset].priceImpactFees
+
+  const totalFees =
+    pnlData[asset].keeperFees + pnlData[asset].interfaceFees + positionFees + pnlData[asset].liquidationFee
+  return {
+    data: pnlData[asset],
+    pnl: realtime,
+    unrealized: realtime - (pnlData[asset].accumulatedPnl.value - totalFees),
+    pnlPercent: realtimePercent,
+    averageEntryPriceFormatted,
+    averageEntryPrice,
+    liquidation: pnlData[asset].liquidation,
+    livePnl,
+    livePnlPercent,
+    totalFees,
+    liveUnrealized: livePnl - (pnlData[asset].accumulatedPnl.value - totalFees),
+  }
+}
+
+export const useHandleRowClick = () => {
   const {
-    data: positionHistory,
-    hasNextPage,
-    fetchNextPage,
-    isLoading,
-    isFetchingNextPage,
-    status,
-  } = useUserChainPositionHistory(isMaker ? PositionSide.Maker : PositionSide.Taker)
+    setSelectedMarket,
+    setOrderDirection,
+    setActivePositionTab,
+    selectedMarket,
+    orderDirection,
+    isMaker,
+    selectedMakerMarket,
+    setSelectedMakerMarket,
+  } = useMarketContext()
 
-  const positions = (positionHistory?.pages.flatMap((page) => page?.positions).filter(notEmpty) ?? []).map(
-    (position) => {
-      const numSigFigs = AssetMetadata[position.asset]?.displayDecimals ?? 2
-      const symbol = AssetMetadata[position.asset]?.symbol ?? position.asset
-
-      const startingPosition = position.subPositions
-        ? position.subPositions[0].size + position.subPositions[0].delta
-        : 0n
-      return {
-        details: position,
-        asset: position.asset,
-        symbol: symbol,
-        ...getFormattedPositionDetails({ positionDetails: position, placeholderString: noValue, numSigFigs }),
-        position: position.subPositions ? formatBig18(startingPosition) : noValue,
-        notional: position.subPositions
-          ? formatBig18USDPrice(Big18Math.mul(startingPosition, position.subPositions[0].settlePrice))
-          : noValue,
-      }
-    },
-  )
-  return {
-    positions,
-    hasNextPage,
-    fetchNextPage,
-    isLoading,
-    isFetchingNextPage,
-    status,
+  return (row: PositionTableData) => {
+    setActivePositionTab(PositionsTab.current)
+    if (!isMaker) {
+      if (row.asset === selectedMarket && row.details.side === orderDirection) return
+      setSelectedMarket(row.asset)
+      setOrderDirection(row.details.side === PositionSide2.long ? PositionSide2.long : PositionSide2.short)
+    } else {
+      const { asset } = row.details
+      if (asset === selectedMakerMarket) return
+      setSelectedMakerMarket(asset)
+    }
   }
-}
-
-export const usePnl = ({ positionDetails, live }: { positionDetails: PositionDetails; live?: boolean }) => {
-  const livePrices = useChainLivePrices()
-  const { data: snapshots } = useChainAssetSnapshots()
-  const { asset } = positionDetails
-
-  if (!live) return calculatePnl(positionDetails)
-  const productSnapshot = positionDetails?.direction ? snapshots?.[asset]?.[positionDetails.direction] : undefined
-  let currentPriceDelta = getCurrentPriceDelta({ snapshots, livePrices, asset: asset })
-
-  // Multiply the live price by the payoff direction of the market
-  let payoffDirectionMultiplier = 1n
-  if (productSnapshot) {
-    payoffDirectionMultiplier = productSnapshot.productInfo.payoffDefinition.payoffDirection === 0 ? 1n : -1n
-    // Makers take the opposite side of the payoff
-    if (positionDetails.side === 'maker') payoffDirectionMultiplier = payoffDirectionMultiplier * -1n
-  }
-
-  // If taker, apply socialization dampening
-  if (productSnapshot && positionDetails.side === 'taker' && currentPriceDelta)
-    currentPriceDelta =
-      Big18Math.mul(currentPriceDelta, socialization(productSnapshot.pre, productSnapshot.position)) *
-      payoffDirectionMultiplier
-  // If maker, apply utilization dampening
-  else if (productSnapshot && positionDetails.side === 'maker' && currentPriceDelta)
-    currentPriceDelta =
-      Big18Math.mul(currentPriceDelta, utilization(productSnapshot.pre, productSnapshot.position)) *
-      payoffDirectionMultiplier
-
-  return calculatePnl(positionDetails, currentPriceDelta)
 }

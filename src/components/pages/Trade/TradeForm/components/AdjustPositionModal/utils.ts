@@ -1,106 +1,117 @@
 import { IntlShape } from 'react-intl'
 
-import { SupportedAsset } from '@/constants/assets'
-import { OrderDirection } from '@/constants/markets'
-import { PositionDetails } from '@/hooks/markets'
-import { Big18Math, formatBig18USDPrice } from '@/utils/big18Utils'
-import { calcLeverage } from '@/utils/positionUtils'
+import { PositionSide2, PositionStatus, SupportedAsset } from '@/constants/markets'
+import { SupportedChainId } from '@/constants/network'
+import { MarketSnapshot, UserMarketSnapshot } from '@/hooks/markets2'
+import { Big6Math, formatBig6USDPrice } from '@/utils/big6Utils'
+import { calcInterfaceFee, calcLeverage, calcTradeFee } from '@/utils/positionUtils'
 
 import colors from '@ds/theme/colors'
 
-import { ProductSnapshot } from '@t/perennial'
-
 import { OrderValues } from '../../constants'
-import {
-  calcCollateralDifference,
-  calcLeverageDifference,
-  calcPositionDifference,
-  calcPositionFee,
-  needsApproval,
-} from '../../utils'
+import { calcCollateralDifference, calcLeverageDifference, calcPositionDifference, needsApproval } from '../../utils'
 import { Adjustment } from './constants'
 import { ModalCopy } from './hooks'
 
 type CreateAdjustmentArgs = {
   orderValues: OrderValues
-  position?: PositionDetails
-  product: ProductSnapshot
+  position?: UserMarketSnapshot
+  market: MarketSnapshot
   usdcAllowance: bigint
+  chainId: SupportedChainId
+  positionSide: PositionSide2
 }
 
 export const createAdjustment = ({
   orderValues,
   position,
-  product,
+  market,
+  chainId,
   usdcAllowance = 0n,
+  positionSide,
 }: CreateAdjustmentArgs): Adjustment => {
-  const currentCollateral = position?.currentCollateral ?? 0n
-  const currentPositionAmount = position?.nextPosition ?? 0n
-  const currentLeverage = position?.nextLeverage ?? 0n
+  const currentCollateral = position?.local.collateral ?? 0n
+  const currentPositionAmount = position?.magnitude ?? 0n
+  const currentLeverage = position?.[position?.status === PositionStatus.failed ? 'leverage' : 'nextLeverage'] ?? 0n
   const currentMaintenance = position?.maintenance ?? 0n
 
   const {
-    latestVersion: { price },
-    productInfo: { takerFee },
-  } = product
+    global: { latestPrice: price },
+    parameter: { settlementFee: settlementFee_ },
+  } = market
 
   const { amount, collateral, fullClose } = orderValues
-  const positionAmount = fullClose ? 0n : Big18Math.fromFloatString(amount)
-  const collateralAmount = fullClose ? 0n : Big18Math.fromFloatString(collateral)
-  const leverage = calcLeverage(price, positionAmount, collateralAmount)
+  const positionAmount = fullClose ? 0n : Big6Math.fromFloatString(amount)
+  const collateralAmount = fullClose ? 0n : Big6Math.fromFloatString(collateral)
+
+  const positionDifference = calcPositionDifference(positionAmount, currentPositionAmount)
+
+  const settlementFee = positionDifference !== 0n ? settlementFee_ : 0n
+  const interfaceFee = calcInterfaceFee({
+    positionStatus: position?.status,
+    latestPrice: market.global.latestPrice,
+    chainId,
+    positionDelta: positionDifference,
+    side: positionSide,
+  })
+  const tradeFee = calcTradeFee({
+    positionDelta: positionDifference,
+    marketSnapshot: market,
+    direction: positionSide,
+    isMaker: positionSide === PositionSide2.maker,
+  })
+  const totalFees = tradeFee.total + interfaceFee.interfaceFee + settlementFee
 
   const collateralDifference = calcCollateralDifference(collateralAmount, currentCollateral)
-  const positionDifference = calcPositionDifference(positionAmount, currentPositionAmount)
-  const leverageDifference = calcLeverageDifference({
-    currentCollateral,
-    price,
-    currentPositionAmount,
-    newCollateralAmount: collateralAmount,
-    newPositionAmount: positionAmount,
-  })
+  const leverage = calcLeverage(price, positionAmount, collateralAmount - totalFees)
+  const leverageDifference = calcLeverageDifference(leverage, currentLeverage)
 
   return {
     collateral: {
       prevCollateral: currentCollateral,
       newCollateral: collateralAmount,
       difference: collateralDifference,
-      crossCollateral: orderValues.crossCollateral ?? 0n,
     },
     position: {
       prevPosition: currentPositionAmount,
       newPosition: positionAmount,
       difference: positionDifference,
-      fee: calcPositionFee(price, positionDifference, takerFee),
+      tradeFee: tradeFee.total,
+      interfaceFee: interfaceFee.interfaceFee,
+      settlementFee,
     },
     leverage: {
       prevLeverage: currentLeverage,
       newLeverage: leverage,
       difference: leverageDifference,
     },
-    needsApproval: needsApproval({ collateralDifference, usdcAllowance }),
+    needsApproval: needsApproval({ collateralDifference, usdcAllowance, interfaceFee: interfaceFee.interfaceFee }),
     fullClose: !!fullClose,
-    requiresTwoStep: currentMaintenance > collateralAmount,
+    // Buffer maintenance by 1.5x to prevent liquidations between settlements
+    requiresTwoStep: Big6Math.mul(currentMaintenance, Big6Math.fromFloatString('1.5')) > collateralAmount,
   }
 }
 
 export const getOrderToastProps = ({
-  orderDirection,
+  positionSide,
   variant,
   asset,
   amount,
   adjustment,
   copy,
   intl,
-  product,
+  market,
+  isMaker,
 }: {
-  orderDirection: OrderDirection
+  positionSide: PositionSide2
   variant: 'close' | 'adjust' | 'withdraw'
   asset: SupportedAsset
   amount: string
   adjustment: Adjustment
   copy: ModalCopy
   intl: IntlShape
-  product: ProductSnapshot
+  market: MarketSnapshot
+  isMaker: boolean
 }) => {
   const formattedAsset = asset.toUpperCase()
   if (variant === 'close' && adjustment.fullClose) {
@@ -112,31 +123,51 @@ export const getOrderToastProps = ({
   }
   const { prevPosition, newPosition } = adjustment.position
   const isNewPosition = prevPosition === 0n
-  const isLong = orderDirection === OrderDirection.Long
+  const isLong = positionSide === PositionSide2.long
 
   if (isNewPosition) {
-    const price = formatBig18USDPrice(Big18Math.abs(product.latestVersion.price))
+    const price = formatBig6USDPrice(Big6Math.abs(market.global.latestPrice))
     const message = intl.formatMessage(
       { defaultMessage: '{amount} {asset} at {price}' },
       { amount, asset: formattedAsset, price },
     )
     return {
-      title: copy.orderPlaced,
-      action: isLong ? copy.buy : copy.sell,
+      title: copy.orderSent,
+      action: isMaker ? copy.make : isLong ? copy.buy : copy.sell,
       message,
-      actionColor: isLong ? colors.brand.green : colors.brand.red,
+      actionColor: isLong || isMaker ? colors.brand.green : colors.brand.red,
     }
   }
 
-  const difference = Big18Math.toFloatString(Big18Math.abs(adjustment.position.difference))
+  const difference = Big6Math.toFloatString(Big6Math.abs(adjustment.position.difference))
+
+  if (difference === '0') {
+    // collateral change
+    const { newLeverage, prevLeverage } = adjustment.leverage
+    const action = newLeverage > prevLeverage ? copy.increase : copy.decrease
+    const message = intl.formatMessage(
+      { defaultMessage: 'leverage for {orderDirection} {asset}' },
+      {
+        orderDirection: isMaker ? copy.make : positionSide,
+        asset: formattedAsset,
+      },
+    )
+    return {
+      title: copy.modifyCollateral,
+      action,
+      message,
+      actionColor: action === copy.increase ? colors.brand.green : colors.brand.red,
+    }
+  }
+
   const message = intl.formatMessage(
     { defaultMessage: '{orderDirection} {asset} {difference}' },
-    { difference, asset: formattedAsset, orderDirection },
+    { difference, asset: formattedAsset, orderDirection: isMaker ? copy.make : positionSide },
   )
   const action = newPosition > prevPosition ? copy.increase : copy.decrease
 
   return {
-    title: copy.orderPlaced,
+    title: copy.orderSent,
     action,
     message,
     actionColor: action === copy.increase ? colors.brand.green : colors.brand.red,

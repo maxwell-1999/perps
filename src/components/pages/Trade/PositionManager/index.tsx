@@ -6,6 +6,7 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@ds/Tabs'
 import AllPositions from './AllPositions'
 import CurrentPosition from './CurrentPosition'
 import HistoricalPositions from './HistoricalPositions'
+import Orders from './Orders'
 import { usePositionManagerCopy } from './hooks'
 
 function PositionManager() {
@@ -24,6 +25,7 @@ function PositionManager() {
       <TabList>
         <Tab>{copy.thisPosition}</Tab>
         <Tab>{copy.allPositions}</Tab>
+        <Tab>{copy.orders}</Tab>
         <Tab>{copy.history}</Tab>
       </TabList>
       <TabPanels>
@@ -32,6 +34,9 @@ function PositionManager() {
         </TabPanel>
         <TabPanel>
           <AllPositions />
+        </TabPanel>
+        <TabPanel>
+          <Orders />
         </TabPanel>
         <TabPanel>
           <HistoricalPositions />

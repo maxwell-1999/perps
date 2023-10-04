@@ -9,11 +9,12 @@ export const useAdjustmentModalCopy = () => {
     confirm: intl.formatMessage({ defaultMessage: 'Confirm' }),
     cancel: intl.formatMessage({ defaultMessage: 'Cancel' }),
     side: intl.formatMessage({ defaultMessage: 'Side' }),
+    maker: intl.formatMessage({ defaultMessage: 'Maker' }),
     long: intl.formatMessage({ defaultMessage: 'Long' }),
     short: intl.formatMessage({ defaultMessage: 'Short' }),
     positionSizeAsset: (asset: string) =>
       intl.formatMessage({ defaultMessage: 'Size ({asset})' }, { asset: asset.toUpperCase() }),
-    fees: intl.formatMessage({ defaultMessage: 'Fees' }),
+    estEntry: intl.formatMessage({ defaultMessage: 'Est. Entry' }),
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
     position: intl.formatMessage({ defaultMessage: 'Position' }),
@@ -43,8 +44,8 @@ export const useAdjustmentModalCopy = () => {
     approveRequests: intl.formatMessage({
       defaultMessage: 'Please check your wallet, and confirm the following requests.',
     }),
-    orderPlaced: intl.formatMessage({
-      defaultMessage: 'Order placed',
+    orderSent: intl.formatMessage({
+      defaultMessage: 'Order sent',
     }),
     positionChanged: intl.formatMessage({ defaultMessage: 'Position changed' }),
     positionClose: intl.formatMessage({ defaultMessage: 'Position close' }),
@@ -55,6 +56,24 @@ export const useAdjustmentModalCopy = () => {
     positionSettled: intl.formatMessage({ defaultMessage: 'Position settled' }),
     yourPositionHasSettled: intl.formatMessage({ defaultMessage: 'Your position has settled' }),
     withdrawComplete: intl.formatMessage({ defaultMessage: 'Withdrawal complete' }),
+    modifyCollateral: intl.formatMessage({ defaultMessage: 'Modify collateral' }),
+    interfaceFee: intl.formatMessage({ defaultMessage: 'Ecosystem fee' }),
+    priceImpact: intl.formatMessage({ defaultMessage: 'Est. Price impact' }),
+    fee: intl.formatMessage({ defaultMessage: 'Fee' }),
+    retryFailedOrder: intl.formatMessage({ defaultMessage: 'Retry failed order?' }),
+    retryBody: intl.formatMessage({
+      defaultMessage: 'This order was not able to be processed. Would you like to try again?',
+    }),
+    make: intl.formatMessage({ defaultMessage: 'Make' }),
+    staleAfterMessage: (staleAfter: React.ReactNode) =>
+      intl.formatMessage(
+        {
+          defaultMessage:
+            'After submitting your update, confirm the transaction in your wallet within {staleAfter} to avoid reverts.',
+        },
+        { staleAfter },
+      ),
+    seconds: intl.formatMessage({ defaultMessage: 'seconds' }),
   }
 }
 

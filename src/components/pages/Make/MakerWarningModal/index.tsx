@@ -39,14 +39,14 @@ export default function MakerWarningModal({ onClose }: MakerWarningModalProps) {
     },
     {
       advancedLiquidityProvisioning: (
-        <Link href="https://docs.perennial.finance/lps-makers/advanced-liquidity-provisioning" target="_blank">
+        <Link href="https://docs.perennial.finance/protocol-design/advanced-lp" target="_blank">
           <Text as="span" textDecoration="underline">
             {advancedLiquidityProvisioning}
           </Text>
         </Link>
       ),
       riskManagement: (
-        <Link href="https://docs.perennial.finance/lps-makers/risk-management" target="_blank">
+        <Link href="https://docs.perennial.finance/protocol-design/protocol-risks" target="_blank">
           <Text as="span" textDecoration="underline">
             {riskManagement}
           </Text>

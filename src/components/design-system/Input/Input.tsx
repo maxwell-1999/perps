@@ -25,6 +25,7 @@ export interface InputProps extends ChakraInputProps {
   width?: FormControlProps['width']
   helperText?: string
   isRequired?: boolean
+  labelColor?: string
   pattern?: string
   rightEl?: React.ReactNode
   leftEl?: React.ReactNode
@@ -43,6 +44,7 @@ export const Input: React.FC<InputProps> = ({
   rightEl,
   validate,
   leftEl,
+  labelColor,
   ...inputProps
 }) => {
   const pr = rightEl ? { pr: '60px' } : {}
@@ -61,7 +63,9 @@ export const Input: React.FC<InputProps> = ({
     <FormControl width={width} isInvalid={Boolean(error)}>
       <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
         <FormLabel m={0} htmlFor={id}>
-          <Text variant="label">{label}</Text>
+          <Text variant="label" color={labelColor}>
+            {label}
+          </Text>
         </FormLabel>
         {rightLabel && rightLabel}
       </Flex>

@@ -2,10 +2,9 @@ import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
 import { useMarketContext } from '@/contexts/marketContext'
-import { useAsset7DayData, useAsset24hrData, useChainLivePrices } from '@/hooks/markets'
-import { Big18Math, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
-import { utilization } from '@/utils/positionUtils'
-import { Hour } from '@/utils/timeUtils'
+import { useChainLivePrices2, useMarket7dData, useMarket24HrHighLow, useMarket24hrData } from '@/hooks/markets2'
+import { Big6Math, formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
+import { calcLpUtilization, calcSkew, calcTakerLiquidity } from '@/utils/positionUtils'
 
 export const useSelectorCopy = () => {
   const intl = useIntl()
@@ -21,84 +20,83 @@ export const useMarketBarCopy = () => {
   const intl = useIntl()
   return {
     dailyChange: intl.formatMessage({ defaultMessage: '24h Change' }),
-    hourlyFunding: intl.formatMessage({ defaultMessage: 'Funding Rate (1h)' }),
+    hourlyFunding: intl.formatMessage({ defaultMessage: 'Funding Rate' }),
     low: intl.formatMessage({ defaultMessage: '24h Low' }),
     high: intl.formatMessage({ defaultMessage: '24h High' }),
     volume: intl.formatMessage({ defaultMessage: '24h Volume' }),
     volumeLS: intl.formatMessage({ defaultMessage: '7d Volume (L/S)' }),
     openInterest: intl.formatMessage({ defaultMessage: 'Open Interest (L/S)' }),
-    liquidity: intl.formatMessage({ defaultMessage: 'Liquidity (L/S)' }),
-    utilization: intl.formatMessage({ defaultMessage: 'Utilization (L/S)' }),
+    liquidity: intl.formatMessage({ defaultMessage: 'Available Liquidity (L/S)' }),
+    lpExposure: intl.formatMessage({ defaultMessage: 'LP Exposure' }),
+    totalLiquidity: intl.formatMessage({ defaultMessage: 'Total liquidity (L/S)' }),
+    skew: intl.formatMessage({ defaultMessage: 'Skew (L/S)' }),
+    slash: intl.formatMessage({ defaultMessage: '/' }),
+    fundingRateOption: {
+      hourlyFunding: intl.formatMessage({ defaultMessage: '1H' }),
+      eightHourFunding: intl.formatMessage({ defaultMessage: '8H' }),
+      dailyFunding: intl.formatMessage({ defaultMessage: '24H' }),
+      yearlyFunding: intl.formatMessage({ defaultMessage: '1Y' }),
+    },
   }
 }
 
 export const useFormattedMarketBarValues = () => {
-  const livePrices = useChainLivePrices()
-  const {
-    selectedMarket,
-    selectedMarketSnapshot: snapshot,
-    selectedMakerMarketSnapshot: makerSnapshot,
-    snapshots,
-    isMaker,
-    makerAsset,
-  } = useMarketContext()
+  const livePrices = useChainLivePrices2()
+  const { selectedMarket: selectedMarket_, isMaker, selectedMarketSnapshot2, selectedMakerMarket } = useMarketContext()
 
-  const { data: dailyData } = useAsset24hrData(isMaker ? makerAsset : selectedMarket)
-  const { data: weeklyData } = useAsset7DayData(isMaker ? makerAsset : selectedMarket)
+  const selectedMarket = isMaker ? selectedMakerMarket : selectedMarket_
+  const { data: priceData } = useMarket24HrHighLow(selectedMarket)
+  const { data: dailyData } = useMarket24hrData(selectedMarket)
+  const { data: weeklyData } = useMarket7dData(selectedMarket)
 
   const totalVolume = useMemo(() => {
     if (!dailyData?.volume) return 0n
-    return dailyData.volume.reduce((acc, cur) => acc + BigInt(cur.takerNotional), 0n)
+    return dailyData.volume.reduce((acc, cur) => acc + BigInt(cur.longNotional) + BigInt(cur.shortNotional), 0n)
   }, [dailyData?.volume])
 
-  const longRate = (isMaker ? makerSnapshot?.rate ?? 0n : snapshot?.Long?.rate ?? 0n) * Hour
-  const shortRate = (isMaker ? makerSnapshot?.rate ?? 0n : snapshot?.Short?.rate ?? 0n) * Hour
-  const currentPrice = isMaker
-    ? Big18Math.abs(
-        livePrices[makerAsset] ?? makerSnapshot?.latestVersion?.price ?? makerSnapshot?.latestVersion?.price ?? 0n,
-      )
-    : Big18Math.abs(
-        livePrices[selectedMarket] ??
-          snapshot?.Long?.latestVersion?.price ??
-          snapshot?.Short?.latestVersion?.price ??
-          0n,
-      )
-  const change = currentPrice - BigInt(dailyData?.start?.at(0)?.price ?? currentPrice)
-  const longMakerSnapshot = snapshots?.[makerAsset]?.Long
-  const longUtilization = longMakerSnapshot?.pre
-    ? formatBig18Percent(utilization(longMakerSnapshot?.pre, longMakerSnapshot?.position))
-    : '--'
-  const shortMakerSnapshot = snapshots?.[makerAsset]?.Short
-  const shortUtilization = shortMakerSnapshot?.pre
-    ? formatBig18Percent(utilization(shortMakerSnapshot?.pre, shortMakerSnapshot?.position))
-    : '--'
+  // Coerce to 18 decimals to match pyth price
+  const chainPrice = selectedMarketSnapshot2?.global?.latestPrice ?? 0n
+  const currentPrice = livePrices[selectedMarket] ?? 0n ?? chainPrice ?? 0n
+  const change = currentPrice - BigInt(priceData?.open ?? currentPrice)
 
-  const longOpenInterest = isMaker ? longMakerSnapshot?.openInterest?.taker : snapshot?.Long?.openInterest?.taker
-  const shortOpenInterest = isMaker ? shortMakerSnapshot?.openInterest?.taker : snapshot?.Short?.openInterest?.taker
+  const latestPrice = selectedMarketSnapshot2?.global?.latestPrice ?? 0n
+  const nextLong = selectedMarketSnapshot2?.nextPosition?.long ?? 0n
+  const nextShort = selectedMarketSnapshot2?.nextPosition?.short ?? 0n
+  const longOpenInterest = Big6Math.mul(nextLong, latestPrice)
+  const shortOpenInterest = Big6Math.mul(nextShort, latestPrice)
 
-  const longLiquidity = isMaker ? longMakerSnapshot?.openInterest?.maker : snapshot?.Long?.openInterest?.maker
-  const shortLiquidity = isMaker ? shortMakerSnapshot?.openInterest?.maker : snapshot?.Short?.openInterest?.maker
+  const availableLiq = selectedMarketSnapshot2 ? calcTakerLiquidity(selectedMarketSnapshot2) : undefined
+  const lpUtilization = calcLpUtilization(selectedMarketSnapshot2)
+  const calculatedSkew = calcSkew(selectedMarketSnapshot2)
 
   return {
-    price: formatBig18USDPrice(currentPrice),
-    change: formatBig18Percent(Big18Math.abs(Big18Math.div(change, BigInt(dailyData?.start?.at(0)?.price || 1)))),
+    price: formatBig6USDPrice(currentPrice),
+    change: formatBig6Percent(Big6Math.abs(Big6Math.div(change, priceData?.open ?? 1n))),
     changeIsNegative: change < 0n,
-    hourlyFunding: `${formatBig18Percent(longRate, { numDecimals: 4 })} / ${formatBig18Percent(shortRate, {
-      numDecimals: 4,
+    low: formatBig6USDPrice(Big6Math.min(currentPrice, priceData?.low ?? 0n)),
+    high: formatBig6USDPrice(Big6Math.max(currentPrice, priceData?.high ?? 0n)),
+    volume: formatBig6USDPrice(totalVolume, { compact: true }),
+    openInterest: `${formatBig6USDPrice(longOpenInterest, {
+      compact: true,
+    })} / ${formatBig6USDPrice(shortOpenInterest, { compact: true })}`,
+    availableLiquidity: `${formatBig6USDPrice(Big6Math.mul(availableLiq?.availableLongLiquidity ?? 0n, latestPrice), {
+      compact: true,
+    })} / ${formatBig6USDPrice(Big6Math.mul(availableLiq?.availableShortLiquidity ?? 0n, latestPrice), {
+      compact: true,
     })}`,
-    low: formatBig18USDPrice(BigInt(dailyData?.low?.at(0)?.price || 0)),
-    high: formatBig18USDPrice(BigInt(dailyData?.high?.at(0)?.price || 0)),
-    volume: formatBig18USDPrice(totalVolume, { compact: true }),
-    openInterest: `${formatBig18USDPrice(longOpenInterest, {
+    totalLiquidity: `${formatBig6USDPrice(Big6Math.mul(availableLiq?.totalLongLiquidity ?? 0n, latestPrice), {
       compact: true,
-    })} / ${formatBig18USDPrice(shortOpenInterest, { compact: true })}`,
-    liquidity: `${formatBig18USDPrice(longLiquidity, {
+    })} / ${formatBig6USDPrice(Big6Math.mul(availableLiq?.totalShortLiquidity ?? 0n, latestPrice), {
       compact: true,
-    })} / ${formatBig18USDPrice(shortLiquidity, { compact: true })}`,
-    utilization: `${longUtilization} / ${shortUtilization}`,
-    volumeLS: `${formatBig18USDPrice(weeklyData?.takerVolumes.Long ?? 0n, { compact: true })} / ${formatBig18USDPrice(
-      weeklyData?.takerVolumes.Short ?? 0n,
+    })}`,
+    lpUtilization: lpUtilization?.formattedLpUtilization ?? '0.00%',
+    lpExposure: lpUtilization?.exposureSide ?? '--',
+    volumeLS: `${formatBig6USDPrice(weeklyData?.takerVolumes.long ?? 0n, { compact: true })} / ${formatBig6USDPrice(
+      weeklyData?.takerVolumes.short ?? 0n,
       { compact: true },
     )}`,
+    skew: formatBig6Percent(calculatedSkew?.skew ?? 0n),
+    longSkew: formatBig6Percent(calculatedSkew?.longSkew ?? 0n),
+    shortSkew: formatBig6Percent(calculatedSkew?.shortSkew ?? 0n),
   }
 }

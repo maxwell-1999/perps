@@ -4,15 +4,11 @@ export type TxState = {
 }
 
 export type ClaimTxState = {
-  approveDSULoading: boolean
-  approveDSUCompleted: boolean
   claimLoading: boolean
   claimCompleted: boolean
 }
 
 export const initialTransactionState: ClaimTxState = {
-  approveDSULoading: false,
-  approveDSUCompleted: false,
   claimLoading: false,
   claimCompleted: false,
 }

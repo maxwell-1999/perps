@@ -1,7 +1,7 @@
 import { Flex, FormLabel, Spinner, Text } from '@chakra-ui/react'
-import { arbitrum } from '@wagmi/chains'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { arbitrum } from 'viem/chains'
 
 import { Button, Container } from '@/components/design-system'
 import { DataRow } from '@/components/design-system'
@@ -9,13 +9,14 @@ import colors from '@/components/design-system/theme/colors'
 import Toggle from '@/components/shared/Toggle'
 import { TxButton } from '@/components/shared/TxButton'
 import { Form, USDCETooltip } from '@/components/shared/components'
-import { QuoteCurrency } from '@/constants/assets'
+import { QuoteCurrency } from '@/constants/markets'
+import { useMigrationContext } from '@/contexts/migrationContext'
 import { useAddress } from '@/hooks/network'
 import { useChainId } from '@/hooks/network'
-import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
+import { VaultAccountSnapshot2, VaultSnapshot2 } from '@/hooks/vaults2'
 import { Balances } from '@/hooks/wallet'
+import { Big6Math, formatBig6USDPrice } from '@/utils/big6Utils'
 import { Big18Math } from '@/utils/big18Utils'
-import { formatBig18USDPrice } from '@/utils/big18Utils'
 
 import { Input, Pill } from '@ds/Input'
 
@@ -29,17 +30,19 @@ export default function VaultForm({
   vaultUserSnapshot,
   balances,
 }: {
-  vaultSnapshot: VaultSnapshot
+  vaultSnapshot: VaultSnapshot2
   vaultName: string
-  vaultUserSnapshot?: VaultUserSnapshot
+  vaultUserSnapshot?: VaultAccountSnapshot2
   balances: Balances
 }) {
+  const formRef = useRef<HTMLFormElement>(null)
   const copy = useVaultFormCopy()
   const { address } = useAddress()
   const chainId = useChainId()
   const [formValues, setFormValues] = useState<FormValues | null>(null)
   const [vaultOption, setVaultOption] = useState<VaultFormOption>(VaultFormOption.Deposit)
   const [maxWithdrawal, setMaxWithdrawal] = useState(false)
+  const { withdrawnAmount, setWithdrawnAmount } = useMigrationContext()
 
   const {
     handleSubmit,
@@ -53,6 +56,15 @@ export default function VaultForm({
       [FormNames.amount]: '',
     },
   })
+
+  useEffect(() => {
+    if (withdrawnAmount > 0n && !!balances?.usdcAllowance) {
+      setVaultOption(VaultFormOption.Deposit)
+      setFormValues({ amount: Big18Math.toFloatString(withdrawnAmount) })
+      setWithdrawnAmount(0n)
+      reset()
+    }
+  }, [withdrawnAmount, setValue, reset, formValues, balances, setWithdrawnAmount])
 
   useEffect(() => {
     reset()
@@ -79,7 +91,7 @@ export default function VaultForm({
   }
 
   const onClickMaxAmount = () => {
-    setValue(FormNames.amount, Big18Math.toFloatString(Big18Math.fromDecimals(balances?.usdc ?? 0n, 6)), {
+    setValue(FormNames.amount, Big6Math.toFloatString(Big6Math.fromDecimals(balances?.usdc ?? 0n, 6)), {
       shouldDirty: true,
       shouldValidate: true,
     })
@@ -87,16 +99,13 @@ export default function VaultForm({
 
   const onClickMaxShares = () => {
     setMaxWithdrawal(true)
-    setValue(FormNames.amount, Big18Math.toFloatString(vaultUserSnapshot?.assets ?? 0n), {
+    setValue(FormNames.amount, Big6Math.toFloatString(vaultUserSnapshot?.assets ?? 0n), {
       shouldDirty: true,
       shouldValidate: true,
     })
   }
 
-  const displayAmount = Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(Number(amount))
+  const displayAmount = formatBig6USDPrice(Big6Math.fromFloatString(amount))
 
   const vaultFormValidators = useVaultFormValidators({
     usdcBalance: balances?.usdc ?? 0n,
@@ -115,8 +124,8 @@ export default function VaultForm({
     )
   }
 
-  const hasAssets = !Big18Math.isZero(vaultUserSnapshot?.assets ?? 0n)
-  const userBalance = formatBig18USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
+  const hasAssets = !Big6Math.isZero(vaultUserSnapshot?.assets ?? 0n)
+  const userBalance = formatBig6USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
 
   return (
     <>
@@ -134,7 +143,7 @@ export default function VaultForm({
         />
       )}
       <Container variant="vaultCard" mb="22px" py={5} px={4}>
-        <Form onSubmit={handleSubmit(onSubmit)}>
+        <Form onSubmit={handleSubmit(onSubmit)} ref={formRef}>
           <Flex mb="14px">
             <Toggle<VaultFormOption>
               labels={vaultFormOptions}
@@ -175,7 +184,7 @@ export default function VaultForm({
                 )}
                 {!!address && !isDeposit && (
                   <Flex gap={1}>
-                    <Text variant="label">{formatBig18USDPrice(vaultUserSnapshot?.assets) ?? copy.zeroUsd}</Text>
+                    <Text variant="label">{formatBig6USDPrice(vaultUserSnapshot?.assets) ?? copy.zeroUsd}</Text>
                     <Button
                       variant="text"
                       padding={0}
@@ -202,9 +211,29 @@ export default function VaultForm({
                 )
               }
             />
+            {amount && (
+              <DataRow
+                mb={3}
+                label={copy.SettlementFee}
+                value={
+                  amount ? (
+                    <DisplayAmount
+                      amount={formatBig6USDPrice(
+                        vaultSnapshot.totalSettlementFee * (vaultOption === VaultFormOption.Redeem ? 2n : 1n),
+                        { compact: true },
+                      )}
+                      isWithdrawal={true}
+                    />
+                  ) : (
+                    copy.noValue
+                  )
+                }
+              />
+            )}
           </Flex>
           <TxButton
             type="submit"
+            formRef={formRef}
             isDisabled={buttonDisabled}
             label={vaultOption === VaultFormOption.Deposit ? copy.Deposit : copy.Redeem}
             overrideLabel

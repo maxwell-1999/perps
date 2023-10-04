@@ -1,115 +1,105 @@
 import { Row } from 'react-table'
 
-import { AssetMetadata, SupportedAsset } from '@/constants/assets'
-import {
-  AssetSnapshots,
-  LivePrices,
-  PositionDetails,
-  ProductSnapshotWithTradeLimitations,
-  UserCurrentPositions,
-} from '@/hooks/markets'
-import { Big18Math, formatBig18, formatBig18Percent, formatBig18USDPrice } from '@/utils/big18Utils'
-import { utilization } from '@/utils/positionUtils'
+import { AssetMetadata, PositionSide2, SupportedAsset } from '@/constants/markets'
+import { MarketSnapshot, UserMarketSnapshot } from '@/hooks/markets2'
+import { Big6Math, formatBig6, formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
+import { calcLiquidationPrice, calcLpUtilization, isActivePosition, isFailedClose } from '@/utils/positionUtils'
 
 import { FormattedPositionDetail } from './constants'
 
-export const calculatePnl = (positionDetails?: PositionDetails, livePriceDelta?: bigint) => {
-  if (!positionDetails) return { pnl: '0', pnlPercentage: '0', isPnlPositive: false }
-  let pnl = positionDetails.pnl || 0n
-
-  // If there is a new price from offchain sources, update PnL with the difference
-  if (livePriceDelta && positionDetails?.nextPosition) {
-    const additionalPnl = Big18Math.mul(positionDetails.nextPosition, livePriceDelta)
-    pnl = Big18Math.add(pnl, additionalPnl)
-  }
-  let pnlPercentage = '0'
-  if (positionDetails?.startCollateral) {
-    const deposits = positionDetails?.deposits ?? 0n
-    // Only add deposits to the denominator if there is a net positive deposit
-    const denominator = deposits > 0n ? positionDetails?.startCollateral + deposits : positionDetails?.startCollateral
-    pnlPercentage = formatBig18Percent(Big18Math.abs(Big18Math.div(pnl, denominator)), {
-      numDecimals: 2,
-    })
-  }
-  return {
-    pnl: formatBig18USDPrice(pnl),
-    pnlPercentage,
-    isPnlPositive: pnl > 0n,
-  }
-}
-
-export const transformPositionDataToArray = (userPositions?: UserCurrentPositions, isMaker?: boolean) => {
+export const transformPositionDataToArray = (
+  userPositions?: Record<SupportedAsset, UserMarketSnapshot>,
+  isMaker?: boolean,
+) => {
   const result: FormattedPositionDetail[] = []
   if (!userPositions) return result
   for (const [_asset, positionData] of Object.entries(userPositions)) {
     const asset = _asset as SupportedAsset
     const symbol = AssetMetadata[asset].symbol
-    if (positionData) {
-      if (
-        positionData?.Long &&
-        positionData?.Long.side === (isMaker ? 'maker' : 'taker') &&
-        positionData?.Long?.currentCollateral !== 0n
-      ) {
-        result.push({ asset, symbol, details: positionData?.Long })
+    if (isActivePosition(positionData)) {
+      if (isMaker && (positionData.side === PositionSide2.maker || positionData.nextSide === PositionSide2.maker)) {
+        result.push({ asset, symbol, details: positionData })
       }
-      if (
-        positionData?.Short &&
-        positionData?.Short.side === (isMaker ? 'maker' : 'taker') &&
-        positionData?.Short?.currentCollateral !== 0n
-      ) {
-        result.push({ asset, symbol, details: positionData?.Short })
+      if (!isMaker && positionData.side !== PositionSide2.maker) {
+        result.push({ asset, symbol, details: positionData })
       }
     }
   }
   return result
 }
 
-export const getCurrentPriceDelta = ({
-  snapshots,
-  asset,
-  livePrices,
-}: {
-  snapshots?: AssetSnapshots
-  asset: SupportedAsset
-  livePrices: LivePrices
-}) => {
-  if (!snapshots) return undefined
-  const selectedMarketSnapshot = snapshots[asset]
-  const currentPrice = Big18Math.abs(
-    selectedMarketSnapshot?.Long?.latestVersion?.price ?? selectedMarketSnapshot?.Short?.latestVersion?.price ?? 0n,
-  )
-  const pythPrice = livePrices[asset]
-  // Use the live price to calculate real time pnl
-  const currentPriceDelta = currentPrice > 0 && pythPrice ? pythPrice - currentPrice : undefined
-  return currentPriceDelta
-}
-
 export const getFormattedPositionDetails = ({
-  positionDetails,
+  userMarketSnapshot,
+  marketSnapshot,
   numSigFigs,
   placeholderString,
 }: {
-  positionDetails?: PositionDetails
+  userMarketSnapshot?: UserMarketSnapshot
+  marketSnapshot?: MarketSnapshot
   numSigFigs: number
   placeholderString: string
-}) => ({
-  currentCollateral: positionDetails ? formatBig18USDPrice(positionDetails?.currentCollateral) : placeholderString,
-  startCollateral: positionDetails ? formatBig18USDPrice(positionDetails?.startCollateral) : placeholderString,
-  position: positionDetails ? formatBig18(positionDetails?.position, { numSigFigs }) : placeholderString,
-  nextPosition: positionDetails ? formatBig18(positionDetails?.nextPosition, { numSigFigs }) : placeholderString,
-  averageEntry: positionDetails ? formatBig18USDPrice(positionDetails?.averageEntry) : placeholderString,
-  liquidationPrice: positionDetails ? formatBig18USDPrice(positionDetails?.liquidationPrice) : placeholderString,
-  unformattedLiquidationPrice: positionDetails
-    ? formatBig18(positionDetails?.liquidationPrice, { numSigFigs: 8 })
-    : placeholderString,
-  notional: positionDetails ? formatBig18USDPrice(positionDetails?.notional) : placeholderString,
-  nextNotional: positionDetails ? formatBig18USDPrice(positionDetails?.nextNotional) : placeholderString,
-  unformattedNotional: positionDetails ? formatBig18(positionDetails?.notional) : placeholderString,
-  leverage: positionDetails ? formatBig18(positionDetails?.leverage) : placeholderString,
-  nextLeverage: positionDetails ? formatBig18(positionDetails?.nextLeverage) : placeholderString,
-  fees: positionDetails ? formatBig18USDPrice(positionDetails?.fees) : placeholderString,
-  liquidationFee: positionDetails ? formatBig18USDPrice(positionDetails?.liquidationFee) : placeholderString,
-})
+}) => {
+  if (!userMarketSnapshot || !isActivePosition(userMarketSnapshot)) {
+    return {
+      currentCollateral: placeholderString,
+      startCollateral: placeholderString,
+      position: placeholderString,
+      nextPosition: placeholderString,
+      liquidationPrice: placeholderString,
+      unformattedLiquidationPrice: placeholderString,
+      notional: placeholderString,
+      nextNotional: placeholderString,
+      unformattedNotional: placeholderString,
+      leverage: placeholderString,
+      nextLeverage: placeholderString,
+      fees: placeholderString,
+      liquidationFee: placeholderString,
+      exposure: placeholderString,
+      exposureSide: placeholderString,
+      failedClose: false,
+    }
+  }
+  const failedClose = isFailedClose(userMarketSnapshot)
+
+  const liquidationPrices = calcLiquidationPrice({
+    marketSnapshot,
+    position: failedClose ? userMarketSnapshot?.magnitude : userMarketSnapshot?.nextMagnitude,
+    collateral: userMarketSnapshot?.local?.collateral,
+  })
+
+  const liquidationPrice =
+    userMarketSnapshot.nextSide === PositionSide2.long ? liquidationPrices.long : liquidationPrices.short
+
+  const below1xLeverage = userMarketSnapshot?.nextLeverage <= Big6Math.ONE
+
+  const lpUtilization = calcLpUtilization(marketSnapshot)
+  const isMakerPosition = userMarketSnapshot?.side === PositionSide2.maker
+  const makerExposure = isMakerPosition
+    ? getMakerExposure(
+        lpUtilization?.lpUtilization,
+        failedClose ? userMarketSnapshot?.leverage : userMarketSnapshot?.nextLeverage,
+      )
+    : 0n
+
+  return {
+    currentCollateral: formatBig6USDPrice(userMarketSnapshot?.local?.collateral),
+    startCollateral: formatBig6USDPrice(userMarketSnapshot?.local?.collateral), // TODO: await graph
+    position: formatBig6(userMarketSnapshot?.magnitude, { numSigFigs }),
+    nextPosition: formatBig6(userMarketSnapshot?.nextMagnitude, { numSigFigs }),
+    liquidationPrice: below1xLeverage ? placeholderString : formatBig6USDPrice(liquidationPrice),
+    unformattedLiquidationPrice: placeholderString, // TODO: implement
+    notional: formatBig6USDPrice(userMarketSnapshot?.notional),
+    nextNotional: formatBig6USDPrice(userMarketSnapshot?.nextNotional),
+    unformattedNotional: placeholderString, // TODO: implement
+    leverage: formatBig6(userMarketSnapshot?.leverage),
+    nextLeverage: formatBig6(userMarketSnapshot?.nextLeverage),
+    fees: placeholderString, // TODO: implement
+    liquidationFee: placeholderString, // TODO: implement
+    makerExposure: formatBig6Percent(makerExposure, { numDecimals: 2 }),
+    exposureSide: lpUtilization?.exposureSide ?? placeholderString,
+    failedClose,
+  }
+}
 
 export const numericColumnSort = (rowA: Row, rowB: Row, id: string) => {
   const a = parseFloat(rowA.values[id])
@@ -123,13 +113,7 @@ export const numericColumnSort = (rowA: Row, rowB: Row, id: string) => {
   return 0
 }
 
-export const getMakerExposure = (
-  selectedMakerMarketSnapshot: ProductSnapshotWithTradeLimitations | undefined,
-  leverage: bigint | undefined,
-) => {
-  if (!selectedMakerMarketSnapshot || !leverage) return undefined
-
-  const { pre: globalPre, position } = selectedMakerMarketSnapshot
-  const utilizationResult = utilization(globalPre, position)
-  return Big18Math.mul(utilizationResult, leverage)
+export const getMakerExposure = (lpUtililization?: bigint, leverage?: bigint) => {
+  if (!lpUtililization || !leverage) return 0n
+  return Big6Math.mul(lpUtililization, leverage)
 }

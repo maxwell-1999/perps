@@ -1,19 +1,28 @@
+import { useState } from 'react'
+import { useRef } from 'react'
 import { useIntl } from 'react-intl'
+import { TransactionReceipt } from 'viem'
 
 import { useAuthStatus } from '@/contexts/authStatusContext'
 import { useAddress } from '@/hooks/network'
+import { useOperators } from '@/hooks/wallet'
 
 import { Button, ButtonProps } from '../design-system/Button'
+import ApproveOperatorModal from './ApproveOperatorModal'
 
 interface Props extends ButtonProps {
   overrideLabel?: boolean
   actionAllowedInGeoblock?: boolean
+  formRef?: React.RefObject<HTMLFormElement>
 }
 
 export const TxButton = (props: Props) => {
   const intl = useIntl()
+  const [showApproveOperatorModal, setShowApproveOperatorModal] = useState(false)
   const { geoblocked: geoblocked_ } = useAuthStatus()
   const { address, overriding } = useAddress()
+  const { data: operatorData } = useOperators()
+  const btnRef = useRef<HTMLButtonElement | null>(null)
 
   const geoblocked = geoblocked_ && !props.actionAllowedInGeoblock
   const appNotAvailable = intl.formatMessage({ defaultMessage: 'App Not Available' })
@@ -25,8 +34,43 @@ export const TxButton = (props: Props) => {
     else if (!address) label = connectWallet
   }
 
-  const btnProps = { ...props }
+  const { formRef, ...btnProps } = props
+
   delete btnProps.overrideLabel
   delete btnProps.actionAllowedInGeoblock
+
+  if (!operatorData?.multiInvokerApproved) {
+    delete btnProps.type
+    return (
+      <>
+        <Button
+          ref={btnRef}
+          {...btnProps}
+          isDisabled={geoblocked || overriding || !address || props.isDisabled}
+          onClick={() => setShowApproveOperatorModal(true)}
+          label={label}
+        />
+        {showApproveOperatorModal && (
+          <ApproveOperatorModal
+            onClose={(receipt?: TransactionReceipt) => {
+              if (receipt?.status === 'success') {
+                if (props.type === 'submit' && formRef) {
+                  formRef.current?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+                } else if (btnProps.onClick) {
+                  const mockEvent = {
+                    preventDefault: () => {},
+                    stopPropagation: () => {},
+                  }
+                  btnProps.onClick(mockEvent as any)
+                }
+              }
+              setShowApproveOperatorModal(false)
+            }}
+          />
+        )}
+      </>
+    )
+  }
+
   return <Button {...btnProps} isDisabled={geoblocked || overriding || !address || props.isDisabled} label={label} />
 }

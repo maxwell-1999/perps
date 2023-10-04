@@ -28,6 +28,9 @@ export const formatBig18USDPrice = (
   value: bigint = 0n,
   { compact = false, fromUsdc = false }: { compact?: boolean; fromUsdc?: boolean } = {},
 ) => {
+  if (value === 0n) {
+    return '$0.00'
+  }
   const valueToFormat = fromUsdc ? Number(formatUnits(value, 6)) : Big18Math.toUnsafeFloat(value)
   return Intl.NumberFormat('en-US', {
     style: 'currency',

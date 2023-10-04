@@ -6,6 +6,8 @@ export const Hour = Minute * 60n
 export const Day = Hour * 24n
 export const Year = Day * 365n
 
+export const nowSeconds = () => Math.floor(Date.now() / 1000)
+
 export const last24hrBounds = () => {
   const now = new Date()
   const yesterday = new Date(new Date().setDate(now.getDate() - 1))

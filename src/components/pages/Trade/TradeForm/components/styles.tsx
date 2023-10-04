@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 import { Container } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
+import { PositionSide2 } from '@/constants/markets'
 
 import { useStyles, useTradeFormCopy } from '../hooks'
 
@@ -27,6 +28,32 @@ export const FormOverlayHeader = ({ title, onClose }: { title: string; onClose: 
   )
 }
 
+export const PaddedContainer = ({ children, ...props }: { children: React.ReactNode } & FlexProps) => (
+  <Flex p="16px" pb="8x" flexDirection="column" {...props}>
+    {children}
+  </Flex>
+)
+
+export const FormContainer = ({
+  children,
+  variant,
+  isMobile,
+  ...props
+}: { children: React.ReactNode; variant: 'transparent' | 'active' | 'pink'; isMobile?: boolean } & FlexProps) => (
+  <Container
+    height={{ base: isMobile ? '100%' : '0px', xl: '100%' }}
+    minHeight="100%"
+    p="0"
+    variant={variant}
+    overflowY={{
+      base: 'auto',
+      xl: 'initial',
+    }}
+    {...props}
+  >
+    {children}
+  </Container>
+)
 export const MarketClosedMessage = (props: FlexProps) => {
   const copy = useTradeFormCopy()
   return (
@@ -98,3 +125,34 @@ export const VpnDetectedMessage = (props: FlexProps) => {
     </Container>
   )
 }
+
+export const SocializationMessage = ({
+  minorSide,
+  hasPosition,
+  ...props
+}: { minorSide: PositionSide2; hasPosition: boolean } & FlexProps) => {
+  const copy = useTradeFormCopy()
+  return (
+    <Container border="none" bg={colors.brand.purpleAlpha[10]} {...props}>
+      <Flex flexDirection="column" p={2} gap={2}>
+        <Text>{copy.liquidityImbalance}</Text>
+        <Text fontSize="12px" color={colors.brand.whiteAlpha[50]}>
+          {copy.liquidityImbalanceMessage(minorSide)}
+          {hasPosition && (
+            <Text as="span" ml={1}>
+              {copy.reduceYourPosition}
+            </Text>
+          )}
+        </Text>
+      </Flex>
+    </Container>
+  )
+}
+
+export const RestrictionMessage = ({ message }: { message: string }) => (
+  <Flex mb="12px">
+    <Text fontSize="11px" color={colors.brand.red}>
+      {message}
+    </Text>
+  </Flex>
+)

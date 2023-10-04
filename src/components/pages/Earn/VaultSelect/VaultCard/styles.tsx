@@ -2,9 +2,9 @@ import { Box, Flex, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
 import { keyframes } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 
-import { FormattedBig18USDPrice } from '@/components/shared/components'
-import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
-import { Big18Math } from '@/utils/big18Utils'
+import { FormattedBig6USDPrice } from '@/components/shared/components'
+import { VaultAccountSnapshot2, VaultSnapshot2, useVaultPositionHistory } from '@/hooks/vaults2'
+import { Big6Math } from '@/utils/big6Utils'
 
 import { Container } from '@ds/Container'
 import colors from '@ds/theme/colors'
@@ -45,27 +45,28 @@ export const fadeIn = keyframes`
 `
 
 export const VaultUserStats = ({
-  vaultUserSnapshot,
+  vaultAccountSnapshot,
   vault,
 }: {
-  vault: VaultSnapshot
-  vaultUserSnapshot: VaultUserSnapshot
+  vault: VaultSnapshot2
+  vaultAccountSnapshot: VaultAccountSnapshot2
 }) => {
+  const { data: positionHistory } = useVaultPositionHistory()
   const copy = useVaultSelectCopy()
   const alpha10 = useColorModeValue(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])
   const alpha20 = useColorModeValue(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])
   const alpha70 = useColorModeValue(colors.brand.blackAlpha[70], colors.brand.whiteAlpha[70])
-  const pnl = usePnl({ vault, vaultUserSnapshot })
+  const pnl = usePnl({ vault, vaultAccountSnapshot, vaultPositionHistory: positionHistory?.[vault.vaultType] })
   const pnlColor = pnl && pnl > 0n ? colors.brand.green : colors.brand.red
-  const assets = vaultUserSnapshot?.assets ?? 0n
-  const pendingDeposits = vaultUserSnapshot?.pendingDepositAmount ?? 0n
-  const pendingRedemption = vaultUserSnapshot?.pendingRedemptionAmount ?? 0n
-  const positionAmount = Big18Math.sub(Big18Math.add(assets, pendingDeposits), pendingRedemption)
-  const hasPosition = !Big18Math.isZero(positionAmount)
+  const assets = vaultAccountSnapshot?.assets ?? 0n
+  const pendingDeposits = vaultAccountSnapshot?.accountData.deposit ?? 0n
+  const pendingRedemption = vaultAccountSnapshot?.accountData.redemption ?? 0n
+  const positionAmount = Big6Math.sub(Big6Math.add(assets, pendingDeposits), pendingRedemption)
+  const hasPosition = !Big6Math.isZero(positionAmount)
   const positionUpdating = Boolean(
-    vaultUserSnapshot &&
-      (!Big18Math.isZero(vaultUserSnapshot.pendingDepositAmount) ||
-        !Big18Math.isZero(vaultUserSnapshot.pendingRedemptionAmount)),
+    vaultAccountSnapshot &&
+      (!Big6Math.isZero(vaultAccountSnapshot.accountData.deposit) ||
+        !Big6Math.isZero(vaultAccountSnapshot.accountData.redemption)),
   )
 
   if (!hasPosition) return null
@@ -85,7 +86,7 @@ export const VaultUserStats = ({
           <Text color={alpha70} fontSize="12px">
             {copy.size}
           </Text>
-          <FormattedBig18USDPrice value={positionAmount} fontSize="12px" fontWeight={500} />
+          <FormattedBig6USDPrice value={positionAmount} fontSize="12px" fontWeight={500} />
         </Flex>
         <Box width="1px" height="100%" bg={alpha10} />
         <Flex flex={1} px={2} justifyContent="space-between" flexWrap="wrap">
@@ -97,7 +98,7 @@ export const VaultUserStats = ({
               <Spinner size="xs" />
             </Flex>
           ) : (
-            <FormattedBig18USDPrice value={pnl} fontSize="12px" fontWeight={500} compact color={pnlColor} />
+            <FormattedBig6USDPrice value={pnl ?? 0n} fontSize="12px" fontWeight={500} compact color={pnlColor} />
           )}
         </Flex>
       </Container>

@@ -26,7 +26,7 @@ const Container = defineStyleConfig({
     }),
     pink: (props: StyleFunctionProps) => ({
       bg: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
-      border: `1px solid ${colors.brand.purple.alpha}`,
+      border: `1px solid ${colors.brand.purpleAlpha[30]}`,
     }),
     vaultCard: (props: StyleFunctionProps) => ({
       px: 0,

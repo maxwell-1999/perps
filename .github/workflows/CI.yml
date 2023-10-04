@@ -32,7 +32,7 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Generate types
-        run: yarn gen:gql-typings
+        run: yarn gen:gql-typings && yarn gen:lens-artifact
 
       - name: Typecheck
         run: yarn tsc

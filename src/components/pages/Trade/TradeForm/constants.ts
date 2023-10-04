@@ -1,7 +1,3 @@
-import { OrderDirection } from '@/constants/markets'
-
-export const orderDirections: [OrderDirection, OrderDirection] = [OrderDirection.Long, OrderDirection.Short]
-
 export const formIds = {
   collateral: 'collateral-input',
   amount: 'amount-input',
@@ -26,3 +22,11 @@ export type OrderValues = {
   fullClose?: boolean
   crossCollateral?: bigint
 }
+
+export enum OrderTypes {
+  market = 'market',
+  limit = 'limit',
+  stopLimit = 'stopLimit',
+}
+
+export const orderTypes = [OrderTypes.market, OrderTypes.limit, OrderTypes.stopLimit]

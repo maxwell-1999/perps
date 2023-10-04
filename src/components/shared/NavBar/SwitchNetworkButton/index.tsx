@@ -42,6 +42,7 @@ export default function SwitchNetworkButton() {
                 key={option.id}
                 borderBottom={index !== mainnetChains.length - 1 ? `1px solid ${colors.brand.whiteAlpha[10]}` : 'none'}
                 onClick={() => {
+                  // @ts-ignore
                   setDefaultChain(option)
                   onClose()
                 }}

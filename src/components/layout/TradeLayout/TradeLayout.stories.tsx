@@ -4,10 +4,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { Container } from '../../design-system/Container'
 import {
   ChartGridItem,
+  FlexibleGridItem,
   HeaderGridItem,
   MarketBarGridItem,
   PositionManagerGridItem,
-  TradeFormGridItem,
   TradeLayout,
 } from './index'
 
@@ -28,9 +28,9 @@ export const Default: Story = () => {
       <HeaderGridItem>
         <Container height="100%">Header</Container>
       </HeaderGridItem>
-      <TradeFormGridItem>
+      <FlexibleGridItem gridArea="tradeForm">
         <Container height="100%">Trade Form</Container>
-      </TradeFormGridItem>
+      </FlexibleGridItem>
       {!isBase && (
         <>
           <MarketBarGridItem>

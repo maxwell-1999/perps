@@ -1,21 +1,19 @@
 import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { TxButton } from '@/components/shared/TxButton'
-import { FormattedBig18USDPrice } from '@/components/shared/components'
+import { FormattedBig6USDPrice } from '@/components/shared/components'
 import { Form } from '@/components/shared/components'
-import { SupportedAsset } from '@/constants/assets'
-import { OpenPositionType } from '@/constants/markets'
+import { PositionSide2, SupportedAsset } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
-import { PositionDetails, useProtocolSnapshot } from '@/hooks/markets'
-import { Big18Math } from '@/utils/big18Utils'
+import { MarketSnapshot, UserMarketSnapshot } from '@/hooks/markets2'
+import { useChainId } from '@/hooks/network'
+import { Big6Math } from '@/utils/big6Utils'
 
 import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
-
-import { ProductSnapshot } from '@t/perennial'
 
 import { FormNames, OrderValues, buttonPercentValues } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
@@ -27,35 +25,36 @@ import { useCloseCollateralValidator } from './validatorHooks'
 
 interface WithdrawCollateralFormProps {
   asset: SupportedAsset
-  position: PositionDetails
-  product: ProductSnapshot
+  position: UserMarketSnapshot
+  product: MarketSnapshot
 }
 
 function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateralFormProps) {
+  const chainId = useChainId()
+  const formRef = useRef<HTMLFormElement>(null)
   const { setTradeFormState } = useTradeFormState()
-  const { assetMetadata, isMaker } = useMarketContext()
+  const { assetMetadata, orderDirection, isMaker } = useMarketContext()
   const copy = useTradeFormCopy()
   const { percentBtnBg } = useStyles()
   const [orderValues, setOrderValues] = useState<OrderValues | null>(null)
-  const { data: protocolSnapshot } = useProtocolSnapshot()
 
   const {
-    latestVersion: { price },
-  } = product
-  const { nextPosition, nextLeverage, currentCollateral } = position
+    nextMagnitude,
+    nextLeverage,
+    local: { collateral: currentCollateral },
+  } = position
 
   const {
     control,
     watch,
     setValue,
     handleSubmit,
-    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
-      [FormNames.leverage]: Big18Math.toFloatString(nextLeverage ?? 0n),
+      [FormNames.leverage]: Big6Math.toFloatString(nextLeverage ?? 0n),
     },
   })
   const amount = watch(FormNames.amount)
@@ -67,8 +66,12 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
     leverage,
     collateral,
     amount,
-    price,
     leverageFixed: false,
+    currentPosition: Big6Math.fromFloatString(amount),
+    marketSnapshot: product,
+    chainId,
+    positionStatus: position.status,
+    direction: isMaker ? PositionSide2.maker : orderDirection,
   })
 
   // Setup values based on variant
@@ -76,7 +79,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
   const onPerecentClick = useCallback(
     (percent: number) => {
       const newAmount = ((currentCollateral ?? 0n) * BigInt(percent)) / 100n
-      collateralChangeHandler(Big18Math.toFloatString(newAmount))
+      collateralChangeHandler(Big6Math.toFloatString(newAmount))
     },
     [currentCollateral, collateralChangeHandler],
   )
@@ -97,23 +100,22 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
 
   const positionDelta = useMemo(() => {
     return {
-      collateralDelta: -Big18Math.fromFloatString(collateral),
-      positionDelta: -Big18Math.fromFloatString(amount),
-      fullClose: isFullClose(amount, nextPosition ?? 0n),
+      collateralDelta: -Big6Math.fromFloatString(collateral),
+      positionDelta: -Big6Math.fromFloatString(amount),
+      fullClose: isFullClose(amount, nextMagnitude ?? 0n),
     }
-  }, [collateral, amount, nextPosition])
+  }, [collateral, amount, nextMagnitude])
 
   const onConfirm = (orderData: { collateral: string; amount: string }) => {
-    const fullClose = isFullClose(orderData.amount, nextPosition ?? 0n)
+    const fullClose = isFullClose(orderData.amount, nextMagnitude ?? 0n)
 
     setOrderValues({
-      collateral: Big18Math.toFloatString(
-        fullClose ? 0n : Big18Math.sub(currentCollateral, Big18Math.fromFloatString(orderData.collateral)),
+      collateral: Big6Math.toFloatString(
+        fullClose ? 0n : Big6Math.sub(currentCollateral, Big6Math.fromFloatString(orderData.collateral)),
       ),
-      amount: Big18Math.toFloatString(Big18Math.sub(nextPosition ?? 0n, Big18Math.fromFloatString(orderData.amount))),
+      amount: Big6Math.toFloatString(Big6Math.sub(nextMagnitude ?? 0n, Big6Math.fromFloatString(orderData.amount))),
       fullClose,
     })
-    reset()
   }
 
   const hasFormErrors = Object.keys(errors).length > 0
@@ -121,9 +123,9 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
 
   const collateralValidator = useCloseCollateralValidator({
     requiredMaintenance: position.maintenance ?? 0n,
-    minCollateral: protocolSnapshot?.minCollateral ?? 0n,
+    minCollateral: (product.riskParameter.minMargin ?? 0n) * 2n,
     currentCollateral: currentCollateral ?? 0n,
-    nextPosition: nextPosition ?? 0n,
+    nextPosition: nextMagnitude ?? 0n,
   })
 
   return (
@@ -134,17 +136,16 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
           onClose={closeAdjustmentModal}
           onCancel={cancelAdjustmentModal}
           title={copy.withdrawCollateral}
-          positionType={isMaker ? OpenPositionType.maker : OpenPositionType.taker}
+          positionSide={position.side}
           asset={asset}
           position={position}
-          product={product}
+          market={product}
           orderValues={orderValues}
           usdcAllowance={0n}
           variant="withdraw"
-          leverage={leverage}
         />
       )}
-      <Form onSubmit={handleSubmit(onConfirm)}>
+      <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
         <FormOverlayHeader title={copy.withdrawCollateral} onClose={() => setTradeFormState(FormState.trade)} />
         <Flex flexDirection="column" px="16px" mb="12px" gap="12px">
           <Input
@@ -154,7 +155,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
             rightLabel={
               <FormLabel mr={0} mb={0}>
                 <Text variant="label">
-                  <FormattedBig18USDPrice value={currentCollateral ?? 0n} as="span" />
+                  <FormattedBig6USDPrice value={currentCollateral ?? 0n} as="span" />
                 </Text>
               </FormLabel>
             }
@@ -194,6 +195,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
           <ButtonGroup>
             <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
             <TxButton
+              formRef={formRef}
               flex={1}
               label={copy.withdrawCollateral}
               type="submit"

@@ -52,6 +52,11 @@ module.exports = {
             message: 'Use hook from @/hooks/network instead',
           },
           {
+            name: 'wagmi',
+            importNames: ['useWebSocketPublicClient'],
+            message: 'Use hook from @/hooks/network instead',
+          },
+          {
             name: 'viem',
             importNames: ['parseEther'],
             message: 'Use Big18Math.fromFloatString',

@@ -12,15 +12,16 @@ import {
 import CloseX from '@public/icons/close-x.svg'
 
 import { AssetIconWithText } from '@/components/shared/components'
+import { AssetMetadata } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 
 import { Button, IconButton } from '@ds/Button'
 
 import { useSelectorCopy } from '../hooks'
-import { MakerButtonLabel, MakerOptions, TakerOptions } from './components'
+import { MarketOptions } from './components'
 
 function MarketSelector() {
-  const { selectedMakerMarket, isMaker, assetMetadata } = useMarketContext()
+  const { assetMetadata, isMaker, selectedMakerMarket } = useMarketContext()
   const { isOpen, onOpen, onClose } = useDisclosure({ id: 'marketSelector' })
   const copy = useSelectorCopy()
 
@@ -36,12 +37,7 @@ function MarketSelector() {
     >
       <PopoverTrigger>
         <Button
-          label={
-            <AssetIconWithText
-              market={assetMetadata}
-              text={isMaker && <MakerButtonLabel makerMarket={selectedMakerMarket} />}
-            />
-          }
+          label={<AssetIconWithText market={isMaker ? AssetMetadata[selectedMakerMarket] : assetMetadata} />}
           variant="pairSelector"
           rightIcon={<HamburgerIcon height="20px" width="20px" />}
           minWidth={{ base: '160px', xs: '179px' }}
@@ -58,7 +54,7 @@ function MarketSelector() {
             <Text variant="label">{copy.priceLiquidity}</Text>
           </Flex>
         </PopoverHeader>
-        <PopoverBody>{isMaker ? <MakerOptions onClose={onClose} /> : <TakerOptions onClose={onClose} />}</PopoverBody>
+        <PopoverBody>{<MarketOptions isMaker={isMaker} onClose={onClose} />}</PopoverBody>
       </PopoverContent>
     </Popover>
   )

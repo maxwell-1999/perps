@@ -3,9 +3,9 @@ import { useEffect, useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
 import Toast, { ToastMessage } from '@/components/shared/Toast'
-import { VaultSnapshot, VaultUserSnapshot } from '@/hooks/vaults'
+import { VaultAccountSnapshot2, VaultPositionHistory, VaultSnapshot2 } from '@/hooks/vaults2'
 import { sum } from '@/utils/arrayUtils'
-import { Big18Math } from '@/utils/big18Utils'
+import { Big6Math } from '@/utils/big6Utils'
 
 export const useVaultDetailCopy = () => {
   const intl = useIntl()
@@ -14,7 +14,7 @@ export const useVaultDetailCopy = () => {
     vaults: intl.formatMessage({ defaultMessage: 'Vaults' }),
     emptyStateSubhead: intl.formatMessage({
       defaultMessage:
-        'Vaults provide liquidity to Perennial markets, taking the other side of trades in exchange for funding & trading fees. See more here:',
+        'Vaults provide liquidity to Perennial markets, taking the other side of trades in exchange for funding & trading fees.',
     }),
     liquidityDisclaimer: intl.formatMessage({
       defaultMessage:
@@ -54,13 +54,14 @@ export const useVaultDetailCopy = () => {
       defaultMessage: 'Delta-Hedged',
     }),
     deltaHedgedBody: intl.formatMessage({
-      defaultMessage: 'Deploy liquidity to both long & short sides of the market, reducing net exposure.',
+      defaultMessage: 'Built-in incentives to keep longs & shorts balanced, reducing overall maker exposure.',
     }),
     capitalEfficient: intl.formatMessage({
       defaultMessage: 'Capital Efficient',
     }),
     capitalEfficientBody: intl.formatMessage({
-      defaultMessage: 'Take advantage of the power of the Perennial protocol to get high utilization of capital.',
+      defaultMessage:
+        'Native netting of longs and shorts, makers only cover the difference — capital efficiency at its finest.',
     }),
     pendingWithdrawal: intl.formatMessage({
       defaultMessage: 'Once your position settles you may withdraw your funds.',
@@ -89,50 +90,54 @@ export const useVaultDetailCopy = () => {
       defaultMessage:
         "The net direction of the Vault's current market position. Larger directional exposure will result in greater counterparty profit/loss when the price moves.",
     }),
+    back: intl.formatMessage({ defaultMessage: 'Back' }),
+    readTheDocs: intl.formatMessage({ defaultMessage: 'Read the documentation for more information' }),
   }
 }
 
 export const usePnl = ({
   vault,
-  vaultUserSnapshot,
+  vaultAccountSnapshot,
+  vaultPositionHistory,
 }: {
-  vault?: VaultSnapshot
-  vaultUserSnapshot?: VaultUserSnapshot
+  vault?: VaultSnapshot2
+  vaultAccountSnapshot?: VaultAccountSnapshot2
+  vaultPositionHistory?: VaultPositionHistory
 }) => {
   const pnl = useMemo(() => {
-    if (!vault || !vaultUserSnapshot) {
-      return Big18Math.ZERO
+    if (!vault || !vaultAccountSnapshot || !vaultPositionHistory) {
+      return 0n
     }
 
-    const inflightRedemption = Big18Math.isZero(vault.totalSupply)
-      ? Big18Math.ZERO
-      : Big18Math.div(Big18Math.mul(vaultUserSnapshot.pendingRedemptionAmount, vault.totalAssets), vault.totalSupply)
+    const userNetDeposits = vaultPositionHistory
+      ? Big6Math.sub(vaultPositionHistory.currentPositionDeposits, vaultPositionHistory.currentPositionClaims)
+      : Big6Math.ZERO
 
-    const userNetDeposits = vaultUserSnapshot
-      ? Big18Math.sub(vaultUserSnapshot.currentPositionDeposits, vaultUserSnapshot.currentPositionClaims)
-      : Big18Math.ZERO
-
-    const _pnl = Big18Math.sub(
+    const _pnl = Big6Math.sub(
       sum([
-        vaultUserSnapshot.assets,
-        vaultUserSnapshot.claimable,
-        vaultUserSnapshot.pendingDepositAmount,
-        inflightRedemption,
+        vaultAccountSnapshot.assets,
+        vaultAccountSnapshot.accountData.assets,
+        vaultAccountSnapshot.accountData.deposit,
+        vaultAccountSnapshot.redemptionAssets,
       ]),
       userNetDeposits,
     )
 
     return _pnl
-  }, [vault, vaultUserSnapshot])
+  }, [vault, vaultAccountSnapshot, vaultPositionHistory])
 
   return pnl
 }
 
 export const usePositionSettledToast = ({
+  vaultName,
+  prevVaultName,
   prevPositionUpdating,
   positionUpdating,
   copy,
 }: {
+  vaultName?: string
+  prevVaultName?: string
   prevPositionUpdating?: boolean
   positionUpdating?: boolean
   copy: ReturnType<typeof useVaultDetailCopy>
@@ -140,7 +145,7 @@ export const usePositionSettledToast = ({
   const toast = useToast()
 
   useEffect(() => {
-    if (prevPositionUpdating && !positionUpdating) {
+    if (prevPositionUpdating && !positionUpdating && vaultName === prevVaultName) {
       toast({
         render: ({ onClose }) => (
           <Toast
@@ -151,5 +156,5 @@ export const usePositionSettledToast = ({
         ),
       })
     }
-  }, [positionUpdating, prevPositionUpdating, copy, toast])
+  }, [positionUpdating, prevPositionUpdating, copy, toast, vaultName, prevVaultName])
 }

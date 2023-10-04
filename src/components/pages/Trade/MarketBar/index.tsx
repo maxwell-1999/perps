@@ -1,13 +1,15 @@
-import { Container, Flex, Spinner } from '@chakra-ui/react'
+import { Container, Flex, Spinner, Text } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 
 import { useMarketContext } from '@/contexts/marketContext'
 
+import { TooltipIcon } from '@ds/Tooltip'
 import colors from '@ds/theme/colors'
 
 import {
   DesktopContainer,
   DividerStyled,
+  FundingRateStat,
   MarketContainer,
   MobileMarketContainer,
   PriceContainer,
@@ -77,18 +79,53 @@ export default function MarketBar() {
               <Stat label={copy.volumeLS} value={formattedValues.volumeLS} />
             </MarketContainer>
             <MarketContainer>
-              <Stat label={copy.utilization} value={formattedValues.utilization} />
+              <Stat label={copy.lpExposure} value={`${formattedValues.lpUtilization} ${formattedValues.lpExposure}`} />
             </MarketContainer>
           </>
         )}
         <MarketContainer>
-          <Stat label={copy.hourlyFunding} value={formattedValues.hourlyFunding} />
+          <FundingRateStat />
+        </MarketContainer>
+        <MarketContainer>
+          <Stat
+            label={copy.skew}
+            value={
+              <Flex gap={1}>
+                <Text color={colors.brand.green}>{formattedValues.longSkew}</Text>
+                <Text>{copy.slash}</Text>
+                <Text color={colors.brand.red}>{formattedValues.shortSkew}</Text>
+              </Flex>
+            }
+          />
         </MarketContainer>
         <MarketContainer>
           <Stat label={copy.openInterest} value={formattedValues.openInterest} />
         </MarketContainer>
         <MarketContainer>
-          <Stat label={copy.liquidity} value={formattedValues.liquidity} />
+          <Stat
+            label={
+              <Flex gap={2} alignItems="center">
+                <Text whiteSpace="nowrap" fontSize="12px" color={colors.brand.whiteAlpha[50]}>
+                  {copy.liquidity}
+                </Text>
+                <TooltipIcon
+                  color={colors.brand.whiteAlpha[50]}
+                  height="11px"
+                  width="11px"
+                  tooltipProps={{ placement: 'bottom' }}
+                  tooltipText={
+                    <Flex flexDirection="column" gap={2}>
+                      <Text fontSize="12px" color={colors.brand.whiteAlpha[50]}>
+                        {copy.totalLiquidity}
+                      </Text>
+                      <Text fontSize="14px">{formattedValues.totalLiquidity}</Text>
+                    </Flex>
+                  }
+                />
+              </Flex>
+            }
+            value={formattedValues.availableLiquidity}
+          />
         </MarketContainer>
       </DesktopContainer>
     </Container>

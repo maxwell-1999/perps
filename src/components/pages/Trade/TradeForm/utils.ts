@@ -1,14 +1,13 @@
-import { SupportedAsset, SupportedMakerMarket } from '@/constants/assets'
-import { OrderDirection } from '@/constants/markets'
+import { PositionSide2, PositionStatus } from '@/constants/markets'
+import { SupportedChainId } from '@/constants/network'
 import { FormState } from '@/contexts/tradeFormContext'
-import { UserCurrentPositions } from '@/hooks/markets'
-import { Big18Math } from '@/utils/big18Utils'
-import { getMakerAssetAndDirection } from '@/utils/makerMarketUtils'
-import { calcLeverage } from '@/utils/positionUtils'
+import { MarketSnapshot } from '@/hooks/markets2'
+import { Big6Math } from '@/utils/big6Utils'
+import { calcLeverage, calcNotional, calcTotalPositionChangeFee } from '@/utils/positionUtils'
 
 export const calcMaintenance = (price: bigint, position: bigint, maintenanceRate: bigint) => {
-  if (Big18Math.isZero(position)) return 0n
-  return Big18Math.mul(Big18Math.mul(Big18Math.abs(price), position), maintenanceRate)
+  if (Big6Math.isZero(position)) return 0n
+  return Big6Math.mul(Big6Math.mul(Big6Math.abs(price), position), maintenanceRate)
 }
 
 type CalculateInitialLeverage = {
@@ -27,118 +26,173 @@ export const calculateInitialLeverage = ({
   if (!amount || !currentCollateralAmount || !price) return '0'
   if (isNewPosition) return '1'
 
-  const formattedAmount = Big18Math.toFloatString(amount)
-  const parsedPositionAmount = Big18Math.fromFloatString(formattedAmount)
-  if (Big18Math.isZero(currentCollateralAmount)) {
-    return Big18Math.toFloatString(0n)
+  const formattedAmount = Big6Math.toFloatString(amount)
+  const parsedPositionAmount = Big6Math.fromFloatString(formattedAmount)
+  if (Big6Math.isZero(currentCollateralAmount)) {
+    return Big6Math.toFloatString(0n)
   }
 
   const leverage = calcLeverage(price, parsedPositionAmount, currentCollateralAmount)
-  return Big18Math.toFloatString(leverage)
+  return Big6Math.toFloatString(leverage)
 }
 
-export const max18Decimals = (amount: string) => {
+export const max6Decimals = (amount: string) => {
   const [first, decimals] = amount.split('.')
-  if (!decimals || decimals.length <= 18) {
+  if (!decimals || decimals.length <= 6) {
     return amount
   }
 
-  return `${first}.${decimals.substring(0, 18)}`
+  return `${first}.${decimals.substring(0, 6)}`
 }
 
 export const collateralFromAmountAndLeverage = ({
+  currentAmount,
   amount,
   leverage,
-  price,
+  marketSnapshot,
+  chainId,
+  positionStatus,
+  direction,
 }: {
+  currentAmount: bigint
   amount: string
   leverage: string
-  price: bigint
+  marketSnapshot: MarketSnapshot
+  chainId: SupportedChainId
+  positionStatus: PositionStatus
+  direction: PositionSide2
 }) => {
-  const parsedLeverage = Big18Math.fromFloatString(leverage)
-  if (Big18Math.isZero(parsedLeverage)) return ''
+  const parsedLeverage = Big6Math.fromFloatString(leverage)
+  if (Big6Math.isZero(parsedLeverage)) return ''
 
-  const parsedPositionAmount = Big18Math.fromFloatString(amount)
-  const newCollateral = Big18Math.div(Big18Math.abs(Big18Math.mul(parsedPositionAmount, price)), parsedLeverage)
-  return Big18Math.toFloatString(newCollateral)
+  const {
+    global: { latestPrice: price },
+  } = marketSnapshot
+
+  const parsedPositionAmount = Big6Math.fromFloatString(amount)
+  const notional = calcNotional(parsedPositionAmount, price)
+  const fees = calcTotalPositionChangeFee({
+    positionStatus,
+    marketSnapshot,
+    chainId,
+    positionDelta: parsedPositionAmount - currentAmount,
+    direction,
+  })
+  // Add fees to collateral amount since they increase the collateral required for a given position
+  const newCollateral = Big6Math.div(notional, parsedLeverage) + fees.total
+  return Big6Math.toFloatString(newCollateral)
 }
 
 export const leverageFromAmountAndCollateral = ({
+  currentAmount,
   amount,
   collateral,
-  price,
+  marketSnapshot,
+  chainId,
+  positionStatus,
+  direction,
 }: {
+  currentAmount: bigint
   amount: string
   collateral: string
-  price: bigint
+  marketSnapshot: MarketSnapshot
+  chainId: SupportedChainId
+  positionStatus: PositionStatus
+  direction: PositionSide2
 }) => {
-  const parsedCollateralAmount = Big18Math.fromFloatString(collateral)
-  if (Big18Math.isZero(parsedCollateralAmount)) {
+  const parsedCollateralAmount = Big6Math.fromFloatString(collateral)
+  if (Big6Math.isZero(parsedCollateralAmount)) {
     return '0'
   }
 
-  const parsedPositionAmount = Big18Math.fromFloatString(amount)
-  const newLeverage = calcLeverage(price, parsedPositionAmount, parsedCollateralAmount)
-  return Big18Math.toFloatString(newLeverage)
+  const {
+    global: { latestPrice: price },
+  } = marketSnapshot
+  const parsedPositionAmount = Big6Math.fromFloatString(amount)
+  const fees = calcTotalPositionChangeFee({
+    positionStatus,
+    marketSnapshot,
+    chainId,
+    positionDelta: parsedPositionAmount - currentAmount,
+    direction,
+  })
+  const newLeverage = calcLeverage(
+    price,
+    parsedPositionAmount,
+    parsedCollateralAmount > fees.total ? parsedCollateralAmount - fees.total : parsedCollateralAmount,
+  )
+  return Big6Math.toFloatString(newLeverage)
 }
 
 export const positionFromCollateralAndLeverage = ({
+  currentAmount,
   collateral,
   leverage,
-  price,
+  marketSnapshot,
+  chainId,
+  positionStatus,
+  direction,
 }: {
+  currentAmount: bigint
   collateral: string
   leverage: string
-  price: bigint
+  marketSnapshot: MarketSnapshot
+  chainId: SupportedChainId
+  positionStatus: PositionStatus
+  direction: PositionSide2
 }) => {
-  if (Big18Math.isZero(price)) return ''
+  const {
+    global: { latestPrice: price },
+  } = marketSnapshot
+  if (Big6Math.isZero(price)) return ''
 
-  const parsedCollateralAmount = Big18Math.fromFloatString(collateral)
-  const parsedLeverage = Big18Math.fromFloatString(leverage)
-  const newPosition = Big18Math.abs(Big18Math.div(Big18Math.mul(parsedLeverage, parsedCollateralAmount), price))
-  return Big18Math.toFloatString(newPosition)
+  const parsedCollateralAmount = Big6Math.fromFloatString(collateral)
+  const parsedLeverage = Big6Math.fromFloatString(leverage)
+  let newPosition = Big6Math.abs(Big6Math.div(Big6Math.mul(parsedLeverage, parsedCollateralAmount), price))
+
+  // Iteratively calculate position size to approach ideal position size for given leverage and fees
+  for (let i = 0; i < 10; i++) {
+    const fees = calcTotalPositionChangeFee({
+      positionStatus,
+      marketSnapshot,
+      chainId,
+      positionDelta: newPosition - currentAmount,
+      direction,
+    })
+
+    newPosition = Big6Math.abs(Big6Math.div(Big6Math.mul(parsedLeverage, parsedCollateralAmount - fees.total), price))
+  }
+
+  return Big6Math.toFloatString(newPosition)
 }
 
 export const calcCollateralDifference = (newCollateralAmount: bigint, currentCollateralAmount: bigint): bigint => {
-  return Big18Math.sub(newCollateralAmount, currentCollateralAmount)
+  return Big6Math.sub(newCollateralAmount, currentCollateralAmount)
 }
 
 export const calcPositionDifference = (newPositionAmount: bigint, currentPositionAmount: bigint): bigint => {
-  return Big18Math.sub(newPositionAmount, currentPositionAmount)
+  return Big6Math.sub(newPositionAmount, currentPositionAmount)
 }
 
-export const calcLeverageDifference = ({
-  currentCollateral,
-  newCollateralAmount,
-  price,
-  currentPositionAmount,
-  newPositionAmount,
-}: {
-  currentCollateral: bigint
-  newCollateralAmount: bigint
-  price: bigint
-  currentPositionAmount: bigint
-  newPositionAmount: bigint
-}): bigint => {
-  if (!currentCollateral) return 0n
-
-  const prevLev = calcLeverage(price, currentPositionAmount, currentCollateral)
-  const newLev = calcLeverage(price, newPositionAmount, newCollateralAmount)
-  return Big18Math.sub(newLev, prevLev)
+export const calcLeverageDifference = (newLeverage: bigint, currentLeverage: bigint): bigint => {
+  return Big6Math.sub(newLeverage, currentLeverage)
 }
 
 export const needsApproval = ({
   collateralDifference,
   usdcAllowance,
+  interfaceFee,
 }: {
   collateralDifference: bigint
   usdcAllowance: bigint
+  interfaceFee: bigint
 }) => {
-  return Big18Math.fromDecimals(usdcAllowance, 6) < collateralDifference
+  const change = collateralDifference + interfaceFee
+  return Big6Math.fromDecimals(usdcAllowance, 6) < (change < 0n ? interfaceFee : collateralDifference + interfaceFee)
 }
 
 export const calcPositionFee = (price: bigint, positionDelta: bigint, feeRate: bigint) => {
-  return Big18Math.abs(Big18Math.mul(Big18Math.mul(price, positionDelta), feeRate))
+  return Big6Math.abs(Big6Math.mul(Big6Math.mul(price, positionDelta), feeRate))
 }
 
 type InitialInputs = {
@@ -147,9 +201,17 @@ type InitialInputs = {
   price?: bigint
   isNewPosition: boolean
   isConnected: boolean
+  isFailedClose?: boolean
 }
 
-export const formatInitialInputs = ({ userCollateral, amount, price, isNewPosition, isConnected }: InitialInputs) => {
+export const formatInitialInputs = ({
+  userCollateral,
+  amount,
+  price,
+  isNewPosition,
+  isConnected,
+  isFailedClose,
+}: InitialInputs) => {
   if (!isConnected)
     return {
       collateral: '',
@@ -157,23 +219,36 @@ export const formatInitialInputs = ({ userCollateral, amount, price, isNewPositi
       leverage: '1',
     }
   return {
-    collateral: userCollateral ? (userCollateral === 0n ? '0' : Big18Math.toFloatString(userCollateral)) : '',
-    amount: amount ? (amount === 0n ? '0' : Big18Math.toFloatString(amount)) : '',
+    collateral: userCollateral ? (userCollateral === 0n ? '0' : Big6Math.toFloatString(userCollateral)) : '',
+    amount: amount ? (amount === 0n ? '0' : Big6Math.toFloatString(amount)) : isFailedClose ? '0' : '',
     leverage: calculateInitialLeverage({ isNewPosition, amount, currentCollateralAmount: userCollateral, price }),
   }
 }
 
-export const calcMaxLeverage = (maintenance?: bigint) => {
-  if (!maintenance) return 10
-  const maxLeverageAsFloat = 1 / Big18Math.toUnsafeFloat(maintenance)
-  if (maxLeverageAsFloat > 20) {
-    return maxLeverageAsFloat / 2
-  }
-  return maxLeverageAsFloat
+/* MaxLeverage is the minimum of the following:
+  min(100x, 1/margin, collateral/minCollateralForFullRange * 1/margin)
+*/
+export const calcMaxLeverage = ({
+  margin,
+  minMargin,
+  collateral,
+}: { margin?: bigint; minMargin?: bigint; collateral?: bigint } = {}) => {
+  if (!margin) return 10
+  const marginMaxLeverage = Big6Math.div(Big6Math.ONE, margin)
+  const minCollateralForFullRange = Big6Math.mul(minMargin ?? 0n, marginMaxLeverage)
+  const collateralMaxLeverage = !!collateral
+    ? Big6Math.div(Big6Math.mul(collateral, marginMaxLeverage), minCollateralForFullRange)
+    : marginMaxLeverage
+
+  const maxLeverage = Big6Math.min(marginMaxLeverage, collateralMaxLeverage)
+
+  const flooredLeverage = Math.floor(Big6Math.toUnsafeFloat(Big6Math.min(maxLeverage, Big6Math.ONE * 100n)))
+  // Round to nearest 5x
+  return flooredLeverage < 5 ? flooredLeverage : Math.floor(flooredLeverage / 5) * 5
 }
 
 export const isFullClose = (closeAmount: string, currPosition: bigint) => {
-  return Big18Math.eq(Big18Math.fromFloatString(closeAmount), Big18Math.abs(currPosition))
+  return Big6Math.eq(Big6Math.fromFloatString(closeAmount), Big6Math.abs(currPosition))
 }
 
 export const getContainerVariant = (formState: FormState, isClosedOrResolved: boolean, isLoggedOut: boolean) => {
@@ -184,26 +259,6 @@ export const getContainerVariant = (formState: FormState, isClosedOrResolved: bo
     return 'pink'
   }
   return 'active'
-}
-
-export const getPositionFromSelectedMarket = ({
-  isMaker,
-  positions,
-  selectedMarket,
-  orderDirection,
-  selectedMakerMarket,
-}: {
-  isMaker?: boolean
-  positions?: UserCurrentPositions
-  selectedMarket: SupportedAsset
-  orderDirection: OrderDirection
-  selectedMakerMarket: SupportedMakerMarket
-}) => {
-  if (isMaker) {
-    const { asset, orderDirection } = getMakerAssetAndDirection(selectedMakerMarket)
-    return positions?.[asset]?.[orderDirection]
-  }
-  return positions?.[selectedMarket]?.[orderDirection]
 }
 
 export const calcTradeFeeApr = ({
@@ -218,9 +273,9 @@ export const calcTradeFeeApr = ({
   notional: bigint
 }) => {
   if (!fees7Day || !makerOi || !collateral || !notional) return 0n
-  const dailyAvgFee = Big18Math.div(fees7Day, Big18Math.fromDecimals(7n, 0))
-  const annualFees = Big18Math.mul(dailyAvgFee, Big18Math.fromDecimals(365n, 0))
-  const annualFeesPerUser = Big18Math.mul(annualFees, notional)
-  const denominator = Big18Math.mul(makerOi, collateral)
-  return Big18Math.div(annualFeesPerUser, denominator)
+  const dailyAvgFee = Big6Math.div(fees7Day, Big6Math.fromDecimals(7n, 0))
+  const annualFees = Big6Math.mul(dailyAvgFee, Big6Math.fromDecimals(365n, 0))
+  const annualFeesPerUser = Big6Math.mul(annualFees, notional)
+  const denominator = Big6Math.mul(makerOi, collateral)
+  return Big6Math.div(annualFeesPerUser, denominator)
 }

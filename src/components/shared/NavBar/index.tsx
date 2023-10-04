@@ -14,7 +14,7 @@ import LinkSwitcher from './LinkSwitcher'
 import SwitchNetworkButton from './SwitchNetworkButton'
 import { links } from './constants'
 import { useNavCopy } from './hooks'
-import { MobileButtonLabel, Nav } from './styles'
+import { MobileButtonLabel, Nav, V1Link } from './styles'
 
 function NavBar() {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -28,6 +28,7 @@ function NavBar() {
       <Flex>
         <HiddenOnMobile>
           <LinkSwitcher links={links} />
+          <V1Link />
         </HiddenOnMobile>
         <HiddenOnDesktop>
           <IconButton aria-label={copy.menu} icon={<HamburgerIcon height="20px" width="20px" />} onClick={onOpen} />
@@ -51,6 +52,7 @@ function NavBar() {
                   <Box height="1px" width="100%" bg={linkUnderlineColor} mt={2} />
                 </Link>
               ))}
+              <V1Link />
             </Stack>
           </MobileDrawer>
         </HiddenOnDesktop>

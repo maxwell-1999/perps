@@ -40,3 +40,22 @@ export const DataRow: React.FC<DataRowProps & FlexProps> = ({
     </Flex>
   )
 }
+
+export const TooltipDataRow: React.FC<DataRowProps & FlexProps> = ({ label, value, ...props }) => {
+  return (
+    <DataRow
+      width="100%"
+      {...props}
+      label={
+        <Text variant="label" as="div" mr={2} alignItems="center">
+          {label}
+        </Text>
+      }
+      value={
+        <Text fontSize="12px" as="div">
+          {value}
+        </Text>
+      }
+    />
+  )
+}

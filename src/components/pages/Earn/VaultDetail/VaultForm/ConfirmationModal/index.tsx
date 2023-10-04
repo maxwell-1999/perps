@@ -16,9 +16,10 @@ import { useIntl } from 'react-intl'
 import { TrackingEvents, useMixpanel } from '@/analytics'
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import Toast, { ToastMessage } from '@/components/shared/Toast'
-import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
+import { StaleAfterMessage } from '@/components/shared/components'
+import { VaultAccountSnapshot2, VaultSnapshot2, useVaultTransactions } from '@/hooks/vaults2'
 import { Balances } from '@/hooks/wallet'
-import { Big18Math, formatBig18 } from '@/utils/big18Utils'
+import { Big6Math, formatBig6USDPrice } from '@/utils/big6Utils'
 
 import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
@@ -35,8 +36,8 @@ interface ConfirmationModalProps {
   balances: Balances
   formValues: FormValues
   vaultName: string
-  vaultSnapshot: VaultSnapshot
-  vaultUserSnapshot: VaultUserSnapshot
+  vaultSnapshot: VaultSnapshot2
+  vaultUserSnapshot: VaultAccountSnapshot2
   maxWithdrawal: boolean
 }
 
@@ -55,7 +56,7 @@ export default function ConfirmationModal({
   const intl = useIntl()
   const toast = useToast()
   const { track } = useMixpanel()
-  const { onApproveUSDC, onApproveShares, onDeposit, onRedeem } = useVaultTransactions(vaultSnapshot.vaultType)
+  const { onApproveUSDC, onApproveOperator, onDeposit, onRedeem } = useVaultTransactions(vaultSnapshot.vault)
   const bigintAmount = setAmountForConfirmation({
     maxWithdrawal,
     vaultUserSnapshot,
@@ -70,22 +71,23 @@ export default function ConfirmationModal({
     approveUSDCCompleted,
     depositCompleted,
     depositLoading,
-    approveSharesCompleted,
-    approveSharesLoading,
+    approveOperatorCompleted,
+    approveOperatorLoading,
     redemptionCompleted,
     redemptionLoading,
   } = transactionState
 
   const isDeposit = vaultOption === VaultFormOption.Deposit
-  const formattedAmount = Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(Number(formValues.amount))
+  const settlementFee = formatBig6USDPrice(
+    isDeposit ? vaultSnapshot.totalSettlementFee : vaultSnapshot.totalSettlementFee * 2n,
+    { compact: true },
+  )
+  const formattedAmount = formatBig6USDPrice(Big6Math.fromFloatString(formValues.amount))
 
   useEffect(() => {
     const requiredApprovals = getRequiredApprovals({
       amount: bigintAmount,
-      vaultSnapshot,
+      vaultAccountSnapshot: vaultUserSnapshot,
       vaultOption,
       balances,
     })
@@ -104,35 +106,37 @@ export default function ConfirmationModal({
       setTransactionState((prevState) => ({ ...prevState, approveUSDCLoading: false }))
     }
   }
-  const handleSharesApproval = async () => {
-    setTransactionState((prevState) => ({ ...prevState, approveSharesLoading: true }))
+  const handleOperatorApproval = async () => {
+    setTransactionState((prevState) => ({ ...prevState, approveOperatorLoading: true }))
     try {
-      await onApproveShares()
-      setTransactionState((prevState) => ({ ...prevState, approveSharesCompleted: true }))
+      await onApproveOperator()
+      setTransactionState((prevState) => ({ ...prevState, approveOperatorCompleted: true }))
     } catch (e) {
       console.error(e)
     } finally {
-      setTransactionState((prevState) => ({ ...prevState, approveSharesLoading: false }))
+      setTransactionState((prevState) => ({ ...prevState, approveOperatorLoading: false }))
     }
   }
 
   const handleDeposit = async () => {
     setTransactionState((prevState) => ({ ...prevState, depositLoading: true }))
     try {
-      await onDeposit(bigintAmount)
-      setTransactionState((prevState) => ({ ...prevState, depositCompleted: true }))
-      onClose()
-      const message = copy.depositToast(formattedAmount, vaultName)
-      toast({
-        render: ({ onClose }) => (
-          <Toast
-            title={copy.collateralDeposited}
-            onClose={onClose}
-            body={<ToastMessage action={copy.Deposit} message={message} actionColor={colors.brand.green} />}
-          />
-        ),
-      })
-      track(TrackingEvents.depositToVault, { vaultName, amount: formValues.amount })
+      const receipt = await onDeposit(bigintAmount)
+      if (receipt?.status === 'success') {
+        setTransactionState((prevState) => ({ ...prevState, depositCompleted: true }))
+        onClose()
+        const message = copy.depositToast(formattedAmount, vaultName)
+        toast({
+          render: ({ onClose }) => (
+            <Toast
+              title={copy.collateralDeposited}
+              onClose={onClose}
+              body={<ToastMessage action={copy.Deposit} message={message} actionColor={colors.brand.green} />}
+            />
+          ),
+        })
+        track(TrackingEvents.depositToVault, { vaultName, amount: formValues.amount })
+      }
     } catch (e) {
       console.error(e)
     } finally {
@@ -143,20 +147,22 @@ export default function ConfirmationModal({
   const handleRedemption = async () => {
     setTransactionState((prevState) => ({ ...prevState, redemptionLoading: true }))
     try {
-      await onRedeem(bigintAmount, { max: maxWithdrawal || bigintAmount === vaultUserSnapshot.assets })
-      setTransactionState((prevState) => ({ ...prevState, redemptionCompleted: true }))
-      onClose()
-      const message = copy.redeemToast(formattedAmount, vaultName)
-      toast({
-        render: ({ onClose }) => (
-          <Toast
-            title={copy.assetsRedeemed}
-            onClose={onClose}
-            body={<ToastMessage action={copy.Redeem} message={message} actionColor={colors.brand.green} />}
-          />
-        ),
-      })
-      track(TrackingEvents.redeemFromVault, { vaultName, amount: formValues.amount })
+      const receipt = await onRedeem(bigintAmount, { max: maxWithdrawal || bigintAmount === vaultUserSnapshot.assets })
+      if (receipt?.status === 'success') {
+        setTransactionState((prevState) => ({ ...prevState, redemptionCompleted: true }))
+        onClose()
+        const message = copy.redeemToast(formattedAmount, vaultName)
+        toast({
+          render: ({ onClose }) => (
+            <Toast
+              title={copy.assetsRedeemed}
+              onClose={onClose}
+              body={<ToastMessage action={copy.Redeem} message={message} actionColor={colors.brand.green} />}
+            />
+          ),
+        })
+        track(TrackingEvents.redeemFromVault, { vaultName, amount: formValues.amount })
+      }
     } catch (e) {
       console.error(e)
     } finally {
@@ -165,11 +171,7 @@ export default function ConfirmationModal({
   }
 
   const requiresUSDCApproval = requiredApprovals?.includes(RequiredApprovals.usdc)
-  const requiresSharesApproval = requiredApprovals?.includes(RequiredApprovals.shares)
-  const approximateShares = Big18Math.mul(
-    Big18Math.div(Big18Math.mul(bigintAmount, vaultSnapshot.totalSupply), vaultSnapshot.totalAssets),
-    Big18Math.fromFloatString('1.05'),
-  )
+  const requiresOperatorApproval = requiredApprovals?.includes(RequiredApprovals.operator)
 
   return (
     <Modal isOpen onClose={onClose} isCentered variant="confirmation">
@@ -183,6 +185,14 @@ export default function ConfirmationModal({
             <Text variant="label" fontSize="13px" mb={5}>
               {isDeposit ? copy.confirmDepositBody : copy.confirmWithdrawBody}
             </Text>
+            {requiresOperatorApproval && (
+              <ModalStep
+                title={copy.approveOperator}
+                description={copy.approveOperatorBody}
+                isLoading={approveOperatorLoading}
+                isCompleted={approveOperatorCompleted}
+              />
+            )}
             {isDeposit && (
               <>
                 {requiresUSDCApproval && (
@@ -207,28 +217,25 @@ export default function ConfirmationModal({
                     { defaultMessage: '{amount} to {vaultName}' },
                     { amount: formattedAmount, vaultName },
                   )}
+                  subDetail={intl.formatMessage(
+                    { defaultMessage: 'Settlement Fee: {amount}' },
+                    {
+                      amount: (
+                        <>
+                          {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+                          <Text as="span" color={colors.brand.red} mr={1}>
+                            -
+                          </Text>
+                          {settlementFee}
+                        </>
+                      ),
+                    },
+                  )}
                 />
               </>
             )}
             {!isDeposit && (
               <>
-                {requiresSharesApproval && (
-                  <ModalStep
-                    title={copy.approveShares}
-                    description={intl.formatMessage(
-                      { defaultMessage: 'Approve at least {approximateShares} to redeem your funds' },
-                      {
-                        approximateShares: (
-                          <Text as="span" color={colors.brand.purple[240]}>
-                            {formatBig18(approximateShares)} {copy.shares}
-                          </Text>
-                        ),
-                      },
-                    )}
-                    isLoading={approveSharesLoading}
-                    isCompleted={approveSharesCompleted}
-                  />
-                )}
                 <ModalStep
                   title={copy.redeemShares}
                   description={intl.formatMessage(
@@ -249,13 +256,41 @@ export default function ConfirmationModal({
                       vaultName,
                     },
                   )}
+                  subDetail={intl.formatMessage(
+                    { defaultMessage: 'Settlement Fee: {amount}' },
+                    {
+                      amount: (
+                        <>
+                          {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+                          <Text as="span" color={colors.brand.red} mr={1}>
+                            -
+                          </Text>
+                          {settlementFee}
+                        </>
+                      ),
+                    },
+                  )}
                 />
               </>
             )}
+            <StaleAfterMessage
+              staleAfter={Big6Math.min(
+                ...vaultSnapshot.marketSnapshots.map((marketSnapshot) => marketSnapshot.riskParameter.staleAfter),
+              ).toString()}
+            />
           </Flex>
         </ModalBody>
         <ModalFooter justifyContent="initial">
           <VStack flex={1}>
+            {requiresOperatorApproval && (
+              <Button
+                variant={approveOperatorCompleted ? 'outline' : 'primary'}
+                isDisabled={approveOperatorCompleted || approveOperatorLoading}
+                label={approveOperatorLoading ? <Spinner size="sm" /> : copy.approveOperator}
+                onClick={handleOperatorApproval}
+                width="100%"
+              />
+            )}
             {isDeposit && (
               <>
                 {requiresUSDCApproval && (
@@ -278,21 +313,14 @@ export default function ConfirmationModal({
             )}
             {!isDeposit && (
               <>
-                {requiresSharesApproval && (
-                  <Button
-                    variant={approveSharesCompleted ? 'outline' : 'primary'}
-                    isDisabled={approveSharesCompleted || approveSharesLoading}
-                    label={approveSharesLoading ? <Spinner size="sm" /> : copy.approveShares}
-                    onClick={handleSharesApproval}
-                    width="100%"
-                  />
-                )}
                 <Button
                   variant={
-                    (requiresSharesApproval && !approveSharesCompleted) || redemptionCompleted ? 'outline' : 'primary'
+                    (requiresOperatorApproval && !approveOperatorCompleted) || redemptionCompleted
+                      ? 'outline'
+                      : 'primary'
                   }
                   isDisabled={
-                    (requiresSharesApproval && !approveSharesCompleted) || redemptionLoading || redemptionCompleted
+                    (requiresOperatorApproval && !approveOperatorCompleted) || redemptionLoading || redemptionCompleted
                   }
                   label={redemptionLoading ? <Spinner size="sm" /> : copy.redeemShares}
                   onClick={handleRedemption}

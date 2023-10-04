@@ -1,18 +1,11 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
-import { AssetMetadata, SupportedAsset, SupportedMakerMarket } from '@/constants/assets'
-import { OrderDirection } from '@/constants/markets'
-import { ChainMarkets } from '@/constants/markets'
+import { AdjustmentModalProps } from '@/components/pages/Trade/TradeForm/components/AdjustPositionModal'
+import { AssetMetadata, ChainMarkets2, PositionSide2, SupportedAsset } from '@/constants/markets'
 import { DefaultChain } from '@/constants/network'
 import { SupportedChainId } from '@/constants/network'
-import {
-  AssetSnapshots,
-  ProductSnapshotWithTradeLimitations,
-  useChainAssetSnapshots,
-  useRefreshKeysOnPriceUpdates,
-} from '@/hooks/markets'
+import { MarketSnapshot, MarketSnapshots, UserMarketSnapshot, useMarketSnapshots2 } from '@/hooks/markets2'
 import { useChainId } from '@/hooks/network'
-import { getMakerAssetAndDirection } from '@/utils/makerMarketUtils'
 
 export enum PositionsTab {
   current,
@@ -20,33 +13,36 @@ export enum PositionsTab {
   history,
 }
 
+export type OverrideValues = Pick<
+  AdjustmentModalProps,
+  'market' | 'position' | 'asset' | 'orderValues' | 'positionSide' | 'positionDelta'
+>
+
 type MarketContextType = {
   chainId: SupportedChainId
-  orderDirection: OrderDirection
-  setOrderDirection: (orderDirection: OrderDirection) => void
+  orderDirection: PositionSide2.long | PositionSide2.short
+  setOrderDirection: (orderDirection: PositionSide2.long | PositionSide2.short) => void
   assetMetadata: (typeof AssetMetadata)[SupportedAsset]
-
   selectedMarket: SupportedAsset
   setSelectedMarket: (asset: SupportedAsset) => void
-  selectedMakerMarket: SupportedMakerMarket
-  setSelectedMakerMarket: (makerMarket: SupportedMakerMarket) => void
-  snapshots?: AssetSnapshots
-  selectedMarketSnapshot?: {
-    [OrderDirection.Long]?: ProductSnapshotWithTradeLimitations
-    [OrderDirection.Short]?: ProductSnapshotWithTradeLimitations
-  }
-  selectedMakerMarketSnapshot?: ProductSnapshotWithTradeLimitations
+  selectedMakerMarket: SupportedAsset
+  setSelectedMakerMarket: (makerMarket: SupportedAsset) => void
   activePositionTab: PositionsTab
   setActivePositionTab: (tab: PositionsTab) => void
   isMaker: boolean
-  makerAsset: SupportedAsset
-  makerOrderDirection: OrderDirection
+  // V2
+  snapshots2?: MarketSnapshots
+  userCurrentPosition?: UserMarketSnapshot
+  selectedMarketSnapshot2?: MarketSnapshot
+  setOverrideValues: (overrideValues?: OverrideValues) => void
+  overrideValues?: OverrideValues
+  manualCommitment: boolean
 }
 
 const MarketContext = createContext<MarketContextType>({
   chainId: DefaultChain.id,
-  orderDirection: OrderDirection.Long,
-  setOrderDirection: (orderDirection: OrderDirection) => {
+  orderDirection: PositionSide2.long,
+  setOrderDirection: (orderDirection: PositionSide2.long | PositionSide2.short) => {
     orderDirection
   },
   selectedMarket: SupportedAsset.eth,
@@ -54,90 +50,102 @@ const MarketContext = createContext<MarketContextType>({
   setSelectedMarket: (asset: SupportedAsset) => {
     asset
   },
-  setSelectedMakerMarket: (makerMarket: SupportedMakerMarket) => {
+  setSelectedMakerMarket: (makerMarket: SupportedAsset) => {
     makerMarket
   },
-  selectedMakerMarket: SupportedMakerMarket.ethLong,
-  snapshots: undefined,
-  selectedMarketSnapshot: undefined,
-  selectedMakerMarketSnapshot: undefined,
+  selectedMakerMarket: SupportedAsset.eth,
   activePositionTab: PositionsTab.current,
   setActivePositionTab: (tab: PositionsTab) => {
     tab
   },
   isMaker: false,
-  makerAsset: SupportedAsset.eth,
-  makerOrderDirection: OrderDirection.Long,
+  // V2
+  snapshots2: undefined,
+  userCurrentPosition: undefined,
+  selectedMarketSnapshot2: undefined,
+  setOverrideValues: (overrideValues?: OverrideValues) => {
+    overrideValues
+  },
+  overrideValues: undefined,
+  manualCommitment: false,
 })
 
 export const MarketProvider = ({ children, isMaker }: { children: React.ReactNode; isMaker?: boolean }) => {
   const chainId = useChainId()
   const [selectedMarket, _setSelectedMarket] = useState<SupportedAsset>(SupportedAsset.eth)
-  const [selectedMakerMarket, _setSelectedMakerMarket] = useState<SupportedMakerMarket>(SupportedMakerMarket.ethLong)
-  const [orderDirection, _setOrderDirection] = useState<OrderDirection>(OrderDirection.Long)
+  const [selectedMakerMarket, _setSelectedMakerMarket] = useState<SupportedAsset>(SupportedAsset.eth)
+  const [orderDirection, _setOrderDirection] = useState<PositionSide2.long | PositionSide2.short>(PositionSide2.long)
   const [activePositionTab, setActivePositionTab] = useState<PositionsTab>(PositionsTab.current)
+  const [overrideValues, setOverrideValues] = useState<OverrideValues | undefined>(undefined)
+  const [manualCommitment, setManualCommitment] = useState<boolean>(false)
 
-  const { data: snapshots } = useChainAssetSnapshots()
-  const { asset: makerAsset, orderDirection: makerOrderDirection } = getMakerAssetAndDirection(selectedMakerMarket)
-
-  useRefreshKeysOnPriceUpdates()
+  const { data: snapshots2 } = useMarketSnapshots2()
 
   useEffect(() => {
     // check query params first
     const urlParams = new URLSearchParams(window.location.search)
     const marketFromParams = urlParams.get('market')?.toLowerCase()
-    const makerMarketFromParams = urlParams.get('makerMarket')?.toLowerCase()
+    const makerMarketFromParams = urlParams.get('makerMarket')?.toLowerCase() as SupportedAsset
     const directionFromParams = urlParams.get('direction')?.toLowerCase()
+    const manualCommitmentFromParams = urlParams.get('manualCommitment')?.toLowerCase()
 
-    if (marketFromParams && Object.keys(SupportedAsset).includes(marketFromParams)) {
+    if (manualCommitmentFromParams === 'true' && !manualCommitment) setManualCommitment(true)
+
+    if (marketFromParams && marketFromParams in ChainMarkets2[chainId]) {
       _setSelectedMarket(marketFromParams as SupportedAsset)
     } else {
       const marketFromLocalStorage = localStorage.getItem(`${chainId}_market`)
       const makerMarketFromLocalStorage = localStorage.getItem(`${chainId}_makerMarket`)
 
-      if (marketFromLocalStorage && Object.keys(SupportedAsset).includes(marketFromLocalStorage)) {
+      if (marketFromLocalStorage && marketFromLocalStorage in ChainMarkets2[chainId]) {
         _setSelectedMarket(marketFromLocalStorage as SupportedAsset)
       }
 
-      if (makerMarketFromLocalStorage && Object.keys(SupportedMakerMarket).includes(makerMarketFromLocalStorage)) {
-        _setSelectedMakerMarket(makerMarketFromLocalStorage as SupportedMakerMarket)
+      if (makerMarketFromLocalStorage && makerMarketFromLocalStorage in ChainMarkets2[chainId]) {
+        _setSelectedMakerMarket(makerMarketFromLocalStorage as SupportedAsset)
       }
     }
 
-    if (makerMarketFromParams && Object.keys(SupportedMakerMarket).includes(makerMarketFromParams)) {
-      _setSelectedMakerMarket(makerMarketFromParams as SupportedMakerMarket)
+    if (makerMarketFromParams && makerMarketFromParams in ChainMarkets2[chainId]) {
+      _setSelectedMakerMarket(makerMarketFromParams as SupportedAsset)
     }
 
-    if (directionFromParams && Object.keys(OrderDirection).includes(directionFromParams)) {
-      _setOrderDirection(directionFromParams as OrderDirection)
+    if (
+      directionFromParams &&
+      [PositionSide2.long, PositionSide2.short].includes(directionFromParams as PositionSide2)
+    ) {
+      _setOrderDirection(directionFromParams as PositionSide2.long | PositionSide2.short)
     } else {
       const directionFromLocalStorage = localStorage.getItem(`${chainId}_orderDirection`)
 
-      if (directionFromLocalStorage && Object.keys(OrderDirection).includes(directionFromLocalStorage)) {
-        _setOrderDirection(directionFromLocalStorage as OrderDirection)
+      if (
+        directionFromLocalStorage &&
+        [PositionSide2.long, PositionSide2.short].includes(directionFromLocalStorage as PositionSide2)
+      ) {
+        _setOrderDirection(directionFromLocalStorage as PositionSide2.long | PositionSide2.short)
       }
     }
 
-    if (!(selectedMarket in ChainMarkets[chainId])) {
-      _setSelectedMarket(Object.keys(ChainMarkets[chainId])[0] as SupportedAsset)
+    if (!(selectedMarket in ChainMarkets2[chainId])) {
+      _setSelectedMarket((Object.keys(ChainMarkets2[chainId])[0] as SupportedAsset) ?? SupportedAsset.eth)
     }
 
-    if (!(makerAsset in ChainMarkets[chainId])) {
-      _setSelectedMakerMarket(SupportedMakerMarket.ethLong)
+    if (!(selectedMakerMarket in ChainMarkets2[chainId])) {
+      _setSelectedMakerMarket(SupportedAsset.eth)
     }
-  }, [chainId, selectedMarket, makerAsset])
+  }, [chainId, selectedMarket, snapshots2, selectedMakerMarket, isMaker, manualCommitment])
 
   const setSelectedMarket = (asset: SupportedAsset) => {
     localStorage.setItem(`${chainId}_market`, asset)
     _setSelectedMarket(asset)
   }
 
-  const setSelectedMakerMarket = (makerMarket: SupportedMakerMarket) => {
+  const setSelectedMakerMarket = (makerMarket: SupportedAsset) => {
     localStorage.setItem(`${chainId}_makerMarket`, makerMarket)
     _setSelectedMakerMarket(makerMarket)
   }
 
-  const setOrderDirection = (orderDirection: OrderDirection) => {
+  const setOrderDirection = (orderDirection: PositionSide2.long | PositionSide2.short) => {
     localStorage.setItem(`${chainId}_orderDirection`, orderDirection)
     _setOrderDirection(orderDirection)
   }
@@ -150,17 +158,18 @@ export const MarketProvider = ({ children, isMaker }: { children: React.ReactNod
         setOrderDirection,
         selectedMarket,
         setSelectedMarket,
-        snapshots,
-        selectedMarketSnapshot: snapshots?.[selectedMarket],
-        selectedMakerMarketSnapshot: snapshots?.[makerAsset]?.[makerOrderDirection],
-        assetMetadata: AssetMetadata[isMaker ? makerAsset : selectedMarket],
+        snapshots2,
+        assetMetadata: AssetMetadata[isMaker ? selectedMakerMarket : selectedMarket],
         activePositionTab,
         setActivePositionTab,
         setSelectedMakerMarket,
         selectedMakerMarket,
         isMaker: isMaker ?? false,
-        makerAsset,
-        makerOrderDirection,
+        userCurrentPosition: snapshots2?.user?.[isMaker ? selectedMakerMarket : selectedMarket],
+        selectedMarketSnapshot2: snapshots2?.market?.[isMaker ? selectedMakerMarket : selectedMarket],
+        setOverrideValues,
+        overrideValues,
+        manualCommitment,
       }}
     >
       {children}
