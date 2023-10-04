@@ -12,6 +12,10 @@ export enum TrackingEvents {
   depositToVault = 'Deposit to Vault',
   redeemFromVault = 'Redeem from Vault',
   withdrawFromVault = 'Withdraw from Vault',
+  goToV1 = 'Go to V1',
+  redeemV1VaultShares = 'Redeem V1 Vault Shares',
+  claimV1VaultRewards = 'Claim V1 Vault Shares',
+  initiateV1ToV2VaultDeposit = 'Initiate V1 to V2 Vault Deposit',
 }
 
 interface PageViewEvent {
@@ -65,4 +69,8 @@ export type EventMap = {
   [TrackingEvents.redeemFromVault]: VaultEvent
   [TrackingEvents.withdrawFromVault]: VaultEvent
   [TrackingEvents.selectMakerMarket]: SelectMakerMarketEvent
+  [TrackingEvents.goToV1]: any
+  [TrackingEvents.redeemV1VaultShares]: VaultEvent
+  [TrackingEvents.claimV1VaultRewards]: VaultEvent
+  [TrackingEvents.initiateV1ToV2VaultDeposit]: VaultEvent
 }

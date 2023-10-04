@@ -3,6 +3,7 @@ import styled from '@emotion/styled'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { TrackingEvents, useMixpanel } from '@/analytics'
 import { Button } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
 import { useUserCurrentPositions } from '@/hooks/markets'
@@ -25,6 +26,7 @@ export const V1Link = () => {
   const { data: v1PositionSnapshots } = useUserCurrentPositions()
   const [showV1Link, setShowV1Link] = useState(false)
   const copy = useNavCopy()
+  const { track } = useMixpanel()
 
   useEffect(() => {
     if (v1PositionSnapshots && v1PositionSnapshots.length > 0) {
@@ -40,6 +42,9 @@ export const V1Link = () => {
   return (
     <Link href="https://v1.perennial.finance">
       <Button
+        onClick={() => {
+          track(TrackingEvents.goToV1, {})
+        }}
         variant="secondary"
         bg={colors.brand.whiteAlpha[20]}
         borderColor={colors.brand.purple[240]}

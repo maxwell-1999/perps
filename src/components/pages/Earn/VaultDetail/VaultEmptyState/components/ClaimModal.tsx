@@ -88,7 +88,7 @@ export default function ClaimModal({
           />
         ),
       })
-      track(TrackingEvents.withdrawFromVault, {
+      track(TrackingEvents.claimV1VaultRewards, {
         vaultName,
         amount: Big18Math.toFloatString(vaultUserSnapshot.claimable),
       })
