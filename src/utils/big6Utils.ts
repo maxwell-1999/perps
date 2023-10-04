@@ -112,8 +112,11 @@ export class Big6Math {
     return a === b ? 0 : a < b ? -1 : 1
   }
 
-  public static fromFloatString(a: string): bigint {
+  public static fromFloatString(a: string, floor: boolean = false): bigint {
     if (!a || a === '.') return 0n
+    if (floor) {
+      return parseUnits(this.max6Decimals(a), Big6Math.FIXED_DECIMALS)
+    }
     return parseUnits(a.replace(/','/g, '') as `${number}`, Big6Math.FIXED_DECIMALS)
   }
 
@@ -131,5 +134,14 @@ export class Big6Math {
 
   public static to18Decimals(amount: bigint): bigint {
     return amount * BigInt('1000000000000')
+  }
+
+  public static max6Decimals = (amount: string) => {
+    const [first, decimals] = amount.split('.')
+    if (!decimals || decimals.length <= 6) {
+      return amount
+    }
+
+    return `${first}.${decimals.substring(0, 6)}`
   }
 }
