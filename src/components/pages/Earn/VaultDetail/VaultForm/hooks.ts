@@ -103,7 +103,8 @@ export const useOnAmountChange = (setValue: UseFormSetValue<FormValues>) =>
   useCallback(
     (newAmount: string) => {
       if (!isNumbersOnly(newAmount)) return
-      setValue(FormNames.amount, newAmount, setArgs)
+      const validatedAmount = Big6Math.max6Decimals(newAmount)
+      setValue(FormNames.amount, validatedAmount, setArgs)
     },
     [setValue],
   )
