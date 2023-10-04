@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { arbitrum } from 'viem/chains'
 
+import { TrackingEvents, useMixpanel } from '@/analytics'
 import { Button, Container } from '@/components/design-system'
 import { DataRow } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
@@ -44,6 +45,7 @@ export default function VaultForm({
   const [maxWithdrawal, setMaxWithdrawal] = useState(false)
   const { withdrawnAmount, setWithdrawnAmount } = useMigrationContext()
   const { data: operatorApprovals } = useOperators()
+  const { track } = useMixpanel()
 
   const {
     handleSubmit,
@@ -61,11 +63,16 @@ export default function VaultForm({
   useEffect(() => {
     if (withdrawnAmount > 0n && !!balances?.usdcAllowance) {
       setVaultOption(VaultFormOption.Deposit)
-      setFormValues({ amount: Big6Math.max6Decimals(Big18Math.toFloatString(withdrawnAmount)) })
+      const amount = Big6Math.max6Decimals(Big18Math.toFloatString(withdrawnAmount))
+      setFormValues({ amount })
       setWithdrawnAmount(0n)
       reset()
+      track(TrackingEvents.initiateV1ToV2VaultDeposit, {
+        amount,
+        vaultName,
+      })
     }
-  }, [withdrawnAmount, setValue, reset, formValues, balances, setWithdrawnAmount])
+  }, [withdrawnAmount, setValue, reset, formValues, balances, setWithdrawnAmount, track, vaultName])
 
   useEffect(() => {
     reset()

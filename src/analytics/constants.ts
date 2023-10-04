@@ -70,4 +70,7 @@ export type EventMap = {
   [TrackingEvents.withdrawFromVault]: VaultEvent
   [TrackingEvents.selectMakerMarket]: SelectMakerMarketEvent
   [TrackingEvents.goToV1]: any
+  [TrackingEvents.redeemV1VaultShares]: VaultEvent
+  [TrackingEvents.claimV1VaultRewards]: VaultEvent
+  [TrackingEvents.initiateV1ToV2VaultDeposit]: VaultEvent
 }

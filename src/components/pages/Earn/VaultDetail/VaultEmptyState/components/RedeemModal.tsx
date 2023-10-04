@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 
+import { TrackingEvents, useMixpanel } from '@/analytics'
 import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { VaultSnapshot, VaultUserSnapshot, useVaultTransactions } from '@/hooks/vaults'
@@ -45,6 +46,7 @@ export default function RedeemModal({
   const copy = useVaultFormCopy()
   const intl = useIntl()
   const toast = useToast()
+  const { track } = useMixpanel()
 
   const { onApproveShares, onRedeem } = useVaultTransactions(vaultSnapshot.vaultType)
 
@@ -94,6 +96,10 @@ export default function RedeemModal({
             body={<ToastMessage action={copy.Redeem} message={message} actionColor={colors.brand.green} />}
           />
         ),
+      })
+      track(TrackingEvents.redeemV1VaultShares, {
+        amount: Big18Math.toFloatString(assets),
+        vaultName,
       })
     } catch (e) {
       console.error(e)
