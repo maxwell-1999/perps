@@ -96,7 +96,7 @@ export default function VaultDetail({
         />
       )}
       {showLpModal && <LpWarningModal onClose={() => setShowLpModal(false)} />}
-      <Flex height="100%" width="100%" pt={10} px={14} bg={alpha5}>
+      <Flex height="100%" width="100%" pt={10} px={{ base: 6, sm: 14 }} bg={alpha5}>
         <Flex flexDirection="column" mr={isBase ? 0 : 9} width={isBase ? '100%' : '50%'}>
           <MobileSelectContainer>
             <MobileVaultSelect />
