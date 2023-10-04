@@ -9,6 +9,7 @@ import { SupportedChainId } from '@/constants/network'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState } from '@/contexts/tradeFormContext'
 import { MarketSnapshot } from '@/hooks/markets2'
+import { Big6Math } from '@/utils/big6Utils'
 import { isNumbersOnly } from '@/utils/formUtils'
 import { usePrevious } from '@/utils/hooks'
 
@@ -16,7 +17,6 @@ import { FormNames } from './constants'
 import {
   collateralFromAmountAndLeverage,
   leverageFromAmountAndCollateral,
-  max6Decimals,
   positionFromCollateralAndLeverage,
 } from './utils'
 
@@ -250,7 +250,7 @@ export const useOnChangeHandlers = ({
   const onChangeAmount = useCallback(
     (newAmount: string) => {
       if (!isNumbersOnly(newAmount)) return
-      const validatedAmount = max6Decimals(newAmount)
+      const validatedAmount = Big6Math.max6Decimals(newAmount)
       setValue(FormNames.amount, validatedAmount, setArgs)
 
       if (leverageFixed) {
@@ -293,7 +293,7 @@ export const useOnChangeHandlers = ({
   const onChangeLeverage = useCallback(
     (newLeverage: string) => {
       if (!isNumbersOnly(newLeverage)) return
-      const validatedLeverage = max6Decimals(newLeverage)
+      const validatedLeverage = Big6Math.max6Decimals(newLeverage)
       setValue(FormNames.leverage, validatedLeverage, setArgs)
       // todo: set position after fees?
       const newPosition = positionFromCollateralAndLeverage({
@@ -313,7 +313,7 @@ export const useOnChangeHandlers = ({
   const onChangeCollateral = useCallback(
     (newAmount: string) => {
       if (!isNumbersOnly(newAmount)) return
-      const validatedCollateral = max6Decimals(newAmount)
+      const validatedCollateral = Big6Math.max6Decimals(newAmount)
       setValue(FormNames.collateral, validatedCollateral, setArgs)
 
       if (leverageFixed) {

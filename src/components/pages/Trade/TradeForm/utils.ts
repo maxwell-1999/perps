@@ -36,15 +36,6 @@ export const calculateInitialLeverage = ({
   return Big6Math.toFloatString(leverage)
 }
 
-export const max6Decimals = (amount: string) => {
-  const [first, decimals] = amount.split('.')
-  if (!decimals || decimals.length <= 6) {
-    return amount
-  }
-
-  return `${first}.${decimals.substring(0, 6)}`
-}
-
 export const collateralFromAmountAndLeverage = ({
   currentAmount,
   amount,
