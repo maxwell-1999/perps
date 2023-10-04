@@ -14,6 +14,7 @@ interface Props extends ButtonProps {
   overrideLabel?: boolean
   actionAllowedInGeoblock?: boolean
   formRef?: React.RefObject<HTMLFormElement>
+  skipMarketFactoryApproval?: boolean
 }
 
 export const TxButton = (props: Props) => {
@@ -34,12 +35,12 @@ export const TxButton = (props: Props) => {
     else if (!address) label = connectWallet
   }
 
-  const { formRef, ...btnProps } = props
+  const { formRef, skipMarketFactoryApproval, ...btnProps } = props
 
   delete btnProps.overrideLabel
   delete btnProps.actionAllowedInGeoblock
 
-  if (!operatorData?.multiInvokerApproved) {
+  if (!skipMarketFactoryApproval && !operatorData?.marketFactoryApproved) {
     delete btnProps.type
     return (
       <>

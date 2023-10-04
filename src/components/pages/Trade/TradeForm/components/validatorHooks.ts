@@ -173,7 +173,7 @@ export function usePositionValidators({
       if (marketClosed) return true // socialization does not apply in closed markets
 
       // Disallow decreasing position if liquidity is insufficient
-      if (inputValue !== 0n && makerLiquidity - inputValue < major) {
+      if (inputValue < 0n && makerLiquidity - inputValue < major) {
         return copy.belowMinMaker
       }
 

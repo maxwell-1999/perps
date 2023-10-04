@@ -39,6 +39,7 @@ interface ConfirmationModalProps {
   vaultSnapshot: VaultSnapshot2
   vaultUserSnapshot: VaultAccountSnapshot2
   maxWithdrawal: boolean
+  operatorApproved: boolean
 }
 
 export default function ConfirmationModal({
@@ -51,6 +52,7 @@ export default function ConfirmationModal({
   vaultName,
   vaultUserSnapshot,
   maxWithdrawal,
+  operatorApproved,
 }: ConfirmationModalProps) {
   const copy = useVaultFormCopy()
   const intl = useIntl()
@@ -87,7 +89,7 @@ export default function ConfirmationModal({
   useEffect(() => {
     const requiredApprovals = getRequiredApprovals({
       amount: bigintAmount,
-      vaultAccountSnapshot: vaultUserSnapshot,
+      vaultFactoryApproved: operatorApproved,
       vaultOption,
       balances,
     })

@@ -6,7 +6,7 @@ import { readContract, waitForTransaction } from 'wagmi/actions'
 
 import { ChainalysisContractAddress, MultiInvoker2Addresses } from '@/constants/contracts'
 
-import { useDSU, useMarketFactory, useUSDC } from './contracts'
+import { useDSU, useMarketFactory, useUSDC, useVaultFactory } from './contracts'
 import { useAddress, useChainId } from './network'
 
 export type Balances =
@@ -47,6 +47,7 @@ export const useBalances = () => {
 export const useOperators = () => {
   const chainId = useChainId()
   const marketFactory = useMarketFactory()
+  const vaultFactory = useVaultFactory()
   const { address } = useAddress()
 
   return useQuery({
@@ -56,7 +57,8 @@ export const useOperators = () => {
       if (!address || !chainId) return
 
       return {
-        multiInvokerApproved: await marketFactory.read.operators([address, MultiInvoker2Addresses[chainId]]),
+        marketFactoryApproved: await marketFactory.read.operators([address, MultiInvoker2Addresses[chainId]]),
+        vaultFactoryApproved: await vaultFactory.read.operators([address, MultiInvoker2Addresses[chainId]]),
       }
     },
   })

@@ -14,7 +14,7 @@ import { useMigrationContext } from '@/contexts/migrationContext'
 import { useAddress } from '@/hooks/network'
 import { useChainId } from '@/hooks/network'
 import { VaultAccountSnapshot2, VaultSnapshot2 } from '@/hooks/vaults2'
-import { Balances } from '@/hooks/wallet'
+import { Balances, useOperators } from '@/hooks/wallet'
 import { Big6Math, formatBig6USDPrice } from '@/utils/big6Utils'
 import { Big18Math } from '@/utils/big18Utils'
 
@@ -43,6 +43,7 @@ export default function VaultForm({
   const [vaultOption, setVaultOption] = useState<VaultFormOption>(VaultFormOption.Deposit)
   const [maxWithdrawal, setMaxWithdrawal] = useState(false)
   const { withdrawnAmount, setWithdrawnAmount } = useMigrationContext()
+  const { data: operatorApprovals } = useOperators()
 
   const {
     handleSubmit,
@@ -140,6 +141,7 @@ export default function VaultForm({
           vaultSnapshot={vaultSnapshot}
           vaultUserSnapshot={vaultUserSnapshot}
           maxWithdrawal={maxWithdrawal}
+          operatorApproved={!!operatorApprovals?.vaultFactoryApproved}
         />
       )}
       <Container variant="vaultCard" mb="22px" py={5} px={4}>
@@ -238,6 +240,7 @@ export default function VaultForm({
             label={vaultOption === VaultFormOption.Deposit ? copy.Deposit : copy.Redeem}
             overrideLabel
             actionAllowedInGeoblock={vaultOption === VaultFormOption.Redeem} // allow redeem in geoblock
+            skipMarketFactoryApproval // not needed for deposit/redeem
           />
         </Form>
       </Container>

@@ -340,6 +340,7 @@ export const ClaimCard = ({
             loadingText={copy.confirmWithdraw}
             overrideLabel
             actionAllowedInGeoblock // allow claims in geoblock
+            skipMarketFactoryApproval // not needed for claims
           />
         </Flex>
       </Flex>

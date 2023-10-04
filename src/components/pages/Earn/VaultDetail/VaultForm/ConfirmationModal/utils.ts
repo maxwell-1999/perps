@@ -9,18 +9,18 @@ export const getRequiredApprovals = ({
   amount,
   balances,
   vaultOption,
-  vaultAccountSnapshot,
+  vaultFactoryApproved,
 }: {
   amount: bigint
   balances: Balances
   vaultOption: VaultFormOption
-  vaultAccountSnapshot?: VaultAccountSnapshot2
+  vaultFactoryApproved: boolean
 }): RequiredApprovals[] => {
   if (!balances) {
     return []
   }
   const approvals = []
-  if (!vaultAccountSnapshot?.multiInvokerApproved) {
+  if (!vaultFactoryApproved) {
     approvals.push(RequiredApprovals.operator)
   }
 
