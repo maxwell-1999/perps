@@ -65,6 +65,7 @@ export const createAdjustment = ({
   const collateralDifference = calcCollateralDifference(collateralAmount, currentCollateral)
   const leverage = calcLeverage(price, positionAmount, collateralAmount - totalFees)
   const leverageDifference = calcLeverageDifference(leverage, currentLeverage)
+  const approvalInfo = needsApproval({ collateralDifference, usdcAllowance, interfaceFee: interfaceFee.interfaceFee })
 
   return {
     collateral: {
@@ -85,7 +86,8 @@ export const createAdjustment = ({
       newLeverage: leverage,
       difference: leverageDifference,
     },
-    needsApproval: needsApproval({ collateralDifference, usdcAllowance, interfaceFee: interfaceFee.interfaceFee }),
+    needsApproval: approvalInfo.needsApproval,
+    approvalAmount: approvalInfo.approvalAmount,
     fullClose: !!fullClose,
     // Buffer maintenance by 1.5x to prevent liquidations between settlements
     requiresTwoStep: Big6Math.mul(currentMaintenance, Big6Math.fromFloatString('1.5')) > collateralAmount,

@@ -24,6 +24,7 @@ export type Adjustment = {
   position: PositionDetails
   leverage: LeverageDetails
   needsApproval: boolean
+  approvalAmount: bigint
   fullClose: boolean
   requiresTwoStep: boolean
 }

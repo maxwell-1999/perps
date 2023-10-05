@@ -1,5 +1,7 @@
 import { useIntl } from 'react-intl'
 
+import { formatBig6USDPrice } from '@/utils/big6Utils'
+
 export const useAdjustmentModalCopy = () => {
   const intl = useIntl()
   return {
@@ -41,6 +43,13 @@ export const useAdjustmentModalCopy = () => {
     approveUsdcBody: intl.formatMessage({
       defaultMessage: 'Approve funds to trade on Perennial.',
     }),
+    insufficientUsdcApproval: (requiredAmount: bigint) =>
+      intl.formatMessage(
+        {
+          defaultMessage: 'You must approve at least {requiredAmount} USDC',
+        },
+        { requiredAmount: formatBig6USDPrice(requiredAmount, { fullPrecision: true }) },
+      ),
     approveRequests: intl.formatMessage({
       defaultMessage: 'Please check your wallet, and confirm the following requests.',
     }),

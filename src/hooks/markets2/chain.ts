@@ -373,6 +373,7 @@ export const useMarketTransactions2 = (productAddress: Address) => {
 
   const txOpts = { account: address || zeroAddress, chainId, chain }
   const onApproveUSDC = async (suggestedAmount: bigint = MaxUint256) => {
+    if (!address) throw new Error('No Address')
     const hash = await usdcContract.write.approve(
       [MultiInvoker2Addresses[chainId], Big6Math.abs(suggestedAmount)],
       txOpts,
@@ -383,7 +384,8 @@ export const useMarketTransactions2 = (productAddress: Address) => {
       hash,
       description: copy.approveUSDC,
     })
-    return hash
+    const newAllowance = await usdcContract.read.allowance([address, MultiInvoker2Addresses[chainId]])
+    return { hash, newAllowance }
   }
 
   const onModifyPosition = async ({

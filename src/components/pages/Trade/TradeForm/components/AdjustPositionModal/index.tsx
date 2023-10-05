@@ -85,6 +85,7 @@ const AdjustPositionModal = memo(
       position: { prevPosition, newPosition, interfaceFee, tradeFee, settlementFee },
       leverage: { prevLeverage, newLeverage },
       needsApproval,
+      approvalAmount,
       requiresTwoStep,
     } = adjustment
 
@@ -100,6 +101,7 @@ const AdjustPositionModal = memo(
     const copy = useAdjustmentModalCopy()
     const [needsUsdcApproval, setNeedsUsdcApproval] = useState(false)
     const [approveUsdcLoading, setApproveUsdcLoading] = useState(false)
+    const [insufficientApproval, setInsufficientApproval] = useState(false)
     const [usdcApproved, setUsdcApproved] = useState(false)
     const [withdrawCollateralLoading, setWithdrawCollateralLoading] = useState(false)
     const [awaitingSettlement, setAwaitingSettlement] = useState(false)
@@ -138,9 +140,15 @@ const AdjustPositionModal = memo(
     const handleApproveUSDC = async () => {
       setApproveUsdcLoading(true)
       try {
-        await onApproveUSDC()
-        setUsdcApproved(true)
-        setStep(1)
+        const { newAllowance } = await onApproveUSDC()
+        if (newAllowance >= approvalAmount) {
+          setUsdcApproved(true)
+          setInsufficientApproval(false)
+          setStep(1)
+        } else {
+          setUsdcApproved(false)
+          setInsufficientApproval(true)
+        }
       } catch (err) {
         console.error(err)
       } finally {
@@ -267,7 +275,9 @@ const AdjustPositionModal = memo(
               {needsUsdcApproval && (
                 <ModalStep
                   title={copy.approveUsdcTitle}
-                  description={copy.approveUsdcBody}
+                  description={
+                    insufficientApproval ? copy.insufficientUsdcApproval(approvalAmount) : copy.approveUsdcBody
+                  }
                   isLoading={needsUsdcApproval ? approveUsdcLoading : false}
                   isCompleted={usdcApproved}
                 />

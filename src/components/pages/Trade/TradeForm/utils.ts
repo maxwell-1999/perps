@@ -179,7 +179,8 @@ export const needsApproval = ({
   interfaceFee: bigint
 }) => {
   const change = collateralDifference + interfaceFee
-  return Big6Math.fromDecimals(usdcAllowance, 6) < (change < 0n ? interfaceFee : collateralDifference + interfaceFee)
+  const approvalAmount = change < 0n ? interfaceFee : collateralDifference + interfaceFee
+  return { needsApproval: Big6Math.fromDecimals(usdcAllowance, 6) < approvalAmount, approvalAmount }
 }
 
 export const calcPositionFee = (price: bigint, positionDelta: bigint, feeRate: bigint) => {

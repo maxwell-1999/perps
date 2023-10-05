@@ -1831,6 +1831,20 @@
       "value": "Home"
     }
   ],
+  "ezCbHx": [
+    {
+      "type": 0,
+      "value": "You must approve at least "
+    },
+    {
+      "type": 1,
+      "value": "requiredAmount"
+    },
+    {
+      "type": 0,
+      "value": " USDC"
+    }
+  ],
   "f+aM7s": [
     {
       "type": 0,
