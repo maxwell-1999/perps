@@ -7,12 +7,14 @@ import { Analytics } from '@vercel/analytics/react'
 import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 import { IntlProvider } from 'react-intl'
 // eslint-disable-next-line no-restricted-imports
 import { WagmiConfig, useAccount, useDisconnect } from 'wagmi'
 
 import { DatadogProvider, MixpanelProvider, useMixpanel } from '@/analytics'
 import SanctionModal from '@/components/SanctionModal'
+import { ErrorScreen, logErrorToDataDog } from '@/components/shared/ErrorScreen'
 import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
 import { AuthStatusProvider, StartingAuthStatus, useAuthStatus } from '@/contexts/authStatusContext'
@@ -88,7 +90,13 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
       <RainbowKitProvider chains={chains} theme={darkTheme()} modalSize="compact" showRecentTransactions>
         <ChakraProvider theme={theme} toastOptions={{ defaultOptions: { position: 'top-right', duration: 5000 } }}>
           <CSSReset />
-          {sanctioned ? <SanctionModal /> : <Component {...pageProps} />}
+          {sanctioned ? (
+            <SanctionModal />
+          ) : (
+            <ErrorBoundary fallback={<ErrorScreen minHeight="100vh" />} onError={logErrorToDataDog}>
+              <Component {...pageProps} />
+            </ErrorBoundary>
+          )}
         </ChakraProvider>
       </RainbowKitProvider>
     </RainbowKitAuthenticationProvider>
