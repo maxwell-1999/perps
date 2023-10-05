@@ -1,4 +1,5 @@
 import { Flex, FlexProps, Text } from '@chakra-ui/react'
+import { datadogLogs } from '@datadog/browser-logs'
 import { useIntl } from 'react-intl'
 
 import colors from '../design-system/theme/colors'
@@ -28,4 +29,8 @@ export const ErrorScreen = ({
       {children}
     </Flex>
   )
+}
+
+export const logErrorToDataDog = (error: Error) => {
+  datadogLogs.logger.error(error.message, {}, error)
 }

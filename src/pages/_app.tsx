@@ -14,7 +14,7 @@ import { WagmiConfig, useAccount, useDisconnect } from 'wagmi'
 
 import { DatadogProvider, MixpanelProvider, useMixpanel } from '@/analytics'
 import SanctionModal from '@/components/SanctionModal'
-import { ErrorScreen } from '@/components/shared/ErrorScreen'
+import { ErrorScreen, logErrorToDataDog } from '@/components/shared/ErrorScreen'
 import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
 import { AuthStatusProvider, StartingAuthStatus, useAuthStatus } from '@/contexts/authStatusContext'
@@ -93,7 +93,7 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
           {sanctioned ? (
             <SanctionModal />
           ) : (
-            <ErrorBoundary fallback={<ErrorScreen minHeight="100vh" />}>
+            <ErrorBoundary fallback={<ErrorScreen minHeight="100vh" />} onError={logErrorToDataDog}>
               <Component {...pageProps} />
             </ErrorBoundary>
           )}

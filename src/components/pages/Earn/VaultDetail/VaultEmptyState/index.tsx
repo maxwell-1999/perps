@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
-import { ErrorScreen } from '@/components/shared/ErrorScreen'
+import { ErrorScreen, logErrorToDataDog } from '@/components/shared/ErrorScreen'
 
 import { EarnWithVaults } from './components'
 import Migration from './components/Migration'
@@ -11,7 +11,7 @@ export default function VaultEmptyState() {
   const [view, setView] = useState<EmptyStateView>(EmptyStateView.earnWithVaults)
   if (view === EmptyStateView.migrate) {
     return (
-      <ErrorBoundary fallback={<ErrorScreen />}>
+      <ErrorBoundary fallback={<ErrorScreen />} onError={logErrorToDataDog}>
         <Migration setView={setView} />
       </ErrorBoundary>
     )
