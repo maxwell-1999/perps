@@ -24,6 +24,7 @@ import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
 
 import { useClaimModalCopy } from '../../ClaimModal/hooks'
+import { useEmtpyStateCopy } from '../hooks'
 
 interface ClaimModalProps {
   onClose: () => void
@@ -41,6 +42,7 @@ export default function ClaimModal({
   dsuAllowance,
 }: ClaimModalProps) {
   const copy = useClaimModalCopy()
+  const { insufficientDSUApprovalMsg } = useEmtpyStateCopy()
   const intl = useIntl()
   const toast = useToast()
   const { track } = useMixpanel()
@@ -49,6 +51,7 @@ export default function ClaimModal({
   const formattedClaimableBalance = formatBig18USDPrice(vaultUserSnapshot.claimable)
 
   const [requiresDSUApproval, setRequiresDSUApproval] = useState<boolean>(false)
+  const [insuficientDSUApproval, setInsuficientDSUApproval] = useState<boolean>(false)
 
   const [transactionState, setTransactionState] = useState<ClaimTxState>(initialTransactionState)
   const { approveDSUCompleted, approveDSULoading, claimCompleted, claimLoading } = transactionState
@@ -62,8 +65,14 @@ export default function ClaimModal({
   const handleApproveDSU = async () => {
     setTransactionState((prevState) => ({ ...prevState, approveDSULoading: true }))
     try {
-      await onApproveDSU()
-      setTransactionState((prevState) => ({ ...prevState, approveDSUCompleted: true }))
+      const { newAllowance } = await onApproveDSU()
+      if (newAllowance >= vaultUserSnapshot.claimable) {
+        setInsuficientDSUApproval(false)
+        setTransactionState((prevState) => ({ ...prevState, approveDSUCompleted: true }))
+      } else {
+        setInsuficientDSUApproval(true)
+        setTransactionState((prevState) => ({ ...prevState, approveDSUCompleted: false }))
+      }
     } catch (e) {
       console.error(e)
     } finally {
@@ -119,17 +128,26 @@ export default function ClaimModal({
             {requiresDSUApproval && (
               <ModalStep
                 title={copy.approveDSU}
-                description={intl.formatMessage(
-                  { defaultMessage: 'Approve at least {dsuApprovalSuggestion} to withdraw collateral' },
-                  {
-                    dsuApprovalSuggestion: (
-                      <Text as="span" color={colors.brand.purple[240]}>
-                        {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
-                        {dsuApprovalSuggestion} DSU
-                      </Text>
-                    ),
-                  },
-                )}
+                description={
+                  insuficientDSUApproval
+                    ? insufficientDSUApprovalMsg(
+                        <Text as="span" color={colors.brand.purple[240]}>
+                          {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+                          {formatBig18(vaultUserSnapshot.claimable)} DSU
+                        </Text>,
+                      )
+                    : intl.formatMessage(
+                        { defaultMessage: 'Approve at least {dsuApprovalSuggestion} to withdraw collateral' },
+                        {
+                          dsuApprovalSuggestion: (
+                            <Text as="span" color={colors.brand.purple[240]}>
+                              {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
+                              {dsuApprovalSuggestion} DSU
+                            </Text>
+                          ),
+                        },
+                      )
+                }
                 isLoading={approveDSULoading}
                 isCompleted={approveDSUCompleted}
               />

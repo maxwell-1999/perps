@@ -41,6 +41,10 @@ export const useEmtpyStateCopy = () => {
     claimable: intl.formatMessage({ defaultMessage: 'Claimable:' }),
     availableForDeposit: intl.formatMessage({ defaultMessage: 'Available for deposit:' }),
     deposit: intl.formatMessage({ defaultMessage: 'Deposit' }),
+    insufficientApprovalSharesMsg: (shares: React.ReactNode) =>
+      intl.formatMessage({ defaultMessage: 'You must approve at least {shares}' }, { shares }),
+    insufficientDSUApprovalMsg: (claimable: React.ReactNode) =>
+      intl.formatMessage({ defaultMessage: 'You must approve at least {claimable}' }, { claimable }),
   }
 }
 

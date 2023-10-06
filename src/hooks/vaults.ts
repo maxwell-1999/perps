@@ -18,7 +18,7 @@ import { BalancedVaultAbi } from '@abi/BalancedVault.abi'
 import { LensProductSnapshotAbi, LensUserProductSnapshotAbi } from '@abi/Lens.abi'
 
 import { bufferGasLimit, getProductContract, getVaultAddressForType, getVaultForTypeV1 } from '../utils/contractUtils'
-import { useDSU, useLensProductSnapshot, useLensUserProductSnapshot, useMultiInvoker, useUSDC } from './contracts'
+import { useDSU, useLensProductSnapshot, useLensUserProductSnapshot, useMultiInvoker } from './contracts'
 import { useAddress, useChainId } from './network'
 
 export const useVaultSnapshots = (vaultTypes: PerennialVaultType[]) => {
@@ -264,9 +264,8 @@ const useVaultTransactionCopy = () => {
 }
 
 export type VaultTransactions = {
-  onApproveUSDC: () => Promise<`0x${string}`>
-  onApproveDSU: () => Promise<`0x${string}`>
-  onApproveShares: () => Promise<`0x${string}` | undefined>
+  onApproveDSU: () => Promise<{ hash: `0x${string}`; newAllowance: bigint }>
+  onApproveShares: () => Promise<{ hash: `0x${string}`; newAllowance: bigint } | undefined>
   onDeposit: (amount: bigint) => Promise<`0x${string}` | undefined>
   onRedeem: (amount: bigint, { assets, max }: { assets?: boolean; max?: boolean }) => Promise<`0x${string}` | undefined>
   onClaim: (unwrapAmount?: bigint) => Promise<`0x${string}` | undefined>
@@ -279,7 +278,6 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
   const addRecentTransaction = useAddRecentTransaction()
   const copy = useVaultTransactionCopy()
 
-  const usdcContract = useUSDC(walletClient ?? undefined)
   const dsuContract = useDSU(walletClient ?? undefined)
   const multiInvoker = useMultiInvoker(walletClient ?? undefined)
 
@@ -296,18 +294,9 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
   )
 
   const txOpts = { account: address || zeroAddress, chainId, chain }
-  const onApproveUSDC = async () => {
-    const hash = await usdcContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
-    await waitForTransaction({ hash })
-    await refresh()
-    addRecentTransaction({
-      hash,
-      description: copy.approveUSDC,
-    })
-    return hash
-  }
 
   const onApproveDSU = async () => {
+    if (!address) throw new Error('No address')
     const hash = await dsuContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
     await refresh()
@@ -315,13 +304,15 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
       hash,
       description: copy.approveDSU,
     })
-    return hash
+    const newAllowance = await dsuContract.read.allowance([address, MultiInvokerAddresses[chainId]])
+    return { hash, newAllowance }
   }
 
   const onApproveShares = async () => {
     if (!walletClient) return
     const vaultContract = getVaultForTypeV1(vaultType, chainId, walletClient)
     if (!vaultContract) return
+    if (!address) throw new Error('No address')
 
     const hash = await vaultContract.write.approve([MultiInvokerAddresses[chainId], MaxUint256], txOpts)
     await waitForTransaction({ hash })
@@ -330,7 +321,8 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
       hash,
       description: copy.approveShares,
     })
-    return hash
+    const newAllowance = await vaultContract.read.allowance([address, MultiInvokerAddresses[chainId]])
+    return { hash, newAllowance }
   }
 
   const onDeposit = async (amount: bigint) => {
@@ -422,7 +414,6 @@ export const useVaultTransactions = (vaultType: PerennialVaultType): VaultTransa
   }
 
   return {
-    onApproveUSDC,
     onApproveDSU,
     onApproveShares,
     onDeposit,
