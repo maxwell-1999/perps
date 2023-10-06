@@ -66,7 +66,7 @@ export default function ConfirmationModal({
   })
 
   const [requiredApprovals, setRequiredApprovals] = useState<RequiredApprovals[]>()
-
+  const [insufficientApproval, setInsufficientApproval] = useState(false)
   const [transactionState, setTransactionState] = useState<TransactionState>(initialTransactionState)
   const {
     approveUSDCLoading,
@@ -100,8 +100,14 @@ export default function ConfirmationModal({
   const handleUSDCApproval = async () => {
     setTransactionState((prevState) => ({ ...prevState, approveUSDCLoading: true }))
     try {
-      await onApproveUSDC()
-      setTransactionState((prevState) => ({ ...prevState, approveUSDCCompleted: true }))
+      const { newAllowance } = await onApproveUSDC()
+      if (newAllowance >= bigintAmount) {
+        setInsufficientApproval(false)
+        setTransactionState((prevState) => ({ ...prevState, approveUSDCCompleted: true }))
+      } else {
+        setTransactionState((prevState) => ({ ...prevState, approveUSDCCompleted: false }))
+        setInsufficientApproval(true)
+      }
     } catch (e) {
       console.error(e)
     } finally {
@@ -200,7 +206,9 @@ export default function ConfirmationModal({
                 {requiresUSDCApproval && (
                   <ModalStep
                     title={copy.approveUSDC}
-                    description={copy.approveUSDCBody}
+                    description={
+                      insufficientApproval ? copy.insufficientUsdcApproval(bigintAmount) : copy.approveUSDCBody
+                    }
                     isLoading={approveUSDCLoading}
                     isCompleted={approveUSDCCompleted}
                   />

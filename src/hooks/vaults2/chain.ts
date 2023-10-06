@@ -334,7 +334,7 @@ export const useRefreshVaultsOnPriceUpdates = () => {
 }
 
 export type VaultTransactions = {
-  onApproveUSDC: () => Promise<`0x${string}`>
+  onApproveUSDC: () => Promise<{ hash: `0x${string}`; newAllowance: bigint }>
   onApproveOperator: () => Promise<`0x${string}` | undefined>
   onDeposit: (amount: bigint) => Promise<TransactionReceipt | void>
   onRedeem: (amount: bigint, { assets, max }: { assets?: boolean; max?: boolean }) => Promise<TransactionReceipt | void>
@@ -374,6 +374,7 @@ export const useVaultTransactions = (vaultAddress: Address): VaultTransactions =
   const txOpts = { account: address || zeroAddress, chainId, chain }
   const updateTxOpts = { ...txOpts, value: 0n }
   const onApproveUSDC = async () => {
+    if (!address) throw new Error('No Address')
     const hash = await usdcContract.write.approve([MultiInvoker2Addresses[chainId], MaxUint256], txOpts)
     await waitForTransactionAlert(hash)
     await refresh()
@@ -381,7 +382,9 @@ export const useVaultTransactions = (vaultAddress: Address): VaultTransactions =
       hash,
       description: copy.approveUSDC,
     })
-    return hash
+    const newAllowance = await usdcContract.read.allowance([address, MultiInvoker2Addresses[chainId]])
+
+    return { hash, newAllowance }
   }
 
   const onApproveOperator = async () => {

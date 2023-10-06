@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { UseFormSetValue } from 'react-hook-form'
 import { useIntl } from 'react-intl'
 
-import { Big6Math } from '@/utils/big6Utils'
+import { Big6Math, formatBig6USDPrice } from '@/utils/big6Utils'
 import { isNumbersOnly } from '@/utils/formUtils'
 
 import { FormNames, FormValues, VaultFormOption } from './constants'
@@ -30,6 +30,13 @@ export function useVaultFormCopy() {
     approveUSDC: intl.formatMessage({ defaultMessage: 'Approve USDC' }),
     approveVaultDeposits: intl.formatMessage({ defaultMessage: 'Approve Vault Deposits' }),
     approveUSDCBody: intl.formatMessage({ defaultMessage: "Approve funds for Perennial's vaults." }),
+    insufficientUsdcApproval: (requiredAmount: bigint) =>
+      intl.formatMessage(
+        {
+          defaultMessage: 'You must approve at least {requiredAmount} USDC',
+        },
+        { requiredAmount: formatBig6USDPrice(requiredAmount, { fullPrecision: true }) },
+      ),
     approveVaultDepositsBody: intl.formatMessage({
       defaultMessage: 'Approve vault deposits for withdrawal',
     }),
