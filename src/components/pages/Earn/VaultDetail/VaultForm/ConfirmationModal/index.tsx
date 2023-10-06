@@ -207,7 +207,13 @@ export default function ConfirmationModal({
                   <ModalStep
                     title={copy.approveUSDC}
                     description={
-                      insufficientApproval ? copy.insufficientUsdcApproval(bigintAmount) : copy.approveUSDCBody
+                      insufficientApproval
+                        ? copy.insufficientUsdcApproval(
+                            <Text as="span" color={colors.brand.purple[240]}>
+                              {formatBig6USDPrice(bigintAmount, { fullPrecision: true })}
+                            </Text>,
+                          )
+                        : copy.approveUSDCBody
                     }
                     isLoading={approveUSDCLoading}
                     isCompleted={approveUSDCCompleted}

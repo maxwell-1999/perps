@@ -871,6 +871,16 @@
       "value": " to withdraw collateral"
     }
   ],
+  "GlzMOB": [
+    {
+      "type": 0,
+      "value": "You must approve at least "
+    },
+    {
+      "type": 1,
+      "value": "shares"
+    }
+  ],
   "GufXy5": [
     {
       "type": 0,
@@ -1037,12 +1047,6 @@
     {
       "type": 0,
       "value": "Deposited"
-    }
-  ],
-  "LpwptN": [
-    {
-      "type": 0,
-      "value": "Deposit Collateral"
     }
   ],
   "LzlMDx": [
@@ -1763,12 +1767,6 @@
       "value": "Connect Wallet"
     }
   ],
-  "csFLe1": [
-    {
-      "type": 0,
-      "value": "Approve Shares"
-    }
-  ],
   "cyR7Kh": [
     {
       "type": 0,
@@ -2231,12 +2229,6 @@
       "value": "Remove collateral"
     }
   ],
-  "oynltk": [
-    {
-      "type": 0,
-      "value": "Redeem Collateral"
-    }
-  ],
   "p2+VKY": [
     {
       "type": 0,
@@ -2377,12 +2369,6 @@
     {
       "type": 0,
       "value": "Menu"
-    }
-  ],
-  "tLsiTt": [
-    {
-      "type": 0,
-      "value": "Claim Collateral"
     }
   ],
   "tNTSVo": [
@@ -2585,6 +2571,16 @@
     {
       "type": 0,
       "value": "Advanced LP Interface"
+    }
+  ],
+  "ycpUyU": [
+    {
+      "type": 0,
+      "value": "You must approve at least "
+    },
+    {
+      "type": 1,
+      "value": "claimable"
     }
   ],
   "yeHZsK": [

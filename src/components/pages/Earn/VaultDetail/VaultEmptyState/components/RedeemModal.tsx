@@ -23,6 +23,7 @@ import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
 
 import { useVaultFormCopy } from '../../VaultForm/hooks'
+import { useEmtpyStateCopy } from '../hooks'
 import { getRequiresShareApproval } from '../utils'
 
 interface RedeemModalProps {
@@ -44,6 +45,7 @@ export default function RedeemModal({
   vaultName,
 }: RedeemModalProps) {
   const copy = useVaultFormCopy()
+  const { insufficientApprovalSharesMsg } = useEmtpyStateCopy()
   const intl = useIntl()
   const toast = useToast()
   const { track } = useMixpanel()
@@ -53,11 +55,16 @@ export default function RedeemModal({
   const assets = vaultUserSnapshot?.assets ?? 0n
 
   const [requiresShareApproval, setRequiresShareApproval] = useState<boolean>(true)
+  const [insufficientApproval, setInsufficientApproval] = useState<boolean>(false)
 
   const [transactionState, setTransactionState] = useState<TransactionState>(initialTransactionState)
   const { approveSharesCompleted, approveSharesLoading, redemptionCompleted, redemptionLoading } = transactionState
 
   const formattedAmount = formatBig18USDPrice(assets)
+  const approximateShares = Big18Math.mul(
+    Big18Math.div(Big18Math.mul(assets, vaultSnapshot.totalSupply), vaultSnapshot.totalAssets),
+    Big18Math.fromFloatString('1.05'),
+  )
 
   useEffect(() => {
     const requiresApproval = getRequiresShareApproval({
@@ -72,8 +79,17 @@ export default function RedeemModal({
   const handleSharesApproval = async () => {
     setTransactionState((prevState) => ({ ...prevState, approveSharesLoading: true }))
     try {
-      await onApproveShares()
-      setTransactionState((prevState) => ({ ...prevState, approveSharesCompleted: true }))
+      const data = await onApproveShares()
+      if (data?.newAllowance && data?.newAllowance >= approximateShares) {
+        setInsufficientApproval(false)
+        setTransactionState((prevState) => ({ ...prevState, approveSharesCompleted: true }))
+      } else {
+        setInsufficientApproval(true)
+        setTransactionState((prevState) => ({
+          ...prevState,
+          approveSharesCompleted: false,
+        }))
+      }
     } catch (e) {
       console.error(e)
     } finally {
@@ -108,11 +124,6 @@ export default function RedeemModal({
     }
   }
 
-  const approximateShares = Big18Math.mul(
-    Big18Math.div(Big18Math.mul(assets, vaultSnapshot.totalSupply), vaultSnapshot.totalAssets),
-    Big18Math.fromFloatString('1.05'),
-  )
-
   return (
     <Modal isOpen onClose={onClose} isCentered variant="confirmation">
       <ModalOverlay />
@@ -129,16 +140,24 @@ export default function RedeemModal({
             {requiresShareApproval && (
               <ModalStep
                 title={copy.approveShares}
-                description={intl.formatMessage(
-                  { defaultMessage: 'Approve at least {approximateShares} to redeem your funds' },
-                  {
-                    approximateShares: (
-                      <Text as="span" color={colors.brand.purple[240]}>
-                        {formatBig18(approximateShares)} {copy.shares}
-                      </Text>
-                    ),
-                  },
-                )}
+                description={
+                  insufficientApproval
+                    ? insufficientApprovalSharesMsg(
+                        <Text as="span" color={colors.brand.purple[240]}>
+                          {formatBig18(approximateShares)} {copy.shares}
+                        </Text>,
+                      )
+                    : intl.formatMessage(
+                        { defaultMessage: 'Approve at least {approximateShares} to redeem your funds' },
+                        {
+                          approximateShares: (
+                            <Text as="span" color={colors.brand.purple[240]}>
+                              {formatBig18(approximateShares)} {copy.shares}
+                            </Text>
+                          ),
+                        },
+                      )
+                }
                 isLoading={approveSharesLoading}
                 isCompleted={approveSharesCompleted}
               />

@@ -276,7 +276,13 @@ const AdjustPositionModal = memo(
                 <ModalStep
                   title={copy.approveUsdcTitle}
                   description={
-                    insufficientApproval ? copy.insufficientUsdcApproval(approvalAmount) : copy.approveUsdcBody
+                    insufficientApproval
+                      ? copy.insufficientUsdcApproval(
+                          <Text as="span" color={colors.brand.purple[240]}>
+                            {formatBig6USDPrice(approvalAmount, { fullPrecision: true })}
+                          </Text>,
+                        )
+                      : copy.approveUsdcBody
                   }
                   isLoading={needsUsdcApproval ? approveUsdcLoading : false}
                   isCompleted={usdcApproved}
