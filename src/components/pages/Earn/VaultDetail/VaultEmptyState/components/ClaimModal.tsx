@@ -133,7 +133,7 @@ export default function ClaimModal({
                     ? insufficientDSUApprovalMsg(
                         <Text as="span" color={colors.brand.purple[240]}>
                           {/* eslint-disable-next-line formatjs/no-literal-string-in-jsx */}
-                          {formatBig18(vaultUserSnapshot.claimable)} DSU
+                          {dsuApprovalSuggestion} DSU
                         </Text>,
                       )
                     : intl.formatMessage(
