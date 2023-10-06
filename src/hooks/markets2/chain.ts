@@ -1,7 +1,5 @@
-import { EvmPriceServiceConnection, PriceFeed } from '@pythnetwork/pyth-evm-js'
-import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
+import { useQuery } from '@tanstack/react-query'
 import {
   Address,
   Hex,
@@ -16,33 +14,24 @@ import {
   toHex,
   zeroAddress,
 } from 'viem'
-import { useNetwork, useWalletClient } from 'wagmi'
-import { waitForTransaction } from 'wagmi/actions'
 
-import { useAdjustmentModalCopy } from '@/components/pages/Trade/TradeForm/components/AdjustPositionModal/hooks'
-import { useTransactionToasts, useTxToastCopy } from '@/components/shared/Toast/transactionToasts'
-import { MarketFactoryAddresses, MultiInvoker2Addresses } from '@/constants/contracts'
-import { AssetMetadata, SupportedAsset } from '@/constants/markets'
+import { MarketFactoryAddresses } from '@/constants/contracts'
+import { SupportedAsset } from '@/constants/markets'
 import { PositionSide2, PositionStatus, addressToAsset2, chainAssetsWithAddress } from '@/constants/markets'
-import { SupportedChainId, interfaceFeeBps, isTestnet, metamaskTxRejectedError } from '@/constants/network'
+import { SupportedChainId } from '@/constants/network'
 import { MaxUint256 } from '@/constants/units'
-import { notEmpty, unique } from '@/utils/arrayUtils'
-import { Big6Math, BigOrZero } from '@/utils/big6Utils'
+import { notEmpty } from '@/utils/arrayUtils'
+import { Big6Math } from '@/utils/big6Utils'
 import { getMarketContract, getOracleContract, getPythProviderContract } from '@/utils/contractUtils'
 import { calculateFundingForSides } from '@/utils/fundingAndInterestUtils'
-import { buildCommitPrice, buildInterfaceFee, buildUpdateMarket } from '@/utils/multiinvoker2'
 import { calcLeverage, calcNotional, getSideFromPosition, getStatusForSnapshot } from '@/utils/positionUtils'
-import { buildCommitmentsForOracles, getRecentVaa } from '@/utils/pythUtils'
-import { nowSeconds } from '@/utils/timeUtils'
+import { buildCommitmentsForOracles } from '@/utils/pythUtils'
 
 import { Lens2Abi } from '@abi/v2/Lens2.abi'
-import { PythOracleAbi } from '@abi/v2/PythOracle.abi'
-
-import { MultiInvoker2Action } from '@t/perennial'
 
 import LensArtifact from '../../../lens/artifacts/contracts/Lens.sol/Lens.json'
-import { useMarketFactory, useMultiInvoker2, useUSDC } from '../contracts'
-import { useAddress, useChainId, usePyth, usePythSubscription, useRPCProviderUrl, useViemWsClient } from '../network'
+import { useMarketFactory } from '../contracts'
+import { useAddress, useChainId, usePyth, useRPCProviderUrl } from '../network'
 
 export const useProtocolParameter = () => {
   const chainId = useChainId()
@@ -341,291 +330,4 @@ const fetchMarketSnapshotsAfterSettle = async (
       })
       .filter(notEmpty),
   }
-}
-
-export const useMarketTransactions2 = (productAddress: Address) => {
-  const { chain } = useNetwork()
-  const chainId = useChainId()
-  const errorToastCopy = useTxToastCopy()
-  const { triggerErrorToast } = useTransactionToasts()
-
-  const { address } = useAddress()
-  const { data: walletClient } = useWalletClient()
-  const { data: marketOracles } = useMarketOracles2()
-  const { data: marketSnapshots } = useMarketSnapshots2()
-  const pyth = usePyth()
-  const copy = useAdjustmentModalCopy()
-  const addRecentTransaction = useAddRecentTransaction()
-
-  const multiInvoker = useMultiInvoker2(walletClient ?? undefined)
-  const usdcContract = useUSDC(walletClient ?? undefined)
-
-  const queryClient = useQueryClient()
-  const refresh = useCallback(
-    () =>
-      queryClient.invalidateQueries({
-        predicate: ({ queryKey }) =>
-          ['marketSnapshots2', 'marketPnls2', 'balances'].includes(queryKey.at(0) as string) &&
-          queryKey.includes(chainId),
-      }),
-    [queryClient, chainId],
-  )
-
-  const txOpts = { account: address || zeroAddress, chainId, chain }
-  const onApproveUSDC = async (suggestedAmount: bigint = MaxUint256) => {
-    if (!address) throw new Error('No Address')
-    const hash = await usdcContract.write.approve(
-      [MultiInvoker2Addresses[chainId], Big6Math.abs(suggestedAmount)],
-      txOpts,
-    )
-    await waitForTransaction({ hash })
-    await refresh()
-    addRecentTransaction({
-      hash,
-      description: copy.approveUSDC,
-    })
-    const newAllowance = await usdcContract.read.allowance([address, MultiInvoker2Addresses[chainId]])
-    return { hash, newAllowance }
-  }
-
-  const onModifyPosition = async ({
-    positionSide,
-    positionAbs,
-    collateralDelta,
-    txHistoryLabel,
-    interfaceFee,
-  }: {
-    txHistoryLabel?: string
-    collateralDelta?: bigint
-    positionAbs?: bigint
-    positionSide?: PositionSide2
-    interfaceFee?: bigint
-  } = {}) => {
-    if (!address || !chainId || !walletClient || !marketOracles || !pyth) {
-      return
-    }
-
-    const oracleInfo = Object.values(marketOracles).find((o) => o.marketAddress === productAddress)
-    if (!oracleInfo) return
-    const asset = addressToAsset2(productAddress)
-
-    // Interface fee
-    const interfaceFeeInfo = interfaceFeeBps[chainId]
-    let chargeFeeAction
-    if (interfaceFee && interfaceFeeInfo && interfaceFeeInfo.feeRecipientAddress !== zeroAddress) {
-      chargeFeeAction = buildInterfaceFee({
-        to: interfaceFeeInfo.feeRecipientAddress,
-        amount: interfaceFee,
-      })
-    }
-
-    const updateAction = buildUpdateMarket({
-      market: productAddress,
-      maker: positionSide === PositionSide2.maker ? positionAbs : undefined, // Absolute position size
-      long: positionSide === PositionSide2.long ? positionAbs : undefined,
-      short: positionSide === PositionSide2.short ? positionAbs : undefined,
-      collateral: (collateralDelta ?? 0n) - (interfaceFee ?? 0n), // Delta collateral
-      wrap: true,
-    })
-
-    const actions: MultiInvoker2Action[] = [updateAction, chargeFeeAction].filter(notEmpty)
-
-    let isPriceStale = false
-    if (asset && marketSnapshots?.market[asset]) {
-      const {
-        parameter: { maxPendingGlobal, maxPendingLocal },
-        riskParameter: { staleAfter },
-        pendingPositions,
-      } = marketSnapshots.market[asset]
-      const lastUpdated = await getOracleContract(oracleInfo.address, chainId).read.latest()
-      isPriceStale = BigInt(nowSeconds()) - lastUpdated.timestamp > staleAfter / 2n
-      // If there is a backlog of pending positions, we need to commit the price
-      isPriceStale = isPriceStale || BigInt(pendingPositions.length) >= maxPendingGlobal
-      // If there is a backlog of pending positions for this user, we need to commit the price
-      isPriceStale =
-        isPriceStale || BigOrZero(marketSnapshots.user?.[asset]?.pendingPositions?.length) >= maxPendingLocal
-    }
-
-    // Only add the price commit if the price is stale
-    if (isPriceStale) {
-      const [{ version, index, value, updateData }] = await buildCommitmentsForOracles({
-        chainId,
-        pyth,
-        marketOracles: [oracleInfo],
-        onError: () => triggerErrorToast({ title: errorToastCopy.error, message: errorToastCopy.errorFetchingPrice }),
-      })
-
-      const commitAction = buildCommitPrice({
-        oracle: oracleInfo.providerAddress,
-        version,
-        value,
-        index,
-        vaa: updateData,
-        revertOnFailure: false,
-      })
-
-      actions.unshift(commitAction)
-    }
-
-    try {
-      const hash = await multiInvoker.write.invoke([actions], { ...txOpts, value: 1n })
-      waitForTransaction({ hash })
-        .then(() => refresh())
-        .catch(() => null)
-      addRecentTransaction({
-        hash,
-        description: txHistoryLabel || copy.positionChanged,
-      })
-      // Refresh after a timeout to catch missed events
-      setTimeout(() => refresh(), 15000)
-      setTimeout(() => refresh(), 30000)
-      // TODO: non-blocking waitForTransaction and show an error if the tx reverts on chain
-      return hash
-    } catch (err: any) {
-      // Ignore metamask tx rejected error
-      if (err.details !== metamaskTxRejectedError) {
-        triggerErrorToast({ title: errorToastCopy.error, message: errorToastCopy.errorPlacingOrder })
-      }
-
-      console.error(err)
-    }
-  }
-
-  const onSubmitVaa = async () => {
-    if (!address || !chainId || !walletClient || !marketOracles || !pyth) {
-      return
-    }
-
-    const oracleInfo = Object.values(marketOracles).find((o) => o.marketAddress === productAddress)
-    if (!oracleInfo) return
-
-    const [{ version, vaa }] = await getRecentVaa({
-      pyth,
-      feeds: [oracleInfo],
-    })
-
-    try {
-      const oracleProvider = getPythProviderContract(oracleInfo.providerAddress, chainId, walletClient)
-      const hash = await oracleProvider.write.commit(
-        [await oracleProvider.read.versionListLength(), version, vaa as Hex],
-        { ...txOpts, value: 1n },
-      )
-      await waitForTransaction({ hash })
-        .then(() => refresh())
-        .catch(() => null)
-      return hash
-    } catch (err: any) {
-      // Ignore metamask tx rejected error
-      if (err.details !== metamaskTxRejectedError) {
-        triggerErrorToast({ title: errorToastCopy.error, message: errorToastCopy.errorPlacingOrder })
-      }
-
-      console.error(err)
-    }
-  }
-
-  return {
-    onApproveUSDC,
-    onModifyPosition,
-    onSubmitVaa,
-  }
-}
-
-export const useChainLivePrices2 = () => {
-  const chain = useChainId()
-  const markets = chainAssetsWithAddress(chain)
-  const [prices, setPrices] = useState<{ [key in SupportedAsset]?: bigint }>({})
-  const feedKey = isTestnet(chain) ? 'pythFeedIdTestnet' : 'pythFeedId'
-
-  const [feedIds, feedToAsset] = useMemo(() => {
-    const feedToAsset = markets.reduce((acc, { asset }) => {
-      const feed = AssetMetadata[asset][feedKey]
-      if (!feed) return acc
-      if (acc[feed]) {
-        acc[feed].push(asset)
-      } else {
-        acc[feed] = [asset]
-      }
-      return acc
-    }, {} as { [key: string]: SupportedAsset[] })
-
-    const feedIds = Object.keys(feedToAsset)
-
-    return [feedIds, feedToAsset]
-  }, [markets, feedKey])
-
-  const feedSubscription = usePythSubscription(feedIds)
-  const onUpdate = useCallback(
-    (priceFeed: PriceFeed) => {
-      const price = priceFeed.getPriceNoOlderThan(60)
-      const normalizedExpo = price ? 6 + price?.expo : 0
-      const normalizedPrice =
-        normalizedExpo >= 0
-          ? BigOrZero(price?.price) * 10n ** BigInt(normalizedExpo)
-          : BigOrZero(price?.price) / 10n ** BigInt(Math.abs(normalizedExpo))
-      setPrices((prices) => ({
-        ...prices,
-        ...feedToAsset['0x' + priceFeed.id].reduce((acc, asset) => {
-          const { transform } = AssetMetadata[asset]
-          // Pyth price is has `expo` (negative number) decimals, normalize to expected 18 decimals by multiplying by 10^(18 + expo)
-          acc[asset] = price ? transform(normalizedPrice) : undefined
-          return acc
-        }, {} as { [key in SupportedAsset]?: bigint }),
-      }))
-    },
-    [feedToAsset],
-  )
-
-  useEffect(() => {
-    feedSubscription.on('updates', onUpdate)
-
-    return () => {
-      feedSubscription.off('updates', onUpdate)
-    }
-  }, [feedSubscription, onUpdate])
-
-  return prices
-}
-
-export type LivePrices = Awaited<ReturnType<typeof useChainLivePrices2>>
-
-const RefreshKeys = ['marketSnapshots2', 'marketPnls2']
-export const useRefreshKeysOnPriceUpdates2 = (invalidKeys: string[] = RefreshKeys) => {
-  const chainId = useChainId()
-  const queryClient = useQueryClient()
-  const { data: marketOracles, isPreviousData } = useMarketOracles2()
-  const wsClient = useViemWsClient()
-
-  const refresh = useCallback(() => {
-    return queryClient.invalidateQueries({
-      predicate: ({ queryKey }) => invalidKeys.includes(queryKey.at(0) as string) && queryKey.includes(chainId),
-    })
-  }, [invalidKeys, queryClient, chainId])
-
-  const oracleProviders = useMemo(() => {
-    if (!marketOracles || isPreviousData) return []
-    return unique(Object.values(marketOracles).flatMap((p) => p.providerAddress))
-  }, [marketOracles, isPreviousData])
-
-  useEffect(() => {
-    if (!oracleProviders.length) return
-    const unwatchFns = oracleProviders.map((a) => {
-      return [
-        wsClient.watchContractEvent({
-          address: a,
-          abi: PythOracleAbi,
-          eventName: 'OracleProviderVersionRequested',
-          onLogs: () => refresh(),
-        }),
-
-        wsClient.watchContractEvent({
-          address: a,
-          abi: PythOracleAbi,
-          eventName: 'OracleProviderVersionFulfilled',
-          onLogs: () => refresh(),
-        }),
-      ]
-    })
-    return () => unwatchFns.flat().forEach((unwatch) => unwatch())
-  }, [oracleProviders, refresh, wsClient])
 }

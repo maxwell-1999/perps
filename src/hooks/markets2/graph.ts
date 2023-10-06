@@ -329,7 +329,7 @@ export const useHistoricalPositions = (maker: boolean) => {
         ) {
           marketAccountCheckpoints(
             where: { account: $account, market_in: $markets, side_in: $sides },
-            orderBy: version, orderDirection: desc
+            orderBy: version, orderDirection: desc, first: $first, skip: $skip
           ) { market, account, type, version, blockNumber }
         }
       `)
@@ -683,6 +683,47 @@ async function fetchSubPositions({
   }
 
   return { changes, hasMore: updateds.length === first }
+}
+
+const OpenOrdersPageSize = 10
+export const useOpenOrders = () => {
+  const chainId = useChainId()
+  const { address } = useAddress()
+  const graphClient = useGraphClient2()
+  const markets = chainAssetsWithAddress(chainId)
+
+  return useInfiniteQuery({
+    queryKey: ['openOrders', chainId, address],
+    enabled: !!address && !!markets.length,
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!address || !markets.length) return
+
+      const queryOpenOrders = gql(`
+        query OpenOrders($account: Bytes!, $markets: [Bytes!]!, $first: Int!, $skip: Int!) {
+          multiInvokerOrderPlaceds(
+            where: { account: $account, market_in: $markets, cancelled: false, executed: false },
+            orderBy: nonce, orderDirection: desc, first: $first, skip: $skip
+          ) {
+              account, market, nonce, order_side, order_comparison, order_fee, order_price, order_delta
+              blockNumber, blockTimestamp, transactionHash
+            }
+        }
+      `)
+
+      const { multiInvokerOrderPlaceds: openOrders } = await graphClient.request(queryOpenOrders, {
+        account: address,
+        markets: markets.map(({ marketAddress }) => marketAddress),
+        first: OpenOrdersPageSize,
+        skip: pageParam * OpenOrdersPageSize,
+      })
+
+      return {
+        openOrders,
+        nextPageParam: openOrders.length === OpenOrdersPageSize ? pageParam + 1 : undefined,
+      }
+    },
+    getNextPageParam: (lastPage) => lastPage?.nextPageParam,
+  })
 }
 
 export const useMarket24hrData = (asset: SupportedAsset) => {
