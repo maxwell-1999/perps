@@ -206,12 +206,16 @@ export function useReceiptCopy() {
     collateral: intl.formatMessage({ defaultMessage: 'Collateral' }),
     leverage: intl.formatMessage({ defaultMessage: 'Leverage' }),
     exposure: intl.formatMessage({ defaultMessage: 'Exposure' }),
-    fundingFees: intl.formatMessage({ defaultMessage: 'Funding Fee APR' }),
-    tradingFees: intl.formatMessage({ defaultMessage: 'Trading Fee APR' }),
+    fundingFees: intl.formatMessage({ defaultMessage: 'Est. Funding Fee APR' }),
+    tradingFees: intl.formatMessage({ defaultMessage: 'Est. Trading Fee APR' }),
     totalAPR: intl.formatMessage({ defaultMessage: 'Total APR' }),
-    totalAprCalculation: intl.formatMessage({
-      defaultMessage: 'Funding Fee APR + Trading Fee APR',
-    }),
+    totalAprCalculation: intl.formatMessage(
+      {
+        defaultMessage:
+          'Funding Fee APR + Trading Fee APR {br} APR values are calculated using the last 7 days of market activity',
+      },
+      { br: <br /> },
+    ),
     feeBasisPoints: intl.formatMessage({ defaultMessage: 'Market Fee:' }),
     noValue: intl.formatMessage({ defaultMessage: '--' }),
     settlementFee: intl.formatMessage({ defaultMessage: 'Settlement Fee:' }),

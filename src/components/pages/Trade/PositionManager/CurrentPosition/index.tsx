@@ -2,7 +2,7 @@ import { ButtonGroup, Flex, Text, useBreakpointValue } from '@chakra-ui/react'
 import ClosePositionIcon from '@public/icons/closePositionIcon.svg'
 import React from 'react'
 
-import { TooltipIcon } from '@/components/design-system/Tooltip'
+import { TooltipIcon, TooltipText } from '@/components/design-system/Tooltip'
 import { AssetIconWithText } from '@/components/shared/components'
 import { PositionSide2 } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
@@ -201,41 +201,45 @@ function CurrentPosition() {
                     height="11px"
                     width="11px"
                     color={alpha50}
-                    tooltipText={
-                      <Flex pt={2} flexDirection="column">
-                        <DataRow
-                          label={
-                            <Text fontSize="11px" mr={2}>
-                              {copy.fundingFeeAPR}
-                            </Text>
-                          }
-                          value={
-                            <Text fontSize="12px" color={alpha75}>
-                              {hasPosition ? fundingFeeAPR : noValue}
-                            </Text>
-                          }
-                        />
-                        <DataRow
-                          label={
-                            <Text fontSize="11px" mr={2}>
-                              {copy.tradingFeeAPR}
-                            </Text>
-                          }
-                          value={
-                            <Text fontSize="12px" color={alpha75}>
-                              {hasPosition ? tradingFeeAPR : noValue}
-                            </Text>
-                          }
-                        />
-                      </Flex>
-                    }
+                    tooltipText={<Text fontSize="12px">{copy.totalAprCalculationTooltip}</Text>}
                   />
                 </Flex>
               }
               value={
-                <Text fontSize="14px" color={alpha75}>
+                <TooltipText
+                  fontSize="14px"
+                  color={alpha75}
+                  tooltipText={
+                    <Flex pt={2} flexDirection="column">
+                      <DataRow
+                        label={
+                          <Text fontSize="11px" mr={2}>
+                            {copy.fundingFeeAPR}
+                          </Text>
+                        }
+                        value={
+                          <Text fontSize="12px" color={alpha75}>
+                            {hasPosition ? fundingFeeAPR : noValue}
+                          </Text>
+                        }
+                      />
+                      <DataRow
+                        label={
+                          <Text fontSize="11px" mr={2}>
+                            {copy.tradingFeeAPR}
+                          </Text>
+                        }
+                        value={
+                          <Text fontSize="12px" color={alpha75}>
+                            {hasPosition ? tradingFeeAPR : noValue}
+                          </Text>
+                        }
+                      />
+                    </Flex>
+                  }
+                >
                   {hasPosition ? totalAPR : noValue}
-                </Text>
+                </TooltipText>
               }
             />
             <DataRow
@@ -262,25 +266,23 @@ function CurrentPosition() {
           label={
             <Flex alignItems="center" gap={2}>
               <Text variant="label">{copy.fundingRate1hr}</Text>
-              <TooltipIcon
-                height="11px"
-                width="11px"
-                color={alpha50}
-                tooltipText={
-                  <FundingRateTooltip
-                    dailyFunding={dailyFunding}
-                    hourlyFunding={hourlyFunding}
-                    yearlyFunding={yearlyFundingRate}
-                    eightHourFunding={eightHourFunding}
-                  />
-                }
-              />
             </Flex>
           }
           value={
-            <Text fontSize="14px" color={alpha75}>
+            <TooltipText
+              fontSize="14px"
+              color={alpha75}
+              tooltipText={
+                <FundingRateTooltip
+                  dailyFunding={dailyFunding}
+                  hourlyFunding={hourlyFunding}
+                  yearlyFunding={yearlyFundingRate}
+                  eightHourFunding={eightHourFunding}
+                />
+              }
+            >
               {hourlyFunding}
-            </Text>
+            </TooltipText>
           }
         />
 

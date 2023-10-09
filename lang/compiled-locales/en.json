@@ -373,12 +373,6 @@
       "value": "Unsettled"
     }
   ],
-  "6YLI7o": [
-    {
-      "type": 0,
-      "value": "Funding Fee APR + Trading Fee APR"
-    }
-  ],
   "6aiQC7": [
     {
       "type": 0,
@@ -541,12 +535,6 @@
       "value": "Sell"
     }
   ],
-  "9IuVXI": [
-    {
-      "type": 0,
-      "value": "Funding Fee APR"
-    }
-  ],
   "A3zdUJ": [
     {
       "type": 0,
@@ -627,12 +615,6 @@
     {
       "type": 0,
       "value": "Change"
-    }
-  ],
-  "Bo6BEb": [
-    {
-      "type": 0,
-      "value": "Trading Fee APR"
     }
   ],
   "C5rikK": [
@@ -1441,6 +1423,12 @@
       "value": "Approve"
     }
   ],
+  "WO+lsu": [
+    {
+      "type": 0,
+      "value": "Est. Trading Fee APR"
+    }
+  ],
   "WjiRhX": [
     {
       "type": 0,
@@ -1839,6 +1827,12 @@
     {
       "type": 0,
       "value": "Home"
+    }
+  ],
+  "euVHNw": [
+    {
+      "type": 0,
+      "value": "Est. Funding Fee APR"
     }
   ],
   "ezCbHx": [
@@ -2507,6 +2501,20 @@
     {
       "type": 0,
       "value": "Approve funds to trade on Perennial."
+    }
+  ],
+  "wYH62K": [
+    {
+      "type": 0,
+      "value": "Funding Fee APR + Trading Fee APR "
+    },
+    {
+      "type": 1,
+      "value": "br"
+    },
+    {
+      "type": 0,
+      "value": " APR values are calculated using the last 7 days of market activity"
     }
   ],
   "wbWBPw": [

@@ -101,9 +101,18 @@ export const usePositionManagerCopy = () => {
     connectWalletPositions: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your positions' }),
     connectWalletHistory: intl.formatMessage({ defaultMessage: 'Connect your wallet to see your position history' }),
     exposure: intl.formatMessage({ defaultMessage: 'Exposure' }),
-    fundingFeeAPR: intl.formatMessage({ defaultMessage: 'Funding Fee APR' }),
-    tradingFeeAPR: intl.formatMessage({ defaultMessage: 'Trading Fee APR' }),
-    totalAPR: intl.formatMessage({ defaultMessage: 'Total APR' }),
+    fundingFeeAPR: intl.formatMessage({ defaultMessage: 'Est. Funding Fee APR' }),
+    tradingFeeAPR: intl.formatMessage({ defaultMessage: 'Est. Trading Fee APR' }),
+    totalAPR: intl.formatMessage({
+      defaultMessage: 'Total APR',
+    }),
+    totalAprCalculationTooltip: intl.formatMessage(
+      {
+        defaultMessage:
+          'Funding Fee APR + Trading Fee APR {br} APR values are calculated using the last 7 days of market activity',
+      },
+      { br: <br /> },
+    ),
     unsettled: intl.formatMessage({ defaultMessage: 'Unsettled' }),
     unsettledTooltip: intl.formatMessage({
       defaultMessage:
