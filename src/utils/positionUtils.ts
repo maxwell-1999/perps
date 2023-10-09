@@ -82,19 +82,22 @@ export const calcLiquidationPrice = ({
   const noValue = { long: 0n, short: 0n }
   if (!collateral || !marketSnapshot || !position) return noValue
 
-  const minMaintenanceThreshold =
-    Big6Math.mul(Big6Math.mul(position, marketSnapshot.global.latestPrice), marketSnapshot.riskParameter.maintenance) <
-    marketSnapshot.riskParameter.minMaintenance
+  const notional = calcNotional(position, marketSnapshot.global.latestPrice)
+  const maintenance = Big6Math.mul(notional, marketSnapshot.riskParameter.maintenance)
 
-  if (minMaintenanceThreshold) {
-    const minMaintenanceLiqPrice = Big6Math.abs(
+  // If maintenance is less than minMaintenance, then the liquidation calc is slightly simplified:
+  // LiqPrice = ((minMaintenance - collateral) / (position * (long ? 1 : -1)) + price
+  if (maintenance < marketSnapshot.riskParameter.minMaintenance) {
+    const minMaintenanceLiqPriceLong = Big6Math.abs(
       Big6Math.div(marketSnapshot.riskParameter.minMaintenance - collateral, position) +
         marketSnapshot.global.latestPrice,
     )
-    return { long: minMaintenanceLiqPrice, short: minMaintenanceLiqPrice }
+    const minMaintenanceLiqPriceShort = Big6Math.abs(
+      Big6Math.div(marketSnapshot.riskParameter.minMaintenance - collateral, position * -1n) +
+        marketSnapshot.global.latestPrice,
+    )
+    return { long: minMaintenanceLiqPriceLong, short: minMaintenanceLiqPriceShort }
   }
-
-  const notional = calcNotional(position, marketSnapshot.global.latestPrice)
 
   const longNumerator = Big6Math.sub(notional, collateral)
   const longDenominator = Big6Math.mul(position, Big6Math.sub(marketSnapshot.riskParameter.maintenance, Big6Math.ONE))
