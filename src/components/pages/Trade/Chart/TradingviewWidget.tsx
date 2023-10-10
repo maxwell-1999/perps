@@ -5,7 +5,7 @@ import { AssetMetadata } from '@/constants/markets'
 import { PythDatafeedUrl } from '@/constants/network'
 import { useMarketContext } from '@/contexts/marketContext'
 import { useActiveSubPositionHistory } from '@/hooks/markets2'
-import { usePyth } from '@/hooks/network'
+import { useChainId, usePyth } from '@/hooks/network'
 import { Big6Math, formatBig6 } from '@/utils/big6Utils'
 import { usePrevious } from '@/utils/hooks'
 
@@ -51,6 +51,7 @@ let datafeed: Datafeed | null = null
 let tvScriptLoadingPromise: Promise<void> | null = null
 
 const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ overrides, theme, containerId, isMaker }) => {
+  const chainId = useChainId()
   const pyth = usePyth()
   const { selectedMarket, selectedMakerMarket } = useMarketContext()
 
@@ -107,13 +108,16 @@ const TradingViewWidget: React.FC<TradingViewWidgetProps> = ({ overrides, theme,
 
       await tvScriptLoadingPromise
 
-      if (datafeed === null) datafeed = new Datafeed(PythDatafeedUrl ?? '', pyth, positionChanges)
-      else datafeed.positions = positionChanges
+      if (datafeed === null) datafeed = new Datafeed(PythDatafeedUrl ?? '', pyth, chainId, positionChanges)
+      else {
+        datafeed.positions = positionChanges
+        datafeed.chainId = chainId
+      }
 
       if (!tvWidget) createWidget()
     }
     setup()
-  }, [createWidget, prevTicker, tvTicker, pyth, positionChanges])
+  }, [createWidget, prevTicker, tvTicker, pyth, chainId, positionChanges])
 
   useEffect(() => {
     if (tvWidget && prevTicker !== tvTicker) {

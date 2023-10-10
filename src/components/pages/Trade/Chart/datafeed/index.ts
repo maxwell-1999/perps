@@ -1,6 +1,7 @@
 import { EvmPriceServiceConnection } from '@pythnetwork/pyth-evm-js'
 
 import { AssetMetadata } from '@/constants/markets'
+import { SupportedChainId, isTestnet } from '@/constants/network'
 import { ActiveSubPositionHistory } from '@/hooks/markets2'
 import { Big18Math } from '@/utils/big18Utils'
 import { Minute, Second } from '@/utils/timeUtils'
@@ -29,14 +30,21 @@ declare global {
   }
 }
 class Datafeed {
+  public chainId: SupportedChainId
   public positions?: ActiveSubPositionHistory
 
   private baseFeed: UDFCompatibleDatafeed
   private pyth: EvmPriceServiceConnection
 
-  constructor(url: string, pyth: EvmPriceServiceConnection, positions?: ActiveSubPositionHistory) {
+  constructor(
+    url: string,
+    pyth: EvmPriceServiceConnection,
+    chainId: SupportedChainId,
+    positions?: ActiveSubPositionHistory,
+  ) {
     this.baseFeed = new window.Datafeeds.UDFCompatibleDatafeed(url, Number(60n * Second))
     this.pyth = pyth
+    this.chainId = chainId
     this.positions = positions
   }
 
@@ -73,7 +81,8 @@ class Datafeed {
     const metadata = this.metadataForSymbol(symbolInfo.ticker)
     if (!metadata?.pythFeedId) return
 
-    this.pyth.subscribePriceFeedUpdates([metadata.pythFeedId, metadata.pythFeedIdTestnet ?? ''], (priceFeed) => {
+    const feedId = isTestnet(this.chainId) ? metadata.pythFeedIdTestnet : metadata.pythFeedId
+    this.pyth.subscribePriceFeedUpdates([feedId ?? ''], (priceFeed) => {
       const price = priceFeed.getPriceNoOlderThan(60)
       if (price) {
         const floatPrice = Number(price.price) * 10 ** price.expo
