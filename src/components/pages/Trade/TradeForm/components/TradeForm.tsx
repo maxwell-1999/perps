@@ -131,6 +131,7 @@ function TradeForm(props: TradeFormProps) {
     watch,
     setValue,
     reset,
+    trigger,
     formState: { dirtyFields, errors },
   } = useForm({
     defaultValues: initialFormState,
@@ -146,6 +147,11 @@ function TradeForm(props: TradeFormProps) {
     () => calcMaxLeverage({ margin, minMargin, collateral: Big6Math.fromFloatString(collateral) }),
     [margin, minMargin, collateral],
   )
+
+  useEffect(() => {
+    // Manually trigger leverage validation on maxLeverage change
+    trigger(FormNames.leverage)
+  }, [maxLeverage, trigger])
 
   const resetInputs = useCallback(() => {
     reset({ ...initialFormState })
