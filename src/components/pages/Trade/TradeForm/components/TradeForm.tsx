@@ -150,7 +150,9 @@ function TradeForm(props: TradeFormProps) {
 
   useEffect(() => {
     // Manually trigger leverage validation on maxLeverage change
-    trigger(FormNames.leverage)
+    setTimeout(() => {
+      trigger(FormNames.leverage)
+    }, 0)
   }, [maxLeverage, trigger])
 
   const resetInputs = useCallback(() => {
