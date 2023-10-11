@@ -282,7 +282,11 @@ const AdjustPositionModal = memo(
                             {formatBig6USDPrice(approvalAmount, { fullPrecision: true })}
                           </Text>,
                         )
-                      : copy.approveUsdcBody
+                      : copy.approveUsdcBody(
+                          <Text as="span" color={colors.brand.purple[240]}>
+                            {formatBig6USDPrice(approvalAmount, { fullPrecision: true })}
+                          </Text>,
+                        )
                   }
                   isLoading={needsUsdcApproval ? approveUsdcLoading : false}
                   isCompleted={usdcApproved}
