@@ -178,8 +178,7 @@ export const needsApproval = ({
   usdcAllowance: bigint
   interfaceFee: bigint
 }) => {
-  const change = collateralDifference + interfaceFee
-  const approvalAmount = change < 0n ? interfaceFee : collateralDifference + interfaceFee
+  const approvalAmount = Big6Math.max(collateralDifference, interfaceFee)
   return { needsApproval: Big6Math.fromDecimals(usdcAllowance, 6) < approvalAmount, approvalAmount }
 }
 

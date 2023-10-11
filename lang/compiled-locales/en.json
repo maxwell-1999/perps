@@ -617,6 +617,20 @@
       "value": "Change"
     }
   ],
+  "BkbnMP": [
+    {
+      "type": 0,
+      "value": "Approve "
+    },
+    {
+      "type": 1,
+      "value": "approvalAmount"
+    },
+    {
+      "type": 0,
+      "value": " USDC to trade on Perennial."
+    }
+  ],
   "C5rikK": [
     {
       "type": 0,
@@ -2495,12 +2509,6 @@
     {
       "type": 0,
       "value": "Submit"
-    }
-  ],
-  "wTQgO8": [
-    {
-      "type": 0,
-      "value": "Approve funds to trade on Perennial."
     }
   ],
   "wYH62K": [

@@ -38,9 +38,13 @@ export const useAdjustmentModalCopy = () => {
     }),
     confirmWithdrawTitle: intl.formatMessage({ defaultMessage: 'Confirm Withdrawal' }),
     approveUsdcTitle: intl.formatMessage({ defaultMessage: 'Approve USDC' }),
-    approveUsdcBody: intl.formatMessage({
-      defaultMessage: 'Approve funds to trade on Perennial.',
-    }),
+    approveUsdcBody: (approvalAmount: React.ReactNode) =>
+      intl.formatMessage(
+        {
+          defaultMessage: 'Approve {approvalAmount} USDC to trade on Perennial.',
+        },
+        { approvalAmount },
+      ),
     insufficientUsdcApproval: (requiredAmount: React.ReactNode) =>
       intl.formatMessage(
         {
