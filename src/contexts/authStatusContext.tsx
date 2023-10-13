@@ -1,9 +1,7 @@
 import { AuthenticationStatus } from '@rainbow-me/rainbowkit'
-import { getCookie } from 'cookies-next'
 import { createContext, useContext, useMemo, useState } from 'react'
 
-import { LocalDev, RestrictedCountries, RestrictedRegions } from '@/constants/auth'
-import { GeolocationCookie, GeolocationRegionCookie } from '@/constants/cookies'
+import { LocalDev } from '@/constants/auth'
 import { isTestnet } from '@/constants/network'
 import { useChainId } from '@/hooks/network'
 import { useIsSanctioned } from '@/hooks/wallet'
@@ -25,20 +23,16 @@ const AuthStatusOverlayContext = createContext({
     status
   },
   geoblocked: false,
+  setGeoblocked: (geoblocked: boolean) => {
+    geoblocked
+  },
   sanctioned: false,
 })
 
 export const AuthStatusProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId()
   const [authStatus, setAuthStatus] = useState<AuthStatus>(StartingAuthStatus)
-  const [_geoblocked] = useState<boolean>(() => {
-    if (LocalDev) return false
-    const country = getCookie(GeolocationCookie)?.toString() ?? ''
-    return (
-      RestrictedCountries.includes(country) ||
-      RestrictedRegions[country]?.includes(getCookie(GeolocationRegionCookie)?.toString() ?? '')
-    )
-  })
+  const [_geoblocked, setGeoblocked] = useState<boolean>(false)
   const [vpnDetected, setVpnDetected] = useState<boolean>(false)
   const [tosAccepted, _setTosAccepted] = useState<boolean>(() => {
     return typeof window !== 'undefined' && localStorage.getItem('tos_accepted') === 'true'
@@ -65,6 +59,7 @@ export const AuthStatusProvider = ({ children }: { children: React.ReactNode }) 
         vpnDetected,
         setVpnDetected,
         geoblocked,
+        setGeoblocked,
         sanctioned: Boolean(sanctioned),
       }}
     >

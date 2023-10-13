@@ -38,7 +38,7 @@ const queryClient = new QueryClient({
 })
 
 const AppWithAuth = ({ Component, pageProps }: AppProps) => {
-  const { authStatus, setAuthStatus, setVpnDetected, sanctioned } = useAuthStatus()
+  const { authStatus, setAuthStatus, setVpnDetected, setGeoblocked, sanctioned } = useAuthStatus()
   const { disconnect } = useDisconnect()
   const { mixpanel } = useMixpanel()
 
@@ -55,8 +55,8 @@ const AppWithAuth = ({ Component, pageProps }: AppProps) => {
   const prevAddress = usePrevious(address)
 
   const loginUser = useCallback(() => {
-    if (address) login({ address, setAuthStatus, setVpnDetected, disconnect })
-  }, [address, setAuthStatus, setVpnDetected, disconnect])
+    if (address) login({ address, setAuthStatus, setVpnDetected, setGeoblocked, disconnect })
+  }, [address, setAuthStatus, setVpnDetected, setGeoblocked, disconnect])
 
   useEffect(() => {
     // If the address changes and there is a JWT for the new address, try logging in, otherwise set the auth status to unauthenticated

@@ -4,7 +4,7 @@ import { debounce } from 'lodash'
 import { SiweMessage } from 'siwe'
 import { Address } from 'viem'
 
-import { TosBackendURL, jwtKey } from '@/constants/auth'
+import { RestrictedCountries, RestrictedRegions, TosBackendURL, jwtKey } from '@/constants/auth'
 import { AuthStatus } from '@/contexts/authStatusContext'
 
 export const getJwt = (address: string) => localStorage.getItem(jwtKey(address))
@@ -20,11 +20,13 @@ export const login = debounce(
     address,
     setAuthStatus,
     setVpnDetected,
+    setGeoblocked,
     disconnect,
   }: {
     address: string
     setAuthStatus: (status: AuthStatus) => void
     setVpnDetected: (detected: boolean) => void
+    setGeoblocked: (geoblocked: boolean) => void
     disconnect: () => void
   }) => {
     const ip = getIPFromCookie()
@@ -50,14 +52,22 @@ export const login = debounce(
       setAuthStatus('authenticated')
       try {
         const loginJson = await loginRes.json()
+        const country = loginJson?.ipMeta.isocode
+        setGeoblocked(
+          RestrictedCountries.includes(country) ||
+            RestrictedRegions[country]?.includes(loginJson?.ipMeta.regioncode ?? ''),
+        )
         setVpnDetected(loginJson?.ipMeta.proxy && loginJson?.ipMeta.type === 'VPN')
       } catch {
+        setGeoblocked(false)
         setVpnDetected(false)
       }
     } catch {
       setAuthStatus('unauthenticated')
       disconnect()
       removeJwt(address)
+      setGeoblocked(false)
+      setVpnDetected(false)
     }
   },
   500,

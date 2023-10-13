@@ -9,6 +9,15 @@ const nextConfig = {
   experimental: {
     swcPlugins: [['@formatjs/swc-plugin-experimental', {}]],
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/trade',
+        permanent: false,
+      },
+    ]
+  },
   webpack(config, { isServer }) {
     config.module.rules.push({
       test: /\.svg$/i,
