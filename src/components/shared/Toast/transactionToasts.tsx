@@ -61,8 +61,11 @@ export const useTxToastTriggers = () => {
 const TransactionLink = ({ transactionHash }: { transactionHash: Address }) => {
   const copy = useTxToastCopy()
   const chainId = useChainId()
-  const explorerUrl = `${ExplorerURLs[chainId]}tx/${transactionHash}`
-
+  let baseUrl = ExplorerURLs[chainId]
+  if (!baseUrl.endsWith('/')) {
+    baseUrl += '/'
+  }
+  const explorerUrl = `${baseUrl}tx/${transactionHash}`
   return (
     <Link isExternal href={explorerUrl} target="_blank" rel="noopener noreferrer">
       <Text
