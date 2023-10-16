@@ -24,12 +24,12 @@ import { useMarketSnapshots2 } from './chain'
 
 export const useActivePositionMarketPnls = () => {
   const chainId = useChainId()
-  const { data: marketSnapshots, isLoading: marketSnapshotsLoading } = useMarketSnapshots2()
+  const { data: marketSnapshots, isLoading: marketSnapshotsLoading, dataUpdatedAt } = useMarketSnapshots2()
   const { address } = useAddress()
   const graphClient = useGraphClient2()
 
   return useQuery({
-    queryKey: ['marketPnls2', chainId, address],
+    queryKey: ['marketPnls2', chainId, address, dataUpdatedAt],
     enabled: !!address && !!marketSnapshots && !!marketSnapshots.user && !marketSnapshotsLoading,
     queryFn: async () => {
       if (!address || !marketSnapshots || !marketSnapshots.user) return
