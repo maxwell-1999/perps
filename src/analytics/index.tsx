@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import { LocalDev } from '@/constants/auth'
+import { useChainId } from '@/hooks/network'
 
 import { EventMap, TrackingEvents } from './constants'
 
@@ -21,6 +22,7 @@ const MixpanelContext = createContext<MixpanelContext>({ mixpanel: null, isIniti
 export const MixpanelProvider = ({ children }: { children: React.ReactNode }) => {
   const [mixpanelInstance, setMixpanelInstance] = useState<Mixpanel | null>(null)
   const [isInitialized, setIsInitialized] = useState(false)
+  const chainId = useChainId()
   const { events } = useRouter()
 
   useEffect(() => {
@@ -40,6 +42,14 @@ export const MixpanelProvider = ({ children }: { children: React.ReactNode }) =>
     setMixpanelInstance(_mixpanelInstance)
     setIsInitialized(true)
   }, [])
+
+  useEffect(() => {
+    if (isInitialized && chainId && mixpanelInstance) {
+      mixpanelInstance.register({
+        chainId,
+      })
+    }
+  }, [isInitialized, chainId, mixpanelInstance])
 
   const track = useCallback(
     <K extends keyof EventMap>(eventName: K, properties: EventMap[K]) => {
