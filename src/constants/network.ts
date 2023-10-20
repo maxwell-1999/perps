@@ -98,8 +98,8 @@ export const interfaceFeeBps: {
   },
   [arbitrum.id]: {
     feeAmount: {
-      [PositionSide2.short]: Big6Math.fromFloatString('0.0002'), // 2bps
-      [PositionSide2.long]: Big6Math.fromFloatString('0.0002'), // 2bps
+      [PositionSide2.short]: 0n,
+      [PositionSide2.long]: 0n,
       [PositionSide2.maker]: 0n,
       [PositionSide2.none]: 0n,
     },
