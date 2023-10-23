@@ -41,14 +41,11 @@ export const FormContainer = ({
   ...props
 }: { children: React.ReactNode; variant: 'transparent' | 'active' | 'pink'; isMobile?: boolean } & FlexProps) => (
   <Container
-    height={{ base: isMobile ? '100%' : '0px', xl: '100%' }}
-    minHeight="100%"
+    height={{ base: isMobile ? '100%' : '0px', xl: 'fit-content' }}
+    minHeight={{ base: '100%', xl: 'initial' }}
     p="0"
     variant={variant}
-    overflowY={{
-      base: 'auto',
-      xl: 'initial',
-    }}
+    overflowY="auto"
     {...props}
   >
     {children}
