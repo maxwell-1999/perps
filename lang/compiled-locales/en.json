@@ -2221,6 +2221,16 @@
       "value": "Withdraw from vault"
     }
   ],
+  "jt5+pO": [
+    {
+      "type": 0,
+      "value": "Edit "
+    },
+    {
+      "type": 1,
+      "value": "orderType"
+    }
+  ],
   "juU558": [
     {
       "type": 0,
@@ -2461,6 +2471,12 @@
     {
       "type": 0,
       "value": "TESTNET"
+    }
+  ],
+  "pBQ5bd": [
+    {
+      "type": 0,
+      "value": "Editing"
     }
   ],
   "pKvURI": [

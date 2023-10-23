@@ -8,15 +8,15 @@ import { Input, Pill } from '@/components/design-system/Input'
 import colors from '@/components/design-system/theme/colors'
 import { TxButton } from '@/components/shared/TxButton'
 import { Form } from '@/components/shared/components'
-import { PositionSide2 } from '@/constants/markets'
+import { PositionSide2, SupportedAsset } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
-import { UserMarketSnapshot, useChainLivePrices2 } from '@/hooks/markets2'
+import { MarketSnapshot, UserMarketSnapshot, useChainLivePrices2 } from '@/hooks/markets2'
 import { Big6Math, formatBig6, formatBig6USDPrice } from '@/utils/big6Utils'
 import { usePrevious } from '@/utils/hooks'
 import { calcLiquidationPrice, isFailedClose } from '@/utils/positionUtils'
 
 import { FormNames, OrderTypes } from '../../constants'
-import { useTradeFormCopy } from '../../hooks'
+import { TradeFormValues, useTradeFormCopy } from '../../hooks'
 import { PaddedContainer, TriggerBetaMessage } from '../styles'
 import { useStopLossValidator, useTakeProfitValidators, useTriggerAmountValidators } from '../validatorHooks'
 import { PercentValueShortcuts, PositionDisplay } from './components'
@@ -27,23 +27,35 @@ interface TriggerOrderFormProps {
   selectedOrderType: OrderTypes
   userMarketSnapshot: UserMarketSnapshot
   orderDirection: PositionSide2.long | PositionSide2.short
-  latestPrice: bigint
-  onSubmit: (orderData: TriggerFormValues) => void
+  onSubmit: (orderData: TriggerFormValues | Partial<TradeFormValues>) => void
+  overrides?: {
+    selectedMarket: SupportedAsset
+    selectedMarketSnapshot?: MarketSnapshot
+  }
+  noPadding?: boolean
 }
 
 export function TriggerOrderForm({
   selectedOrderType,
   userMarketSnapshot,
   orderDirection,
-  latestPrice,
   onSubmit,
+  overrides,
+  noPadding,
 }: TriggerOrderFormProps) {
   const copy = useTradeFormCopy()
   const { assetMetadata, selectedMarket, selectedMarketSnapshot2 } = useMarketContext()
   const prevSelectedOrderType = usePrevious(selectedOrderType)
   const livePrices = useChainLivePrices2()
 
-  const indexPrice = livePrices[selectedMarket] ?? latestPrice ?? 0n
+  const market = overrides ? overrides.selectedMarket : selectedMarket
+  const selectedMarketSnapshot = overrides ? overrides.selectedMarketSnapshot : selectedMarketSnapshot2
+  const _latestPrice = overrides
+    ? overrides.selectedMarketSnapshot?.global.latestPrice
+    : selectedMarketSnapshot2?.global.latestPrice
+  const latestPrice = _latestPrice ?? 0n
+
+  const indexPrice = livePrices[market] ?? latestPrice ?? 0n
 
   const {
     handleSubmit,
@@ -75,7 +87,7 @@ export function TriggerOrderForm({
     : userMarketSnapshot.nextMagnitude
 
   const liquidationPriceData = calcLiquidationPrice({
-    marketSnapshot: selectedMarketSnapshot2,
+    marketSnapshot: selectedMarketSnapshot,
     collateral: userMarketSnapshot.local.collateral,
     position: positionSize,
   })
@@ -129,7 +141,7 @@ export function TriggerOrderForm({
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <PaddedContainer gap="13px" height="100%">
+      <PaddedContainer gap="13px" height="100%" p={noPadding ? 0 : 4} pb={noPadding ? 0 : 2} maxWidth="300px">
         <TriggerBetaMessage />
         <PositionDisplay position={userMarketSnapshot} orderDirection={orderDirection} />
         {selectedOrderType === OrderTypes.stopLoss && (

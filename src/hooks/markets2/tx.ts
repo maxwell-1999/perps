@@ -246,7 +246,6 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     }
   }
 
-  // TODO: onCancelOrder
   const onPlaceOrder = async ({
     orderType,
     limitPrice,
@@ -258,6 +257,7 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     settlementFee,
     positionAbs,
     selectedLimitComparison,
+    cancelOrderDetails,
   }: {
     orderType: OrderTypes
     limitPrice?: bigint
@@ -269,15 +269,22 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     settlementFee: bigint
     positionAbs: bigint
     selectedLimitComparison?: TriggerComparison
+    cancelOrderDetails?: { market: Address; nonce: bigint }
   }) => {
     if (!address || !chainId || !walletClient || !marketOracles || !pyth) {
       return
     }
 
+    let cancelAction
     let updateAction
     let limitOrderAction
     let stopLossAction
     let takeProfitAction
+
+    if (cancelOrderDetails) {
+      cancelAction = buildCancelOrder(cancelOrderDetails)
+    }
+
     if (orderType === OrderTypes.limit && limitPrice) {
       if (collateralDelta) {
         updateAction = buildUpdateMarket({
@@ -321,9 +328,13 @@ export const useMarketTransactions2 = (productAddress: Address) => {
       })
     }
 
-    const actions: MultiInvoker2Action[] = [updateAction, limitOrderAction, stopLossAction, takeProfitAction].filter(
-      notEmpty,
-    )
+    const actions: MultiInvoker2Action[] = [
+      cancelAction,
+      updateAction,
+      limitOrderAction,
+      stopLossAction,
+      takeProfitAction,
+    ].filter(notEmpty)
 
     if (orderType === OrderTypes.limit && collateralDelta) {
       const oracleInfo = Object.values(marketOracles).find((o) => o.marketAddress === productAddress)
@@ -437,6 +448,7 @@ export const useCancelOrder = () => {
         triggerErrorToast({ title: errorToastCopy.error, message: errorToastCopy.errorCancelingOrder })
       }
       console.error(err)
+      throw new Error(err)
     }
   }
 

@@ -459,7 +459,6 @@ function TradeForm(props: TradeFormProps) {
           selectedOrderType={selectedOrderType}
           userMarketSnapshot={position}
           orderDirection={orderDirection}
-          latestPrice={latestPrice}
           onSubmit={onConfirmTriggerOrder}
         />
       ) : (

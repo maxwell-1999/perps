@@ -53,6 +53,10 @@ export interface AdjustmentModalProps {
   isRetry?: boolean
   orderType?: OrderTypes
   selectedLimitComparison?: TriggerComparison
+  cancelOrderDetails?: {
+    nonce: bigint
+    market: Address
+  }
 }
 
 const AdjustPositionModal = memo(
@@ -72,6 +76,7 @@ const AdjustPositionModal = memo(
     isRetry,
     orderType,
     selectedLimitComparison,
+    cancelOrderDetails,
   }: AdjustmentModalProps) {
     const chainId = useChainId()
 
@@ -194,6 +199,7 @@ const AdjustPositionModal = memo(
             settlementFee: settlementFee || market.parameter.settlementFee,
             positionAbs: newPosition,
             selectedLimitComparison,
+            cancelOrderDetails,
           })
         } else {
           hash = await onModifyPosition({
@@ -284,7 +290,6 @@ const AdjustPositionModal = memo(
         setWithdrawCollateralLoading(false)
       }
     }
-
     const showWithdrawButton = isWithdrawing || requiresTwoStep || step === 2
     const showSettlementStep = requiresTwoStep || isSettlementCompleted
 

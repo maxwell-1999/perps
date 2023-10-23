@@ -672,7 +672,6 @@ export const getOpenOrderLabel = ({
   if (isMaker) {
     return orderDelta > 0n ? 'limitOpen' : 'limitClose'
   }
-
   if (orderDelta > 0n) {
     return 'limitOpen'
   }

@@ -23,6 +23,7 @@ import {
 import { Big6Math, formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
 import { calcFundingRates, calcMakerExposure, calcMakerStats2 } from '@/utils/positionUtils'
 
+import { OrderTypes } from '../TradeForm/constants'
 import { PositionTableData } from './constants'
 import { getFormattedPositionDetails, transformPositionDataToArray } from './utils'
 
@@ -163,6 +164,7 @@ export const usePositionManagerCopy = () => {
     syncErrorMessage: intl.formatMessage({
       defaultMessage: 'Error syncing latest data. Your position is not impacted. Try refreshing the page.',
     }),
+    editing: intl.formatMessage({ defaultMessage: 'Editing' }),
   }
 }
 
@@ -291,13 +293,14 @@ export const useOpenOrderTableData = (): FormattedOpenOrder[] => {
       const market = addressToAsset2(getAddress(order.market)) as SupportedAsset
       const orderSize = BigInt(order.order_delta)
       const deltaNotional = Big6Math.mul(orderSize, BigInt(order.order_price))
+      const type = order.order_comparison === -1 ? TriggerComparison.lte : TriggerComparison.gte
 
       return {
         status: 'open',
         side: orderIntToPositionSide(order.order_side),
         orderDelta: Big6Math.toFloatString(orderSize),
         orderDeltaNotional: formatBig6USDPrice(deltaNotional),
-        type: order.order_comparison === -1 ? TriggerComparison.lte : TriggerComparison.gte,
+        type,
         triggerPrice: formatBig6USDPrice(BigInt(order.order_price)),
         triggerPriceUnformatted: BigInt(order.order_price),
         market,
@@ -310,6 +313,17 @@ export const useOpenOrderTableData = (): FormattedOpenOrder[] => {
       }
     })
   return orders || []
+}
+
+export const getOrderTypeFromOrder = (order: FormattedOpenOrder) => {
+  if (BigInt(order.details.order_delta) > 0n) {
+    return OrderTypes.limit
+  }
+  if (order.side === PositionSide2.long) {
+    return order.type === TriggerComparison.lte ? OrderTypes.stopLoss : OrderTypes.takeProfit
+  } else {
+    return order.type === TriggerComparison.gte ? OrderTypes.stopLoss : OrderTypes.takeProfit
+  }
 }
 
 export const usePnl2 = (
