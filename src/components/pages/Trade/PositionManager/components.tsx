@@ -200,8 +200,9 @@ export const SubPositionRow = ({
     interfaceFee,
     collateral: collateralChange_,
     realizedValues,
+    collateralOnly,
   } = change
-  const settled = accumulations.length > 0
+  const settled = accumulations.length > 0 || collateralOnly
   const price = BigInt(change.priceWithImpact)
   const value = accumulations.reduce((acc, cur) => acc + BigInt(cur.accumulatedValue), 0n)
   const fees =

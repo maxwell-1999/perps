@@ -627,56 +627,66 @@ async function fetchSubPositions({
     skip,
   })
 
-  const changes = updateds.map((update, i, self) => {
-    const accumulations = accountPositionProcesseds.filter(
-      (p) =>
-        BigInt(p.toOracleVersion) >= BigInt(update.version) &&
-        (i > 0 ? BigInt(p.toOracleVersion) < BigInt(updateds[i - 1].version) : true),
+  const changes = updateds
+    .filter((update, i) =>
+      i === updateds.length - 1
+        ? magnitude(update.newMaker, update.newLong, update.newShort) > 0n // skip update if it has no size
+        : true,
     )
+    .map((update, i, self) => {
+      const accumulations = accountPositionProcesseds.filter(
+        (p) =>
+          BigInt(p.toOracleVersion) >= BigInt(update.version) &&
+          (i > 0 ? BigInt(p.toOracleVersion) < BigInt(self[i - 1].version) : true),
+      )
 
-    const magnitude_ = magnitude(update.newMaker, update.newLong, update.newShort)
-    const side = side2(update.newMaker, update.newLong, update.newShort)
-    const prevValid = updateds.find((u) => u.version < update.version && u.valid)
-    const prevSide = prevValid ? side2(prevValid.newMaker, prevValid.newLong, prevValid.newShort) : PositionSide2.none
-    const delta =
-      prevValid && update.valid
-        ? magnitude_ - magnitude(prevValid.newMaker, prevValid.newLong, prevValid.newShort)
-        : BigInt(update.version) === startVersion || (i === self.length - 1 && startVersion === 1n)
-        ? magnitude_
-        : null
+      const magnitude_ = magnitude(update.newMaker, update.newLong, update.newShort)
+      const side = side2(update.newMaker, update.newLong, update.newShort)
+      const prevValid = self.find((u) => u.version < update.version && u.valid)
+      const prevSide = prevValid ? side2(prevValid.newMaker, prevValid.newLong, prevValid.newShort) : PositionSide2.none
+      const delta =
+        prevValid && update.valid
+          ? magnitude_ - magnitude(prevValid.newMaker, prevValid.newLong, prevValid.newShort)
+          : BigInt(update.version) === startVersion || (i === self.length - 1 && startVersion === 1n)
+          ? magnitude_
+          : null
 
-    let priceWithImpact = BigInt(update.price)
+      let priceWithImpact = BigInt(update.price)
 
-    const realizedValues = accumulateRealized(accumulations)
-    if (!!delta && (side === 'long' || prevSide === 'long'))
-      priceWithImpact = priceWithImpact + Big6Math.div(BigOrZero(update.priceImpactFee), Big6Math.abs(delta))
-    if (!!delta && (side === 'short' || prevSide === 'short'))
-      priceWithImpact = priceWithImpact - Big6Math.div(BigOrZero(update.priceImpactFee), Big6Math.abs(delta))
-    if (side !== 'maker') realizedValues.pnl = realizedValues.pnl - BigInt(update.priceImpactFee)
+      const realizedValues = accumulateRealized(accumulations)
+      if (!!delta && (side === 'long' || prevSide === 'long'))
+        priceWithImpact = priceWithImpact + Big6Math.div(BigOrZero(update.priceImpactFee), Big6Math.abs(delta))
+      if (!!delta && (side === 'short' || prevSide === 'short'))
+        priceWithImpact = priceWithImpact - Big6Math.div(BigOrZero(update.priceImpactFee), Big6Math.abs(delta))
+      if (side !== 'maker') realizedValues.pnl = realizedValues.pnl - BigInt(update.priceImpactFee)
 
-    return {
-      ...update,
-      magnitude: magnitude_,
-      priceWithImpact,
-      delta,
-      accumulations,
-      realizedValues,
-      collateralOnly: magnitude_ === 0n && BigOrZero(update.collateral) !== 0n,
-    }
-  })
+      return {
+        ...update,
+        magnitude: magnitude_,
+        priceWithImpact,
+        delta,
+        accumulations,
+        realizedValues,
+        collateralOnly: magnitude_ === 0n && BigOrZero(update.collateral) !== 0n,
+      }
+    })
 
   // Check if the next update is a collateral only change, and if so pull it in as a new update that is part of this
   // position. This is done because the graph does not include collateral only updates as part of the checkpointing
   // system, but it's a nicer UX if we include them as part of the position history
-  if (nextUpdate[0] && magnitude(nextUpdate[0].newMaker, nextUpdate[0].newLong, nextUpdate[0].newShort) === 0n) {
-    if (changes[0].accumulations[0].toOracleVersion === nextUpdate[0].version) {
+  if (
+    nextUpdate[0] &&
+    BigInt(nextUpdate[0].collateral) < 0n &&
+    magnitude(nextUpdate[0].newMaker, nextUpdate[0].newLong, nextUpdate[0].newShort) === 0n
+  ) {
+    if (changes[0].accumulations[0].toOracleVersion <= nextUpdate[0].version) {
       changes.unshift({
         ...nextUpdate[0],
         magnitude: 0n,
         priceWithImpact: 0n,
         delta: null,
-        accumulations: [changes[0].accumulations[0]],
-        realizedValues: accumulateRealized([changes[0].accumulations[0]]),
+        accumulations: [],
+        realizedValues: accumulateRealized([]),
         collateralOnly: true,
       })
     }
