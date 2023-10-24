@@ -19,13 +19,6 @@ const desktopLayout = `
   "tradeForm positionManager"
 `
 
-const largeScreenLayout = `
-  "header header"
-  "marketBar marketBar"
-  "tradeForm chart"
-  ". positionManager"
-`
-
 const GridContainer = styled.div<{ isMaker?: boolean }>`
   display: grid;
   grid-gap: 15px;
@@ -44,8 +37,7 @@ const GridContainer = styled.div<{ isMaker?: boolean }>`
   }
 
   @media (min-width: ${breakpoints.xl}) {
-    grid-template-areas: ${largeScreenLayout};
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 350px 1fr;
     grid-template-rows: auto auto 1fr 320px;
   }
 `

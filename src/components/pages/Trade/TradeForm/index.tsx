@@ -1,4 +1,4 @@
-import { Flex, Spinner } from '@chakra-ui/react'
+import { Container, Spinner } from '@chakra-ui/react'
 
 import { SupportedAsset } from '@/constants/markets'
 import { PositionSide2 } from '@/constants/markets'
@@ -39,11 +39,15 @@ function TradeContainer({ isMobile }: { isMobile?: boolean }) {
   const containerVariant = getContainerVariant(formState, !!closedOrResolved(userCurrentPosition?.status), !address)
   if (!market) {
     return (
-      <FormContainer variant={containerVariant}>
-        <Flex height="100%" width="100%" justifyContent="center" alignItems="center">
-          <Spinner />
-        </Flex>
-      </FormContainer>
+      <Container
+        height={{ base: '100%', xl: '650px' }}
+        width="100%"
+        justifyContent="center"
+        alignItems="center"
+        variant={containerVariant}
+      >
+        <Spinner />
+      </Container>
     )
   }
 
