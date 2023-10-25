@@ -6,15 +6,22 @@ import { useNetwork, useWalletClient } from 'wagmi'
 import { waitForTransaction } from 'wagmi/actions'
 
 import { useAdjustmentModalCopy } from '@/components/pages/Trade/TradeForm/components/AdjustPositionModal/hooks'
+import { OrderTypes } from '@/components/pages/Trade/TradeForm/constants'
 import { useTransactionToasts, useTxToastCopy } from '@/components/shared/Toast/transactionToasts'
 import { MultiInvoker2Addresses } from '@/constants/contracts'
-import { PositionSide2, addressToAsset2 } from '@/constants/markets'
+import { PositionSide2, TriggerComparison, addressToAsset2 } from '@/constants/markets'
 import { interfaceFeeBps, metamaskTxRejectedError } from '@/constants/network'
 import { MaxUint256 } from '@/constants/units'
 import { notEmpty } from '@/utils/arrayUtils'
 import { Big6Math, BigOrZero } from '@/utils/big6Utils'
 import { getOracleContract, getPythProviderContract } from '@/utils/contractUtils'
-import { buildCommitPrice, buildInterfaceFee, buildUpdateMarket } from '@/utils/multiinvoker2'
+import {
+  buildCancelOrder,
+  buildCommitPrice,
+  buildInterfaceFee,
+  buildPlaceTriggerOrder,
+  buildUpdateMarket,
+} from '@/utils/multiinvoker2'
 import { buildCommitmentsForOracles, getRecentVaa } from '@/utils/pythUtils'
 import { nowSeconds } from '@/utils/timeUtils'
 
@@ -46,7 +53,7 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     () =>
       queryClient.invalidateQueries({
         predicate: ({ queryKey }) =>
-          ['marketSnapshots2', 'marketPnls2', 'balances'].includes(queryKey.at(0) as string) &&
+          ['marketSnapshots2', 'marketPnls2', 'balances', 'openOrders'].includes(queryKey.at(0) as string) &&
           queryKey.includes(chainId),
       }),
     [queryClient, chainId],
@@ -75,12 +82,18 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     collateralDelta,
     txHistoryLabel,
     interfaceFee,
+    stopLoss,
+    takeProfit,
+    settlementFee,
   }: {
     txHistoryLabel?: string
     collateralDelta?: bigint
     positionAbs?: bigint
     positionSide?: PositionSide2
     interfaceFee?: bigint
+    stopLoss?: bigint
+    takeProfit?: bigint
+    settlementFee?: bigint
   } = {}) => {
     if (!address || !chainId || !walletClient || !marketOracles || !pyth) {
       return
@@ -109,7 +122,35 @@ export const useMarketTransactions2 = (productAddress: Address) => {
       wrap: true,
     })
 
-    const actions: MultiInvoker2Action[] = [updateAction, chargeFeeAction].filter(notEmpty)
+    const isNotMaker = positionSide !== PositionSide2.maker && positionSide !== PositionSide2.none
+    // TODO: stopLoss and takeProfit
+    let stopLossAction
+    if (stopLoss && positionSide && isNotMaker && settlementFee) {
+      stopLossAction = buildPlaceTriggerOrder({
+        market: productAddress,
+        side: positionSide,
+        triggerPrice: stopLoss,
+        comparison: positionSide === PositionSide2.short ? 'gte' : 'lte',
+        maxFee: settlementFee * 2n,
+        delta: -(positionAbs ?? 0n),
+      })
+    }
+
+    let takeProfitAction
+    if (takeProfit && positionSide && isNotMaker && settlementFee) {
+      takeProfitAction = buildPlaceTriggerOrder({
+        market: productAddress,
+        side: positionSide,
+        triggerPrice: takeProfit,
+        comparison: positionSide === PositionSide2.short ? 'lte' : 'gte',
+        delta: -(positionAbs ?? 0n),
+        maxFee: settlementFee * 2n,
+      })
+    }
+
+    const actions: MultiInvoker2Action[] = [updateAction, chargeFeeAction, stopLossAction, takeProfitAction].filter(
+      notEmpty,
+    )
 
     let isPriceStale = false
     if (asset && marketSnapshots?.market[asset]) {
@@ -205,11 +246,199 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     }
   }
 
-  // TODO: onPlaceOrder, onCancelOrder
+  // TODO: onCancelOrder
+  const onPlaceOrder = async ({
+    orderType,
+    limitPrice,
+    collateralDelta,
+    stopLoss,
+    takeProfit,
+    side,
+    delta = 0n,
+    settlementFee,
+    positionAbs,
+    selectedLimitComparison,
+  }: {
+    orderType: OrderTypes
+    limitPrice?: bigint
+    stopLoss?: bigint
+    takeProfit?: bigint
+    side: PositionSide2
+    collateralDelta?: bigint
+    delta: bigint
+    settlementFee: bigint
+    positionAbs: bigint
+    selectedLimitComparison?: TriggerComparison
+  }) => {
+    if (!address || !chainId || !walletClient || !marketOracles || !pyth) {
+      return
+    }
+
+    let updateAction
+    let limitOrderAction
+    let stopLossAction
+    let takeProfitAction
+    if (orderType === OrderTypes.limit && limitPrice) {
+      if (collateralDelta) {
+        updateAction = buildUpdateMarket({
+          market: productAddress,
+          maker: undefined,
+          long: undefined,
+          short: undefined,
+          collateral: collateralDelta,
+          wrap: true,
+        })
+      }
+      limitOrderAction = buildPlaceTriggerOrder({
+        market: productAddress,
+        side: side as PositionSide2.long | PositionSide2.short,
+        triggerPrice: limitPrice,
+        comparison: selectedLimitComparison ? selectedLimitComparison : side === PositionSide2.long ? 'lte' : 'gte',
+        maxFee: settlementFee * 2n,
+        delta,
+      })
+    }
+
+    if (stopLoss && orderType !== OrderTypes.takeProfit) {
+      stopLossAction = buildPlaceTriggerOrder({
+        market: productAddress,
+        side: side as PositionSide2.long | PositionSide2.short,
+        triggerPrice: stopLoss,
+        comparison: side === PositionSide2.short ? 'gte' : 'lte',
+        maxFee: settlementFee * 2n,
+        delta: orderType === OrderTypes.limit ? -positionAbs : delta,
+      })
+    }
+
+    if (takeProfit && orderType !== OrderTypes.stopLoss) {
+      takeProfitAction = buildPlaceTriggerOrder({
+        market: productAddress,
+        side: side as PositionSide2.long | PositionSide2.short,
+        triggerPrice: takeProfit,
+        comparison: side === PositionSide2.short ? 'lte' : 'gte',
+        maxFee: settlementFee * 2n,
+        delta: orderType === OrderTypes.limit ? -positionAbs : delta,
+      })
+    }
+
+    const actions: MultiInvoker2Action[] = [updateAction, limitOrderAction, stopLossAction, takeProfitAction].filter(
+      notEmpty,
+    )
+
+    if (orderType === OrderTypes.limit && collateralDelta) {
+      const oracleInfo = Object.values(marketOracles).find((o) => o.marketAddress === productAddress)
+      if (!oracleInfo) return
+      const asset = addressToAsset2(productAddress)
+      let isPriceStale = false
+      if (asset && marketSnapshots?.market[asset]) {
+        const {
+          parameter: { maxPendingGlobal, maxPendingLocal },
+          riskParameter: { staleAfter },
+          pendingPositions,
+        } = marketSnapshots.market[asset]
+        const lastUpdated = await getOracleContract(oracleInfo.address, chainId).read.latest()
+        isPriceStale = BigInt(nowSeconds()) - lastUpdated.timestamp > staleAfter / 2n
+        // If there is a backlog of pending positions, we need to commit the price
+        isPriceStale = isPriceStale || BigInt(pendingPositions.length) >= maxPendingGlobal
+        // If there is a backlog of pending positions for this user, we need to commit the price
+        isPriceStale =
+          isPriceStale || BigOrZero(marketSnapshots.user?.[asset]?.pendingPositions?.length) >= maxPendingLocal
+      }
+
+      // Only add the price commit if the price is stale
+      if (isPriceStale) {
+        const [{ version, index, value, updateData }] = await buildCommitmentsForOracles({
+          chainId,
+          pyth,
+          marketOracles: [oracleInfo],
+          onError: () => triggerErrorToast({ title: errorToastCopy.error, message: errorToastCopy.errorFetchingPrice }),
+        })
+
+        const commitAction = buildCommitPrice({
+          oracle: oracleInfo.providerAddress,
+          version,
+          value,
+          index,
+          vaa: updateData,
+          revertOnFailure: false,
+        })
+
+        actions.unshift(commitAction)
+      }
+    }
+
+    try {
+      const hash = await multiInvoker.write.invoke([actions], { ...txOpts, value: 1n })
+      waitForTransaction({ hash })
+        .then(() => refresh())
+        .catch(() => null)
+      // Refresh after a timeout to catch missed events
+      setTimeout(() => refresh(), 15000)
+      setTimeout(() => refresh(), 30000)
+      return hash
+    } catch (err: any) {
+      if (err.details !== metamaskTxRejectedError) {
+        triggerErrorToast({ title: errorToastCopy.error, message: errorToastCopy.errorPlacingOrder })
+      }
+      console.error(err)
+    }
+  }
 
   return {
+    onPlaceOrder,
     onApproveUSDC,
     onModifyPosition,
     onSubmitVaa,
   }
+}
+
+export const useCancelOrder = () => {
+  const chainId = useChainId()
+  const errorToastCopy = useTxToastCopy()
+  const { chain } = useNetwork()
+  const { triggerErrorToast } = useTransactionToasts()
+
+  const { address } = useAddress()
+  const { data: walletClient } = useWalletClient()
+
+  const multiInvoker = useMultiInvoker2(walletClient ?? undefined)
+  const txOpts = { account: address || zeroAddress, chainId, chain }
+  const queryClient = useQueryClient()
+  const refresh = useCallback(
+    () =>
+      queryClient.invalidateQueries({
+        predicate: ({ queryKey }) => ['openOrders'].includes(queryKey.at(0) as string) && queryKey.includes(chainId),
+      }),
+    [queryClient, chainId],
+  )
+
+  const onCancelOrder = async (orderDetails: [Address, bigint][]) => {
+    if (!address || !chainId || !walletClient) {
+      return
+    }
+
+    const actions: MultiInvoker2Action[] = orderDetails.map(([market, nonce]) =>
+      buildCancelOrder({
+        market,
+        nonce,
+      }),
+    )
+
+    try {
+      const hash = await multiInvoker.write.invoke([actions], { ...txOpts, value: 1n })
+      waitForTransaction({ hash })
+        .then(() => refresh())
+        .catch(() => null)
+      // Refresh after a timeout to catch missed events
+      setTimeout(() => refresh(), 15000)
+      return hash
+    } catch (err: any) {
+      if (err.details !== metamaskTxRejectedError) {
+        triggerErrorToast({ title: errorToastCopy.error, message: errorToastCopy.errorCancelingOrder })
+      }
+      console.error(err)
+    }
+  }
+
+  return onCancelOrder
 }

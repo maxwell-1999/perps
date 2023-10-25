@@ -5,6 +5,16 @@
       "value": "Once your position settles you may withdraw your funds."
     }
   ],
+  "+A6MyN": [
+    {
+      "type": 1,
+      "value": "orderType"
+    },
+    {
+      "type": 0,
+      "value": "Increase"
+    }
+  ],
   "+JzBHJ": [
     {
       "type": 0,
@@ -63,6 +73,12 @@
     {
       "type": 0,
       "value": "Connect your wallet to see your position history"
+    }
+  ],
+  "/GCoTA": [
+    {
+      "type": 0,
+      "value": "Clear"
     }
   ],
   "/Waagm": [
@@ -179,10 +195,22 @@
       "value": "price"
     }
   ],
+  "2R+iFy": [
+    {
+      "type": 0,
+      "value": "Limit Price"
+    }
+  ],
   "2Xvb7U": [
     {
       "type": 0,
       "value": "Open / Liq"
+    }
+  ],
+  "2hsoiX": [
+    {
+      "type": 0,
+      "value": "+ Add"
     }
   ],
   "2moxWw": [
@@ -245,6 +273,18 @@
     {
       "type": 0,
       "value": "This UI is for Advanced liquidity providers only. Please review Perennial's documentation to understand the risks."
+    }
+  ],
+  "3wsVWF": [
+    {
+      "type": 0,
+      "value": "Cancelled"
+    }
+  ],
+  "46ZYIg": [
+    {
+      "type": 0,
+      "value": "Index Price:"
     }
   ],
   "47FYwb": [
@@ -391,6 +431,12 @@
       "value": "Modify Collateral"
     }
   ],
+  "711Oz7": [
+    {
+      "type": 0,
+      "value": "Stop price below limit price"
+    }
+  ],
   "73CDRG": [
     {
       "type": 0,
@@ -429,6 +475,12 @@
     {
       "type": 0,
       "value": "Approve vault deposits for withdrawal"
+    }
+  ],
+  "89T/ze": [
+    {
+      "type": 0,
+      "value": "Invalid"
     }
   ],
   "8ELrUm": [
@@ -487,6 +539,12 @@
       "value": "seconds"
     }
   ],
+  "8b+lh3": [
+    {
+      "type": 0,
+      "value": "Error canceling order. Please try again."
+    }
+  ],
   "8fCJaV": [
     {
       "type": 0,
@@ -529,12 +587,6 @@
       "value": "Capital Efficient"
     }
   ],
-  "9AgXoz": [
-    {
-      "type": 0,
-      "value": "Sell"
-    }
-  ],
   "A3zdUJ": [
     {
       "type": 0,
@@ -575,6 +627,12 @@
       "value": "difference"
     }
   ],
+  "Aegu17": [
+    {
+      "type": 0,
+      "value": "Limit Close"
+    }
+  ],
   "AwJFvy": [
     {
       "type": 0,
@@ -609,6 +667,16 @@
     {
       "type": 0,
       "value": "Temporary liquidity imbalance"
+    }
+  ],
+  "BT1S8D": [
+    {
+      "type": 1,
+      "value": "orderType"
+    },
+    {
+      "type": 0,
+      "value": "Sell"
     }
   ],
   "BY343C": [
@@ -771,10 +839,10 @@
       "value": "Delta-Hedged"
     }
   ],
-  "EnCOBJ": [
+  "Em5VYO": [
     {
       "type": 0,
-      "value": "Buy"
+      "value": "Limit Open"
     }
   ],
   "Eypml7": [
@@ -809,6 +877,12 @@
     {
       "type": 0,
       "value": "Chain"
+    }
+  ],
+  "FM0aXX": [
+    {
+      "type": 0,
+      "value": "Take profit price below limit price"
     }
   ],
   "FazwRl": [
@@ -889,6 +963,12 @@
       "value": "Increase"
     }
   ],
+  "H7nbQW": [
+    {
+      "type": 0,
+      "value": "Take profit price above limit price"
+    }
+  ],
   "HBSsow": [
     {
       "type": 0,
@@ -899,6 +979,12 @@
     {
       "type": 0,
       "value": "Maker Fees"
+    }
+  ],
+  "Hf9Pys": [
+    {
+      "type": 0,
+      "value": "Stop price below liquidation price"
     }
   ],
   "HrHmba": [
@@ -955,6 +1041,12 @@
     {
       "type": 0,
       "value": "Available for deposit:"
+    }
+  ],
+  "J5cc23": [
+    {
+      "type": 0,
+      "value": "Close amount exceeds position size."
     }
   ],
   "JdkOCO": [
@@ -1033,16 +1125,16 @@
       "value": "Settlement failure"
     }
   ],
-  "LiHQih": [
-    {
-      "type": 0,
-      "value": "Coming Soon"
-    }
-  ],
   "LjNvmm": [
     {
       "type": 0,
       "value": "Deposited"
+    }
+  ],
+  "Lqqnih": [
+    {
+      "type": 0,
+      "value": "Take profit price below index price"
     }
   ],
   "LzlMDx": [
@@ -1067,10 +1159,26 @@
       "value": "%"
     }
   ],
+  "Mjf+Kf": [
+    {
+      "type": 1,
+      "value": "percent"
+    },
+    {
+      "type": 0,
+      "value": "% from index"
+    }
+  ],
   "Mkgcwj": [
     {
       "type": 0,
       "value": "Claim your redeemed LP shares from v1"
+    }
+  ],
+  "MvQeJ2": [
+    {
+      "type": 0,
+      "value": "An open position is required to set a trigger order."
     }
   ],
   "N0eaIb": [
@@ -1221,6 +1329,12 @@
       "value": "Date"
     }
   ],
+  "P83H6A": [
+    {
+      "type": 0,
+      "value": "Stop price above liquidation price"
+    }
+  ],
   "PIfHqb": [
     {
       "type": 0,
@@ -1291,6 +1405,12 @@
       "value": "Perennial is the defi-native derivatives platform for traders and developers."
     }
   ],
+  "QRQUSQ": [
+    {
+      "type": 0,
+      "value": "Stop price above index price"
+    }
+  ],
   "QUM56G": [
     {
       "type": 0,
@@ -1359,6 +1479,12 @@
       "value": "Your position has settled"
     }
   ],
+  "Tzs2J1": [
+    {
+      "type": 0,
+      "value": "Error syncing latest data. Your position is not impacted. Try refreshing the page."
+    }
+  ],
   "U6qGuO": [
     {
       "type": 0,
@@ -1405,6 +1531,12 @@
     {
       "type": 0,
       "value": "Connect wallet"
+    }
+  ],
+  "VDBBw+": [
+    {
+      "type": 0,
+      "value": "Amount exceeds position size"
     }
   ],
   "VMJPtv": [
@@ -1635,6 +1767,18 @@
       "value": "Open position"
     }
   ],
+  "ZdOOJb": [
+    {
+      "type": 0,
+      "value": "Placed"
+    }
+  ],
+  "ZwGYjD": [
+    {
+      "type": 0,
+      "value": "Greater than"
+    }
+  ],
   "ZyEi9p": [
     {
       "type": 0,
@@ -1709,6 +1853,18 @@
       "value": "Collateral withdrawn"
     }
   ],
+  "b1zuN9": [
+    {
+      "type": 0,
+      "value": "Price"
+    }
+  ],
+  "bCeZ1I": [
+    {
+      "type": 0,
+      "value": "Error retrieving price from Pyth."
+    }
+  ],
   "bHUwuP": [
     {
       "type": 0,
@@ -1749,6 +1905,12 @@
     {
       "type": 0,
       "value": "Claim your collateral from the vault"
+    }
+  ],
+  "c6lbIa": [
+    {
+      "type": 0,
+      "value": "Amount must be greater than 0"
     }
   ],
   "c9tAE/": [
@@ -1799,6 +1961,12 @@
       "value": "Exceeds total maker limit"
     }
   ],
+  "dhthSF": [
+    {
+      "type": 0,
+      "value": "Sync Error"
+    }
+  ],
   "diIoAQ": [
     {
       "type": 0,
@@ -1809,6 +1977,16 @@
     {
       "type": 0,
       "value": "History"
+    }
+  ],
+  "dsYPar": [
+    {
+      "type": 1,
+      "value": "orderType"
+    },
+    {
+      "type": 0,
+      "value": "Decrease"
     }
   ],
   "e6/RzF": [
@@ -1917,6 +2095,18 @@
       "value": "Closing"
     }
   ],
+  "hJL4XZ": [
+    {
+      "type": 0,
+      "value": "Less than"
+    }
+  ],
+  "hLu7De": [
+    {
+      "type": 0,
+      "value": "Stop price above limit price"
+    }
+  ],
   "hR5Qz3": [
     {
       "type": 0,
@@ -1995,12 +2185,6 @@
       "value": "Maker"
     }
   ],
-  "iiLT48": [
-    {
-      "type": 0,
-      "value": "Stop Limit"
-    }
-  ],
   "iv4B8O": [
     {
       "type": 0,
@@ -2011,6 +2195,12 @@
     {
       "type": 0,
       "value": "Decrease"
+    }
+  ],
+  "jZ6WWN": [
+    {
+      "type": 0,
+      "value": "Stop Loss"
     }
   ],
   "jfEJ+9": [
@@ -2049,16 +2239,16 @@
       "value": "The Large Cap Vault deploys liquidity to the markets of infrastructure assets. Currently, this includes 2 markets: SOL and MATIC."
     }
   ],
+  "kZcqo0": [
+    {
+      "type": 0,
+      "value": "%"
+    }
+  ],
   "kkjl2v": [
     {
       "type": 0,
       "value": "Max"
-    }
-  ],
-  "l/PfUR": [
-    {
-      "type": 0,
-      "value": "Est. Price impact"
     }
   ],
   "l0NFC6": [
@@ -2147,6 +2337,18 @@
       "value": "8H"
     }
   ],
+  "mlQLJX": [
+    {
+      "type": 0,
+      "value": "Take Profit"
+    }
+  ],
+  "mlhi5i": [
+    {
+      "type": 0,
+      "value": "Trigger Price"
+    }
+  ],
   "mnywDl": [
     {
       "type": 0,
@@ -2159,10 +2361,22 @@
       "value": "Stale price error. Please try again."
     }
   ],
+  "my+EO2": [
+    {
+      "type": 0,
+      "value": "Take profit price above index price"
+    }
+  ],
   "nF4Glg": [
     {
       "type": 0,
       "value": "Withdraw assets"
+    }
+  ],
+  "nJnYpD": [
+    {
+      "type": 0,
+      "value": "Your order will execute as a market order."
     }
   ],
   "nfAZ/T": [
@@ -2317,6 +2531,12 @@
     {
       "type": 0,
       "value": "Withdraw Collateral"
+    }
+  ],
+  "rP9p/Z": [
+    {
+      "type": 0,
+      "value": "Max Exec Fee"
     }
   ],
   "rSsD3z": [
@@ -2487,6 +2707,16 @@
       "value": "Please refresh the page and try again"
     }
   ],
+  "va2i3M": [
+    {
+      "type": 1,
+      "value": "orderType"
+    },
+    {
+      "type": 0,
+      "value": "Buy"
+    }
+  ],
   "vf1MO6": [
     {
       "type": 0,
@@ -2537,6 +2767,12 @@
       "value": "Select vault"
     }
   ],
+  "x/V7Jl": [
+    {
+      "type": 0,
+      "value": "Stop price below index price"
+    }
+  ],
   "x8Vy97": [
     {
       "type": 0,
@@ -2561,6 +2797,12 @@
       "value": "Native netting of longs and shorts, makers only cover the difference — capital efficiency at its finest."
     }
   ],
+  "xwSE21": [
+    {
+      "type": 0,
+      "value": "Price must be greater than 0"
+    }
+  ],
   "xxqE9a": [
     {
       "type": 0,
@@ -2569,6 +2811,12 @@
     {
       "type": 1,
       "value": "website"
+    }
+  ],
+  "xypRJf": [
+    {
+      "type": 0,
+      "value": "Limit and SL/TP orders are currently in beta. Order execution is not guaranteed."
     }
   ],
   "yDYkIj": [

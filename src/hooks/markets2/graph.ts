@@ -86,7 +86,7 @@ export const useActivePositionMarketPnls = () => {
 
       // Query the market accumulators for each market. These are used to get data between the latest account settlement
       // and the latest global settlement
-      const queryMarketAccumulatorsAndFirstInterfaceFee = gql(`
+      const queryMarketAccumulatorsAndFirstUpdate = gql(`
         query MarketAccumulators($market: Bytes!, $account: Bytes!, $accountLatestVersion: BigInt!) {
           start: marketAccumulators(
             where: { market: $market, version: $accountLatestVersion, latest: false }
@@ -110,7 +110,7 @@ export const useActivePositionMarketPnls = () => {
           }
           firstUpdate: updateds(
             where: { market: $market, account: $account, version: $accountLatestVersion }
-          ) { interfaceFee }
+          ) { interfaceFee, orderFee }
         }
       `)
 
@@ -118,7 +118,7 @@ export const useActivePositionMarketPnls = () => {
         marketToLatestSettlement.map(async ({ asset, market, lastSettlement }) => ({
           asset,
           market,
-          accumulators: await graphClient.request(queryMarketAccumulatorsAndFirstInterfaceFee, {
+          accumulators: await graphClient.request(queryMarketAccumulatorsAndFirstUpdate, {
             market,
             account: address,
             accountLatestVersion: lastSettlement.toString(),
@@ -135,6 +135,7 @@ export const useActivePositionMarketPnls = () => {
           // If there is no graph position (no settlement after position open), use the values from the snapshot
           const accumulators = marketAccumulators.find((a) => a.market === snapshot.market)?.accumulators
           let interfaceFees = BigOrZero(accumulators?.firstUpdate.at(0)?.interfaceFee)
+          let orderFees = BigOrZero(accumulators?.firstUpdate.at(0)?.orderFee)
           let startCollateral = snapshot.pre.local.collateral
           let netDeposits = 0n
           let keeperFees = snapshot.pendingPositions[0].keeper
@@ -177,6 +178,7 @@ export const useActivePositionMarketPnls = () => {
             positionFees = positionFees + graphPosition.positionFees
             priceImpactFees = priceImpactFees + graphPosition.priceImpactFees
             interfaceFees = graphPosition.interfaceFees
+            orderFees = graphPosition.orderFees
           }
 
           const accumulatedValues = AccumulatorTypes.map(({ type, unrealizedKey }) => {
@@ -200,9 +202,9 @@ export const useActivePositionMarketPnls = () => {
             return { type, realized, unrealized, total: realized + unrealized }
           })
 
-          // Add interface fee as part of start collateral since it is deducted from deposit and collateral balance
-          const realtimePnl = snapshot.local.collateral - (startCollateral + netDeposits + interfaceFees)
-          const percentDenominator = startCollateral + (netDeposits > 0n ? netDeposits : 0n) + interfaceFees
+          // Add interface + order fee as part of start collateral since it is deducted from deposit and collateral balance
+          const realtimePnl = snapshot.local.collateral - (startCollateral + netDeposits + interfaceFees + orderFees)
+          const percentDenominator = startCollateral + (netDeposits > 0n ? netDeposits : 0n) + interfaceFees + orderFees
           const accumulatedPnl = AccumulatorTypes.reduce((acc, { type }) => {
             let pnl = accumulatedValues.find((v) => v.type === type)?.total ?? 0n
             // If this is a taker position, we need to subtract the price impact fees from the pnl and total
@@ -222,6 +224,7 @@ export const useActivePositionMarketPnls = () => {
             positionFees,
             priceImpactFees,
             interfaceFees,
+            orderFees,
             averageEntryPrice,
             liquidation: !!graphPosition?.liquidation,
             liquidationFee: graphPosition?.liquidationFee ?? 0n,
@@ -240,6 +243,7 @@ export const useActivePositionMarketPnls = () => {
             positionFees: bigint
             priceImpactFees: bigint
             interfaceFees: bigint
+            orderFees: bigint
             averageEntryPrice: bigint
             liquidation: boolean
             liquidationFee: bigint
@@ -413,25 +417,25 @@ async function fetchPositionData({
       ) {
         market, accumulatedValue, accumulatedCollateral, openSize, openNotional, openPriceImpactFees, accumulatedPositionFees
         accumulatedKeeperFees, accumulatedPnl, accumulatedFunding, accumulatedInterest, accumulatedMakerPositionFee,
-        accumulatedPriceImpactFees, accumulatedInterfaceFees, collateral, netDeposits, side, startMagnitude, blockTimestamp, transactionHash
+        accumulatedPriceImpactFees, accumulatedInterfaceFees, accumulatedOrderFees, collateral, netDeposits, side, startMagnitude, blockTimestamp, transactionHash
       }
       end: marketAccountCheckpoints(
         where: { market: $market, account: $account, version: $endVersion },
       ) {
         market, accumulatedValue, accumulatedCollateral, openSize, openNotional, openPriceImpactFees, accumulatedPositionFees
         accumulatedKeeperFees, accumulatedPnl, accumulatedFunding, accumulatedInterest, accumulatedMakerPositionFee,
-        accumulatedPriceImpactFees, accumulatedInterfaceFees, collateral, netDeposits
+        accumulatedPriceImpactFees, accumulatedInterfaceFees, accumulatedOrderFees, collateral, netDeposits
       }
       currentPosition: marketAccountPositions(
         where: { market: $market, account: $account },
       ) {
         market, accumulatedValue, accumulatedCollateral, openSize, openNotional, openPriceImpactFees, accumulatedPositionFees
         accumulatedKeeperFees, accumulatedPnl, accumulatedFunding, accumulatedInterest, accumulatedMakerPositionFee,
-        accumulatedPriceImpactFees, accumulatedInterfaceFees, collateral, netDeposits
+        accumulatedPriceImpactFees, accumulatedInterfaceFees, accumulatedOrderFees, collateral, netDeposits
       }
       startUpdate: updateds(
         where: { market: $market, account: $account, version: $startVersion },
-      ) { price, priceImpactFee, interfaceFee }
+      ) { price, priceImpactFee, interfaceFee, orderFee }
       endUpdate: updateds(
         where: { market: $market, account: $account, version_lte: $endVersion },
         first: 1, orderBy: version, orderDirection: desc
@@ -527,6 +531,8 @@ async function fetchPositionData({
       BigOrZero(startUpdate.interfaceFee) +
       BigOrZero(end.accumulatedInterfaceFees) -
       BigOrZero(start.accumulatedInterfaceFees),
+    orderFees:
+      BigOrZero(startUpdate.orderFee) + BigOrZero(end.accumulatedOrderFees) - BigOrZero(start.accumulatedOrderFees),
   }
 
   return position
@@ -594,7 +600,7 @@ async function fetchSubPositions({
         orderBy: version, orderDirection: desc, first: $first, skip: $skip
       ) {
         version, collateral, newMaker, newLong, newShort, valid, transactionHash, price, priceImpactFee,
-        localPositionId, globalPositionId, market, account, blockNumber, blockTimestamp, protect, interfaceFee
+        localPositionId, globalPositionId, market, account, blockNumber, blockTimestamp, protect, interfaceFee, orderFee
       }
 
       accountPositionProcesseds(
@@ -613,7 +619,7 @@ async function fetchSubPositions({
         orderBy: version, orderDirection: asc, first: 1
       ) {
         version, collateral, newMaker, newLong, newShort, valid, transactionHash, price, priceImpactFee,
-        localPositionId, globalPositionId, market, account, blockNumber, blockTimestamp, protect, interfaceFee
+        localPositionId, globalPositionId, market, account, blockNumber, blockTimestamp, protect, interfaceFee, orderFee
       }
     }
   `)
@@ -695,23 +701,27 @@ async function fetchSubPositions({
   return { changes, hasMore: updateds.length === first }
 }
 
-const OpenOrdersPageSize = 10
-export const useOpenOrders = () => {
+export type OpenOrder = NonNullable<
+  NonNullable<Awaited<ReturnType<typeof useOpenOrders>['data']>>['pages'][number]
+>['openOrders'][number]
+
+const OpenOrdersPageSize = 1000
+export const useOpenOrders = (isMaker?: boolean) => {
   const chainId = useChainId()
   const { address } = useAddress()
   const graphClient = useGraphClient2()
   const markets = chainAssetsWithAddress(chainId)
 
   return useInfiniteQuery({
-    queryKey: ['openOrders', chainId, address],
+    queryKey: ['openOrders', chainId, address, isMaker ? 'maker' : 'taker'],
     enabled: !!address && !!markets.length,
     queryFn: async ({ pageParam = 0 }) => {
       if (!address || !markets.length) return
 
       const queryOpenOrders = gql(`
-        query OpenOrders($account: Bytes!, $markets: [Bytes!]!, $first: Int!, $skip: Int!) {
+        query OpenOrders($account: Bytes!, $markets: [Bytes!]!, $side: [Int!]!, $first: Int!, $skip: Int!) {
           multiInvokerOrderPlaceds(
-            where: { account: $account, market_in: $markets, cancelled: false, executed: false },
+            where: { account: $account, market_in: $markets, cancelled: false, executed: false, order_side_in: $side },
             orderBy: nonce, orderDirection: desc, first: $first, skip: $skip
           ) {
               account, market, nonce, order_side, order_comparison, order_fee, order_price, order_delta
@@ -725,6 +735,7 @@ export const useOpenOrders = () => {
         markets: markets.map(({ marketAddress }) => marketAddress),
         first: OpenOrdersPageSize,
         skip: pageParam * OpenOrdersPageSize,
+        side: isMaker ? [0, 3] : [1, 2, 3], // 4 = collateral withdrawal
       })
 
       return {

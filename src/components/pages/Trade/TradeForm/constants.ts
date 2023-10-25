@@ -14,6 +14,11 @@ export enum FormNames {
   amount = 'amount',
   leverage = 'leverage',
   leverageFixed = 'leverageFixed',
+  limitPrice = 'limitPrice',
+  limitPricePercent = 'limitPricePercent',
+  stopLoss = 'stopLoss',
+  takeProfit = 'takeProfit',
+  triggerAmount = 'triggerAmount',
 }
 
 export type OrderValues = {
@@ -21,12 +26,18 @@ export type OrderValues = {
   amount: string
   fullClose?: boolean
   crossCollateral?: bigint
+  limitPrice?: string
+  stopLoss?: string
+  takeProfit?: string
+  triggerAmount?: string
 }
 
 export enum OrderTypes {
   market = 'market',
   limit = 'limit',
-  stopLimit = 'stopLimit',
+  stopLoss = 'stopLoss',
+  takeProfit = 'takeProfit',
 }
 
-export const orderTypes = [OrderTypes.market, OrderTypes.limit, OrderTypes.stopLimit]
+export const orderTypes = [OrderTypes.market, OrderTypes.limit, OrderTypes.stopLoss, OrderTypes.takeProfit]
+export const triggerOrderTypes = [OrderTypes.stopLoss, OrderTypes.takeProfit]

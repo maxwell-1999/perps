@@ -20,7 +20,7 @@ import { ModalDetail, ModalStep } from '@/components/shared/ModalComponents'
 import Toast, { ToastMessage } from '@/components/shared/Toast'
 import { useTransactionToasts } from '@/components/shared/Toast/transactionToasts'
 import { StaleAfterMessage } from '@/components/shared/components'
-import { PositionSide2, PositionStatus, SupportedAsset } from '@/constants/markets'
+import { PositionSide2, PositionStatus, SupportedAsset, TriggerComparison } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { MarketSnapshot, UserMarketSnapshot, useMarketTransactions2 } from '@/hooks/markets2'
 import { useChainId } from '@/hooks/network'
@@ -31,7 +31,7 @@ import { UpdateNoOp } from '@/utils/positionUtils'
 import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
 
-import { OrderValues } from '../../constants'
+import { OrderTypes, OrderValues } from '../../constants'
 import { PositionInfo } from './components'
 import { useAdjustmentModalCopy } from './hooks'
 import { createAdjustment, getOrderToastProps } from './utils'
@@ -51,6 +51,8 @@ export interface AdjustmentModalProps {
   positionDelta?: bigint
   variant: 'close' | 'adjust' | 'withdraw'
   isRetry?: boolean
+  orderType?: OrderTypes
+  selectedLimitComparison?: TriggerComparison
 }
 
 const AdjustPositionModal = memo(
@@ -68,6 +70,8 @@ const AdjustPositionModal = memo(
     positionDelta,
     variant,
     isRetry,
+    orderType,
+    selectedLimitComparison,
   }: AdjustmentModalProps) {
     const chainId = useChainId()
 
@@ -78,6 +82,7 @@ const AdjustPositionModal = memo(
       usdcAllowance,
       chainId,
       positionSide,
+      isTrigger: orderType === OrderTypes.stopLoss || orderType === OrderTypes.takeProfit,
     })
 
     const {
@@ -87,6 +92,7 @@ const AdjustPositionModal = memo(
       needsApproval,
       approvalAmount,
       requiresTwoStep,
+      triggerOrder,
     } = adjustment
 
     const priorPosition = usePrevious(position)
@@ -114,7 +120,7 @@ const AdjustPositionModal = memo(
     const { waitForTransactionAlert } = useTransactionToasts()
 
     const { market: marketAddress } = market
-    const { onApproveUSDC, onModifyPosition } = useMarketTransactions2(marketAddress)
+    const { onApproveUSDC, onModifyPosition, onPlaceOrder } = useMarketTransactions2(marketAddress)
 
     useEffect(() => {
       if (needsApproval) {
@@ -171,13 +177,35 @@ const AdjustPositionModal = memo(
           intl,
           adjustment,
           isMaker,
+          orderType,
         })
-        const hash = await onModifyPosition({
-          collateralDelta: collateralModification,
-          positionSide: positionSide,
-          positionAbs: newPosition,
-          interfaceFee,
-        })
+
+        let hash
+        if (orderType && [OrderTypes.stopLoss, OrderTypes.takeProfit, OrderTypes.limit].includes(orderType)) {
+          const delta = orderType === OrderTypes.limit ? positionDelta : -triggerOrder.size
+          hash = await onPlaceOrder({
+            orderType,
+            side: positionSide,
+            collateralDelta: orderType === OrderTypes.limit ? collateralDifference : undefined,
+            limitPrice: triggerOrder?.limitPrice,
+            stopLoss: triggerOrder?.stopLoss,
+            takeProfit: triggerOrder?.takeProfit,
+            delta: delta ?? 0n,
+            settlementFee,
+            positionAbs: newPosition,
+            selectedLimitComparison,
+          })
+        } else {
+          hash = await onModifyPosition({
+            collateralDelta: collateralModification,
+            positionSide: positionSide,
+            positionAbs: newPosition,
+            interfaceFee,
+            stopLoss: triggerOrder?.stopLoss,
+            takeProfit: triggerOrder?.takeProfit,
+            settlementFee,
+          })
+        }
         if (hash) {
           waitForTransactionAlert(hash, {
             onError: () => {
@@ -330,6 +358,8 @@ const AdjustPositionModal = memo(
                   interfaceFee={interfaceFee}
                   tradeFee={tradeFee}
                   settlementFee={settlementFee}
+                  triggerOrder={triggerOrder}
+                  orderType={orderType}
                   frozen
                 />
               ) : (

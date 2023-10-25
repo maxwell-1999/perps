@@ -1,9 +1,13 @@
 import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
+import { PositionSide2 } from '@/constants/markets'
+import { useMarketContext } from '@/contexts/marketContext'
+import { useChainLivePrices2 } from '@/hooks/markets2'
 import { Big6Math, formatBig6USDPrice } from '@/utils/big6Utils'
 import { efficiency } from '@/utils/positionUtils'
 
+import { OrderTypes } from '../constants'
 import { TradeFormValues } from '../hooks'
 import { isFullClose } from '../utils'
 
@@ -30,6 +34,19 @@ function useErrorMessages() {
     liquidityImbalance: intl.formatMessage({
       defaultMessage: 'Position opens or increases are not allowed until liquidity increases.',
     }),
+    priceMustBePositive: intl.formatMessage({ defaultMessage: 'Price must be greater than 0' }),
+    stopAboveIndex: intl.formatMessage({ defaultMessage: 'Stop price above index price' }),
+    stopBelowIndex: intl.formatMessage({ defaultMessage: 'Stop price below index price' }),
+    stopBelowLiqPrice: intl.formatMessage({ defaultMessage: 'Stop price below liquidation price' }),
+    stopBelowLimit: intl.formatMessage({ defaultMessage: 'Stop price below limit price' }),
+    stopAboveLimit: intl.formatMessage({ defaultMessage: 'Stop price above limit price' }),
+    stopAboveLiqPrice: intl.formatMessage({ defaultMessage: 'Stop price above liquidation price' }),
+    takeProfitAboveIndex: intl.formatMessage({ defaultMessage: 'Take profit price above index price' }),
+    takeProfitAboveLimit: intl.formatMessage({ defaultMessage: 'Take profit price above limit price' }),
+    takeProfitBelowIndex: intl.formatMessage({ defaultMessage: 'Take profit price below index price' }),
+    takeProfitBelowLimit: intl.formatMessage({ defaultMessage: 'Take profit price below limit price' }),
+    amountExceedsPosition: intl.formatMessage({ defaultMessage: 'Amount exceeds position size' }),
+    sizeMustBePositive: intl.formatMessage({ defaultMessage: 'Amount must be greater than 0' }),
   }
 }
 
@@ -310,4 +327,159 @@ export function useCloseCollateralValidator({
   }, [nextPosition, currentCollateral, minCollateral, requiredMaintenance, copy])
 
   return { max: maxValidator, required: isRequiredValidator }
+}
+
+export const useLimitPriceValidators = ({ orderType }: { orderType: OrderTypes }) => {
+  const copy = useErrorMessages()
+  const isRequiredValidator = useIsRequiredValidator()
+
+  const minValidator = useMemo(() => {
+    return (value: string) => {
+      const inputValue = Big6Math.fromFloatString(value)
+      if (inputValue <= 0n) {
+        return copy.priceMustBePositive
+      }
+
+      return true
+    }
+  }, [copy.priceMustBePositive])
+
+  return {
+    min: minValidator,
+    required:
+      orderType === OrderTypes.limit
+        ? isRequiredValidator
+        : () => {
+            return true
+          },
+  }
+}
+
+export const useStopLossValidator = ({
+  orderDirection,
+  latestPrice,
+  isLimit,
+  limitPrice = 0n,
+  liquidationPrice,
+}: {
+  orderDirection: PositionSide2.long | PositionSide2.short
+  latestPrice: bigint
+  isLimit: boolean
+  limitPrice?: bigint
+  liquidationPrice: bigint
+}) => {
+  const copy = useErrorMessages()
+  const livePrices = useChainLivePrices2()
+  const { selectedMarket } = useMarketContext()
+  const indexPrice = livePrices[selectedMarket] ?? latestPrice ?? 0n
+  const price = isLimit ? limitPrice : indexPrice
+
+  const minValidator = useMemo(() => {
+    return (value: string) => {
+      const inputValue = Big6Math.fromFloatString(value)
+
+      if (orderDirection === PositionSide2.long && inputValue > price) {
+        if (isLimit) {
+          return copy.stopAboveLimit
+        }
+        return copy.stopAboveIndex
+      }
+
+      if (orderDirection === PositionSide2.short && inputValue < price) {
+        if (isLimit) {
+          return copy.stopBelowLimit
+        }
+        return copy.stopBelowIndex
+      }
+
+      if (orderDirection === PositionSide2.long && inputValue < liquidationPrice) {
+        return copy.stopBelowLiqPrice
+      }
+
+      if (orderDirection === PositionSide2.short && inputValue > liquidationPrice) {
+        return copy.stopAboveLiqPrice
+      }
+
+      if (inputValue <= 0n) {
+        return copy.priceMustBePositive
+      }
+
+      return true
+    }
+  }, [copy, orderDirection, price, liquidationPrice, isLimit])
+
+  return {
+    min: minValidator,
+  }
+}
+
+export const useTakeProfitValidators = ({
+  orderDirection,
+  latestPrice,
+  isLimit,
+  limitPrice = 0n,
+}: {
+  orderDirection: PositionSide2.long | PositionSide2.short
+  latestPrice: bigint
+  isLimit: boolean
+  limitPrice?: bigint
+}) => {
+  const copy = useErrorMessages()
+  const livePrices = useChainLivePrices2()
+  const { selectedMarket } = useMarketContext()
+  const indexPrice = livePrices[selectedMarket] ?? latestPrice ?? 0n
+  const price = isLimit ? limitPrice : indexPrice
+
+  const minValidator = useMemo(() => {
+    return (value: string) => {
+      const inputValue = Big6Math.fromFloatString(value)
+
+      if (orderDirection === PositionSide2.short && inputValue > price) {
+        if (isLimit) {
+          return copy.takeProfitAboveLimit
+        }
+        return copy.takeProfitAboveIndex
+      }
+
+      if (orderDirection === PositionSide2.long && inputValue < price) {
+        if (isLimit) {
+          return copy.takeProfitBelowLimit
+        }
+        return copy.takeProfitBelowIndex
+      }
+
+      if (inputValue <= 0n) {
+        return copy.priceMustBePositive
+      }
+
+      return true
+    }
+  }, [copy, price, orderDirection, isLimit])
+
+  return {
+    min: minValidator,
+  }
+}
+
+export const useTriggerAmountValidators = ({ position }: { position: bigint }) => {
+  const isRequiredValidator = useIsRequiredValidator()
+  const copy = useErrorMessages()
+
+  const maxValidator = useMemo(() => {
+    return (value: string) => {
+      const inputValue = Big6Math.fromFloatString(value)
+      if (inputValue > position) {
+        return copy.amountExceedsPosition
+      }
+      if (inputValue <= 0) {
+        return copy.sizeMustBePositive
+      }
+      return true
+    }
+  }, [position, copy])
+
+  return {
+    required: isRequiredValidator,
+    max: maxValidator,
+  }
 }

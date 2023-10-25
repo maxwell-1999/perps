@@ -1,3 +1,4 @@
+import { WarningTwoIcon } from '@chakra-ui/icons'
 import { Flex, FlexProps, IconButton, Text } from '@chakra-ui/react'
 import CloseX from '@public/icons/close-x.svg'
 import Link from 'next/link'
@@ -118,6 +119,23 @@ export const VpnDetectedMessage = (props: FlexProps) => {
         <Text fontSize="12px" color={colors.brand.whiteAlpha[50]}>
           {copy.vpnDetectedMessage(TosLink, ClosingPositions)}
         </Text>
+      </Flex>
+    </Container>
+  )
+}
+
+export const TriggerBetaMessage = (props: FlexProps) => {
+  const copy = useTradeFormCopy()
+
+  return (
+    <Container borderColor="white" {...props}>
+      <Flex flexDirection="column" p={2} gap={2}>
+        <Flex alignItems="center">
+          <WarningTwoIcon color="yellow.400" mr={2} />
+          <Text fontSize="12px" color={colors.brand.whiteAlpha[80]}>
+            {copy.triggerBetaMessage}
+          </Text>
+        </Flex>
       </Flex>
     </Container>
   )

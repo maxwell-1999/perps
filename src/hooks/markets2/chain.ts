@@ -111,7 +111,7 @@ export type MarketSnapshot = ChainMarketSnapshot & {
   isSocialized: boolean
 }
 export type UserMarketSnapshot = ChainUserMarketSnapshot & {
-  pre: ChainUserMarketSnapshot
+  pre: Omit<ChainUserMarketSnapshot, 'priceUpdate'>
   side: PositionSide2
   nextSide: PositionSide2
   status: PositionStatus
@@ -123,6 +123,7 @@ export type UserMarketSnapshot = ChainUserMarketSnapshot & {
   nextLeverage: bigint
   notional: bigint
   nextNotional: bigint
+  priceUpdate: Address
 }
 export type MarketSnapshots = NonNullable<Awaited<ReturnType<typeof useMarketSnapshots2>>['data']>
 
@@ -183,6 +184,7 @@ export const useMarketSnapshots2 = (addressOverride?: Address) => {
         const nextSide = getSideFromPosition(nextPosition)
         const magnitude = side === PositionSide2.none ? 0n : latestPosition[side]
         const nextMagnitude = nextSide === PositionSide2.none ? 0n : nextPosition?.[nextSide] ?? 0n
+        const priceUpdate = snapshot?.priceUpdate
         const hasVersionError =
           !snapshot.versions[0].valid &&
           (pre.nextPosition.timestamp < marketSnapshots[snapshot.asset].pre.latestOracleVersion.timestamp ||
@@ -192,7 +194,13 @@ export const useMarketSnapshots2 = (addressOverride?: Address) => {
           pre,
           side,
           nextSide,
-          status: getStatusForSnapshot(magnitude, nextMagnitude, snapshot.local.collateral, hasVersionError),
+          status: getStatusForSnapshot(
+            magnitude,
+            nextMagnitude,
+            snapshot.local.collateral,
+            hasVersionError,
+            priceUpdate,
+          ),
           magnitude,
           nextMagnitude,
           maintenance: !Big6Math.isZero(magnitude)
@@ -310,12 +318,13 @@ const fetchMarketSnapshotsAfterSettle = async (
       })
       .filter(notEmpty),
     user: lensRes.postUpdate.marketAccountSnapshots
-      .map((s) => {
+      .map((s, i) => {
         const asset = addressToAsset2(getAddress(s.market))
         if (!asset) return
         return {
           ...s,
           asset,
+          priceUpdate: lensRes.updateStatus[i],
         }
       })
       .filter(notEmpty),

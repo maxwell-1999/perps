@@ -7,6 +7,7 @@ export enum FormState {
   modify = 'modify',
   withdraw = 'withdraw',
   add = 'add',
+  error = 'error',
 }
 
 const TradeFormOverlayContext = createContext({

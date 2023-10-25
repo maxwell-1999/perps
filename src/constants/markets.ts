@@ -45,6 +45,7 @@ export enum PositionStatus {
   pricing = 'pricing',
   resolved = 'noValue',
   failed = 'failed',
+  syncError = 'syncError',
 }
 
 export type AssetMetadata = {
@@ -233,4 +234,9 @@ export const addressToAsset2 = (address: Address) => {
       }
     }
   }
+}
+
+export enum TriggerComparison {
+  lte = 'lte',
+  gte = 'gte',
 }

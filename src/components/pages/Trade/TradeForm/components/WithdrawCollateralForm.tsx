@@ -55,6 +55,10 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
       [FormNames.leverage]: Big6Math.toFloatString(nextLeverage ?? 0n),
+      [FormNames.limitPrice]: '',
+      [FormNames.limitPricePercent]: '',
+      [FormNames.stopLoss]: '',
+      [FormNames.takeProfit]: '',
     },
   })
   const amount = watch(FormNames.amount)
@@ -72,6 +76,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
     chainId,
     positionStatus: position.status,
     direction: isMaker ? PositionSide2.maker : orderDirection,
+    latestPrice: product.global.latestPrice,
   })
 
   // Setup values based on variant

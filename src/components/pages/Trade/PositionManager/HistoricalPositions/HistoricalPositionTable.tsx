@@ -103,7 +103,7 @@ const HistoricalPositionsTableRow = ({
   const copy = usePositionManagerCopy()
   const { green, red, borderColor, alpha5, alpha20, alpha50 } = useStyles()
   const market = AssetMetadata[row.asset]
-  const fees = row.keeperFees + row.positionFees + row.liquidationFee + row.interfaceFees
+  const fees = row.keeperFees + row.positionFees + row.liquidationFee + row.interfaceFees + row.orderFees
   // Taker position fees are factored into avg entry price
   const displayedFees = row.side === 'maker' ? fees : fees - row.priceImpactFees
   const pnl = row.accumulated.value - fees

@@ -19,6 +19,13 @@ type LeverageDetails = {
   difference: bigint
 }
 
+export type TriggerOrderDetails = {
+  size: bigint
+  limitPrice: bigint
+  stopLoss: bigint
+  takeProfit: bigint
+}
+
 export type Adjustment = {
   collateral: CollateralDetails
   position: PositionDetails
@@ -27,4 +34,5 @@ export type Adjustment = {
   approvalAmount: bigint
   fullClose: boolean
   requiresTwoStep: boolean
+  triggerOrder: TriggerOrderDetails
 }

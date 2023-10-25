@@ -4,7 +4,7 @@ import React from 'react'
 
 import { TooltipIcon, TooltipText } from '@/components/design-system/Tooltip'
 import { AssetIconWithText } from '@/components/shared/components'
-import { PositionSide2 } from '@/constants/markets'
+import { PositionSide2, PositionStatus } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { useActivePositionMarketPnls } from '@/hooks/markets2'
@@ -75,6 +75,7 @@ function CurrentPosition() {
   const closingOrFailed = isClosing || isFailedClose(positionDetails)
 
   const statusLabel = liquidated ? copy.liquidated : copy[status]
+  const isSyncError = status === PositionStatus.syncError && !liquidated
   const exposure = hasPosition ? `${makerExposure} ${exposureSide}` : noValue
   const displayDirection = hasPosition && direction !== PositionSide2.none ? direction : noValue
 
@@ -90,7 +91,12 @@ function CurrentPosition() {
               textProps={{ fontSize: { base: '14px', lg: '15px' }, textTransform: 'capitalize' }}
             />
             <Flex alignItems="center" gap="12px">
-              <Text fontSize="15px">{statusLabel}</Text>
+              <Flex alignItems="center">
+                <Text fontSize="15px" mr={1}>
+                  {statusLabel}
+                </Text>
+                {isSyncError && <TooltipIcon tooltipText={copy.syncErrorMessage} />}
+              </Flex>
               <StatusLight color={statusColor} glow={Boolean(hasPosition)} />
             </Flex>
           </ActivePositionHeader>

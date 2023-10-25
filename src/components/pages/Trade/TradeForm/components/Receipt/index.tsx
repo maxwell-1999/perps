@@ -33,6 +33,8 @@ interface ReceiptProps {
   showCollateral?: boolean
   showLeverage?: boolean
   leverage?: number
+  isLimit?: boolean
+  limitPrice?: string
 }
 
 export function TradeReceipt({
@@ -42,6 +44,8 @@ export function TradeReceipt({
   showCollateral,
   showLeverage,
   leverage,
+  isLimit,
+  limitPrice,
   ...props
 }: ReceiptProps & FlexProps) {
   const copy = useReceiptCopy()
@@ -52,8 +56,10 @@ export function TradeReceipt({
 
   const {
     parameter: { settlementFee },
-    global: { latestPrice: price },
+    global: { latestPrice },
   } = product
+
+  const price = isLimit && limitPrice ? Big6Math.fromFloatString(limitPrice) : latestPrice
 
   const tradingFee = calcTradeFee({
     positionDelta: positionDelta.positionDelta,
@@ -84,6 +90,7 @@ export function TradeReceipt({
     marketSnapshot: product,
     collateral: newCollateral,
     position: newPosition,
+    limitPrice: isLimit ? price : undefined,
   })
 
   const hideLiquidationPrice = (leverage && leverage < 1) || !newPosition
@@ -148,7 +155,10 @@ export function TradeReceipt({
           />
         </>
       )}
-      {!isMaker && (
+      {!isMaker && isLimit && (
+        <DataRow label={copy.estEntry} value={formatBig6USDPrice(Big6Math.fromFloatString(limitPrice ?? '0'))} />
+      )}
+      {!isMaker && !isLimit && (
         <EstimatedEntryRows
           positionDelta={positionDelta.positionDelta}
           totalTradingFee={tradingFee.total}
@@ -181,8 +191,7 @@ export function TradeReceipt({
           />
         </>
       )}
-
-      {isMaker ? (
+      {isMaker && (
         <DataRow
           label={copy.tradingFee}
           value={
@@ -213,7 +222,8 @@ export function TradeReceipt({
             </TooltipText>
           }
         />
-      ) : (
+      )}
+      {!isMaker && !isLimit && (
         <DataRow
           label={copy.tradingFee}
           value={

@@ -5,6 +5,8 @@ import { MarketSnapshot } from '@/hooks/markets2'
 import { Big6Math } from '@/utils/big6Utils'
 import { calcLeverage, calcNotional, calcTotalPositionChangeFee } from '@/utils/positionUtils'
 
+import { OrderTypes } from './constants'
+
 export const calcMaintenance = (price: bigint, position: bigint, maintenanceRate: bigint) => {
   if (Big6Math.isZero(position)) return 0n
   return Big6Math.mul(Big6Math.mul(Big6Math.abs(price), position), maintenanceRate)
@@ -82,6 +84,8 @@ export const leverageFromAmountAndCollateral = ({
   chainId,
   positionStatus,
   direction,
+  orderType,
+  limitPrice,
 }: {
   currentAmount: bigint
   amount: string
@@ -90,12 +94,13 @@ export const leverageFromAmountAndCollateral = ({
   chainId: SupportedChainId
   positionStatus: PositionStatus
   direction: PositionSide2
+  orderType?: OrderTypes
+  limitPrice?: string
 }) => {
   const parsedCollateralAmount = Big6Math.fromFloatString(collateral)
   if (Big6Math.isZero(parsedCollateralAmount)) {
     return '0'
   }
-
   const {
     global: { latestPrice: price },
   } = marketSnapshot
@@ -107,8 +112,10 @@ export const leverageFromAmountAndCollateral = ({
     positionDelta: parsedPositionAmount - currentAmount,
     direction,
   })
+  const priceToCalculateLeverage =
+    orderType === OrderTypes.limit && limitPrice ? Big6Math.fromFloatString(limitPrice) : price
   const newLeverage = calcLeverage(
-    price,
+    priceToCalculateLeverage,
     parsedPositionAmount,
     parsedCollateralAmount > fees.total ? parsedCollateralAmount - fees.total : parsedCollateralAmount,
   )
@@ -123,6 +130,8 @@ export const positionFromCollateralAndLeverage = ({
   chainId,
   positionStatus,
   direction,
+  orderType,
+  limitPrice,
 }: {
   currentAmount: bigint
   collateral: string
@@ -131,15 +140,22 @@ export const positionFromCollateralAndLeverage = ({
   chainId: SupportedChainId
   positionStatus: PositionStatus
   direction: PositionSide2
+  orderType?: OrderTypes
+  limitPrice?: string
 }) => {
   const {
     global: { latestPrice: price },
   } = marketSnapshot
   if (Big6Math.isZero(price)) return ''
 
+  const priceToCalculatePosition =
+    orderType === OrderTypes.limit && limitPrice ? Big6Math.fromFloatString(limitPrice) : price
+
   const parsedCollateralAmount = Big6Math.fromFloatString(collateral)
   const parsedLeverage = Big6Math.fromFloatString(leverage)
-  let newPosition = Big6Math.abs(Big6Math.div(Big6Math.mul(parsedLeverage, parsedCollateralAmount), price))
+  let newPosition = Big6Math.abs(
+    Big6Math.div(Big6Math.mul(parsedLeverage, parsedCollateralAmount), priceToCalculatePosition),
+  )
 
   // Iteratively calculate position size to approach ideal position size for given leverage and fees
   for (let i = 0; i < 10; i++) {
@@ -151,7 +167,9 @@ export const positionFromCollateralAndLeverage = ({
       direction,
     })
 
-    newPosition = Big6Math.abs(Big6Math.div(Big6Math.mul(parsedLeverage, parsedCollateralAmount - fees.total), price))
+    newPosition = Big6Math.abs(
+      Big6Math.div(Big6Math.mul(parsedLeverage, parsedCollateralAmount - fees.total), priceToCalculatePosition),
+    )
   }
 
   return Big6Math.toFloatString(newPosition)
@@ -208,11 +226,19 @@ export const formatInitialInputs = ({
       collateral: '',
       amount: '',
       leverage: '1',
+      limitPrice: '',
+      limitPricePercent: '',
+      stopLoss: '',
+      takeProfit: '',
     }
   return {
     collateral: userCollateral ? (userCollateral === 0n ? '0' : Big6Math.toFloatString(userCollateral)) : '',
     amount: amount ? (amount === 0n ? '0' : Big6Math.toFloatString(amount)) : isFailedClose ? '0' : '',
     leverage: calculateInitialLeverage({ isNewPosition, amount, currentCollateralAmount: userCollateral, price }),
+    limitPrice: Big6Math.toFloatString(price ?? 0n),
+    limitPricePercent: '0',
+    stopLoss: '0',
+    takeProfit: '0',
   }
 }
 

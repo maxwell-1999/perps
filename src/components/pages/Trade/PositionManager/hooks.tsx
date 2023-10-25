@@ -1,14 +1,24 @@
 import { useColorModeValue, useTheme } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
+import { Address, getAddress } from 'viem'
 
-import { AssetMetadata, PositionSide2, PositionStatus } from '@/constants/markets'
+import {
+  AssetMetadata,
+  PositionSide2,
+  PositionStatus,
+  SupportedAsset,
+  TriggerComparison,
+  addressToAsset2,
+} from '@/constants/markets'
 import { PositionsTab, useMarketContext } from '@/contexts/marketContext'
 import {
   LivePrices,
   MarketSnapshot,
+  OpenOrder,
   UserMarketSnapshot,
   useActivePositionMarketPnls,
   useMarket7dData,
+  useOpenOrders,
 } from '@/hooks/markets2'
 import { Big6Math, formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
 import { calcFundingRates, calcMakerExposure, calcMakerStats2 } from '@/utils/positionUtils'
@@ -137,6 +147,22 @@ export const usePositionManagerCopy = () => {
     realized: intl.formatMessage({ defaultMessage: 'Realized' }),
     unrealized: intl.formatMessage({ defaultMessage: 'Unrealized' }),
     totalPNL: intl.formatMessage({ defaultMessage: 'Total P/L' }),
+    triggerPrice: intl.formatMessage({ defaultMessage: 'Trigger Price' }),
+    maxFee: intl.formatMessage({ defaultMessage: 'Max Exec Fee' }),
+    cancelled: intl.formatMessage({ defaultMessage: 'Cancelled' }),
+    limitOpen: intl.formatMessage({ defaultMessage: 'Limit Open' }),
+    limitClose: intl.formatMessage({ defaultMessage: 'Limit Close' }),
+    stopLoss: intl.formatMessage({ defaultMessage: 'Stop Loss' }),
+    takeProfit: intl.formatMessage({ defaultMessage: 'Take Profit' }),
+    placed: intl.formatMessage({ defaultMessage: 'Placed' }),
+    invalid: intl.formatMessage({ defaultMessage: 'Invalid' }),
+    invalidOrderMsg: intl.formatMessage({
+      defaultMessage: 'Close amount exceeds position size.',
+    }),
+    syncError: intl.formatMessage({ defaultMessage: 'Sync Error' }),
+    syncErrorMessage: intl.formatMessage({
+      defaultMessage: 'Error syncing latest data. Your position is not impacted. Try refreshing the page.',
+    }),
   }
 }
 
@@ -207,6 +233,8 @@ export const useOpenPositionTableData = () => {
         symbol: position.symbol,
         isClosed: position.details.status === PositionStatus.closed,
         isClosing: position.details.status === PositionStatus.closing,
+        triggerPrice: noValue,
+        projectedFees: noValue,
         ...getFormattedPositionDetails({
           marketSnapshot: snapshots2?.market[position.asset],
           userMarketSnapshot: position.details,
@@ -221,6 +249,67 @@ export const useOpenPositionTableData = () => {
     positions,
     status,
   }
+}
+
+export type FormattedOpenOrder = {
+  status: string
+  side: PositionSide2
+  orderDelta: string
+  orderDeltaNotional: string
+  type: TriggerComparison
+  triggerPrice: string
+  triggerPriceUnformatted: bigint
+  market: SupportedAsset
+  transactionHash: string
+  blockTimestamp: string
+  projectedFee: string
+  marketAddress: Address
+  nonce: bigint
+  details: OpenOrder
+}
+
+const orderIntToPositionSide = (orderSide: number) => {
+  switch (orderSide) {
+    case 0:
+      return PositionSide2.maker
+    case 1:
+      return PositionSide2.long
+    case 2:
+      PositionSide2.short
+    default:
+      return PositionSide2.none
+  }
+}
+
+export const useOpenOrderTableData = (): FormattedOpenOrder[] => {
+  const { isMaker } = useMarketContext()
+  const { data: openOrders } = useOpenOrders(isMaker)
+  const orders = openOrders?.pages
+    .map((page) => page?.openOrders || [])
+    .flat()
+    .map((order) => {
+      const market = addressToAsset2(getAddress(order.market)) as SupportedAsset
+      const orderSize = BigInt(order.order_delta)
+      const deltaNotional = Big6Math.mul(orderSize, BigInt(order.order_price))
+
+      return {
+        status: 'open',
+        side: orderIntToPositionSide(order.order_side),
+        orderDelta: Big6Math.toFloatString(orderSize),
+        orderDeltaNotional: formatBig6USDPrice(deltaNotional),
+        type: order.order_comparison === -1 ? TriggerComparison.lte : TriggerComparison.gte,
+        triggerPrice: formatBig6USDPrice(BigInt(order.order_price)),
+        triggerPriceUnformatted: BigInt(order.order_price),
+        market,
+        marketAddress: getAddress(order.market),
+        nonce: BigInt(order.nonce),
+        transactionHash: order.transactionHash,
+        blockTimestamp: order.blockTimestamp,
+        projectedFee: formatBig6USDPrice(BigInt(order.order_fee)),
+        details: order,
+      }
+    })
+  return orders || []
 }
 
 export const usePnl2 = (

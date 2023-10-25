@@ -4,16 +4,16 @@ import { UseFormSetValue } from 'react-hook-form'
 import { useIntl } from 'react-intl'
 
 import { SocializationNotice } from '@/components/shared/components'
-import { PositionSide2, PositionStatus } from '@/constants/markets'
+import { PositionSide2, PositionStatus, TriggerComparison } from '@/constants/markets'
 import { SupportedChainId } from '@/constants/network'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState } from '@/contexts/tradeFormContext'
 import { MarketSnapshot } from '@/hooks/markets2'
 import { Big6Math } from '@/utils/big6Utils'
-import { isNumbersOnly } from '@/utils/formUtils'
+import { isNumbersOnly, isNumbersOnlyWithNegative } from '@/utils/formUtils'
 import { usePrevious } from '@/utils/hooks'
 
-import { FormNames } from './constants'
+import { FormNames, OrderTypes } from './constants'
 import {
   collateralFromAmountAndLeverage,
   leverageFromAmountAndCollateral,
@@ -190,6 +190,30 @@ export function useTradeFormCopy() {
       ),
     reduceYourPosition: intl.formatMessage({ defaultMessage: 'Reducing your position will help balance the market.' }),
     closeFailure: intl.formatMessage({ defaultMessage: 'Your position failed to close. Please try again.' }),
+    limitPrice: intl.formatMessage({ defaultMessage: 'Limit Price' }),
+    percent: intl.formatMessage({ defaultMessage: '%' }),
+    price: intl.formatMessage({ defaultMessage: 'Price' }),
+    stopLoss: intl.formatMessage({ defaultMessage: 'Stop Loss' }),
+    takeProfit: intl.formatMessage({ defaultMessage: 'Take Profit' }),
+    add: intl.formatMessage({ defaultMessage: '+ Add' }),
+    clear: intl.formatMessage({ defaultMessage: 'Clear' }),
+    fromIndex: (percent: string) => intl.formatMessage({ defaultMessage: '{percent}% from index' }, { percent }),
+    position: intl.formatMessage({ defaultMessage: 'Position' }),
+    triggerPrice: intl.formatMessage({ defaultMessage: 'Trigger Price' }),
+    placeOrder: intl.formatMessage({ defaultMessage: 'Place Order' }),
+    indexPrice: intl.formatMessage({ defaultMessage: 'Index Price:' }),
+    comparisonLabels: {
+      [TriggerComparison.lte]: intl.formatMessage({ defaultMessage: 'Less than' }),
+      [TriggerComparison.gte]: intl.formatMessage({ defaultMessage: 'Greater than' }),
+    },
+    executeAsMarketOrder: intl.formatMessage({ defaultMessage: 'Your order will execute as a market order.' }),
+    liquidationPrice: intl.formatMessage({ defaultMessage: 'Liquidation Price' }),
+    triggerBetaMessage: intl.formatMessage({
+      defaultMessage: 'Limit and SL/TP orders are currently in beta. Order execution is not guaranteed.',
+    }),
+    pythError: intl.formatMessage({
+      defaultMessage: 'Error retrieving price from Pyth.',
+    }),
   }
 }
 
@@ -223,18 +247,30 @@ export function useReceiptCopy() {
   }
 }
 
-export type TradeFormValues = { amount: string; collateral: string; leverage: string }
+export type TradeFormValues = {
+  amount: string
+  collateral: string
+  leverage: string
+  limitPrice: string
+  limitPricePercent: string
+  stopLoss: string
+  takeProfit: string
+}
+
 interface OnChangeHandlersArgs {
   setValue: UseFormSetValue<TradeFormValues>
   leverage: string
   collateral: string
   amount: string
+  limitPrice?: string
   leverageFixed: boolean
   currentPosition: bigint
+  latestPrice: bigint
   marketSnapshot: MarketSnapshot
   chainId: SupportedChainId
   positionStatus: PositionStatus
   direction: PositionSide2
+  orderType?: OrderTypes
 }
 
 const setArgs = { shouldValidate: true, shouldDirty: true }
@@ -244,12 +280,15 @@ export const useOnChangeHandlers = ({
   leverage,
   collateral,
   amount,
+  limitPrice,
+  latestPrice,
   leverageFixed,
   currentPosition,
   marketSnapshot,
   chainId,
   positionStatus,
   direction,
+  orderType,
 }: OnChangeHandlersArgs) => {
   const onChangeAmount = useCallback(
     (newAmount: string) => {
@@ -277,6 +316,8 @@ export const useOnChangeHandlers = ({
           chainId,
           positionStatus,
           direction,
+          orderType,
+          limitPrice,
         })
         setValue(FormNames.leverage, newLeverage, setArgs)
       }
@@ -291,6 +332,8 @@ export const useOnChangeHandlers = ({
       positionStatus,
       direction,
       collateral,
+      orderType,
+      limitPrice,
     ],
   )
 
@@ -308,10 +351,12 @@ export const useOnChangeHandlers = ({
         chainId,
         positionStatus,
         direction,
+        orderType,
+        limitPrice,
       })
       setValue(FormNames.amount, newPosition, setArgs)
     },
-    [chainId, collateral, currentPosition, direction, marketSnapshot, positionStatus, setValue],
+    [chainId, collateral, currentPosition, direction, marketSnapshot, positionStatus, setValue, orderType, limitPrice],
   )
 
   const onChangeCollateral = useCallback(
@@ -340,14 +385,132 @@ export const useOnChangeHandlers = ({
           chainId,
           positionStatus,
           direction,
+          limitPrice,
+          orderType,
         })
         setValue(FormNames.leverage, newLeverage, setArgs)
       }
     },
-    [setValue, leverageFixed, currentPosition, leverage, marketSnapshot, chainId, positionStatus, direction, amount],
+    [
+      setValue,
+      leverageFixed,
+      currentPosition,
+      leverage,
+      marketSnapshot,
+      chainId,
+      positionStatus,
+      direction,
+      amount,
+      limitPrice,
+      orderType,
+    ],
   )
 
-  return { onChangeAmount, onChangeLeverage, onChangeCollateral }
+  const onChangeLimitPrice = useCallback(
+    (newLimitPrice: string) => {
+      if (!isNumbersOnly(newLimitPrice)) return
+      const validatedLimitPrice = Big6Math.max6Decimals(newLimitPrice)
+      setValue(FormNames.limitPrice, validatedLimitPrice, setArgs)
+
+      const limitBigInt = Big6Math.fromFloatString(validatedLimitPrice)
+      const difference = Big6Math.sub(limitBigInt, latestPrice)
+      const percentChangeBigInt = Big6Math.div(Big6Math.mul(difference, Big6Math.BASE * 100n), latestPrice)
+      const percentChangeString = Big6Math.toFloatString(percentChangeBigInt)
+      setValue(FormNames.limitPricePercent, percentChangeString, setArgs)
+
+      const newLeverage = leverageFromAmountAndCollateral({
+        currentAmount: currentPosition,
+        amount,
+        collateral,
+        marketSnapshot,
+        chainId,
+        positionStatus,
+        direction,
+        orderType,
+        limitPrice: validatedLimitPrice,
+      })
+      setValue(FormNames.leverage, newLeverage, setArgs)
+    },
+    [
+      setValue,
+      latestPrice,
+      chainId,
+      collateral,
+      currentPosition,
+      direction,
+      amount,
+      marketSnapshot,
+      orderType,
+      positionStatus,
+    ],
+  )
+
+  const onChangeLimitPricePercent = useCallback(
+    (newLimitPricePercent: string) => {
+      if (!isNumbersOnlyWithNegative(newLimitPricePercent)) return
+      const validatedLimitPricePercent = Big6Math.max6Decimals(newLimitPricePercent)
+      setValue(FormNames.limitPricePercent, validatedLimitPricePercent, setArgs)
+
+      const limitPricePercentBigInt = Big6Math.fromFloatString(validatedLimitPricePercent)
+      const percentIncrease = Big6Math.div(Big6Math.mul(latestPrice, limitPricePercentBigInt), Big6Math.BASE * 100n)
+      const newLimitBigInt = Big6Math.add(latestPrice, percentIncrease)
+      const newLimitString = Big6Math.toFloatString(newLimitBigInt)
+
+      setValue(FormNames.limitPrice, newLimitString, setArgs)
+      const newLeverage = leverageFromAmountAndCollateral({
+        currentAmount: currentPosition,
+        amount,
+        collateral,
+        marketSnapshot,
+        chainId,
+        positionStatus,
+        direction,
+        orderType,
+        limitPrice: newLimitString,
+      })
+      setValue(FormNames.leverage, newLeverage, setArgs)
+    },
+    [
+      setValue,
+      latestPrice,
+      chainId,
+      collateral,
+      currentPosition,
+      direction,
+      amount,
+      marketSnapshot,
+      orderType,
+      positionStatus,
+    ],
+  )
+
+  const onChangeStopLoss = useCallback(
+    (newStopLoss: string) => {
+      if (!isNumbersOnly(newStopLoss)) return
+      const validatedStopLoss = Big6Math.max6Decimals(newStopLoss)
+      setValue(FormNames.stopLoss, validatedStopLoss, setArgs)
+    },
+    [setValue],
+  )
+
+  const onChangeTakeProfit = useCallback(
+    (newTakeProfit: string) => {
+      if (!isNumbersOnly(newTakeProfit)) return
+      const validatedTakeProfit = Big6Math.max6Decimals(newTakeProfit)
+      setValue(FormNames.takeProfit, validatedTakeProfit, setArgs)
+    },
+    [setValue],
+  )
+
+  return {
+    onChangeAmount,
+    onChangeLeverage,
+    onChangeCollateral,
+    onChangeLimitPrice,
+    onChangeLimitPricePercent,
+    onChangeStopLoss,
+    onChangeTakeProfit,
+  }
 }
 
 export const useSocializationAlert = () => {

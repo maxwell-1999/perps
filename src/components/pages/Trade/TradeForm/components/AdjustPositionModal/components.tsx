@@ -6,11 +6,13 @@ import { FormattedBig6, FormattedBig6USDPrice } from '@/components/shared/compon
 import { AssetMetadata, PositionSide2, SupportedAsset } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
 import { MarketSnapshot } from '@/hooks/markets2'
-import { Big6Math, formatBig6Percent } from '@/utils/big6Utils'
+import { Big6Math, formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
 import { calcEstExecutionPrice } from '@/utils/positionUtils'
 
 import colors from '@ds/theme/colors'
 
+import { OrderTypes } from '../../constants'
+import { TriggerOrderDetails } from './constants'
 import { useAdjustmentModalCopy } from './hooks'
 
 const PositionValueDisplay = ({
@@ -87,6 +89,8 @@ interface PositionInfoProps {
   interfaceFee: bigint
   tradeFee: bigint
   settlementFee: bigint
+  triggerOrder: TriggerOrderDetails
+  orderType?: OrderTypes
 }
 
 export const PositionInfo = memo(
@@ -104,6 +108,8 @@ export const PositionInfo = memo(
     interfaceFee,
     tradeFee,
     settlementFee,
+    triggerOrder,
+    orderType,
   }: PositionInfoProps) {
     const copy = useAdjustmentModalCopy()
     const { isMaker, orderDirection } = useMarketContext()
@@ -113,8 +119,10 @@ export const PositionInfo = memo(
       parameter: { positionFee },
     } = market
 
+    const { stopLoss, takeProfit, limitPrice, size: triggerOrderSize } = triggerOrder
     const previousNotional = Big6Math.mul(prevPosition, Big6Math.abs(price))
-    const newNotional = Big6Math.mul(newPosition, Big6Math.abs(price))
+    const isLimit = orderType === OrderTypes.limit
+    const newNotional = Big6Math.mul(newPosition, Big6Math.abs(isLimit ? limitPrice : price))
     const { quoteCurrency } = AssetMetadata[asset]
     const estExecutionPrice =
       positionDelta && !Big6Math.isZero(positionDelta)
@@ -127,8 +135,26 @@ export const PositionInfo = memo(
           })
         : { total: price, priceImpact: 0n, nonPriceImpactFee: 0n, priceImpactPercentage: 0n }
 
+    const isTriggerOrder = orderType === OrderTypes.stopLoss || orderType === OrderTypes.takeProfit
+    const showDivider = (!Big6Math.isZero(stopLoss) || !Big6Math.isZero(takeProfit)) && !isTriggerOrder
+
     return (
       <ModalDetailContainer>
+        {orderType === OrderTypes.limit && !Big6Math.isZero(limitPrice) && (
+          <PositionValueDisplay title={copy.limitPrice} newValue={formatBig6USDPrice(limitPrice)} />
+        )}
+        {orderType === OrderTypes.stopLoss && (
+          <PositionValueDisplay title={copy.stopLoss} newValue={formatBig6USDPrice(stopLoss)} />
+        )}
+        {orderType === OrderTypes.takeProfit && (
+          <PositionValueDisplay title={copy.takeProfit} newValue={formatBig6USDPrice(takeProfit)} />
+        )}
+        {isTriggerOrder && (
+          <PositionValueDisplay
+            title={copy.change}
+            newValue={`${Big6Math.toFloatString(-triggerOrderSize)} ${asset.toUpperCase()}`}
+          />
+        )}
         <PositionValueDisplay
           title={copy.side}
           newValue={
@@ -141,19 +167,21 @@ export const PositionInfo = memo(
         />
         <PositionValueDisplay
           title={copy.positionSizeAsset(asset)}
-          newValue={newPosition}
+          newValue={isTriggerOrder ? newPosition - triggerOrderSize : newPosition}
           prevValue={prevPosition}
           asset={asset}
         />
-        <PositionValueDisplay
-          title={copy.positionSizeAsset(quoteCurrency)}
-          newValue={newNotional}
-          prevValue={previousNotional}
-          usd
-        />
+        {!isTriggerOrder && (
+          <PositionValueDisplay
+            title={copy.positionSizeAsset(quoteCurrency)}
+            newValue={newNotional}
+            prevValue={previousNotional}
+            usd
+          />
+        )}
         <PositionValueDisplay title={copy.collateral} newValue={newCollateral} prevValue={prevCollateral} usd />
         <PositionValueDisplay title={copy.leverage} newValue={newLeverage} prevValue={prevLeverage} leverage isLast />
-        {positionDelta !== undefined && !isMaker && (
+        {positionDelta !== undefined && !isMaker && !isTriggerOrder && (
           <>
             <PositionValueDisplay
               title={copy.priceImpact}
@@ -169,6 +197,13 @@ export const PositionInfo = memo(
         )}
         {positionDelta !== undefined && isMaker && (
           <PositionValueDisplay title={copy.fee} newValue={tradeFee + interfaceFee + settlementFee} usd />
+        )}
+        {showDivider && <Flex width="100%" height="1px" bg={colors.brand.whiteAlpha[30]} my={2} />}
+        {!Big6Math.isZero(stopLoss) && !isTriggerOrder && (
+          <PositionValueDisplay title={copy.stopLoss} newValue={formatBig6USDPrice(stopLoss)} />
+        )}
+        {!Big6Math.isZero(takeProfit) && !isTriggerOrder && (
+          <PositionValueDisplay title={copy.takeProfit} newValue={formatBig6USDPrice(takeProfit)} />
         )}
       </ModalDetailContainer>
     )

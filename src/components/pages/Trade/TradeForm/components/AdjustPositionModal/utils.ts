@@ -8,7 +8,7 @@ import { calcInterfaceFee, calcLeverage, calcTradeFee } from '@/utils/positionUt
 
 import colors from '@ds/theme/colors'
 
-import { OrderValues } from '../../constants'
+import { OrderTypes, OrderValues } from '../../constants'
 import { calcCollateralDifference, calcLeverageDifference, calcPositionDifference, needsApproval } from '../../utils'
 import { Adjustment } from './constants'
 import { ModalCopy } from './hooks'
@@ -20,6 +20,7 @@ type CreateAdjustmentArgs = {
   usdcAllowance: bigint
   chainId: SupportedChainId
   positionSide: PositionSide2
+  isTrigger: boolean
 }
 
 export const createAdjustment = ({
@@ -29,6 +30,7 @@ export const createAdjustment = ({
   chainId,
   usdcAllowance = 0n,
   positionSide,
+  isTrigger,
 }: CreateAdjustmentArgs): Adjustment => {
   const currentCollateral = position?.local.collateral ?? 0n
   const currentPositionAmount = position?.magnitude ?? 0n
@@ -43,8 +45,17 @@ export const createAdjustment = ({
   const { amount, collateral, fullClose } = orderValues
   const positionAmount = fullClose ? 0n : Big6Math.fromFloatString(amount)
   const collateralAmount = fullClose ? 0n : Big6Math.fromFloatString(collateral)
+  const triggerOrderSize = Big6Math.fromFloatString(orderValues?.triggerAmount ?? '0')
+  const limitPrice = Big6Math.fromFloatString(orderValues?.limitPrice ?? '0')
+  const stopLoss = Big6Math.fromFloatString(orderValues?.stopLoss ?? '0')
+  const takeProfit = Big6Math.fromFloatString(orderValues?.takeProfit ?? '0')
 
-  const positionDifference = calcPositionDifference(positionAmount, currentPositionAmount)
+  const positionDifference = calcPositionDifference(
+    triggerOrderSize ? triggerOrderSize : positionAmount,
+    currentPositionAmount,
+  )
+
+  const positionPostTrigger = positionAmount - triggerOrderSize
 
   const settlementFee = positionDifference !== 0n ? settlementFee_ : 0n
   const interfaceFee = calcInterfaceFee({
@@ -63,7 +74,7 @@ export const createAdjustment = ({
   const totalFees = tradeFee.total + interfaceFee.interfaceFee + settlementFee
 
   const collateralDifference = calcCollateralDifference(collateralAmount, currentCollateral)
-  const leverage = calcLeverage(price, positionAmount, collateralAmount - totalFees)
+  const leverage = calcLeverage(price, isTrigger ? positionPostTrigger : positionAmount, collateralAmount - totalFees)
   const leverageDifference = calcLeverageDifference(leverage, currentLeverage)
   const approvalInfo = needsApproval({ collateralDifference, usdcAllowance, interfaceFee: interfaceFee.interfaceFee })
 
@@ -86,6 +97,12 @@ export const createAdjustment = ({
       newLeverage: leverage,
       difference: leverageDifference,
     },
+    triggerOrder: {
+      size: triggerOrderSize,
+      limitPrice,
+      stopLoss,
+      takeProfit,
+    },
     needsApproval: approvalInfo.needsApproval,
     approvalAmount: approvalInfo.approvalAmount,
     fullClose: !!fullClose,
@@ -93,7 +110,7 @@ export const createAdjustment = ({
     requiresTwoStep: Big6Math.mul(currentMaintenance, Big6Math.fromFloatString('1.5')) > collateralAmount,
   }
 }
-
+// TODO: Rough alerting here, this will need to be re-worked to handle diff order types.
 export const getOrderToastProps = ({
   positionSide,
   variant,
@@ -104,6 +121,7 @@ export const getOrderToastProps = ({
   intl,
   market,
   isMaker,
+  orderType,
 }: {
   positionSide: PositionSide2
   variant: 'close' | 'adjust' | 'withdraw'
@@ -114,6 +132,7 @@ export const getOrderToastProps = ({
   intl: IntlShape
   market: MarketSnapshot
   isMaker: boolean
+  orderType?: OrderTypes
 }) => {
   const formattedAsset = asset.toUpperCase()
   if (variant === 'close' && adjustment.fullClose) {
@@ -133,9 +152,14 @@ export const getOrderToastProps = ({
       { defaultMessage: '{amount} {asset} at {price}' },
       { amount, asset: formattedAsset, price },
     )
+
     return {
       title: copy.orderSent,
-      action: isMaker ? copy.make : isLong ? copy.buy : copy.sell,
+      action: isMaker
+        ? copy.make
+        : isLong
+        ? copy.buyOrderType(orderType ? `${copy[orderType]} ` : '')
+        : copy.sellOrderType(orderType ? `${copy[orderType]} ` : ''),
       message,
       actionColor: isLong || isMaker ? colors.brand.green : colors.brand.red,
     }
@@ -146,7 +170,10 @@ export const getOrderToastProps = ({
   if (difference === '0') {
     // collateral change
     const { newLeverage, prevLeverage } = adjustment.leverage
-    const action = newLeverage > prevLeverage ? copy.increase : copy.decrease
+    const action =
+      newLeverage > prevLeverage
+        ? copy.increaseOrderType(orderType ? `${copy[orderType]} ` : '')
+        : copy.decreaseOrderType(orderType ? `${copy[orderType]} ` : '')
     const message = intl.formatMessage(
       { defaultMessage: 'leverage for {orderDirection} {asset}' },
       {
@@ -158,7 +185,10 @@ export const getOrderToastProps = ({
       title: copy.modifyCollateral,
       action,
       message,
-      actionColor: action === copy.increase ? colors.brand.green : colors.brand.red,
+      actionColor:
+        action === copy.increaseOrderType(orderType ? `${copy[orderType]} ` : '')
+          ? colors.brand.green
+          : colors.brand.red,
     }
   }
 
@@ -166,12 +196,16 @@ export const getOrderToastProps = ({
     { defaultMessage: '{orderDirection} {asset} {difference}' },
     { difference, asset: formattedAsset, orderDirection: isMaker ? copy.make : positionSide },
   )
-  const action = newPosition > prevPosition ? copy.increase : copy.decrease
+  const action =
+    newPosition > prevPosition
+      ? copy.increaseOrderType(orderType ? `${copy[orderType]} ` : '')
+      : copy.decreaseOrderType(orderType ? `${copy[orderType]} ` : '')
 
   return {
     title: copy.orderSent,
     action,
     message,
-    actionColor: action === copy.increase ? colors.brand.green : colors.brand.red,
+    actionColor:
+      action === copy.increaseOrderType(orderType ? `${copy[orderType]} ` : '') ? colors.brand.green : colors.brand.red,
   }
 }

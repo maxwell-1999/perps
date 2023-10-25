@@ -30,6 +30,7 @@ export const useTxToastCopy = () => {
     defaultConfirmedMsg: (link: React.ReactNode) =>
       intl.formatMessage({ defaultMessage: 'Your transaction has been confirmed.{link}' }, { link }),
     viewOnExplorer: (website: string) => intl.formatMessage({ defaultMessage: 'View on {website}' }, { website }),
+    errorCancelingOrder: intl.formatMessage({ defaultMessage: 'Error canceling order. Please try again.' }),
   }
 }
 
@@ -90,10 +91,9 @@ export const useTransactionToasts = () => {
     triggerConfirmationToast,
     waitForTransactionAlert: (
       hash: Address,
-      options?: { successMsg?: string; errorMsg?: string; onError?: () => void },
-      onSuccess?: () => void,
+      options?: { successMsg?: string; errorMsg?: string; onError?: () => void; onSuccess?: () => void },
     ) => {
-      const { successMsg, errorMsg, onError } = options || {}
+      const { successMsg, errorMsg, onError, onSuccess } = options || {}
       return waitForTransaction({ hash })
         .then((res: TransactionReceipt) => {
           triggerConfirmationToast({

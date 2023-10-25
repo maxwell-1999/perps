@@ -48,4 +48,13 @@ const trade = definePartsStyle({
   },
 })
 
-export default defineMultiStyleConfig({ baseStyle, variants: { trade }, sizes })
+const trigger = definePartsStyle({
+  field: {
+    fontSize: '15px',
+    bg: 'transparent',
+    border: 'none',
+    px: 0,
+  },
+})
+
+export default defineMultiStyleConfig({ baseStyle, variants: { trade, trigger }, sizes })

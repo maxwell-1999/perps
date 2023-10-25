@@ -66,6 +66,10 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
       [FormNames.amount]: '',
       [FormNames.collateral]: '',
       [FormNames.leverage]: Big6Math.toFloatString(nextLeverage ?? 0n),
+      [FormNames.limitPrice]: '',
+      [FormNames.limitPricePercent]: '',
+      [FormNames.stopLoss]: '',
+      [FormNames.takeProfit]: '',
     },
   })
   const amount = watch(FormNames.amount)
@@ -83,6 +87,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
     chainId,
     positionStatus: position.status,
     direction: isMaker ? PositionSide2.maker : orderDirection,
+    latestPrice: product.global.latestPrice,
   })
 
   const onPerecentClick = useCallback(

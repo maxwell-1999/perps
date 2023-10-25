@@ -1,6 +1,9 @@
+import { Address } from 'viem'
+
 import colors from '@/components/design-system/theme/colors'
+import { FormattedOpenOrder } from '@/components/pages/Trade/PositionManager/hooks'
 import { OrderValues } from '@/components/pages/Trade/TradeForm/constants'
-import { PositionSide2, PositionStatus, SupportedAsset } from '@/constants/markets'
+import { PositionSide2, PositionStatus, SupportedAsset, TriggerComparison } from '@/constants/markets'
 import { SupportedChainId, interfaceFeeBps } from '@/constants/network'
 import { MaxUint256 } from '@/constants/units'
 import { ProductSnapshotWithTradeLimitations } from '@/hooks/markets'
@@ -74,27 +77,29 @@ export const calcLiquidationPrice = ({
   marketSnapshot,
   collateral,
   position,
+  limitPrice,
 }: {
   marketSnapshot?: MarketSnapshot
   collateral?: bigint
   position?: bigint
+  limitPrice?: bigint
 }) => {
   const noValue = { long: 0n, short: 0n }
   if (!collateral || !marketSnapshot || !position) return noValue
 
-  const notional = calcNotional(position, marketSnapshot.global.latestPrice)
+  const price = limitPrice ? limitPrice : marketSnapshot.global.latestPrice
+
+  const notional = calcNotional(position, price)
   const maintenance = Big6Math.mul(notional, marketSnapshot.riskParameter.maintenance)
 
   // If maintenance is less than minMaintenance, then the liquidation calc is slightly simplified:
   // LiqPrice = ((minMaintenance - collateral) / (position * (long ? 1 : -1)) + price
   if (maintenance < marketSnapshot.riskParameter.minMaintenance) {
     const minMaintenanceLiqPriceLong = Big6Math.abs(
-      Big6Math.div(marketSnapshot.riskParameter.minMaintenance - collateral, position) +
-        marketSnapshot.global.latestPrice,
+      Big6Math.div(marketSnapshot.riskParameter.minMaintenance - collateral, position) + price,
     )
     const minMaintenanceLiqPriceShort = Big6Math.abs(
-      Big6Math.div(marketSnapshot.riskParameter.minMaintenance - collateral, position * -1n) +
-        marketSnapshot.global.latestPrice,
+      Big6Math.div(marketSnapshot.riskParameter.minMaintenance - collateral, position * -1n) + price,
     )
     return { long: minMaintenanceLiqPriceLong, short: minMaintenanceLiqPriceShort }
   }
@@ -188,7 +193,13 @@ export const getStatusDetails = ({
   const isTransitionPosition = [PositionStatus.pricing, PositionStatus.opening, PositionStatus.closing].includes(status)
   const hasPosition = PositionStatus.resolved !== status
   const isClosing = status === PositionStatus.closing
-  let statusColor = isOpenPosition ? (isTransitionPosition ? 'goldenRod' : colors.brand.green) : 'darkGray'
+  let statusColor = isOpenPosition
+    ? isTransitionPosition
+      ? 'goldenRod'
+      : colors.brand.green
+    : status === PositionStatus.syncError
+    ? 'goldenRod'
+    : 'darkGray'
   if (liquidated || status === PositionStatus.failed) {
     statusColor = colors.brand.red
   }
@@ -365,8 +376,10 @@ export function getStatusForSnapshot(
   nextMagnitude: bigint,
   collateral: bigint,
   hasVersionError: boolean,
+  priceUpdate?: Address,
 ): PositionStatus {
   if (hasVersionError && magnitude !== nextMagnitude) return PositionStatus.failed
+  if (priceUpdate !== '0x') return PositionStatus.syncError
   if (Big6Math.isZero(magnitude) && !Big6Math.isZero(nextMagnitude)) return PositionStatus.opening
   if (!Big6Math.isZero(magnitude) && Big6Math.eq(magnitude, nextMagnitude)) return PositionStatus.open
   if (!Big6Math.isZero(magnitude) && Big6Math.isZero(nextMagnitude)) return PositionStatus.closing
@@ -643,4 +656,70 @@ export const isFailedClose = (position?: UserMarketSnapshot) => {
     !Big6Math.isZero(position.magnitude) &&
     Big6Math.isZero(position.nextMagnitude)
   )
+}
+
+export const getOpenOrderLabel = ({
+  orderDelta,
+  orderDirection,
+  comparison,
+  isMaker,
+}: {
+  orderDelta: bigint
+  orderDirection: PositionSide2
+  comparison: TriggerComparison
+  isMaker: boolean
+}) => {
+  if (isMaker) {
+    return orderDelta > 0n ? 'limitOpen' : 'limitClose'
+  }
+
+  if (orderDelta > 0n) {
+    return 'limitOpen'
+  }
+  if (orderDirection === PositionSide2.long) {
+    return comparison === TriggerComparison.lte ? 'stopLoss' : 'takeProfit'
+  } else {
+    return comparison === TriggerComparison.gte ? 'stopLoss' : 'takeProfit'
+  }
+}
+
+export const isOpenOrderValid = ({
+  order,
+  allOrders,
+  userMarketSnapshot,
+}: {
+  order: FormattedOpenOrder
+  allOrders: FormattedOpenOrder[]
+  userMarketSnapshot?: UserMarketSnapshot
+}) => {
+  if (!userMarketSnapshot || BigInt(order.details.order_delta) > 0n) return true
+  const snapshotPosition = isFailedClose(userMarketSnapshot)
+    ? userMarketSnapshot.magnitude
+    : userMarketSnapshot.nextMagnitude
+
+  if (order.details.order_side === 3) {
+    // TODO: collateral checks
+    return true
+  }
+
+  const currentSide = isFailedClose(userMarketSnapshot) ? userMarketSnapshot.side : userMarketSnapshot.nextSide
+
+  if (currentSide !== PositionSide2.none && order.side !== currentSide) {
+    return false
+  }
+
+  const totalPendingOrderSize = allOrders.reduce((acc, pendingOrder) => {
+    if (
+      order.details.nonce === pendingOrder.details.nonce ||
+      pendingOrder.details.market !== order.details.market ||
+      pendingOrder.details.order_side > 2 ||
+      pendingOrder.details.order_side !== order.details.order_side ||
+      BigInt(pendingOrder.details.order_delta) <= 0n
+    ) {
+      return acc
+    }
+    return acc + BigInt(pendingOrder.details.order_delta)
+  }, 0n)
+
+  return snapshotPosition >= (totalPendingOrderSize + BigInt(order.details.order_delta)) * -1n
 }

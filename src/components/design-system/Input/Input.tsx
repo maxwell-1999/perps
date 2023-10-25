@@ -18,7 +18,7 @@ import {
 import { Control, Validate, useController } from 'react-hook-form'
 
 export interface InputProps extends ChakraInputProps {
-  label: string
+  label?: string | React.ReactNode
   name: string
   control: Control<any>
   rightLabel?: React.ReactNode
@@ -29,6 +29,7 @@ export interface InputProps extends ChakraInputProps {
   pattern?: string
   rightEl?: React.ReactNode
   leftEl?: React.ReactNode
+  hideFieldError?: boolean
   validate?: Validate<any, any> | Record<string, Validate<any, any>> | undefined
 }
 
@@ -45,6 +46,7 @@ export const Input: React.FC<InputProps> = ({
   validate,
   leftEl,
   labelColor,
+  hideFieldError,
   ...inputProps
 }) => {
   const pr = rightEl ? { pr: '60px' } : {}
@@ -61,14 +63,20 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <FormControl width={width} isInvalid={Boolean(error)}>
-      <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
-        <FormLabel m={0} htmlFor={id}>
-          <Text variant="label" color={labelColor}>
-            {label}
-          </Text>
-        </FormLabel>
-        {rightLabel && rightLabel}
-      </Flex>
+      {(label || rightLabel) && (
+        <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
+          {typeof label === 'string' ? (
+            <FormLabel m={0} htmlFor={id}>
+              <Text variant="label" color={labelColor}>
+                {label}
+              </Text>
+            </FormLabel>
+          ) : (
+            label
+          )}
+          {rightLabel && rightLabel}
+        </Flex>
+      )}
       <InputGroup variant="trade" mb={0}>
         {leftEl && <InputLeftElement pointerEvents="none">{leftEl}</InputLeftElement>}
         <ChakraInput
@@ -85,7 +93,7 @@ export const Input: React.FC<InputProps> = ({
         />
         {rightEl && <InputRightElement pointerEvents="none">{rightEl}</InputRightElement>}
       </InputGroup>
-      {error && <FormErrorMessage pl={1}>{error.message}</FormErrorMessage>}
+      {error && !hideFieldError && <FormErrorMessage pl={1}>{error.message}</FormErrorMessage>}
     </FormControl>
   )
 }

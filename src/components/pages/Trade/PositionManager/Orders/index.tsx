@@ -6,13 +6,14 @@ import { useMarketContext } from '@/contexts/marketContext'
 import { useAddress } from '@/hooks/network'
 
 import { TableEmptyScreen } from '../components'
-import { useHandleRowClick, useOpenPositionTableData, usePositionManagerCopy } from '../hooks'
+import { useHandleRowClick, useOpenOrderTableData, useOpenPositionTableData, usePositionManagerCopy } from '../hooks'
 import { OrdersTable } from './OrdersTable'
 
 function AllPositions() {
-  const { noCurrentOrdersToShow, connectWalletPositions } = usePositionManagerCopy()
+  const { connectWalletPositions, noCurrentOrdersToShow } = usePositionManagerCopy()
   const { address } = useAddress()
   const { positions: tableData, status } = useOpenPositionTableData()
+  const openOrders = useOpenOrderTableData()
   const { isMaker } = useMarketContext()
   const handleRowClick = useHandleRowClick()
 
@@ -23,7 +24,7 @@ function AllPositions() {
       PositionStatus.pricing,
       PositionStatus.closing,
     ]
-    return tableData.filter((position) => {
+    const filteredPositions = tableData.filter((position) => {
       const isTransitional = transitionPositionStates.includes(position.details.status)
       if (isMaker) {
         return (
@@ -37,7 +38,9 @@ function AllPositions() {
         position.details.nextSide !== PositionSide2.maker
       )
     })
-  }, [tableData, isMaker])
+
+    return [...filteredPositions, ...openOrders]
+  }, [tableData, openOrders, isMaker])
 
   if (!address) return <TableEmptyScreen message={connectWalletPositions} />
 
@@ -45,7 +48,14 @@ function AllPositions() {
     return <LoadingScreen />
   }
 
-  return <OrdersTable positions={filteredOrders} onClick={handleRowClick} emptyStateMessage={noCurrentOrdersToShow} />
+  return (
+    <OrdersTable
+      positions={filteredOrders}
+      onClick={handleRowClick}
+      emptyStateMessage={noCurrentOrdersToShow}
+      openOrders={openOrders}
+    />
+  )
 }
 
 export default AllPositions

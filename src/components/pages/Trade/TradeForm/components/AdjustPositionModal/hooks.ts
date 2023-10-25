@@ -60,16 +60,22 @@ export const useAdjustmentModalCopy = () => {
     }),
     positionChanged: intl.formatMessage({ defaultMessage: 'Position changed' }),
     positionClose: intl.formatMessage({ defaultMessage: 'Position close' }),
-    buy: intl.formatMessage({ defaultMessage: 'Buy' }),
-    sell: intl.formatMessage({ defaultMessage: 'Sell' }),
-    increase: intl.formatMessage({ defaultMessage: 'Increase' }),
-    decrease: intl.formatMessage({ defaultMessage: 'Decrease' }),
+    buyOrderType: (orderType: string) => intl.formatMessage({ defaultMessage: '{orderType}Buy' }, { orderType }),
+    sellOrderType: (orderType: string) => intl.formatMessage({ defaultMessage: '{orderType}Sell' }, { orderType }),
+    increaseOrderType: (orderType: string) =>
+      intl.formatMessage({ defaultMessage: '{orderType}Increase' }, { orderType }),
+    decreaseOrderType: (orderType: string) =>
+      intl.formatMessage({ defaultMessage: '{orderType}Decrease' }, { orderType }),
+    market: intl.formatMessage({ defaultMessage: 'Market' }),
+    limit: intl.formatMessage({ defaultMessage: 'Limit' }),
+    stopLoss: intl.formatMessage({ defaultMessage: 'Stop Loss' }),
+    takeProfit: intl.formatMessage({ defaultMessage: 'Take Profit' }),
     positionSettled: intl.formatMessage({ defaultMessage: 'Position settled' }),
     yourPositionHasSettled: intl.formatMessage({ defaultMessage: 'Your position has settled' }),
     withdrawComplete: intl.formatMessage({ defaultMessage: 'Withdrawal complete' }),
     modifyCollateral: intl.formatMessage({ defaultMessage: 'Modify collateral' }),
     interfaceFee: intl.formatMessage({ defaultMessage: 'Ecosystem fee' }),
-    priceImpact: intl.formatMessage({ defaultMessage: 'Est. Price impact' }),
+    priceImpact: intl.formatMessage({ defaultMessage: 'Est. Price Impact' }),
     fee: intl.formatMessage({ defaultMessage: 'Fee' }),
     retryFailedOrder: intl.formatMessage({ defaultMessage: 'Retry failed order?' }),
     retryBody: intl.formatMessage({
@@ -85,6 +91,8 @@ export const useAdjustmentModalCopy = () => {
         { staleAfter },
       ),
     seconds: intl.formatMessage({ defaultMessage: 'seconds' }),
+    limitPrice: intl.formatMessage({ defaultMessage: 'Limit Price' }),
+    change: intl.formatMessage({ defaultMessage: 'Change' }),
   }
 }
 

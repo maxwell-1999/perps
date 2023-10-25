@@ -10,7 +10,7 @@ import Toggle from '@/components/shared/Toggle'
 import { TxButton } from '@/components/shared/TxButton'
 import { FormattedBig6USDPrice, USDCETooltip } from '@/components/shared/components'
 import { Form } from '@/components/shared/components'
-import { PositionSide2, PositionStatus, SupportedAsset } from '@/constants/markets'
+import { PositionSide2, PositionStatus, SupportedAsset, TriggerComparison } from '@/constants/markets'
 import { useAuthStatus } from '@/contexts/authStatusContext'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
@@ -20,6 +20,7 @@ import { useBalances } from '@/hooks/wallet'
 import { Big6Math, formatBig6USDPrice } from '@/utils/big6Utils'
 import { usePrevious } from '@/utils/hooks'
 import {
+  calcLiquidationPrice,
   calcNotional,
   calcTakerLiquidity,
   closedOrResolved,
@@ -31,22 +32,33 @@ import { Button } from '@ds/Button'
 import { Input, Pill } from '@ds/Input'
 import colors from '@ds/theme/colors'
 
-import { FormNames, OrderTypes, OrderValues } from '../constants'
+import { FormNames, OrderTypes, OrderValues, triggerOrderTypes } from '../constants'
 import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
 import { calcMaxLeverage, formatInitialInputs } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import LeverageInput from './LeverageInput'
 import OrderTypeSelector from './OrderTypeSelector'
 import { TradeReceipt } from './Receipt'
+import { TriggerOrderForm } from './TriggerOrders/TriggerOrderForm'
+import { LimitOrderInput, TriggerOrderInputGroup } from './TriggerOrders/components'
+import { TriggerFormValues } from './TriggerOrders/constants'
 import {
   GeoBlockedMessage,
   MarketClosedMessage,
   PaddedContainer,
   RestrictionMessage,
   SocializationMessage,
+  TriggerBetaMessage,
   VpnDetectedMessage,
 } from './styles'
-import { useCollateralValidators, useLeverageValidators, usePositionValidators } from './validatorHooks'
+import {
+  useCollateralValidators,
+  useLeverageValidators,
+  useLimitPriceValidators,
+  usePositionValidators,
+  useStopLossValidator,
+  useTakeProfitValidators,
+} from './validatorHooks'
 
 interface TradeFormProps {
   asset: SupportedAsset
@@ -75,6 +87,9 @@ function TradeForm(props: TradeFormProps) {
 
   const { textColor, textBtnColor, textBtnHoverColor } = useStyles()
   const [selectedOrderType, setSelectedOrderType] = useState<OrderTypes>(OrderTypes.market)
+  const [selectedLimitComparison, setSelectedLimitComparison] = useState<TriggerComparison>(
+    positionSide === PositionSide2.long ? TriggerComparison.lte : TriggerComparison.gte,
+  )
   const copy = useTradeFormCopy()
   const { data: balances } = useBalances()
   const { setTradeFormState } = useTradeFormState()
@@ -110,7 +125,9 @@ function TradeForm(props: TradeFormProps) {
   const userMaintenance = position?.maintenance ?? 0n
   const isSocialized = market.isSocialized && orderDirection === market.majorSide
   const prevOrderDirection = usePrevious(orderDirection)
+  const prevSelectedOrderType = usePrevious(selectedOrderType)
   const { onSubmitVaa } = useMarketTransactions2(props.market.market)
+  const isLimit = selectedOrderType === OrderTypes.limit
 
   const initialFormState = useMemo(
     () =>
@@ -131,8 +148,9 @@ function TradeForm(props: TradeFormProps) {
     watch,
     setValue,
     reset,
+    resetField,
     trigger,
-    formState: { dirtyFields, errors },
+    formState: { dirtyFields, errors, isDirty },
   } = useForm({
     defaultValues: initialFormState,
   })
@@ -142,11 +160,16 @@ function TradeForm(props: TradeFormProps) {
   const collateral = watch(FormNames.collateral)
   const amount = watch(FormNames.amount)
   const leverage = watch(FormNames.leverage)
+  const limitPrice = watch(FormNames.limitPrice)
 
   const maxLeverage = useMemo(
     () => calcMaxLeverage({ margin, minMargin, collateral: Big6Math.fromFloatString(collateral) }),
     [margin, minMargin, collateral],
   )
+
+  const resetInputs = useCallback(() => {
+    reset({ ...initialFormState })
+  }, [initialFormState, reset])
 
   useEffect(() => {
     // Manually trigger leverage validation on maxLeverage change
@@ -155,9 +178,13 @@ function TradeForm(props: TradeFormProps) {
     }, 0)
   }, [maxLeverage, trigger])
 
-  const resetInputs = useCallback(() => {
-    reset({ ...initialFormState })
-  }, [initialFormState, reset])
+  useEffect(() => {
+    if (orderDirection === PositionSide2.long) {
+      setSelectedLimitComparison(TriggerComparison.lte)
+    } else {
+      setSelectedLimitComparison(TriggerComparison.gte)
+    }
+  }, [orderDirection])
 
   useEffect(() => {
     const userDisconnected = !address && !!prevAddress
@@ -165,10 +192,20 @@ function TradeForm(props: TradeFormProps) {
     const changedProducts = marketAddress !== prevProductAddress
     const userSwitchedAcct = address !== prevAddress
     const changedDirection = market.isSocialized && orderDirection !== prevOrderDirection
+    const orderTypeChanged = selectedOrderType !== prevSelectedOrderType
 
     const resetRequired = userConnected || userDisconnected || changedProducts || userSwitchedAcct || changedDirection
 
     if (resetRequired) {
+      setSelectedOrderType(OrderTypes.market)
+      resetInputs()
+    }
+
+    if (!position && triggerOrderTypes.includes(selectedOrderType)) {
+      setSelectedOrderType(OrderTypes.market)
+    }
+
+    if (orderTypeChanged) {
       resetInputs()
     }
 
@@ -190,23 +227,42 @@ function TradeForm(props: TradeFormProps) {
     market.isSocialized,
     orderDirection,
     prevOrderDirection,
+    position,
+    selectedOrderType,
+    prevSelectedOrderType,
   ])
 
-  const { onChangeAmount, onChangeLeverage, onChangeCollateral } = useOnChangeHandlers({
+  const {
+    onChangeAmount,
+    onChangeLeverage,
+    onChangeCollateral,
+    onChangeLimitPrice,
+    onChangeLimitPricePercent,
+    onChangeStopLoss,
+    onChangeTakeProfit,
+  } = useOnChangeHandlers({
     setValue,
     leverageFixed: false,
     leverage,
     collateral,
     amount,
+    latestPrice,
     currentPosition: currentPositionAmount,
     marketSnapshot: market,
     chainId,
     positionStatus: position?.status ?? PositionStatus.resolved,
     direction: isMaker ? PositionSide2.maker : orderDirection,
+    orderType: selectedOrderType,
+    limitPrice,
   })
 
   const onConfirm = (orderData: { collateral: string; amount: string }) => {
     setOrderValues({ ...orderData })
+  }
+
+  const onConfirmTriggerOrder = ({ triggerAmount, stopLoss, takeProfit }: TriggerFormValues) => {
+    if (!triggerAmount) return
+    setOrderValues({ collateral, amount, stopLoss, takeProfit, triggerAmount })
   }
 
   const onWithdrawCollateral = () => {
@@ -256,6 +312,13 @@ function TradeForm(props: TradeFormProps) {
   })
 
   const availableLiquidity = calcTakerLiquidity(market)
+
+  const liquidationPriceData = calcLiquidationPrice({
+    marketSnapshot: market,
+    collateral: Big6Math.fromFloatString(collateral),
+    position: Big6Math.fromFloatString(amount),
+  })
+
   const amountValidators = usePositionValidators({
     isMaker: isMaker,
     takerLiquidity:
@@ -273,6 +336,23 @@ function TradeForm(props: TradeFormProps) {
   const leverageValidators = useLeverageValidators({
     maxLeverage,
   })
+  const limitPriceValidators = useLimitPriceValidators({
+    orderType: selectedOrderType,
+  })
+  const stopPriceValidators = useStopLossValidator({
+    orderDirection,
+    latestPrice,
+    isLimit,
+    limitPrice: Big6Math.fromFloatString(limitPrice),
+    liquidationPrice: liquidationPriceData[orderDirection],
+  })
+  const takeProfitValidators = useTakeProfitValidators({
+    orderDirection,
+    latestPrice,
+    isLimit,
+    limitPrice: Big6Math.fromFloatString(limitPrice),
+  })
+
   const notional = calcNotional(Big6Math.fromFloatString(amount), latestPrice)
   const userBalance = formatBig6USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
 
@@ -305,224 +385,294 @@ function TradeForm(props: TradeFormProps) {
           onCancel={cancelAdjustmentModal}
           title={isNewPosition ? copy.confirmOrder : copy.confirmChanges}
           usdcAllowance={balances?.usdcAllowance ?? 0n}
-          variant="adjust"
+          variant={'adjust'}
+          orderType={selectedOrderType}
+          selectedLimitComparison={selectedLimitComparison}
           {...modalProps}
         />
       )}
-      <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
-        <PaddedContainer pb={3}>
-          <Flex justifyContent="space-between">
-            <Flex alignItems="center">
-              <Text color={textColor} mr={1}>
-                {hasPosition && positionStatus !== PositionStatus.closed
-                  ? copy.modifyPosition
-                  : isMaker
-                  ? copy.Make
-                  : copy.trade}
-              </Text>
-              {isMaker && (
-                <Link
-                  href="https://docs.perennial.finance/protocol-design/advanced-lp"
-                  target="_blank"
-                  style={{
-                    display: 'flex',
-                    height: 'initial',
-                    color: textColor,
-                  }}
-                >
-                  <QuestionOutlineIcon cursor="pointer" height="12px" width="12px" />
-                </Link>
-              )}
-            </Flex>
-            {!!manualCommitment && (
-              <TxButton
-                variant="text"
-                label={copy.submitCommitment}
-                p={0}
-                lineHeight={1}
-                height="initial"
-                fontSize="13px"
-                color={textBtnColor}
-                _hover={{ color: textBtnHoverColor }}
-                onClick={onSubmitVaa}
-                loadingText={copy.submitCommitment}
-                actionAllowedInGeoblock
-              />
-            )}
-            {!!address && !Big6Math.isZero(currentCollateral) && (
-              <TxButton
-                variant="text"
-                label={copy.withdrawCollateral}
-                p={0}
-                lineHeight={1}
-                height="initial"
-                fontSize="13px"
-                color={textBtnColor}
-                _hover={{ color: textBtnHoverColor }}
-                onClick={onWithdrawCollateral}
-                isLoading={positionStatus === PositionStatus.closing}
-                loadingText={copy.withdrawCollateral}
-                actionAllowedInGeoblock
-              />
+      <PaddedContainer pb={3}>
+        <Flex justifyContent="space-between">
+          <Flex alignItems="center">
+            <Text color={textColor} mr={1}>
+              {hasPosition && positionStatus !== PositionStatus.closed
+                ? copy.modifyPosition
+                : isMaker
+                ? copy.Make
+                : copy.trade}
+            </Text>
+            {isMaker && (
+              <Link
+                href="https://docs.perennial.finance/protocol-design/advanced-lp"
+                target="_blank"
+                style={{
+                  display: 'flex',
+                  height: 'initial',
+                  color: textColor,
+                }}
+              >
+                <QuestionOutlineIcon cursor="pointer" height="12px" width="12px" />
+              </Link>
             )}
           </Flex>
-        </PaddedContainer>
-        <OrderTypeSelector onClick={setSelectedOrderType} selectedOrderType={selectedOrderType} />
-        <PaddedContainer>
-          {geoblocked && !vpnDetected && <GeoBlockedMessage mb={4} />}
-          {geoblocked && vpnDetected && <VpnDetectedMessage mb={4} />}
-          {closed && <MarketClosedMessage mb={4} />}
-          {isRestricted && <RestrictionMessage message={copy.isRestricted(isMaker)} />}
-          {position?.status === PositionStatus.failed && !failedClose && (
-            <RestrictionMessage message={copy.settlementFailureBody} />
-          )}
-          {failedClose && <RestrictionMessage message={copy.closeFailure} />}
-          {!isMaker && (
-            <Flex mb="14px">
-              <Toggle<PositionSide2.long | PositionSide2.short>
-                labels={[PositionSide2.long, PositionSide2.short]}
-                activeLabel={takerPositionDirection ? takerPositionDirection : orderDirection}
-                onChange={setOrderDirection}
-                overrideValue={!closedOrResolved(positionStatus) ? takerPositionDirection : undefined}
-                activeColor={
-                  takerPositionDirection
-                    ? takerPositionDirection === PositionSide2.long
-                      ? colors.brand.green
-                      : colors.brand.red
-                    : positionSide === PositionSide2.long
-                    ? colors.brand.green
-                    : colors.brand.red
-                }
-              />
-            </Flex>
-          )}
-          {isSocialized && <SocializationMessage mb={4} minorSide={market.minorSide} hasPosition={hasPosition} />}
-
-          <Flex flexDirection="column" gap="13px">
-            <Input
-              key={FormNames.collateral}
-              // eslint-disable-next-line formatjs/no-literal-string-in-jsx
-              label={copy.collateral}
-              labelColor="white"
-              title={copy.collateral}
-              placeholder="0.0000"
-              rightLabel={
-                <FormLabel mr={0} mb={0}>
-                  {!!address && (
-                    <Flex gap={1}>
-                      {chainId === arbitrum.id ? (
-                        <USDCETooltip userBalance={userBalance} />
-                      ) : (
-                        <Text fontSize="12px">{userBalance}</Text>
-                      )}
-                      <Button
-                        variant="text"
-                        padding={0}
-                        height="unset"
-                        label={copy.max}
-                        size="xs"
-                        textDecoration="underline"
-                        onClick={onClickMaxCollateral}
-                      />
-                    </Flex>
-                  )}
-                </FormLabel>
-              }
-              rightEl={<Pill text={assetMetadata.quoteCurrency} />}
-              control={control}
-              name={FormNames.collateral}
-              onChange={(e) => onChangeCollateral(e.target.value)}
-              validate={!!address ? collateralValidators : {}}
-            />
-            <Input
-              key={FormNames.amount}
-              label={copy.amount}
-              labelColor="white"
-              placeholder="0.0000"
-              rightLabel={
-                <FormLabel mr={0} mb={0}>
-                  {notional > 0n && <FormattedBig6USDPrice variant="label" color="white" value={notional} />}
-                </FormLabel>
-              }
-              rightEl={<Pill text={assetMetadata.baseCurrency} />}
-              control={control}
-              name={FormNames.amount}
-              onChange={(e) => onChangeAmount(e.target.value)}
-              validate={!!address ? amountValidators : {}}
-            />
-            <LeverageInput
-              label={copy.leverage}
-              labelColor="white"
-              min={0}
-              max={maxLeverage}
-              step={0.1}
-              control={control}
-              name={FormNames.leverage}
-              onChange={onChangeLeverage}
-              validate={!!address ? leverageValidators : {}}
-            />
-          </Flex>
-          <Flex height={6} width="100%" justifyContent="flex-end" px={2} mt={2}>
-            {Object.keys(dirtyFields).length > 0 && (
-              <Button
-                ml="auto"
-                justifyContent="flex-end"
-                height="100%"
-                variant="text"
-                p={0}
-                fontSize="12px"
-                label={copy.reset}
-                rightIcon={<RepeatIcon />}
-                onClick={resetInputs}
-                aria-label={copy.reset}
-              />
-            )}
-          </Flex>
-        </PaddedContainer>
-        <Divider mt="auto" />
-        <Flex flexDirection="column" p="16px">
-          <TradeReceipt
-            mb="25px"
-            px="3px"
-            product={market}
-            positionDelta={positionDelta}
-            positionDetails={position}
-            leverage={parseFloat(leverage)}
-          />
-          {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
-            <ButtonGroup>
-              <Button
-                variant="transparent"
-                label={copy.closePosition}
-                onClick={() => setTradeFormState(FormState.close)}
-              />
-              <TxButton
-                formRef={formRef}
-                flex={1}
-                label={position?.status === PositionStatus.failed ? copy.tryAgain : copy.modifyPosition}
-                type="submit"
-                isDisabled={disableTradeBtn}
-                overrideLabel
-                actionAllowedInGeoblock={positionDelta.positionDelta <= 0n} // allow closes and collateral changes in geoblock
-              />
-            </ButtonGroup>
-          ) : (
+          {!!manualCommitment && (
             <TxButton
-              formRef={formRef}
-              type="submit"
-              isDisabled={disableTradeBtn}
-              label={
-                address
-                  ? position?.status === PositionStatus.failed
-                    ? copy.tryAgain
-                    : copy.placeTrade
-                  : copy.connectWallet
-              }
-              overrideLabel
+              variant="text"
+              label={copy.submitCommitment}
+              p={0}
+              lineHeight={1}
+              height="initial"
+              fontSize="13px"
+              color={textBtnColor}
+              _hover={{ color: textBtnHoverColor }}
+              onClick={onSubmitVaa}
+              loadingText={copy.submitCommitment}
+              actionAllowedInGeoblock
+            />
+          )}
+          {!!address && !Big6Math.isZero(currentCollateral) && (
+            <TxButton
+              variant="text"
+              label={copy.withdrawCollateral}
+              p={0}
+              lineHeight={1}
+              height="initial"
+              fontSize="13px"
+              color={textBtnColor}
+              _hover={{ color: textBtnHoverColor }}
+              onClick={onWithdrawCollateral}
+              isLoading={positionStatus === PositionStatus.closing}
+              loadingText={copy.withdrawCollateral}
+              actionAllowedInGeoblock
             />
           )}
         </Flex>
-      </Form>
+      </PaddedContainer>
+      <OrderTypeSelector
+        onClick={setSelectedOrderType}
+        selectedOrderType={selectedOrderType}
+        hasPosition={hasPosition}
+        isRestricted={isRestricted}
+      />
+      {triggerOrderTypes.includes(selectedOrderType) && position && !isMaker ? (
+        <TriggerOrderForm
+          selectedOrderType={selectedOrderType}
+          userMarketSnapshot={position}
+          orderDirection={orderDirection}
+          latestPrice={latestPrice}
+          onSubmit={onConfirmTriggerOrder}
+        />
+      ) : (
+        <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
+          <PaddedContainer>
+            {geoblocked && !vpnDetected && <GeoBlockedMessage mb={4} />}
+            {geoblocked && vpnDetected && <VpnDetectedMessage mb={4} />}
+            {selectedOrderType !== OrderTypes.market && <TriggerBetaMessage mb={4} />}
+            {closed && <MarketClosedMessage mb={4} />}
+            {isRestricted && <RestrictionMessage message={copy.isRestricted(isMaker)} />}
+            {position?.status === PositionStatus.failed && !failedClose && (
+              <RestrictionMessage message={copy.settlementFailureBody} />
+            )}
+            {failedClose && <RestrictionMessage message={copy.closeFailure} />}
+            {!isMaker && !triggerOrderTypes.includes(selectedOrderType) && (
+              <Flex mb="14px">
+                <Toggle<PositionSide2.long | PositionSide2.short>
+                  labels={[PositionSide2.long, PositionSide2.short]}
+                  activeLabel={takerPositionDirection ? takerPositionDirection : orderDirection}
+                  onChange={setOrderDirection}
+                  overrideValue={!closedOrResolved(positionStatus) ? takerPositionDirection : undefined}
+                  activeColor={
+                    takerPositionDirection
+                      ? takerPositionDirection === PositionSide2.long
+                        ? colors.brand.green
+                        : colors.brand.red
+                      : positionSide === PositionSide2.long
+                      ? colors.brand.green
+                      : colors.brand.red
+                  }
+                />
+              </Flex>
+            )}
+            {isSocialized && <SocializationMessage mb={4} minorSide={market.minorSide} hasPosition={hasPosition} />}
+            <Flex flexDirection="column" gap="13px">
+              {!triggerOrderTypes.includes(selectedOrderType) && (
+                <>
+                  <Input
+                    key={FormNames.collateral}
+                    // eslint-disable-next-line formatjs/no-literal-string-in-jsx
+                    label={copy.collateral}
+                    labelColor="white"
+                    title={copy.collateral}
+                    isDisabled={selectedOrderType === OrderTypes.limit && hasPosition}
+                    placeholder="0.0000"
+                    rightLabel={
+                      <FormLabel mr={0} mb={0}>
+                        {!!address && (
+                          <Flex gap={1}>
+                            {chainId === arbitrum.id ? (
+                              <USDCETooltip userBalance={userBalance} />
+                            ) : (
+                              <Text fontSize="12px">{userBalance}</Text>
+                            )}
+                            <Button
+                              variant="text"
+                              padding={0}
+                              height="unset"
+                              label={copy.max}
+                              isDisabled={selectedOrderType === OrderTypes.limit && hasPosition}
+                              size="xs"
+                              textDecoration="underline"
+                              onClick={onClickMaxCollateral}
+                            />
+                          </Flex>
+                        )}
+                      </FormLabel>
+                    }
+                    rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+                    control={control}
+                    name={FormNames.collateral}
+                    onChange={(e) => onChangeCollateral(e.target.value)}
+                    validate={!!address ? collateralValidators : {}}
+                  />
+                  <Input
+                    key={FormNames.amount}
+                    label={copy.amount}
+                    labelColor="white"
+                    placeholder="0.0000"
+                    rightLabel={
+                      <FormLabel mr={0} mb={0}>
+                        {notional > 0n && (
+                          <FormattedBig6USDPrice
+                            variant="label"
+                            color="white"
+                            value={
+                              limitPrice
+                                ? Big6Math.mul(Big6Math.fromFloatString(amount), Big6Math.fromFloatString(limitPrice))
+                                : notional
+                            }
+                          />
+                        )}
+                      </FormLabel>
+                    }
+                    rightEl={<Pill text={assetMetadata.baseCurrency} />}
+                    control={control}
+                    name={FormNames.amount}
+                    onChange={(e) => onChangeAmount(e.target.value)}
+                    validate={!!address ? amountValidators : {}}
+                  />
+                </>
+              )}
+              {isLimit && (
+                <LimitOrderInput
+                  validate={limitPriceValidators}
+                  onChangePercent={onChangeLimitPricePercent}
+                  onChange={onChangeLimitPrice}
+                  control={control}
+                  rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+                  error={errors?.limitPrice}
+                  hasPosition={hasPosition}
+                  selectedLimitComparison={selectedLimitComparison}
+                  setSelectedLimitComparison={(comparison: TriggerComparison) => setSelectedLimitComparison(comparison)}
+                  latestPrice={latestPrice}
+                  limitPrice={limitPrice}
+                />
+              )}
+              {!triggerOrderTypes.includes(selectedOrderType) && (
+                <LeverageInput
+                  label={copy.leverage}
+                  labelColor="white"
+                  min={0}
+                  max={maxLeverage}
+                  step={0.1}
+                  control={control}
+                  name={FormNames.leverage}
+                  onChange={onChangeLeverage}
+                  validate={!!address ? leverageValidators : {}}
+                />
+              )}
+              {!triggerOrderTypes.includes(selectedOrderType) && !isMaker && !hasPosition && (
+                <TriggerOrderInputGroup
+                  validateStopLoss={stopPriceValidators}
+                  validateTakeProfit={takeProfitValidators}
+                  onChangeStopLoss={onChangeStopLoss}
+                  onChangeTakeProfit={onChangeTakeProfit}
+                  control={control}
+                  rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+                  latestPrice={isLimit ? Big6Math.fromFloatString(limitPrice) : latestPrice}
+                  collateral={collateral}
+                  amount={amount}
+                  errors={errors}
+                  orderDirection={orderDirection}
+                  resetField={resetField}
+                  isFormDirty={isDirty}
+                  isLimit={isLimit}
+                />
+              )}
+            </Flex>
+            <Flex height={6} width="100%" justifyContent="flex-end" px={2} mt={2}>
+              {Object.keys(dirtyFields).length > 0 && (
+                <Button
+                  ml="auto"
+                  justifyContent="flex-end"
+                  height="100%"
+                  variant="text"
+                  p={0}
+                  fontSize="12px"
+                  label={copy.reset}
+                  rightIcon={<RepeatIcon />}
+                  onClick={resetInputs}
+                  aria-label={copy.reset}
+                />
+              )}
+            </Flex>
+          </PaddedContainer>
+          <Divider mt="auto" />
+          <Flex flexDirection="column" p="16px">
+            <TradeReceipt
+              mb="25px"
+              px="3px"
+              product={market}
+              positionDelta={positionDelta}
+              positionDetails={position}
+              leverage={parseFloat(leverage)}
+              isLimit={isLimit}
+              limitPrice={limitPrice}
+            />
+            {hasPosition && positionStatus !== PositionStatus.closed && positionStatus !== PositionStatus.closing ? (
+              <ButtonGroup>
+                <Button
+                  variant="transparent"
+                  label={copy.closePosition}
+                  onClick={() => setTradeFormState(FormState.close)}
+                />
+                <TxButton
+                  formRef={formRef}
+                  flex={1}
+                  label={position?.status === PositionStatus.failed ? copy.tryAgain : copy.modifyPosition}
+                  type="submit"
+                  isDisabled={disableTradeBtn}
+                  overrideLabel
+                  actionAllowedInGeoblock={positionDelta.positionDelta <= 0n} // allow closes and collateral changes in geoblock
+                />
+              </ButtonGroup>
+            ) : (
+              <TxButton
+                formRef={formRef}
+                type="submit"
+                isDisabled={disableTradeBtn}
+                label={
+                  address
+                    ? position?.status === PositionStatus.failed
+                      ? copy.tryAgain
+                      : copy.placeTrade
+                    : copy.connectWallet
+                }
+                overrideLabel
+              />
+            )}
+          </Flex>
+        </Form>
+      )}
     </>
   )
 }

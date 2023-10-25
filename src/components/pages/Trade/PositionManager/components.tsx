@@ -1,7 +1,7 @@
 import { RepeatIcon } from '@chakra-ui/icons'
 import { Box, Flex, Link, Text } from '@chakra-ui/react'
 import Image from 'next/image'
-import { ReactNode } from 'react'
+import React, { ReactNode } from 'react'
 
 import { IconButton } from '@/components/design-system'
 import { DataRow, TooltipDataRow } from '@/components/design-system/DataRow/DataRow'
@@ -61,13 +61,45 @@ export const Status = ({
   const { statusColor, isOpenPosition, status } = getStatusDetails({ userMarketSnapshot, liquidated, isMaker })
   const copy = usePositionManagerCopy()
   const statusLabel = liquidated ? copy.liquidated : copy[status]
+  const isSyncError = status === PositionStatus.syncError && !liquidated
 
   return (
+    <StatusCell
+      statusColor={statusColor}
+      glow={isOpenPosition || status === PositionStatus.failed}
+      statusLabel={
+        isSyncError ? (
+          <Flex alignItems="center" gap={2} ml={2}>
+            <Text fontSize="13px">{statusLabel}</Text>
+            <TooltipIcon tooltipText={copy.syncErrorMessage} />
+          </Flex>
+        ) : (
+          statusLabel
+        )
+      }
+    />
+  )
+}
+
+export const StatusCell = ({
+  statusColor,
+  glow,
+  statusLabel,
+}: {
+  statusColor: string
+  glow: boolean
+  statusLabel: string | React.ReactNode
+}) => {
+  return (
     <Flex alignItems="center">
-      <StatusLight color={statusColor} glow={isOpenPosition || status === PositionStatus.failed} />
-      <Text fontSize="14px" ml={3}>
-        {statusLabel}
-      </Text>
+      <StatusLight color={statusColor} glow={glow} />
+      {typeof statusLabel === 'string' ? (
+        <Text fontSize="14px" ml={3}>
+          {statusLabel}
+        </Text>
+      ) : (
+        statusLabel
+      )}
     </Flex>
   )
 }
@@ -198,6 +230,7 @@ export const SubPositionRow = ({
     delta,
     valid: valid_,
     interfaceFee,
+    orderFee,
     collateral: collateralChange_,
     realizedValues,
     collateralOnly,
@@ -211,13 +244,15 @@ export const SubPositionRow = ({
       0n,
     ) +
     (liquidation ? liquidationFee : 0n) +
-    BigInt(interfaceFee)
+    BigInt(interfaceFee) +
+    BigInt(orderFee)
 
   const priceImpactFee = sum(accumulations.map((a) => BigInt(a.priceImpactFee)))
   const displayFees = side === 'maker' ? fees : fees - priceImpactFee
   const pnl = value - fees
-  const collateralChange = BigInt(collateralChange_) + BigInt(interfaceFee) + BigInt(liquidationFee)
-  const collateral = BigOrZero(accumulations.at(-1)?.collateral) + BigInt(interfaceFee) + BigInt(liquidationFee)
+  const collateralChange = BigInt(collateralChange_) + BigInt(interfaceFee) + BigInt(orderFee) + BigInt(liquidationFee)
+  const collateral =
+    BigOrZero(accumulations.at(-1)?.collateral) + BigInt(interfaceFee) + BigInt(orderFee) + BigInt(liquidationFee)
   const valid = valid_ || ((delta ?? 0n) === 0n && collateralChange !== 0n)
 
   return (
