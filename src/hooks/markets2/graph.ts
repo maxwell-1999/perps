@@ -651,9 +651,9 @@ async function fetchSubPositions({
       const prevValid = self.find((u) => u.version < update.version && u.valid)
       const prevSide = prevValid ? side2(prevValid.newMaker, prevValid.newLong, prevValid.newShort) : PositionSide2.none
       const delta =
-        prevValid && update.valid
+        (prevValid && update.valid) || (prevValid && !update.valid && i === 0)
           ? magnitude_ - magnitude(prevValid.newMaker, prevValid.newLong, prevValid.newShort)
-          : BigInt(update.version) === startVersion || (i === self.length - 1 && startVersion === 1n)
+          : BigInt(update.version) === startVersion || i === self.length - 1
           ? magnitude_
           : null
 
@@ -673,7 +673,7 @@ async function fetchSubPositions({
         delta,
         accumulations,
         realizedValues,
-        collateralOnly: magnitude_ === 0n && BigOrZero(update.collateral) !== 0n,
+        collateralOnly: delta === 0n && BigOrZero(update.collateral) !== 0n,
       }
     })
 
