@@ -8,7 +8,6 @@ import {
   Flex,
   Link,
   Text,
-  useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
 
@@ -39,15 +38,16 @@ export const AllPositionsTable = ({
   positions,
   onClick,
   emptyStateMessage,
+  isBase,
 }: {
   positions: PositionTableData[]
   onClick?: (row: PositionTableData) => void
   emptyStateMessage: string
+  isBase?: boolean
 }) => {
   const { isMaker } = useMarketContext()
   const { background } = useStyles()
   const copy = usePositionManagerCopy()
-  const isBase = useBreakpointValue({ base: true, tableBreak: false })
 
   return (
     <Box>
@@ -147,7 +147,7 @@ const CurrentPositionsTableRow = ({
     pnl
   )
 
-  if (isBase) {
+  if (isBase !== undefined && isBase) {
     return (
       <AccordionItem>
         <AccordionButton height="50px">

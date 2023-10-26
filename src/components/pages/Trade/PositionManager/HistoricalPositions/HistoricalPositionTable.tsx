@@ -8,7 +8,6 @@ import {
   Flex,
   Link,
   Text,
-  useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
 
@@ -35,14 +34,15 @@ export const HistoricalPositionsTable = ({
   positions,
   onClick,
   emptyStateMessage,
+  isBase,
 }: {
   positions: HistoricalPosition[]
   onClick?: (row: HistoricalPosition) => void
   emptyStateMessage: string
+  isBase?: boolean
 }) => {
   const { background } = useStyles()
   const copy = usePositionManagerCopy()
-  const isBase = useBreakpointValue({ base: true, tableBreak: false })
 
   return (
     <Box>
@@ -128,7 +128,7 @@ const HistoricalPositionsTableRow = ({
     </RealizedAccumulationsTooltip>
   )
 
-  if (isBase) {
+  if (isBase !== undefined && isBase) {
     return (
       <AccordionItem>
         <AccordionButton height="50px">
