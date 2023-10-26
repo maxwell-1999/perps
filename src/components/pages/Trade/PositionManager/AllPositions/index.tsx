@@ -1,4 +1,3 @@
-import { useBreakpointValue } from '@chakra-ui/react'
 import React from 'react'
 
 import { LoadingScreen } from '@/components/shared/components'
@@ -13,7 +12,6 @@ function AllPositions() {
   const { address } = useAddress()
   const { positions: tableData, status } = useOpenPositionTableData()
   const handleRowClick = useHandleRowClick()
-  const isBase = useBreakpointValue({ base: true, tableBreak: false })
 
   if (!address) return <TableEmptyScreen message={connectWalletPositions} />
 
@@ -21,14 +19,7 @@ function AllPositions() {
     return <LoadingScreen />
   }
 
-  return (
-    <AllPositionsTable
-      positions={tableData}
-      onClick={handleRowClick}
-      emptyStateMessage={noCurrentPositions}
-      isBase={isBase}
-    />
-  )
+  return <AllPositionsTable positions={tableData} onClick={handleRowClick} emptyStateMessage={noCurrentPositions} />
 }
 
 export default AllPositions

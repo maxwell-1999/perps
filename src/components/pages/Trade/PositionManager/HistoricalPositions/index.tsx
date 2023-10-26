@@ -1,4 +1,4 @@
-import { Box, Flex, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Flex } from '@chakra-ui/react'
 import React from 'react'
 
 import { Button } from '@/components/design-system'
@@ -17,7 +17,7 @@ function AllPositions() {
   const copy = usePositionManagerCopy()
   const { address } = useAddress()
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, status } = useHistoricalPositions(isMaker)
-  const isBase = useBreakpointValue({ base: true, tableBreak: false })
+
   if (!address) return <TableEmptyScreen message={copy.connectWalletHistory} />
 
   if (status === 'loading') {
@@ -33,7 +33,7 @@ function AllPositions() {
   return (
     <Box>
       <Box>
-        <HistoricalPositionsTable positions={positions} emptyStateMessage={copy.noHistoryPositions} isBase={isBase} />
+        <HistoricalPositionsTable positions={positions} emptyStateMessage={copy.noHistoryPositions} />
       </Box>
       <Flex justifyContent="center" alignContent="center">
         {(hasNextPage || isLoading) && (
