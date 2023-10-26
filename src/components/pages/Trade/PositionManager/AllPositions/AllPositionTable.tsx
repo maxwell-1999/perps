@@ -121,7 +121,7 @@ const CurrentPositionsTableRow = ({
   const isPnlPositive = pnlData ? pnlData.livePnl >= 0n : true
   const pnlPercentage = formatBig6Percent(pnlData?.livePnlPercent ?? 0n)
   const pnl = formatBig6USDPrice(pnlData?.livePnl ?? 0n)
-  const closingOrFailed = row.isClosing || row.failedClose
+  const closingOrFailed = row.isClosing || row.failedClose || row.details.status === PositionStatus.syncError
   const direction = closingOrFailed ? row.details.side : row.details.nextSide
   const directionColor = direction === PositionSide2.long ? colors.brand.green : colors.brand.red
 

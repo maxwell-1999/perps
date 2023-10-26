@@ -113,7 +113,10 @@ const PositionTableRow = ({
   const copy = usePositionManagerCopy()
   const market = AssetMetadata[row.asset]
   const pnlData = usePnl2(row.details)
-  const isClosing = row.details.status === PositionStatus.closing
+  const isClosingOrFailed =
+    row.details.status === PositionStatus.closing ||
+    row.details.status === PositionStatus.syncError ||
+    row.details.status === PositionStatus.failed
 
   return (
     <Flex
@@ -127,7 +130,10 @@ const PositionTableRow = ({
           onClick={() => (onClick ? onClick(row) : undefined)}
           _hover={!onClick ? { textDecoration: 'none' } : undefined}
         >
-          <AssetDirectionLabel market={market} direction={isClosing ? row.details.side : row.details.nextSide} />
+          <AssetDirectionLabel
+            market={market}
+            direction={isClosingOrFailed ? row.details.side : row.details.nextSide}
+          />
         </Link>
       </Flex>
       <Flex flex="2" alignItems="center">
@@ -137,10 +143,10 @@ const PositionTableRow = ({
       <Flex flex="2">
         <Flex flexDirection="column">
           <Text fontSize="14px">
-            {!isClosing ? row.nextPosition : row.position} {row.asset.toUpperCase()}
+            {!isClosingOrFailed ? row.nextPosition : row.position} {row.asset.toUpperCase()}
           </Text>
           <Text variant="label" fontSize="12px">
-            {!isClosing ? row.nextNotional : row.notional}
+            {!isClosingOrFailed ? row.nextNotional : row.notional}
           </Text>
         </Flex>
       </Flex>
