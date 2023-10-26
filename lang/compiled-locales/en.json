@@ -1043,12 +1043,6 @@
       "value": "Available for deposit:"
     }
   ],
-  "J5cc23": [
-    {
-      "type": 0,
-      "value": "Close amount exceeds position size."
-    }
-  ],
   "JdkOCO": [
     {
       "type": 0,
@@ -1593,6 +1587,12 @@
     {
       "type": 0,
       "value": " to redeem your funds"
+    }
+  ],
+  "Ws3w50": [
+    {
+      "type": 0,
+      "value": "This order cannot execute currently."
     }
   ],
   "WxUahp": [

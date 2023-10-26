@@ -157,7 +157,7 @@ export const usePositionManagerCopy = () => {
     placed: intl.formatMessage({ defaultMessage: 'Placed' }),
     invalid: intl.formatMessage({ defaultMessage: 'Invalid' }),
     invalidOrderMsg: intl.formatMessage({
-      defaultMessage: 'Close amount exceeds position size.',
+      defaultMessage: 'This order cannot execute currently.',
     }),
     syncError: intl.formatMessage({ defaultMessage: 'Sync Error' }),
     syncErrorMessage: intl.formatMessage({
@@ -275,7 +275,7 @@ const orderIntToPositionSide = (orderSide: number) => {
     case 1:
       return PositionSide2.long
     case 2:
-      PositionSide2.short
+      return PositionSide2.short
     default:
       return PositionSide2.none
   }

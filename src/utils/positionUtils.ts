@@ -692,7 +692,7 @@ export const isOpenOrderValid = ({
   allOrders: FormattedOpenOrder[]
   userMarketSnapshot?: UserMarketSnapshot
 }) => {
-  if (!userMarketSnapshot || BigInt(order.details.order_delta) > 0n) return true
+  if (!userMarketSnapshot) return true
   const snapshotPosition = isFailedClose(userMarketSnapshot)
     ? userMarketSnapshot.magnitude
     : userMarketSnapshot.nextMagnitude

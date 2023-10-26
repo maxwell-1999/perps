@@ -42,7 +42,7 @@ export const HistoricalPositionsTable = ({
 }) => {
   const { background } = useStyles()
   const copy = usePositionManagerCopy()
-  const isBase = useBreakpointValue({ base: true, tableBreak: false })
+  const isBase = useBreakpointValue({ base: true, tableBreak: false }, { ssr: false })
 
   return (
     <Box>
