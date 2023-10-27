@@ -141,7 +141,7 @@ export function TriggerOrderForm({
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <PaddedContainer gap="13px" height="100%" p={noPadding ? 0 : 4} pb={noPadding ? 0 : 2} maxWidth="300px">
+      <PaddedContainer gap="13px" height="100%" p={noPadding ? 0 : 4} pb={noPadding ? 0 : 2}>
         <TriggerBetaMessage />
         <PositionDisplay position={userMarketSnapshot} orderDirection={orderDirection} />
         {selectedOrderType === OrderTypes.stopLoss && (

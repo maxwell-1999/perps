@@ -33,7 +33,7 @@ const EditOrderModal = ({ orderType, orderDirection, asset, onSubmit, onClose }:
   return (
     <Modal isOpen isCentered variant="confirmation" onClose={onClose}>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent maxWidth="350px">
         <ModalHeader pb={0}>
           <Text>{copy.editOrder(copy[orderType as OrderTypes.stopLoss | OrderTypes.takeProfit])}</Text>
         </ModalHeader>
@@ -44,6 +44,10 @@ const EditOrderModal = ({ orderType, orderDirection, asset, onSubmit, onClose }:
             userMarketSnapshot={userMarketSnapshot}
             orderDirection={orderDirection as PositionSide2.long | PositionSide2.short}
             selectedOrderType={orderType}
+            overrides={{
+              selectedMarket: asset,
+              selectedMarketSnapshot: marketSnapshot,
+            }}
           />
         </ModalBody>
         <ModalFooter />
