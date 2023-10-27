@@ -50,10 +50,9 @@ export const createAdjustment = ({
   const stopLoss = Big6Math.fromFloatString(orderValues?.stopLoss ?? '0')
   const takeProfit = Big6Math.fromFloatString(orderValues?.takeProfit ?? '0')
 
-  const positionDifference = calcPositionDifference(
-    triggerOrderSize ? triggerOrderSize : positionAmount,
-    currentPositionAmount,
-  )
+  const positionDifference = triggerOrderSize
+    ? -triggerOrderSize
+    : calcPositionDifference(positionAmount, currentPositionAmount)
 
   const positionPostTrigger = positionAmount - triggerOrderSize
 
