@@ -385,7 +385,7 @@ const OpenOrderTableRow = ({
           )}
         </Flex>
         <Flex flex="1.5" justifyContent="flex-end">
-          {orderType !== OrderTypes.limit && isValid ? (
+          {orderType !== OrderTypes.limit && isValid && !isCancelled ? (
             <IconButton
               bg="none"
               border="none"
