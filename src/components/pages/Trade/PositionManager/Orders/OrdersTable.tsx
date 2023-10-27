@@ -225,7 +225,8 @@ const OpenOrderTableRow = ({
   const orderType = getOrderTypeFromOrder(order)
 
   const userMarketSnapshot = snapshots2?.user?.[market]
-  const isValid = useMemo(
+  // TODO: If theres a limit open, we check this for edit if no open position
+  const { isValid, limitOpens, hasOpenPosition, pendingOrderSize } = useMemo(
     () =>
       isOpenOrderValid({
         allOrders,
@@ -262,6 +263,8 @@ const OpenOrderTableRow = ({
   )
 
   const onEdit = () => {
+    const overrides =
+      limitOpens === 1 && !hasOpenPosition ? { positionOverride: { positionSize: pendingOrderSize } } : {}
     setEditModalValues({
       orderDirection: side,
       asset: market,
@@ -270,6 +273,7 @@ const OpenOrderTableRow = ({
         market: marketAddress,
         nonce,
       },
+      ...overrides,
     })
   }
 
@@ -311,6 +315,8 @@ const OpenOrderTableRow = ({
     setIsEdited(true)
     setIsEditing(false)
   }
+
+  const canEdit = (hasOpenPosition || limitOpens === 1) && orderType !== OrderTypes.limit && isValid && !isCancelled
 
   return (
     <>
@@ -385,7 +391,7 @@ const OpenOrderTableRow = ({
           )}
         </Flex>
         <Flex flex="1.5" justifyContent="flex-end">
-          {orderType !== OrderTypes.limit && isValid && !isCancelled ? (
+          {canEdit ? (
             <IconButton
               bg="none"
               border="none"

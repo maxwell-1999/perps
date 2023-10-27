@@ -691,22 +691,22 @@ export const isOpenOrderValid = ({
   allOrders: FormattedOpenOrder[]
   userMarketSnapshot?: UserMarketSnapshot
 }) => {
-  if (!userMarketSnapshot) return true
+  if (!userMarketSnapshot) return { isValid: true, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: false }
   const snapshotPosition = isFailedClose(userMarketSnapshot)
     ? userMarketSnapshot.magnitude
     : userMarketSnapshot.nextMagnitude
 
   if (order.details.order_side === 3) {
     // TODO: collateral checks
-    return true
+    return { isValid: true, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: false }
   }
 
   const currentSide = isFailedClose(userMarketSnapshot) ? userMarketSnapshot.side : userMarketSnapshot.nextSide
 
   if (currentSide !== PositionSide2.none && order.side !== currentSide) {
-    return false
+    return { isValid: false, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: false }
   }
-
+  let limitOpens = 0
   const totalPendingOrderSize = allOrders.reduce((acc, pendingOrder) => {
     if (
       order.details.nonce === pendingOrder.details.nonce ||
@@ -717,8 +717,14 @@ export const isOpenOrderValid = ({
     ) {
       return acc
     }
+    limitOpens += 1
     return acc + BigInt(pendingOrder.details.order_delta)
   }, 0n)
 
-  return snapshotPosition >= (totalPendingOrderSize + BigInt(order.details.order_delta)) * -1n
+  return {
+    isValid: snapshotPosition >= (totalPendingOrderSize + BigInt(order.details.order_delta)) * -1n,
+    limitOpens,
+    pendingOrderSize: totalPendingOrderSize,
+    hasOpenPosition: !Big6Math.isZero(snapshotPosition),
+  }
 }

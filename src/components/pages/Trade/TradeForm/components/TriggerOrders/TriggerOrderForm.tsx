@@ -31,6 +31,7 @@ interface TriggerOrderFormProps {
   overrides?: {
     selectedMarket: SupportedAsset
     selectedMarketSnapshot?: MarketSnapshot
+    positionSize?: bigint
   }
   noPadding?: boolean
 }
@@ -82,7 +83,9 @@ export function TriggerOrderForm({
   const takeProfit = watch(FormNames.stopLoss)
   const triggerAmount = watch(FormNames.triggerAmount)
 
-  const positionSize = isFailedClose(userMarketSnapshot)
+  const positionSize = overrides?.positionSize
+    ? overrides.positionSize
+    : isFailedClose(userMarketSnapshot)
     ? userMarketSnapshot.magnitude
     : userMarketSnapshot.nextMagnitude
 
@@ -107,7 +110,7 @@ export function TriggerOrderForm({
     isLimit: false,
   })
   const triggerAmountValidator = useTriggerAmountValidators({
-    position: userMarketSnapshot.nextMagnitude,
+    position: positionSize,
   })
 
   const liquidationPrice = liquidationPriceData[orderDirection]
@@ -129,7 +132,7 @@ export function TriggerOrderForm({
   }
 
   const onClickMax = () => {
-    onChangeTriggerAmount(Big6Math.toFloatString(userMarketSnapshot.nextMagnitude))
+    onChangeTriggerAmount(Big6Math.toFloatString(positionSize))
   }
 
   const hasFormErrors = Object.keys(errors).length > 0
@@ -143,7 +146,7 @@ export function TriggerOrderForm({
     <Form onSubmit={handleSubmit(onSubmit)}>
       <PaddedContainer gap="13px" height="100%" p={noPadding ? 0 : 4} pb={noPadding ? 0 : 2}>
         <TriggerBetaMessage />
-        <PositionDisplay position={userMarketSnapshot} orderDirection={orderDirection} />
+        <PositionDisplay position={positionSize} orderDirection={orderDirection} asset={market} />
         {selectedOrderType === OrderTypes.stopLoss && (
           <>
             <Input
@@ -158,7 +161,9 @@ export function TriggerOrderForm({
               rightLabel={<IndexPriceLabel latestPrice={indexPrice} />}
               control={control}
             />
-            <PercentValueShortcuts percentValues={stopLossPercents} onPercentClick={onPercentClick} />
+            {!overrides?.positionSize && (
+              <PercentValueShortcuts percentValues={stopLossPercents} onPercentClick={onPercentClick} />
+            )}
             <DataRow
               label={copy.liquidationPrice}
               value={
@@ -197,7 +202,7 @@ export function TriggerOrderForm({
           rightLabel={
             <FormLabel mr={0} mb={0}>
               <Flex gap={1}>
-                <Text fontSize="12px">{formatBig6(userMarketSnapshot.nextMagnitude)}</Text>
+                <Text fontSize="12px">{formatBig6(positionSize)}</Text>
                 <Button
                   variant="text"
                   padding={0}

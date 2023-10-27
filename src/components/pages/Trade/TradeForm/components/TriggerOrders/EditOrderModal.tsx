@@ -18,9 +18,19 @@ export interface EditOrderModalProps {
     market: Address
     nonce: bigint
   }
+  positionOverride?: {
+    positionSize: bigint
+  }
 }
 
-const EditOrderModal = ({ orderType, orderDirection, asset, onSubmit, onClose }: EditOrderModalProps) => {
+const EditOrderModal = ({
+  orderType,
+  orderDirection,
+  asset,
+  onSubmit,
+  onClose,
+  positionOverride,
+}: EditOrderModalProps) => {
   const copy = useTradeFormCopy()
   const { snapshots2 } = useMarketContext()
   const userMarketSnapshot = snapshots2?.user?.[asset]
@@ -47,6 +57,7 @@ const EditOrderModal = ({ orderType, orderDirection, asset, onSubmit, onClose }:
             overrides={{
               selectedMarket: asset,
               selectedMarketSnapshot: marketSnapshot,
+              positionSize: positionOverride?.positionSize,
             }}
           />
         </ModalBody>
