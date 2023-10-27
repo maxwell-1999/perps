@@ -191,7 +191,7 @@ const AdjustPositionModal = memo(
             stopLoss: triggerOrder?.stopLoss,
             takeProfit: triggerOrder?.takeProfit,
             delta: delta ?? 0n,
-            settlementFee,
+            settlementFee: settlementFee || market.parameter.settlementFee,
             positionAbs: newPosition,
             selectedLimitComparison,
           })
@@ -203,7 +203,7 @@ const AdjustPositionModal = memo(
             interfaceFee,
             stopLoss: triggerOrder?.stopLoss,
             takeProfit: triggerOrder?.takeProfit,
-            settlementFee,
+            settlementFee: settlementFee || market.parameter.settlementFee,
           })
         }
         if (hash) {
