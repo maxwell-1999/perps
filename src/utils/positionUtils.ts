@@ -643,7 +643,7 @@ export const getOrderValuesFromPosition = ({
     market: marketSnapshot as MarketSnapshot,
     position: userMarketSnapshot as UserMarketSnapshot,
     asset: marketSnapshot.asset,
-    positionSide: userMarketSnapshot.nextSide,
+    positionSide: nextAmount === 0n ? userMarketSnapshot.side : userMarketSnapshot.nextSide,
     orderValues,
     positionDelta,
   }
