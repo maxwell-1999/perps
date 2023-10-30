@@ -3,6 +3,7 @@ import { Address } from 'viem'
 import colors from '@/components/design-system/theme/colors'
 import { FormattedOpenOrder } from '@/components/pages/Trade/PositionManager/hooks'
 import { OrderValues } from '@/components/pages/Trade/TradeForm/constants'
+import { calcMaxLeverage } from '@/components/pages/Trade/TradeForm/utils'
 import { PositionSide2, PositionStatus, SupportedAsset, TriggerComparison } from '@/constants/markets'
 import { SupportedChainId, interfaceFeeBps } from '@/constants/network'
 import { MaxUint256 } from '@/constants/units'
@@ -686,12 +687,15 @@ export const isOpenOrderValid = ({
   order,
   allOrders,
   userMarketSnapshot,
+  marketSnapshot,
 }: {
   order: FormattedOpenOrder
   allOrders: FormattedOpenOrder[]
   userMarketSnapshot?: UserMarketSnapshot
+  marketSnapshot?: MarketSnapshot
 }) => {
-  if (!userMarketSnapshot) return { isValid: true, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: false }
+  if (!userMarketSnapshot || !marketSnapshot)
+    return { isValid: true, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: false }
   const snapshotPosition = isFailedClose(userMarketSnapshot)
     ? userMarketSnapshot.magnitude
     : userMarketSnapshot.nextMagnitude
@@ -704,8 +708,29 @@ export const isOpenOrderValid = ({
   const currentSide = isFailedClose(userMarketSnapshot) ? userMarketSnapshot.side : userMarketSnapshot.nextSide
 
   if (currentSide !== PositionSide2.none && order.side !== currentSide) {
-    return { isValid: false, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: false }
+    return { isValid: false, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: snapshotPosition > 0n }
   }
+
+  if (BigInt(order.details.order_delta) > 0n) {
+    const { collateral } = userMarketSnapshot.local
+    // Subsitute 1n for collateral if none present to bypass 0 collateral check in calcLeverage
+    const collateralForCalc = collateral ? collateral : 1n
+    const {
+      riskParameter: { margin, minMargin },
+    } = marketSnapshot
+    const maxLeverage = calcMaxLeverage({ margin, minMargin, collateral })
+    const orderLeverage = Big6Math.toUnsafeFloat(
+      calcLeverage(BigInt(order.details.order_price), BigInt(order.details.order_delta), collateralForCalc),
+    )
+
+    return {
+      isValid: orderLeverage <= maxLeverage,
+      limitOpens: 0,
+      pendingOrderSize: 0n,
+      hasOpenPosition: snapshotPosition > 0n,
+    }
+  }
+
   let limitOpens = 0
   const totalPendingOrderSize = allOrders.reduce((acc, pendingOrder) => {
     if (

@@ -1,4 +1,10 @@
+import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
+import { getAddress } from 'viem'
+
+import { SupportedAsset, addressToAsset2 } from '@/constants/markets'
+import { useMarketContext } from '@/contexts/marketContext'
+import { OpenOrder, useOpenOrders } from '@/hooks/markets2'
 
 export const useAdjustmentModalCopy = () => {
   const intl = useIntl()
@@ -93,7 +99,33 @@ export const useAdjustmentModalCopy = () => {
     seconds: intl.formatMessage({ defaultMessage: 'seconds' }),
     limitPrice: intl.formatMessage({ defaultMessage: 'Limit Price' }),
     change: intl.formatMessage({ defaultMessage: 'Change' }),
+    cancelAllOrders: (asset: string) =>
+      intl.formatMessage(
+        {
+          defaultMessage: 'Cancel open {asset} orders',
+        },
+        { asset },
+      ),
+    toggleCancelOrders: intl.formatMessage({ defaultMessage: 'Toggle cancel orders' }),
   }
 }
 
 export type ModalCopy = ReturnType<typeof useAdjustmentModalCopy>
+
+export const useOpenOrdersForMarket = (market: SupportedAsset) => {
+  const { isMaker } = useMarketContext()
+  const { data: openOrderData } = useOpenOrders(isMaker)
+  const openOrders = useMemo(() => {
+    if (!openOrderData) {
+      return []
+    }
+    return openOrderData.pages
+      .map((page) => page?.openOrders)
+      .flat()
+      .filter((order) => {
+        return order && market === addressToAsset2(getAddress(order.market))
+      }) as OpenOrder[]
+  }, [openOrderData, market])
+
+  return openOrders
+}

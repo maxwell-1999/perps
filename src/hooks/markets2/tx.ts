@@ -1,7 +1,7 @@
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
-import { Address, Hex, zeroAddress } from 'viem'
+import { Address, Hex, getAddress, zeroAddress } from 'viem'
 import { useNetwork, useWalletClient } from 'wagmi'
 import { waitForTransaction } from 'wagmi/actions'
 
@@ -30,6 +30,7 @@ import { MultiInvoker2Action } from '@t/perennial'
 import { useMultiInvoker2, useUSDC } from '../contracts'
 import { useAddress, useChainId, usePyth } from '../network'
 import { useMarketOracles2, useMarketSnapshots2 } from './chain'
+import { OpenOrder } from './graph'
 
 export const useMarketTransactions2 = (productAddress: Address) => {
   const { chain } = useNetwork()
@@ -85,6 +86,7 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     stopLoss,
     takeProfit,
     settlementFee,
+    cancelOrderDetails,
   }: {
     txHistoryLabel?: string
     collateralDelta?: bigint
@@ -94,10 +96,17 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     stopLoss?: bigint
     takeProfit?: bigint
     settlementFee?: bigint
+    cancelOrderDetails?: OpenOrder[]
   } = {}) => {
     if (!address || !chainId || !walletClient || !marketOracles || !pyth) {
       return
     }
+
+    const cancelOrders = cancelOrderDetails?.length
+      ? cancelOrderDetails?.map(({ market, nonce }) =>
+          buildCancelOrder({ market: getAddress(market), nonce: BigInt(nonce) }),
+        )
+      : []
 
     const oracleInfo = Object.values(marketOracles).find((o) => o.marketAddress === productAddress)
     if (!oracleInfo) return
@@ -148,9 +157,13 @@ export const useMarketTransactions2 = (productAddress: Address) => {
       })
     }
 
-    const actions: MultiInvoker2Action[] = [updateAction, chargeFeeAction, stopLossAction, takeProfitAction].filter(
-      notEmpty,
-    )
+    const actions: MultiInvoker2Action[] = [
+      updateAction,
+      chargeFeeAction,
+      stopLossAction,
+      takeProfitAction,
+      ...cancelOrders,
+    ].filter(notEmpty)
 
     let isPriceStale = false
     if (asset && marketSnapshots?.market[asset]) {

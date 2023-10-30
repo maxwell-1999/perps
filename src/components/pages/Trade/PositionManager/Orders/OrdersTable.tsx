@@ -225,6 +225,7 @@ const OpenOrderTableRow = ({
   const orderType = getOrderTypeFromOrder(order)
 
   const userMarketSnapshot = snapshots2?.user?.[market]
+  const marketSnapshot = snapshots2?.market?.[market]
   // TODO: If theres a limit open, we check this for edit if no open position
   const { isValid, limitOpens, hasOpenPosition, pendingOrderSize } = useMemo(
     () =>
@@ -232,8 +233,9 @@ const OpenOrderTableRow = ({
         allOrders,
         order: order,
         userMarketSnapshot: userMarketSnapshot,
+        marketSnapshot,
       }),
-    [allOrders, order, userMarketSnapshot],
+    [allOrders, order, userMarketSnapshot, marketSnapshot],
   )
 
   const { waitForTransactionAlert } = useTransactionToasts()
@@ -316,7 +318,7 @@ const OpenOrderTableRow = ({
     setIsEditing(false)
   }
 
-  const canEdit = (hasOpenPosition || limitOpens === 1) && orderType !== OrderTypes.limit && isValid && !isCancelled
+  const canEdit = (hasOpenPosition || limitOpens > 0) && orderType !== OrderTypes.limit && isValid && !isCancelled
 
   return (
     <>

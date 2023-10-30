@@ -1241,6 +1241,20 @@
       "value": "APR"
     }
   ],
+  "Nq7X8u": [
+    {
+      "type": 0,
+      "value": "Cancel open "
+    },
+    {
+      "type": 1,
+      "value": "asset"
+    },
+    {
+      "type": 0,
+      "value": " orders"
+    }
+  ],
   "NuSlOR": [
     {
       "type": 0,
@@ -2811,6 +2825,12 @@
     {
       "type": 0,
       "value": "Native netting of longs and shorts, makers only cover the difference — capital efficiency at its finest."
+    }
+  ],
+  "xvXOBl": [
+    {
+      "type": 0,
+      "value": "Toggle cancel orders"
     }
   ],
   "xwSE21": [
