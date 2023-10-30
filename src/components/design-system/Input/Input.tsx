@@ -15,6 +15,7 @@ import {
   useColorModeValue,
   useTheme,
 } from '@chakra-ui/react'
+import { Property } from 'csstype'
 import { Control, Validate, useController } from 'react-hook-form'
 
 export interface InputProps extends ChakraInputProps {
@@ -102,9 +103,10 @@ interface PillProps extends BoxProps {
   text: string
   borderColor?: string
   color?: string
+  texttransform?: Property.TextTransform
 }
 
-export const Pill: React.FC<PillProps> = ({ text, color, borderColor, ...props }) => {
+export const Pill: React.FC<PillProps> = ({ text, color, borderColor, texttransform, ...props }) => {
   const theme = useTheme()
 
   const defaultColor = useColorModeValue(theme.colors.brand.blackAlpha[50], theme.colors.brand.whiteAlpha[50])
@@ -124,7 +126,7 @@ export const Pill: React.FC<PillProps> = ({ text, color, borderColor, ...props }
         fontSize="xs"
         lineHeight="1.2"
         fontWeight="bold"
-        textTransform="uppercase"
+        textTransform={texttransform ?? 'uppercase'}
         whiteSpace="nowrap"
         overflow="hidden"
         textOverflow="ellipsis"

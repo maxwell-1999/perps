@@ -528,7 +528,7 @@ function TradeForm(props: TradeFormProps) {
                         )}
                       </FormLabel>
                     }
-                    rightEl={<Pill text={assetMetadata.quoteCurrency} />}
+                    rightEl={<Pill text={assetMetadata.quoteCurrency} texttransform="none" />}
                     control={control}
                     name={FormNames.collateral}
                     onChange={(e) => onChangeCollateral(e.target.value)}

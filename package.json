@@ -45,6 +45,7 @@
     "abitype": "^0.8.11",
     "connectkit": "^1.2.3",
     "cookies-next": "^2.1.2",
+    "csstype": "^3.1.2",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
     "eslint": "8.39.0",
