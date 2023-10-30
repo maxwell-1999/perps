@@ -174,7 +174,7 @@ const PositionTableRow = ({
         <Status userMarketSnapshot={row.details} liquidated={!!pnlData?.liquidation} isMaker={isMaker} />
       </Flex>
       <Flex flex="1.5" justifyContent="flex-end">
-        {row.details.status === PositionStatus.failed && (
+        {row.details.status === PositionStatus.failed && !pnlData?.liquidation && (
           <RetryButton
             onClick={() => {
               const marketSnapshot = snapshots2?.market[row.details.asset]
