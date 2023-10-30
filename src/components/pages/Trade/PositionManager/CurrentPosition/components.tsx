@@ -8,8 +8,8 @@ import { NoticeTooltip } from '@/components/design-system/Tooltip'
 import { breakpoints } from '@/components/design-system/theme/styles'
 import { SocializationNotice } from '@/components/shared/components'
 import { PositionSide2 } from '@/constants/markets'
+import { useLivePriceContext } from '@/contexts/livePriceContext'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useChainLivePrices2 } from '@/hooks/markets2'
 import { formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
 import { isFailedClose } from '@/utils/positionUtils'
 
@@ -149,7 +149,7 @@ export const DesktopButtonContainer = styled(Flex)`
 export const PnlPositionDetail = ({ asDataRow }: { asDataRow?: boolean }) => {
   const copy = usePositionManagerCopy()
   const { userCurrentPosition, selectedMarketSnapshot2 } = useMarketContext()
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
   const failedClose = isFailedClose(userCurrentPosition)
   const pnlData = usePnl2(userCurrentPosition, selectedMarketSnapshot2, livePrices, failedClose)
 

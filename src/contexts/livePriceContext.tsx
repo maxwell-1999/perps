@@ -15,12 +15,12 @@ const initialPrices: LivePrices = {
 const LivePricesContext = createContext(initialPrices)
 
 export const LivePricesProvider = ({ children }: { children: React.ReactNode }) => {
-  const prices = useChainLivePrices2() // Assuming this hook now only handles fetching and state management
+  const prices = useChainLivePrices2()
 
   return <LivePricesContext.Provider value={prices}>{children}</LivePricesContext.Provider>
 }
 
-export const useLivePrices = () => {
+export const useLivePriceContext = () => {
   const context = useContext(LivePricesContext)
   if (!context) {
     throw new Error('useLivePrices must be used within a LivePricesProvider')

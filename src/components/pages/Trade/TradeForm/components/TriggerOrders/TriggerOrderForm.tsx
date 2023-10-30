@@ -9,8 +9,9 @@ import colors from '@/components/design-system/theme/colors'
 import { TxButton } from '@/components/shared/TxButton'
 import { Form } from '@/components/shared/components'
 import { PositionSide2, SupportedAsset } from '@/constants/markets'
+import { useLivePriceContext } from '@/contexts/livePriceContext'
 import { useMarketContext } from '@/contexts/marketContext'
-import { MarketSnapshot, UserMarketSnapshot, useChainLivePrices2 } from '@/hooks/markets2'
+import { MarketSnapshot, UserMarketSnapshot } from '@/hooks/markets2'
 import { Big6Math, formatBig6, formatBig6USDPrice } from '@/utils/big6Utils'
 import { usePrevious } from '@/utils/hooks'
 import { calcLiquidationPrice, isFailedClose } from '@/utils/positionUtils'
@@ -47,7 +48,7 @@ export function TriggerOrderForm({
   const copy = useTradeFormCopy()
   const { assetMetadata, selectedMarket, selectedMarketSnapshot2 } = useMarketContext()
   const prevSelectedOrderType = usePrevious(selectedOrderType)
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
 
   const market = overrides ? overrides.selectedMarket : selectedMarket
   const selectedMarketSnapshot = overrides ? overrides.selectedMarketSnapshot : selectedMarketSnapshot2

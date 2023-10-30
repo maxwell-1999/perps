@@ -9,6 +9,7 @@ import {
 } from '@/components/layout/TradeLayout'
 import { HeadWithLivePrices } from '@/components/shared/Head'
 import NavBar from '@/components/shared/NavBar'
+import { LivePricesProvider } from '@/contexts/livePriceContext'
 import { MarketProvider } from '@/contexts/marketContext'
 import { SettlementToastProvider } from '@/contexts/settlementToastContext'
 import { TradeFormProvider } from '@/contexts/tradeFormContext'
@@ -26,30 +27,32 @@ export default function Trade() {
   return (
     <MarketProvider>
       <TradeFormProvider>
-        <SettlementToastProvider>
-          <HeadWithLivePrices />
-          <TradeLayout>
-            <HeaderGridItem>
-              <NavBar />
-            </HeaderGridItem>
-            <MarketBarGridItem>
-              <MarketBar />
-            </MarketBarGridItem>
-            <FlexibleGridItem gridArea="tradeForm" desktopOnly>
-              <TradeForm />
-            </FlexibleGridItem>
-            <ChartGridItem>
-              <Chart />
-            </ChartGridItem>
-            <PositionManagerGridItem>
-              <PositionManager />
-            </PositionManagerGridItem>
-            <MobileTradeButtonsGridItem>
-              <MobileTradeButtons />
-            </MobileTradeButtonsGridItem>
-            <MobileTradeForm />
-          </TradeLayout>
-        </SettlementToastProvider>
+        <LivePricesProvider>
+          <SettlementToastProvider>
+            <HeadWithLivePrices />
+            <TradeLayout>
+              <HeaderGridItem>
+                <NavBar />
+              </HeaderGridItem>
+              <MarketBarGridItem>
+                <MarketBar />
+              </MarketBarGridItem>
+              <FlexibleGridItem gridArea="tradeForm" desktopOnly>
+                <TradeForm />
+              </FlexibleGridItem>
+              <ChartGridItem>
+                <Chart />
+              </ChartGridItem>
+              <PositionManagerGridItem>
+                <PositionManager />
+              </PositionManagerGridItem>
+              <MobileTradeButtonsGridItem>
+                <MobileTradeButtons />
+              </MobileTradeButtonsGridItem>
+              <MobileTradeForm />
+            </TradeLayout>
+          </SettlementToastProvider>
+        </LivePricesProvider>
       </TradeFormProvider>
     </MarketProvider>
   )

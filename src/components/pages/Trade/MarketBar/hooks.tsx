@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
+import { useLivePriceContext } from '@/contexts/livePriceContext'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useChainLivePrices2, useMarket7dData, useMarket24HrHighLow, useMarket24hrData } from '@/hooks/markets2'
+import { useMarket7dData, useMarket24HrHighLow, useMarket24hrData } from '@/hooks/markets2'
 import { Big6Math, formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
 import { calcLpUtilization, calcSkew, calcTakerLiquidity } from '@/utils/positionUtils'
 
@@ -41,7 +42,7 @@ export const useMarketBarCopy = () => {
 }
 
 export const useFormattedMarketBarValues = () => {
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
   const { selectedMarket: selectedMarket_, isMaker, selectedMarketSnapshot2, selectedMakerMarket } = useMarketContext()
 
   const selectedMarket = isMaker ? selectedMakerMarket : selectedMarket_

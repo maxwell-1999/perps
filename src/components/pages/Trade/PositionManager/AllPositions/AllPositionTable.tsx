@@ -15,8 +15,9 @@ import {
 import { Badge } from '@/components/design-system/Badge'
 import { AssetIconWithText } from '@/components/shared/components'
 import { AssetMetadata, PositionSide2, PositionStatus } from '@/constants/markets'
+import { useLivePriceContext } from '@/contexts/livePriceContext'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useActiveSubPositionHistory, useChainLivePrices2 } from '@/hooks/markets2'
+import { useActiveSubPositionHistory } from '@/hooks/markets2'
 import { notEmpty } from '@/utils/arrayUtils'
 import { BigOrZero, formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
 import { getOrderValuesFromPosition } from '@/utils/positionUtils'
@@ -113,7 +114,7 @@ const CurrentPositionsTableRow = ({
   isBase?: boolean
 }) => {
   const { isMaker, setOverrideValues, snapshots2 } = useMarketContext()
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
   const copy = usePositionManagerCopy()
   const { green, red, borderColor, alpha5, alpha50, alpha20 } = useStyles()
   const market = AssetMetadata[row.asset]
