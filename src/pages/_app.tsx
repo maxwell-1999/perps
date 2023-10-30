@@ -19,6 +19,7 @@ import { LocalDev } from '@/constants/auth'
 import { chains, wagmiConfig } from '@/constants/network'
 import { AuthStatusProvider, StartingAuthStatus, useAuthStatus } from '@/contexts/authStatusContext'
 import { ChainProvider } from '@/contexts/chainContext'
+import { GlobalErrorProvider } from '@/contexts/globalErrorContext'
 import '@/styles/globals.css'
 import { createAuthAdapter, getJwt, login } from '@/utils/authUtils'
 import { usePrevious } from '@/utils/hooks'
@@ -126,7 +127,9 @@ export default function App(props: AppProps) {
               <AuthStatusProvider>
                 <MixpanelProvider>
                   <DatadogProvider>
-                    <AppWithAuth {...props} />
+                    <GlobalErrorProvider>
+                      <AppWithAuth {...props} />
+                    </GlobalErrorProvider>
                   </DatadogProvider>
                 </MixpanelProvider>
               </AuthStatusProvider>

@@ -20,6 +20,7 @@ import { SupportedAsset } from '@/constants/markets'
 import { PositionSide2, PositionStatus, addressToAsset2, chainAssetsWithAddress } from '@/constants/markets'
 import { SupportedChainId } from '@/constants/network'
 import { MaxUint256 } from '@/constants/units'
+import { useGlobalErrorContext } from '@/contexts/globalErrorContext'
 import { notEmpty } from '@/utils/arrayUtils'
 import { Big6Math } from '@/utils/big6Utils'
 import { getMarketContract, getOracleContract, getPythProviderContract } from '@/utils/contractUtils'
@@ -134,6 +135,7 @@ export const useMarketSnapshots2 = (addressOverride?: Address) => {
   const pyth = usePyth()
   const providerUrl = useRPCProviderUrl()
   const address = addressOverride ?? address_ ?? zeroAddress
+  const { onPythError, resetPythError } = useGlobalErrorContext()
 
   return useQuery({
     queryKey: ['marketSnapshots2', chainId, address],
@@ -141,7 +143,15 @@ export const useMarketSnapshots2 = (addressOverride?: Address) => {
     queryFn: async () => {
       if (!address || !marketOracles) return
 
-      const snapshotData = await fetchMarketSnapshotsAfterSettle(chainId, address, marketOracles, providerUrl, pyth)
+      const snapshotData = await fetchMarketSnapshotsAfterSettle(
+        chainId,
+        address,
+        marketOracles,
+        providerUrl,
+        pyth,
+        onPythError,
+        resetPythError,
+      )
 
       const marketSnapshots = snapshotData.market.reduce((acc, snapshot) => {
         const major = Big6Math.max(snapshot.position.long, snapshot.position.short)
@@ -242,12 +252,16 @@ const fetchMarketSnapshotsAfterSettle = async (
   marketOracles: MarketOracles,
   providerUrl: string,
   pyth: EvmPriceServiceConnection,
+  onPythError: () => void,
+  resetPythError: () => void,
 ) => {
   const lensAddress = getContractAddress({ from: address, nonce: MaxUint256 })
   const priceCommitments = await buildCommitmentsForOracles({
     chainId,
     marketOracles: Object.values(marketOracles),
     pyth,
+    onError: onPythError,
+    onSuccess: resetPythError,
   })
 
   const marketAddresses = Object.values(marketOracles).map(({ marketAddress }) => marketAddress)

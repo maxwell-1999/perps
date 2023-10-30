@@ -1,4 +1,4 @@
-import { CloseIcon } from '@chakra-ui/icons'
+import { CloseIcon, WarningIcon } from '@chakra-ui/icons'
 import { Box, Flex, FlexProps, Spinner, Text, TextProps } from '@chakra-ui/react'
 import styled from '@emotion/styled'
 import Image from 'next/image'
@@ -244,6 +244,17 @@ export const StaleAfterMessage = ({ staleAfter }: { staleAfter: string }) => {
       <Text variant="label" fontSize="12px">
         {copy.staleAfterMessage(staleAfterSpan)}
       </Text>
+    </Flex>
+  )
+}
+
+export const PythErrorMessage = () => {
+  const intl = useIntl()
+  const pythError = intl.formatMessage({ defaultMessage: 'Error retrieving price from Pyth.' })
+  return (
+    <Flex height="100%" width="100%" justifyContent="center" alignItems="center">
+      <WarningIcon mr={2} height="13px" width="13px" color={colors.brand.red} />
+      <Text>{pythError}</Text>
     </Flex>
   )
 }

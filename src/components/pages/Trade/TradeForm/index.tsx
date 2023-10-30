@@ -1,9 +1,9 @@
-import { WarningIcon } from '@chakra-ui/icons'
-import { Container, Flex, Spinner, Text } from '@chakra-ui/react'
+import { Container, Spinner } from '@chakra-ui/react'
 
-import colors from '@/components/design-system/theme/colors'
+import { PythErrorMessage } from '@/components/shared/components'
 import { SupportedAsset } from '@/constants/markets'
 import { PositionSide2 } from '@/constants/markets'
+import { ErrorTypes, useGlobalErrorContext } from '@/contexts/globalErrorContext'
 import { useMarketContext } from '@/contexts/marketContext'
 import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 import { useAddress } from '@/hooks/network'
@@ -13,7 +13,7 @@ import ClosePositionForm from './components/ClosePositionForm'
 import TradeForm from './components/TradeForm'
 import WithdrawCollateralForm from './components/WithdrawCollateralForm'
 import { FormContainer } from './components/styles'
-import { useResetFormOnMarketChange, useSocializationAlert, useTradeFormCopy } from './hooks'
+import { useResetFormOnMarketChange, useSocializationAlert } from './hooks'
 import { getContainerVariant } from './utils'
 
 function TradeContainer({ isMobile }: { isMobile?: boolean }) {
@@ -28,10 +28,10 @@ function TradeContainer({ isMobile }: { isMobile?: boolean }) {
     userCurrentPosition,
   } = useMarketContext()
   const { address } = useAddress()
-  const copy = useTradeFormCopy()
 
   useResetFormOnMarketChange({ setTradeFormState, formState })
   useSocializationAlert()
+  const { error } = useGlobalErrorContext()
 
   const market = snapshots2?.market?.[isMaker ? selectedMakerMarket : selectedMarket]
 
@@ -41,13 +41,10 @@ function TradeContainer({ isMobile }: { isMobile?: boolean }) {
 
   const containerVariant = getContainerVariant(formState, !!closedOrResolved(userCurrentPosition?.status), !address)
 
-  if (formState === FormState.error) {
+  if (error === ErrorTypes.pyth) {
     return (
       <FormContainer variant={containerVariant}>
-        <Flex height="100%" width="100%" justifyContent="center" alignItems="center">
-          <WarningIcon mr={2} height="13px" width="13px" color={colors.brand.red} />
-          <Text>{copy.pythError}</Text>
-        </Flex>
+        <PythErrorMessage />
       </FormContainer>
     )
   }
