@@ -32,6 +32,9 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Generate types
+        env:
+          GRAPH_URL_ARBITRUM: ${{ secrets.GRAPH_URL_ARBITRUM }}
+          GRAPH_URL_ARBITRUM_2: ${{ secrets.GRAPH_URL_ARBITRUM_2 }}
         run: yarn gen:gql-typings && yarn gen:lens-artifact
 
       - name: Typecheck
