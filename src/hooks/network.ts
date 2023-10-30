@@ -18,7 +18,6 @@ import {
   isTestnet,
 } from '@/constants/network'
 import { useDefaultChain } from '@/contexts/chainContext'
-import { FormState, useTradeFormState } from '@/contexts/tradeFormContext'
 
 export const useAddress = () => {
   const { address: wagmiAddress } = useWagmiAccount()
@@ -118,19 +117,13 @@ export const usePyth = () => {
 const pythSubscriptions = new Map<string, EventEmitter>()
 export const usePythSubscription = (feedIds: string[]) => {
   const pyth = usePyth()
-  const { setTradeFormState, formState } = useTradeFormState()
   const key = feedIds.sort().join(',')
   if (!pythSubscriptions.has(key)) {
     const emitter = new EventEmitter()
     pyth.onWsError = () => {
-      if (formState !== FormState.error) {
-        setTradeFormState(FormState.error)
-      }
+      pythSubscriptions.delete(key)
     }
     pyth.subscribePriceFeedUpdates(feedIds, (updates) => {
-      if (formState === FormState.error) {
-        setTradeFormState(FormState.trade)
-      }
       emitter.emit('updates', updates)
     })
 
