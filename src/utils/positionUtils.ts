@@ -3,7 +3,6 @@ import { Address } from 'viem'
 import colors from '@/components/design-system/theme/colors'
 import { FormattedOpenOrder } from '@/components/pages/Trade/PositionManager/hooks'
 import { OrderValues } from '@/components/pages/Trade/TradeForm/constants'
-import { calcMaxLeverage } from '@/components/pages/Trade/TradeForm/utils'
 import { PositionSide2, PositionStatus, SupportedAsset, TriggerComparison } from '@/constants/markets'
 import { SupportedChainId, interfaceFeeBps } from '@/constants/network'
 import { MaxUint256 } from '@/constants/units'
@@ -714,17 +713,16 @@ export const isOpenOrderValid = ({
   if (BigInt(order.details.order_delta) > 0n) {
     const { collateral } = userMarketSnapshot.local
     // Subsitute 1n for collateral if none present to bypass 0 collateral check in calcLeverage
-    const collateralForCalc = collateral ? collateral : 1n
     const {
       riskParameter: { margin, minMargin },
     } = marketSnapshot
-    const maxLeverage = calcMaxLeverage({ margin, minMargin, collateral })
-    const orderLeverage = Big6Math.toUnsafeFloat(
-      calcLeverage(BigInt(order.details.order_price), BigInt(order.details.order_delta), collateralForCalc),
+    const reqMargin = Big6Math.max(
+      minMargin,
+      Big6Math.mul(calcNotional(BigInt(order.details.order_delta), BigInt(order.details.order_price)), margin),
     )
 
     return {
-      isValid: orderLeverage <= maxLeverage,
+      isValid: collateral >= reqMargin,
       limitOpens: 0,
       pendingOrderSize: 0n,
       hasOpenPosition: snapshotPosition > 0n,

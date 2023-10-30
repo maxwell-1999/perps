@@ -102,11 +102,13 @@ export const useMarketTransactions2 = (productAddress: Address) => {
       return
     }
 
-    const cancelOrders = cancelOrderDetails?.length
-      ? cancelOrderDetails?.map(({ market, nonce }) =>
-          buildCancelOrder({ market: getAddress(market), nonce: BigInt(nonce) }),
-        )
-      : []
+    let cancelOrders: { action: number; args: `0x${string}` }[] = []
+
+    if (cancelOrderDetails?.length) {
+      cancelOrders = cancelOrderDetails.map(({ market, nonce }) =>
+        buildCancelOrder({ market: getAddress(market), nonce: BigInt(nonce) }),
+      )
+    }
 
     const oracleInfo = Object.values(marketOracles).find((o) => o.marketAddress === productAddress)
     if (!oracleInfo) return
