@@ -5,9 +5,9 @@ import { Control, FieldError, FieldErrors, UseFormResetField, Validate } from 'r
 
 import { Container } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
-import { AssetMetadata, PositionSide2, TriggerComparison } from '@/constants/markets'
+import { AssetMetadata, PositionSide2, SupportedAsset, TriggerComparison } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
-import { UserMarketSnapshot, useChainLivePrices2 } from '@/hooks/markets2'
+import { useChainLivePrices2 } from '@/hooks/markets2'
 import { Big6Math, formatBig6 } from '@/utils/big6Utils'
 
 import { Button } from '@ds/Button'
@@ -338,13 +338,15 @@ const OptionalInputButton = ({ onClick, label }: { onClick: () => void; label: s
 
 export const PositionDisplay = ({
   position,
+  asset,
   orderDirection,
 }: {
-  position: UserMarketSnapshot
+  position: bigint
+  asset: SupportedAsset
   orderDirection: PositionSide2.long | PositionSide2.short
 }) => {
   const copy = useTradeFormCopy()
-  const market = AssetMetadata[position.asset]
+  const market = AssetMetadata[asset]
   const directionColor = orderDirection === PositionSide2.long ? colors.brand.green : colors.brand.red
   return (
     <Flex flexDirection="column" gap={2}>
@@ -364,8 +366,8 @@ export const PositionDisplay = ({
           <Box minHeight="22px" minWidth="22px">
             <Image src={market.icon} height={22} width={22} alt={market.name} />
           </Box>
-          <Text>{formatBig6(position.nextMagnitude)}</Text>
-          <Pill text={position.asset} />
+          <Text>{formatBig6(position)}</Text>
+          <Pill text={asset} />
         </Flex>
         <Text textTransform="capitalize" color={directionColor}>
           {orderDirection}

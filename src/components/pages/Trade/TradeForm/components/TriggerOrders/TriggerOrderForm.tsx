@@ -8,15 +8,15 @@ import { Input, Pill } from '@/components/design-system/Input'
 import colors from '@/components/design-system/theme/colors'
 import { TxButton } from '@/components/shared/TxButton'
 import { Form } from '@/components/shared/components'
-import { PositionSide2 } from '@/constants/markets'
+import { PositionSide2, SupportedAsset } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
-import { UserMarketSnapshot, useChainLivePrices2 } from '@/hooks/markets2'
+import { MarketSnapshot, UserMarketSnapshot, useChainLivePrices2 } from '@/hooks/markets2'
 import { Big6Math, formatBig6, formatBig6USDPrice } from '@/utils/big6Utils'
 import { usePrevious } from '@/utils/hooks'
 import { calcLiquidationPrice, isFailedClose } from '@/utils/positionUtils'
 
 import { FormNames, OrderTypes } from '../../constants'
-import { useTradeFormCopy } from '../../hooks'
+import { TradeFormValues, useTradeFormCopy } from '../../hooks'
 import { PaddedContainer, TriggerBetaMessage } from '../styles'
 import { useStopLossValidator, useTakeProfitValidators, useTriggerAmountValidators } from '../validatorHooks'
 import { PercentValueShortcuts, PositionDisplay } from './components'
@@ -27,23 +27,36 @@ interface TriggerOrderFormProps {
   selectedOrderType: OrderTypes
   userMarketSnapshot: UserMarketSnapshot
   orderDirection: PositionSide2.long | PositionSide2.short
-  latestPrice: bigint
-  onSubmit: (orderData: TriggerFormValues) => void
+  onSubmit: (orderData: TriggerFormValues | Partial<TradeFormValues>) => void
+  overrides?: {
+    selectedMarket: SupportedAsset
+    selectedMarketSnapshot?: MarketSnapshot
+    positionSize?: bigint
+  }
+  noPadding?: boolean
 }
 
 export function TriggerOrderForm({
   selectedOrderType,
   userMarketSnapshot,
   orderDirection,
-  latestPrice,
   onSubmit,
+  overrides,
+  noPadding,
 }: TriggerOrderFormProps) {
   const copy = useTradeFormCopy()
   const { assetMetadata, selectedMarket, selectedMarketSnapshot2 } = useMarketContext()
   const prevSelectedOrderType = usePrevious(selectedOrderType)
   const livePrices = useChainLivePrices2()
 
-  const indexPrice = livePrices[selectedMarket] ?? latestPrice ?? 0n
+  const market = overrides ? overrides.selectedMarket : selectedMarket
+  const selectedMarketSnapshot = overrides ? overrides.selectedMarketSnapshot : selectedMarketSnapshot2
+  const _latestPrice = overrides
+    ? overrides.selectedMarketSnapshot?.global.latestPrice
+    : selectedMarketSnapshot2?.global.latestPrice
+  const latestPrice = _latestPrice ?? 0n
+
+  const indexPrice = livePrices[market] ?? latestPrice ?? 0n
 
   const {
     handleSubmit,
@@ -70,12 +83,14 @@ export function TriggerOrderForm({
   const takeProfit = watch(FormNames.stopLoss)
   const triggerAmount = watch(FormNames.triggerAmount)
 
-  const positionSize = isFailedClose(userMarketSnapshot)
+  const positionSize = overrides?.positionSize
+    ? overrides.positionSize
+    : isFailedClose(userMarketSnapshot)
     ? userMarketSnapshot.magnitude
     : userMarketSnapshot.nextMagnitude
 
   const liquidationPriceData = calcLiquidationPrice({
-    marketSnapshot: selectedMarketSnapshot2,
+    marketSnapshot: selectedMarketSnapshot,
     collateral: userMarketSnapshot.local.collateral,
     position: positionSize,
   })
@@ -95,7 +110,7 @@ export function TriggerOrderForm({
     isLimit: false,
   })
   const triggerAmountValidator = useTriggerAmountValidators({
-    position: userMarketSnapshot.nextMagnitude,
+    position: positionSize,
   })
 
   const liquidationPrice = liquidationPriceData[orderDirection]
@@ -117,7 +132,7 @@ export function TriggerOrderForm({
   }
 
   const onClickMax = () => {
-    onChangeTriggerAmount(Big6Math.toFloatString(userMarketSnapshot.nextMagnitude))
+    onChangeTriggerAmount(Big6Math.toFloatString(positionSize))
   }
 
   const hasFormErrors = Object.keys(errors).length > 0
@@ -129,9 +144,9 @@ export function TriggerOrderForm({
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <PaddedContainer gap="13px" height="100%">
+      <PaddedContainer gap="13px" height="100%" p={noPadding ? 0 : 4} pb={noPadding ? 0 : 2}>
         <TriggerBetaMessage />
-        <PositionDisplay position={userMarketSnapshot} orderDirection={orderDirection} />
+        <PositionDisplay position={positionSize} orderDirection={orderDirection} asset={market} />
         {selectedOrderType === OrderTypes.stopLoss && (
           <>
             <Input
@@ -146,7 +161,9 @@ export function TriggerOrderForm({
               rightLabel={<IndexPriceLabel latestPrice={indexPrice} />}
               control={control}
             />
-            <PercentValueShortcuts percentValues={stopLossPercents} onPercentClick={onPercentClick} />
+            {!overrides?.positionSize && (
+              <PercentValueShortcuts percentValues={stopLossPercents} onPercentClick={onPercentClick} />
+            )}
             <DataRow
               label={copy.liquidationPrice}
               value={
@@ -185,7 +202,7 @@ export function TriggerOrderForm({
           rightLabel={
             <FormLabel mr={0} mb={0}>
               <Flex gap={1}>
-                <Text fontSize="12px">{formatBig6(userMarketSnapshot.nextMagnitude)}</Text>
+                <Text fontSize="12px">{formatBig6(positionSize)}</Text>
                 <Button
                   variant="text"
                   padding={0}

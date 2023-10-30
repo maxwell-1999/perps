@@ -1,4 +1,4 @@
-import { Flex, Text, useColorModeValue } from '@chakra-ui/react'
+import { Flex, Switch, Text, useColorModeValue } from '@chakra-ui/react'
 import { memo } from 'react'
 
 import { ModalDetailContainer } from '@/components/shared/ModalComponents'
@@ -210,3 +210,15 @@ export const PositionInfo = memo(
   },
   ({ frozen: preFrozen }, { frozen }) => frozen && preFrozen, // Force no re-renders based on prop changes if marked as frozen
 )
+
+export const CancelOpenOrdersToggle = ({ asset, onClick }: { asset: SupportedAsset; onClick: () => void }) => {
+  const copy = useAdjustmentModalCopy()
+  return (
+    <Flex alignItems="center" justifyContent="flex-end" gap={2} px={2} mb={2}>
+      <Text fontSize="12px" color={colors.brand.whiteAlpha[80]}>
+        {copy.cancelAllOrders(asset.toUpperCase())}
+      </Text>
+      <Switch variant="tradeForm" aria-label={copy.toggleCancelOrders} onChange={onClick} />
+    </Flex>
+  )
+}

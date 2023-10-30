@@ -1,7 +1,7 @@
 import { useAddRecentTransaction } from '@rainbow-me/rainbowkit'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
-import { Address, Hex, zeroAddress } from 'viem'
+import { Address, Hex, getAddress, zeroAddress } from 'viem'
 import { useNetwork, useWalletClient } from 'wagmi'
 import { waitForTransaction } from 'wagmi/actions'
 
@@ -30,6 +30,7 @@ import { MultiInvoker2Action } from '@t/perennial'
 import { useMultiInvoker2, useUSDC } from '../contracts'
 import { useAddress, useChainId, usePyth } from '../network'
 import { useMarketOracles2, useMarketSnapshots2 } from './chain'
+import { OpenOrder } from './graph'
 
 export const useMarketTransactions2 = (productAddress: Address) => {
   const { chain } = useNetwork()
@@ -85,6 +86,7 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     stopLoss,
     takeProfit,
     settlementFee,
+    cancelOrderDetails,
   }: {
     txHistoryLabel?: string
     collateralDelta?: bigint
@@ -94,9 +96,18 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     stopLoss?: bigint
     takeProfit?: bigint
     settlementFee?: bigint
+    cancelOrderDetails?: OpenOrder[]
   } = {}) => {
     if (!address || !chainId || !walletClient || !marketOracles || !pyth) {
       return
+    }
+
+    let cancelOrders: { action: number; args: `0x${string}` }[] = []
+
+    if (cancelOrderDetails?.length) {
+      cancelOrders = cancelOrderDetails.map(({ market, nonce }) =>
+        buildCancelOrder({ market: getAddress(market), nonce: BigInt(nonce) }),
+      )
     }
 
     const oracleInfo = Object.values(marketOracles).find((o) => o.marketAddress === productAddress)
@@ -148,9 +159,13 @@ export const useMarketTransactions2 = (productAddress: Address) => {
       })
     }
 
-    const actions: MultiInvoker2Action[] = [updateAction, chargeFeeAction, stopLossAction, takeProfitAction].filter(
-      notEmpty,
-    )
+    const actions: MultiInvoker2Action[] = [
+      updateAction,
+      chargeFeeAction,
+      stopLossAction,
+      takeProfitAction,
+      ...cancelOrders,
+    ].filter(notEmpty)
 
     let isPriceStale = false
     if (asset && marketSnapshots?.market[asset]) {
@@ -246,7 +261,6 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     }
   }
 
-  // TODO: onCancelOrder
   const onPlaceOrder = async ({
     orderType,
     limitPrice,
@@ -258,6 +272,7 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     settlementFee,
     positionAbs,
     selectedLimitComparison,
+    cancelOrderDetails,
   }: {
     orderType: OrderTypes
     limitPrice?: bigint
@@ -269,15 +284,22 @@ export const useMarketTransactions2 = (productAddress: Address) => {
     settlementFee: bigint
     positionAbs: bigint
     selectedLimitComparison?: TriggerComparison
+    cancelOrderDetails?: { market: Address; nonce: bigint }
   }) => {
     if (!address || !chainId || !walletClient || !marketOracles || !pyth) {
       return
     }
 
+    let cancelAction
     let updateAction
     let limitOrderAction
     let stopLossAction
     let takeProfitAction
+
+    if (cancelOrderDetails) {
+      cancelAction = buildCancelOrder(cancelOrderDetails)
+    }
+
     if (orderType === OrderTypes.limit && limitPrice) {
       if (collateralDelta) {
         updateAction = buildUpdateMarket({
@@ -321,9 +343,13 @@ export const useMarketTransactions2 = (productAddress: Address) => {
       })
     }
 
-    const actions: MultiInvoker2Action[] = [updateAction, limitOrderAction, stopLossAction, takeProfitAction].filter(
-      notEmpty,
-    )
+    const actions: MultiInvoker2Action[] = [
+      cancelAction,
+      updateAction,
+      limitOrderAction,
+      stopLossAction,
+      takeProfitAction,
+    ].filter(notEmpty)
 
     if (orderType === OrderTypes.limit && collateralDelta) {
       const oracleInfo = Object.values(marketOracles).find((o) => o.marketAddress === productAddress)
@@ -437,6 +463,7 @@ export const useCancelOrder = () => {
         triggerErrorToast({ title: errorToastCopy.error, message: errorToastCopy.errorCancelingOrder })
       }
       console.error(err)
+      throw new Error(err)
     }
   }
 

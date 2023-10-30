@@ -211,6 +211,7 @@ export function useTradeFormCopy() {
     triggerBetaMessage: intl.formatMessage({
       defaultMessage: 'Limit and SL/TP orders are currently in beta. Order execution is not guaranteed.',
     }),
+    editOrder: (orderType: string) => intl.formatMessage({ defaultMessage: 'Edit {orderType}' }, { orderType }),
   }
 }
 

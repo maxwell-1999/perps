@@ -32,8 +32,8 @@ import { Button } from '@ds/Button'
 import colors from '@ds/theme/colors'
 
 import { OrderTypes, OrderValues } from '../../constants'
-import { PositionInfo } from './components'
-import { useAdjustmentModalCopy } from './hooks'
+import { CancelOpenOrdersToggle, PositionInfo } from './components'
+import { useAdjustmentModalCopy, useOpenOrdersForMarket } from './hooks'
 import { createAdjustment, getOrderToastProps } from './utils'
 
 export interface AdjustmentModalProps {
@@ -53,6 +53,10 @@ export interface AdjustmentModalProps {
   isRetry?: boolean
   orderType?: OrderTypes
   selectedLimitComparison?: TriggerComparison
+  cancelOrderDetails?: {
+    nonce: bigint
+    market: Address
+  }
 }
 
 const AdjustPositionModal = memo(
@@ -72,6 +76,7 @@ const AdjustPositionModal = memo(
     isRetry,
     orderType,
     selectedLimitComparison,
+    cancelOrderDetails,
   }: AdjustmentModalProps) {
     const chainId = useChainId()
 
@@ -107,6 +112,7 @@ const AdjustPositionModal = memo(
     const copy = useAdjustmentModalCopy()
     const [needsUsdcApproval, setNeedsUsdcApproval] = useState(false)
     const [approveUsdcLoading, setApproveUsdcLoading] = useState(false)
+    const [cancelAllOpenOrders, setCancelAllOpenOrders] = useState(false)
     const [insufficientApproval, setInsufficientApproval] = useState(false)
     const [usdcApproved, setUsdcApproved] = useState(false)
     const [withdrawCollateralLoading, setWithdrawCollateralLoading] = useState(false)
@@ -118,9 +124,10 @@ const AdjustPositionModal = memo(
     const { track } = useMixpanel()
     const { isMaker } = useMarketContext()
     const { waitForTransactionAlert } = useTransactionToasts()
-
     const { market: marketAddress } = market
     const { onApproveUSDC, onModifyPosition, onPlaceOrder } = useMarketTransactions2(marketAddress)
+    const openOrders = useOpenOrdersForMarket(asset)
+    const showCancelOrderToggle = openOrders.length > 0 && prevPosition !== 0n && newPosition === 0n
 
     useEffect(() => {
       if (needsApproval) {
@@ -194,6 +201,7 @@ const AdjustPositionModal = memo(
             settlementFee: settlementFee || market.parameter.settlementFee,
             positionAbs: newPosition,
             selectedLimitComparison,
+            cancelOrderDetails,
           })
         } else {
           hash = await onModifyPosition({
@@ -204,6 +212,7 @@ const AdjustPositionModal = memo(
             stopLoss: triggerOrder?.stopLoss,
             takeProfit: triggerOrder?.takeProfit,
             settlementFee: settlementFee || market.parameter.settlementFee,
+            cancelOrderDetails: cancelAllOpenOrders ? openOrders : undefined,
           })
         }
         if (hash) {
@@ -284,7 +293,6 @@ const AdjustPositionModal = memo(
         setWithdrawCollateralLoading(false)
       }
     }
-
     const showWithdrawButton = isWithdrawing || requiresTwoStep || step === 2
     const showSettlementStep = requiresTwoStep || isSettlementCompleted
 
@@ -342,6 +350,9 @@ const AdjustPositionModal = memo(
                   isLoading={awaitingSettlement}
                   isCompleted={isSettlementCompleted}
                 />
+              )}
+              {showCancelOrderToggle && (
+                <CancelOpenOrdersToggle asset={asset} onClick={() => setCancelAllOpenOrders(!cancelAllOpenOrders)} />
               )}
               {!isWithdrawing ? (
                 <PositionInfo

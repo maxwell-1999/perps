@@ -643,7 +643,7 @@ export const getOrderValuesFromPosition = ({
     market: marketSnapshot as MarketSnapshot,
     position: userMarketSnapshot as UserMarketSnapshot,
     asset: marketSnapshot.asset,
-    positionSide: userMarketSnapshot.nextSide,
+    positionSide: nextAmount === 0n ? userMarketSnapshot.side : userMarketSnapshot.nextSide,
     orderValues,
     positionDelta,
   }
@@ -672,7 +672,6 @@ export const getOpenOrderLabel = ({
   if (isMaker) {
     return orderDelta > 0n ? 'limitOpen' : 'limitClose'
   }
-
   if (orderDelta > 0n) {
     return 'limitOpen'
   }
@@ -687,27 +686,50 @@ export const isOpenOrderValid = ({
   order,
   allOrders,
   userMarketSnapshot,
+  marketSnapshot,
 }: {
   order: FormattedOpenOrder
   allOrders: FormattedOpenOrder[]
   userMarketSnapshot?: UserMarketSnapshot
+  marketSnapshot?: MarketSnapshot
 }) => {
-  if (!userMarketSnapshot) return true
+  if (!userMarketSnapshot || !marketSnapshot)
+    return { isValid: true, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: false }
   const snapshotPosition = isFailedClose(userMarketSnapshot)
     ? userMarketSnapshot.magnitude
     : userMarketSnapshot.nextMagnitude
 
   if (order.details.order_side === 3) {
     // TODO: collateral checks
-    return true
+    return { isValid: true, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: false }
   }
 
   const currentSide = isFailedClose(userMarketSnapshot) ? userMarketSnapshot.side : userMarketSnapshot.nextSide
 
   if (currentSide !== PositionSide2.none && order.side !== currentSide) {
-    return false
+    return { isValid: false, limitOpens: 0, pendingOrderSize: 0n, hasOpenPosition: snapshotPosition > 0n }
   }
 
+  if (BigInt(order.details.order_delta) > 0n) {
+    const { collateral } = userMarketSnapshot.local
+    // Subsitute 1n for collateral if none present to bypass 0 collateral check in calcLeverage
+    const {
+      riskParameter: { margin, minMargin },
+    } = marketSnapshot
+    const reqMargin = Big6Math.max(
+      minMargin,
+      Big6Math.mul(calcNotional(BigInt(order.details.order_delta), BigInt(order.details.order_price)), margin),
+    )
+
+    return {
+      isValid: collateral >= reqMargin,
+      limitOpens: 0,
+      pendingOrderSize: 0n,
+      hasOpenPosition: snapshotPosition > 0n,
+    }
+  }
+
+  let limitOpens = 0
   const totalPendingOrderSize = allOrders.reduce((acc, pendingOrder) => {
     if (
       order.details.nonce === pendingOrder.details.nonce ||
@@ -718,8 +740,14 @@ export const isOpenOrderValid = ({
     ) {
       return acc
     }
+    limitOpens += 1
     return acc + BigInt(pendingOrder.details.order_delta)
   }, 0n)
 
-  return snapshotPosition >= (totalPendingOrderSize + BigInt(order.details.order_delta)) * -1n
+  return {
+    isValid: snapshotPosition >= (totalPendingOrderSize + BigInt(order.details.order_delta)) * -1n,
+    limitOpens,
+    pendingOrderSize: totalPendingOrderSize,
+    hasOpenPosition: !Big6Math.isZero(snapshotPosition),
+  }
 }
