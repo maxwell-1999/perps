@@ -57,11 +57,13 @@ export const buildCommitmentsForOracles = async ({
   pyth,
   marketOracles,
   onError,
+  onSuccess,
 }: {
   chainId: SupportedChainId
   pyth: EvmPriceServiceConnection
   marketOracles: { providerAddress: Address; providerId: Hex; minValidTime: bigint }[]
   onError?: () => void
+  onSuccess?: () => void
 }) => {
   try {
     const now = BigInt(nowSeconds())
@@ -72,7 +74,7 @@ export const buildCommitmentsForOracles = async ({
     // Get current VAAs for each price feed
     const priceFeedUpdateData = await getRecentVaa({ feeds: feedIds, pyth })
 
-    return Promise.all(
+    const commitments = Promise.all(
       Object.values(marketOracles).map(async ({ providerAddress, providerId, minValidTime }) => {
         const contract = getPythProviderContract(providerAddress, chainId)
         let updateData = priceFeedUpdateData.find(({ feedId }) => `0x${feedId}` === providerId)
@@ -115,6 +117,8 @@ export const buildCommitmentsForOracles = async ({
         }
       }),
     )
+    onSuccess?.()
+    return commitments
   } catch (err: any) {
     if (onError) {
       onError()

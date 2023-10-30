@@ -26,6 +26,7 @@ import { SupportedAsset, addressToAsset2 } from '@/constants/markets'
 import { SupportedChainId } from '@/constants/network'
 import { MaxUint256 } from '@/constants/units'
 import { PerennialVaultType, chainVaultsWithAddress } from '@/constants/vaults'
+import { useGlobalErrorContext } from '@/contexts/globalErrorContext'
 import { notEmpty, sum } from '@/utils/arrayUtils'
 import { Big6Math } from '@/utils/big6Utils'
 import { Big18Math } from '@/utils/big18Utils'
@@ -57,6 +58,7 @@ export const useVaultSnapshots2 = () => {
   const pyth = usePyth()
   const providerUrl = useRPCProviderUrl()
   const address = address_ ?? zeroAddress
+  const { onPythError, resetPythError } = useGlobalErrorContext()
 
   return useQuery({
     enabled: !!vaults && !!vaults.length && !!marketOracles,
@@ -64,7 +66,15 @@ export const useVaultSnapshots2 = () => {
     queryFn: async () => {
       if (!vaults || !vaults.length || !marketOracles) return
 
-      const snapshotData = await fetchVaultSnapshotsAfterSettle(chainId, address, marketOracles, providerUrl, pyth)
+      const snapshotData = await fetchVaultSnapshotsAfterSettle(
+        chainId,
+        address,
+        marketOracles,
+        providerUrl,
+        pyth,
+        onPythError,
+        resetPythError,
+      )
 
       const vaultSnapshots = snapshotData.vault.reduce((acc, vaultData) => {
         acc[vaultData.vaultType] = {
@@ -105,6 +115,8 @@ const fetchVaultSnapshotsAfterSettle = async (
   marketOracles: MarketOracles,
   providerUrl: string,
   pyth: EvmPriceServiceConnection,
+  onPythError: () => void,
+  resetPythError: () => void,
 ) => {
   const vaults = chainVaultsWithAddress(chainId)
   const vaultLensAddress = getContractAddress({ from: address, nonce: MaxUint256 - 1n })
@@ -115,6 +127,8 @@ const fetchVaultSnapshotsAfterSettle = async (
     chainId,
     marketOracles: Object.values(marketOracles),
     pyth,
+    onError: onPythError,
+    onSuccess: resetPythError,
   })
 
   const vaultAddresses = vaults.map(({ vaultAddress }) => vaultAddress)

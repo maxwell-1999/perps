@@ -211,9 +211,6 @@ export function useTradeFormCopy() {
     triggerBetaMessage: intl.formatMessage({
       defaultMessage: 'Limit and SL/TP orders are currently in beta. Order execution is not guaranteed.',
     }),
-    pythError: intl.formatMessage({
-      defaultMessage: 'Error retrieving price from Pyth.',
-    }),
   }
 }
 
