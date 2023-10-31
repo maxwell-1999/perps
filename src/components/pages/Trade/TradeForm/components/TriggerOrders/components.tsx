@@ -6,8 +6,8 @@ import { Control, FieldError, FieldErrors, UseFormResetField, Validate } from 'r
 import { Container } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
 import { AssetMetadata, PositionSide2, SupportedAsset, TriggerComparison } from '@/constants/markets'
+import { useLivePriceContext } from '@/contexts/livePriceContext'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useChainLivePrices2 } from '@/hooks/markets2'
 import { Big6Math, formatBig6 } from '@/utils/big6Utils'
 
 import { Button } from '@ds/Button'
@@ -47,7 +47,7 @@ export const LimitOrderInput = ({
 }: LimitOrderProps) => {
   const copy = useTradeFormCopy()
   const { selectedMarket } = useMarketContext()
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
   const currentPrice = Big6Math.toUnsafeFloat(livePrices[selectedMarket] ?? latestPrice)
   const willExecuteAsMarketOrder =
     selectedLimitComparison === TriggerComparison.lte
@@ -213,7 +213,7 @@ const TriggerOrderInput = ({
   const [percentChange, setPercentChange] = useState('0')
   const copy = useTradeFormCopy()
   const { selectedMarket } = useMarketContext()
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
   const indexPrice = livePrices[selectedMarket] ?? latestPrice ?? 0n
 
   useEffect(() => {

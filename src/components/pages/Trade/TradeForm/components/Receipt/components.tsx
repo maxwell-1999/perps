@@ -1,8 +1,9 @@
 import { Text } from '@chakra-ui/react'
 
 import { DataRow } from '@/components/design-system'
+import { useLivePriceContext } from '@/contexts/livePriceContext'
 import { useMarketContext } from '@/contexts/marketContext'
-import { MarketSnapshot, useChainLivePrices2 } from '@/hooks/markets2'
+import { MarketSnapshot } from '@/hooks/markets2'
 import { Big6Math, formatBig6Percent, formatBig6USDPrice } from '@/utils/big6Utils'
 import { calcEstExecutionPrice } from '@/utils/positionUtils'
 
@@ -18,7 +19,7 @@ interface EstimatedEntryRowProps {
 
 export function EstimatedEntryRows({ positionDelta, totalTradingFee, marketSnapshot }: EstimatedEntryRowProps) {
   const copy = useReceiptCopy()
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
   const { orderDirection, selectedMarketSnapshot2, selectedMarket } = useMarketContext()
   const close = positionDelta < 0n
 

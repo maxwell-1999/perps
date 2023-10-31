@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
 import { PositionSide2 } from '@/constants/markets'
+import { useLivePriceContext } from '@/contexts/livePriceContext'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useChainLivePrices2 } from '@/hooks/markets2'
 import { Big6Math, formatBig6USDPrice } from '@/utils/big6Utils'
 import { efficiency } from '@/utils/positionUtils'
 
@@ -369,7 +369,7 @@ export const useStopLossValidator = ({
   liquidationPrice: bigint
 }) => {
   const copy = useErrorMessages()
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
   const { selectedMarket } = useMarketContext()
   const indexPrice = livePrices[selectedMarket] ?? latestPrice ?? 0n
   const price = isLimit ? limitPrice : indexPrice
@@ -425,7 +425,7 @@ export const useTakeProfitValidators = ({
   limitPrice?: bigint
 }) => {
   const copy = useErrorMessages()
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
   const { selectedMarket } = useMarketContext()
   const indexPrice = livePrices[selectedMarket] ?? latestPrice ?? 0n
   const price = isLimit ? limitPrice : indexPrice

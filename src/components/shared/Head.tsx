@@ -1,8 +1,8 @@
 import NextHead from 'next/head'
 import { useIntl } from 'react-intl'
 
+import { useLivePriceContext } from '@/contexts/livePriceContext'
 import { useMarketContext } from '@/contexts/marketContext'
-import { useChainLivePrices2 } from '@/hooks/markets2'
 import { formatBig6USDPrice } from '@/utils/big6Utils'
 
 interface HeadProps {
@@ -35,7 +35,7 @@ export default function Head({ title, children, description }: HeadProps) {
 }
 
 export const HeadWithLivePrices = () => {
-  const livePrices = useChainLivePrices2()
+  const livePrices = useLivePriceContext()
   const { assetMetadata, selectedMarketSnapshot2, selectedMarket, isMaker, selectedMakerMarket } = useMarketContext()
   const { symbol } = assetMetadata
   const chainPrice = selectedMarketSnapshot2?.global?.latestPrice ?? 0n
