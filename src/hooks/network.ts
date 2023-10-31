@@ -10,7 +10,6 @@ import { useNetwork, usePublicClient, useAccount as useWagmiAccount } from 'wagm
 
 import {
   GraphUrls,
-  GraphUrls2,
   PythMainnetUrl,
   PythTestnetUrl,
   SupportedChainId,
@@ -90,16 +89,6 @@ export const useGraphClient = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return graphClients.get(chainId)!
-}
-
-const graphClients2 = new Map<SupportedChainId, GraphQLClient>()
-export const useGraphClient2 = () => {
-  const chainId = useChainId()
-
-  if (!graphClients2.has(chainId)) graphClients2.set(chainId, new GraphQLClient(GraphUrls2[chainId]))
-
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return graphClients2.get(chainId)!
 }
 
 const pythClients = {

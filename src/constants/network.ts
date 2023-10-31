@@ -55,12 +55,6 @@ export const wagmiConfig = createConfig({
 export const DefaultChain = chains[0]
 
 export const GraphUrls: { [chainId in SupportedChainId]: string } = {
-  [arbitrum.id]: process.env.NEXT_PUBLIC_GRAPH_URL_ARBITRUM ?? '',
-  [arbitrumGoerli.id]: process.env.NEXT_PUBLIC_GRAPH_URL_ARBITRUM_GOERLI ?? '',
-  [baseGoerli.id]: process.env.NEXT_PUBLIC_GRAPH_URL_BASE_GOERLI ?? '',
-}
-
-export const GraphUrls2: { [chainId in SupportedChainId]: string } = {
   [arbitrum.id]: process.env.NEXT_PUBLIC_GRAPH_URL_ARBITRUM_2 ?? '',
   [arbitrumGoerli.id]: process.env.NEXT_PUBLIC_GRAPH_URL_ARBITRUM_GOERLI_2 ?? '',
   [baseGoerli.id]: process.env.NEXT_PUBLIC_GRAPH_URL_BASE_GOERLI_2 ?? '',

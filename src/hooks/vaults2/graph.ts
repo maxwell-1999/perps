@@ -9,14 +9,14 @@ import { last7dBounds } from '@/utils/timeUtils'
 
 import { gql } from '@t/gql'
 
-import { useChainId, useGraphClient2 } from '../network'
+import { useChainId, useGraphClient } from '../network'
 import { useVaultSnapshots2 } from './chain'
 
 export type VaultAccumulations = NonNullable<Awaited<ReturnType<typeof useVaults7dAccumulations>>[number]['data']>
 export const useVaults7dAccumulations = () => {
   const chainId = useChainId()
   const { data: vaultSnapshots, isLoading: vaultSnapshotsLoading } = useVaultSnapshots2()
-  const graphClient = useGraphClient2()
+  const graphClient = useGraphClient()
   const vaults = chainVaultsWithAddress(chainId)
   const { data: blockNumber } = useBlockNumber()
 

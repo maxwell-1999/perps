@@ -9,7 +9,6 @@ import { MaxUint256 } from '@/constants/units'
 import { ProductSnapshotWithTradeLimitations } from '@/hooks/markets'
 import { MarketSnapshot, MarketSnapshots, UserMarketSnapshot } from '@/hooks/markets2'
 
-import { PositionSide } from '@t/gql/graphql'
 import { Position, PrePosition, ProductSnapshot, UserProductSnapshot } from '@t/perennial'
 
 import { Big6Math, formatBig6Percent } from './big6Utils'
@@ -32,11 +31,6 @@ export function size(pos: Position) {
 
 export function magnitude(maker: bigint | string, long: bigint | string, short: bigint | string) {
   return Big6Math.max(BigInt(maker), Big6Math.max(BigInt(long), BigInt(short)))
-}
-
-export function side(pos?: Position): PositionSide {
-  if (pos && pos.maker > 0n) return PositionSide.Maker
-  return PositionSide.Taker
 }
 
 export function side2(maker: bigint | string, long: bigint | string, short: bigint | string): PositionSide2 {

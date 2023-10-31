@@ -19,14 +19,14 @@ import { Day, Hour, last7dBounds, last24hrBounds, nowSeconds } from '@/utils/tim
 import { gql } from '@t/gql'
 import { MarketsAccountCheckpointsQuery, PositionSide } from '@t/gql/graphql'
 
-import { useAddress, useChainId, useGraphClient2 } from '../network'
+import { useAddress, useChainId, useGraphClient } from '../network'
 import { useMarketSnapshots2 } from './chain'
 
 export const useActivePositionMarketPnls = () => {
   const chainId = useChainId()
   const { data: marketSnapshots, isLoading: marketSnapshotsLoading, dataUpdatedAt } = useMarketSnapshots2()
   const { address } = useAddress()
-  const graphClient = useGraphClient2()
+  const graphClient = useGraphClient()
 
   return useQuery({
     queryKey: ['marketPnls2', chainId, address, dataUpdatedAt],
@@ -265,7 +265,7 @@ export const useActiveSubPositionHistory = (asset: SupportedAsset) => {
   const chainId = useChainId()
   const { data: marketSnapshots, isLoading: marketSnapshotsLoading } = useMarketSnapshots2()
   const { address } = useAddress()
-  const graphClient = useGraphClient2()
+  const graphClient = useGraphClient()
 
   return useInfiniteQuery({
     queryKey: ['activeSubPositionHistory', chainId, asset, address],
@@ -319,7 +319,7 @@ export const useHistoricalPositions = (maker: boolean) => {
   const chainId = useChainId()
   const markets = chainAssetsWithAddress(chainId)
   const { address } = useAddress()
-  const graphClient = useGraphClient2()
+  const graphClient = useGraphClient()
 
   return useInfiniteQuery({
     queryKey: ['historicalPositions', chainId, maker ? 'maker' : 'taker', address],
@@ -549,7 +549,7 @@ export const useHistoricalSubPositions = ({
   endVersion: string
 }) => {
   const chainId = useChainId()
-  const graphClient = useGraphClient2()
+  const graphClient = useGraphClient()
   const { address } = useAddress()
 
   return useInfiniteQuery({
@@ -709,7 +709,7 @@ const OpenOrdersPageSize = 1000
 export const useOpenOrders = (isMaker?: boolean) => {
   const chainId = useChainId()
   const { address } = useAddress()
-  const graphClient = useGraphClient2()
+  const graphClient = useGraphClient()
   const markets = chainAssetsWithAddress(chainId)
 
   return useInfiniteQuery({
@@ -749,7 +749,7 @@ export const useOpenOrders = (isMaker?: boolean) => {
 
 export const useMarket24hrData = (asset: SupportedAsset) => {
   const chainId = useChainId()
-  const graphClient = useGraphClient2()
+  const graphClient = useGraphClient()
   const market = ChainMarkets2[chainId][asset]
 
   return useQuery({
@@ -786,7 +786,7 @@ export const useMarket24hrData = (asset: SupportedAsset) => {
 
 export const useMarket7dData = (asset: SupportedAsset) => {
   const chainId = useChainId()
-  const graphClient = useGraphClient2()
+  const graphClient = useGraphClient()
   const market = ChainMarkets2[chainId][asset]
 
   return useQuery({
