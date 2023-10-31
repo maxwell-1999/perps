@@ -120,9 +120,6 @@ export const usePythSubscription = (feedIds: string[]) => {
   const key = feedIds.sort().join(',')
   if (!pythSubscriptions.has(key)) {
     const emitter = new EventEmitter()
-    pyth.onWsError = () => {
-      pythSubscriptions.delete(key)
-    }
     pyth.subscribePriceFeedUpdates(feedIds, (updates) => {
       emitter.emit('updates', updates)
     })
