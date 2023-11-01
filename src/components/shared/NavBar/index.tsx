@@ -24,7 +24,7 @@ function NavBar() {
   const copy = useNavCopy()
 
   return (
-    <Nav>
+    <Nav className="bg-[#232334] py-2 px-2 pr-3">
       <Flex>
         <HiddenOnMobile>
           <LinkSwitcher links={links} />
@@ -58,7 +58,6 @@ function NavBar() {
         </HiddenOnDesktop>
       </Flex>
       <ButtonGroup>
-        {(!address || overriding) && <SwitchNetworkButton />}
         <ConnectWalletButton />
       </ButtonGroup>
     </Nav>

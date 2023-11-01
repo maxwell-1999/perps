@@ -1,6 +1,6 @@
 const colors = {
   background: {
-    dark: '#0E0E0E',
+    dark: '#191B20',
     light: '#FFFFFF',
   },
   brand: {

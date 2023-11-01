@@ -24,7 +24,7 @@ const GridContainer = styled.div<{ isMaker?: boolean }>`
   grid-gap: 15px;
   min-height: 100dvh;
   width: 100%;
-  padding: 1.2rem;
+  padding: 0rem;
 
   grid-template-areas: ${mobileLayout};
   grid-template-columns: 1fr;

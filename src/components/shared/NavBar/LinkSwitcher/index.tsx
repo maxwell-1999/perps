@@ -18,7 +18,14 @@ const NavLink: React.FC<NavLinkProps> = ({ href, label, external }) => {
 
   return (
     <Link href={href} passHref target={external ? '_blank' : ''}>
-      <Button label={label} variant={isActive ? 'transparent' : 'text'} p={3} />
+      <button
+        className={`transition-all duration-300 text-4 text-f15  px-4 py-[4px] rounded-[8px] ${
+          isActive ? 'text-1 bg-3' : 'hover:bg-1 hover:text-1 hover:brightness-125'
+        } 
+        `}
+      >
+        {label}
+      </button>
     </Link>
   )
 }
@@ -30,7 +37,7 @@ interface LinkSwitcherProps {
 const LinkSwitcher: React.FC<LinkSwitcherProps> = ({ links }) => {
   const { home } = useNavCopy()
   return (
-    <ButtonGroup>
+    <ButtonGroup alignItems={'center'}>
       <Link href="/" passHref>
         <IconButton variant="invisible" aria-label={home} icon={<Logo />} mr={2} />
       </Link>

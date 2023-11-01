@@ -20,7 +20,8 @@
       "@utils/*": ["./src/utils/*"],
       "@public/*": ["./public/*"],
       "@t/*": ["./types/*"],
-      "@abi/*": ["./abi/*"]
+      "@abi/*": ["./abi/*"],
+      "@SvG/*": ["./src/SVG/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "./types/**/*"],
