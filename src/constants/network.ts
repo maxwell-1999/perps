@@ -30,7 +30,7 @@ export const isTestnet = (chainId?: number) =>
   chainId === goerli.id || chainId === arbitrumGoerli.id || chainId === baseGoerli.id
 
 export const { chains, publicClient } = configureChains(
-  [arbitrum, arbitrumGoerli],
+  [arbitrumGoerli],
   [alchemyProvider({ apiKey: AlchemyActiveKey }), publicProvider()],
   {
     batch: {
@@ -43,7 +43,7 @@ export const mainnetChains = [...chains.filter((c) => !isTestnet(c.id))] // TODO
 const { connectors } = getDefaultWallets({
   appName: 'Perennial Interface V2',
   projectId: WalletConnectProjectId,
-  chains: LocalDev ? chains : [...mainnetChains], // Only pass in mainnet chains to clean up the select modal. Testnets will still work
+  chains: chains, // Only pass in mainnet chains to clean up the select modal. Testnets will still work
 })
 
 export const wagmiConfig = createConfig({
