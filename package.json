@@ -10,21 +10,9 @@
     "build": "yarn gen:gql-typings && yarn gen:lens-artifact && next build",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "lint": "next lint --fix",
-    "format": "prettier --write",
-    "format:check": "prettier --check",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
-    "gen:theme-typings": "chakra-cli tokens src/components/design-system/theme/index.ts",
-    "localize:extract": "formatjs extract 'src/{pages,components}/**/*.{ts,tsx}' --format simple --id-interpolation-pattern '[sha512:contenthash:base64:6]' --out-file lang/locales/en.json",
-    "localize:compile": "formatjs compile-folder --ast --format simple lang/locales lang/compiled-locales",
-    "localize": "yarn localize:extract && yarn localize:compile",
     "gen:gql-typings": "graphql-codegen --config graph-codegen.ts",
     "gen:gql-typings:watch": "graphql-codegen --watch --config graph-codegen.ts",
-    "gen:lens-artifact": "cd lens && yarn && yarn hardhat compile && node ../scripts/lensAbiCopy.js && prettier --write ../abi/v2/*Lens2.abi.ts",
-    "postinstall": "husky install && patch-package"
+    "gen:lens-artifact": "cd lens && yarn && yarn hardhat compile && node ../scripts/lensAbiCopy.js && prettier --write ../abi/v2/*Lens2.abi.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.19",

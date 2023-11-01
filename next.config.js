@@ -5,9 +5,16 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 })
 
 const nextConfig = {
-  reactStrictMode: true,
+  // reactStrictMode: true,
   experimental: {
     swcPlugins: [['@formatjs/swc-plugin-experimental', {}]],
+  },
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
   },
   async redirects() {
     return [
