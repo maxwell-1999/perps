@@ -37,7 +37,7 @@ export default function Trade() {
               <MarketBarGridItem>
                 <MarketBar />
               </MarketBarGridItem>
-              <FlexibleGridItem gridArea="tradeForm" desktopOnly>
+              <FlexibleGridItem gridArea="tradeForm" desktopOnly >
                 <TradeForm />
               </FlexibleGridItem>
               <ChartGridItem>

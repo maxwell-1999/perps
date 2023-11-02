@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { arbitrum } from 'viem/chains'
 
-import Toggle from '@/components/shared/Toggle'
+import Toggle, { BuyTradeHeader } from '@/components/shared/Toggle'
 import { TxButton } from '@/components/shared/TxButton'
 import { FormattedBig6USDPrice, USDCETooltip } from '@/components/shared/components'
 import { Form } from '@/components/shared/components'
@@ -287,7 +287,7 @@ function TradeForm(props: TradeFormProps) {
   }
 
   const onClickMaxCollateral = () => {
-    onChangeCollateral(Big6Math.toFloatString(currentCollateral + Big6Math.fromDecimals(balances?.usdc ?? 0n, 6)))
+    return Big6Math.toFloatString(currentCollateral + Big6Math.fromDecimals(balances?.usdc ?? 0n, 6))
   }
 
   const positionDelta = useMemo(
@@ -391,69 +391,36 @@ function TradeForm(props: TradeFormProps) {
           {...modalProps}
         />
       )}
-      <PaddedContainer pb={3}>
-        <Flex justifyContent="space-between">
-          <Flex alignItems="center">
-            <Text color={textColor} mr={1}>
-              {hasPosition && positionStatus !== PositionStatus.closed
-                ? copy.modifyPosition
-                : isMaker
-                ? copy.Make
-                : copy.trade}
-            </Text>
-            {isMaker && (
-              <Link
-                href="https://docs.perennial.finance/protocol-design/advanced-lp"
-                target="_blank"
-                style={{
-                  display: 'flex',
-                  height: 'initial',
-                  color: textColor,
-                }}
-              >
-                <QuestionOutlineIcon cursor="pointer" height="12px" width="12px" />
-              </Link>
-            )}
-          </Flex>
-          {!!manualCommitment && (
-            <TxButton
-              variant="text"
-              label={copy.submitCommitment}
-              p={0}
-              lineHeight={1}
-              height="initial"
-              fontSize="13px"
-              color={textBtnColor}
-              _hover={{ color: textBtnHoverColor }}
-              onClick={onSubmitVaa}
-              loadingText={copy.submitCommitment}
-              actionAllowedInGeoblock
-            />
-          )}
-          {!!address && !Big6Math.isZero(currentCollateral) && (
-            <TxButton
-              variant="text"
-              label={copy.withdrawCollateral}
-              p={0}
-              lineHeight={1}
-              height="initial"
-              fontSize="13px"
-              color={textBtnColor}
-              _hover={{ color: textBtnHoverColor }}
-              onClick={onWithdrawCollateral}
-              isLoading={positionStatus === PositionStatus.closing}
-              loadingText={copy.withdrawCollateral}
-              actionAllowedInGeoblock
-            />
-          )}
-        </Flex>
-      </PaddedContainer>
-      <OrderTypeSelector
+      <Flex justifyContent="space-between" paddingX={3} marginTop={2}>
+        <BuyTradeHeader primary>
+          {hasPosition && positionStatus !== PositionStatus.closed
+            ? copy.modifyPosition
+            : isMaker
+            ? copy.Make
+            : copy.trade}
+        </BuyTradeHeader>
+        {!!manualCommitment && (
+          <TxButton
+            variant="text"
+            label={copy.submitCommitment}
+            p={0}
+            lineHeight={1}
+            height="initial"
+            fontSize="15px"
+            color={textBtnColor}
+            _hover={{ color: textBtnHoverColor }}
+            onClick={onSubmitVaa}
+            loadingText={copy.submitCommitment}
+            actionAllowedInGeoblock
+          />
+        )}
+      </Flex>
+      {/* <OrderTypeSelector
         onClick={setSelectedOrderType}
         selectedOrderType={selectedOrderType}
         hasPosition={hasPosition}
         isRestricted={isRestricted}
-      />
+      /> */}
       {triggerOrderTypes.includes(selectedOrderType) && position && !isMaker ? (
         <TriggerOrderForm
           selectedOrderType={selectedOrderType}
@@ -463,7 +430,7 @@ function TradeForm(props: TradeFormProps) {
         />
       ) : (
         <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
-          <PaddedContainer>
+          <div className="px-4">
             {geoblocked && !vpnDetected && <GeoBlockedMessage mb={4} />}
             {geoblocked && vpnDetected && <VpnDetectedMessage mb={4} />}
             {selectedOrderType !== OrderTypes.market && <TriggerBetaMessage mb={4} />}
@@ -504,6 +471,7 @@ function TradeForm(props: TradeFormProps) {
                     title={copy.collateral}
                     isDisabled={selectedOrderType === OrderTypes.limit && hasPosition}
                     placeholder="0.0000"
+                    max={onClickMaxCollateral}
                     rightLabel={
                       <FormLabel mr={0} mb={0}>
                         {!!address && (
@@ -513,21 +481,11 @@ function TradeForm(props: TradeFormProps) {
                             ) : (
                               <Text fontSize="12px">{userBalance}</Text>
                             )}
-                            <Button
-                              variant="text"
-                              padding={0}
-                              height="unset"
-                              label={copy.max}
-                              isDisabled={selectedOrderType === OrderTypes.limit && hasPosition}
-                              size="xs"
-                              textDecoration="underline"
-                              onClick={onClickMaxCollateral}
-                            />
                           </Flex>
                         )}
                       </FormLabel>
                     }
-                    rightEl={<Pill text={assetMetadata.quoteCurrency} texttransform="none" />}
+                    rightEl={<InputFollower>{assetMetadata.quoteCurrency}</InputFollower>}
                     control={control}
                     name={FormNames.collateral}
                     onChange={(e) => onChangeCollateral(e.target.value)}
@@ -538,6 +496,10 @@ function TradeForm(props: TradeFormProps) {
                     label={copy.amount}
                     labelColor="white"
                     placeholder="0.0000"
+                    max={() => {
+                      onChangeLeverage(maxLeverage + '')
+                      return null
+                    }}
                     rightLabel={
                       <FormLabel mr={0} mb={0}>
                         {notional > 0n && (
@@ -553,7 +515,7 @@ function TradeForm(props: TradeFormProps) {
                         )}
                       </FormLabel>
                     }
-                    rightEl={<Pill text={assetMetadata.baseCurrency} />}
+                    rightEl={<InputFollower>{assetMetadata.baseCurrency.toUpperCase()}</InputFollower>}
                     control={control}
                     name={FormNames.amount}
                     onChange={(e) => onChangeAmount(e.target.value)}
@@ -589,7 +551,7 @@ function TradeForm(props: TradeFormProps) {
                   validate={!!address ? leverageValidators : {}}
                 />
               )}
-              {!triggerOrderTypes.includes(selectedOrderType) && !isMaker && !hasPosition && (
+              {/* {!triggerOrderTypes.includes(selectedOrderType) && !isMaker && !hasPosition && (
                 <TriggerOrderInputGroup
                   validateStopLoss={stopPriceValidators}
                   validateTakeProfit={takeProfitValidators}
@@ -606,7 +568,7 @@ function TradeForm(props: TradeFormProps) {
                   isFormDirty={isDirty}
                   isLimit={isLimit}
                 />
-              )}
+              )} */}
             </Flex>
             <Flex height={6} width="100%" justifyContent="flex-end" px={2} mt={2}>
               {Object.keys(dirtyFields).length > 0 && (
@@ -624,11 +586,11 @@ function TradeForm(props: TradeFormProps) {
                 />
               )}
             </Flex>
-          </PaddedContainer>
-          <Divider mt="auto" />
-          <Flex flexDirection="column" p="16px">
+          </div>
+          {/* <Divider mt="auto" /> */}
+          <Flex flexDirection="column" px="16px" pb="10px">
             <TradeReceipt
-              mb="25px"
+              mb="12px"
               px="3px"
               product={market}
               positionDelta={positionDelta}
@@ -670,6 +632,23 @@ function TradeForm(props: TradeFormProps) {
               />
             )}
           </Flex>
+          {!!address && !Big6Math.isZero(currentCollateral) && (
+            <TxButton
+              variant="text"
+              label={copy.withdrawCollateral}
+              p={0}
+              lineHeight={1}
+              height="initial"
+              fontSize="13px"
+              className="hover:underline"
+              color={textBtnColor}
+              _hover={{ color: textBtnHoverColor }}
+              onClick={onWithdrawCollateral}
+              isLoading={positionStatus === PositionStatus.closing}
+              loadingText={copy.withdrawCollateral}
+              actionAllowedInGeoblock
+            />
+          )}
         </Form>
       )}
     </>
@@ -677,3 +656,9 @@ function TradeForm(props: TradeFormProps) {
 }
 
 export default TradeForm
+
+const InputFollower: React.FC<any> = ({ children }) => {
+  return <div className="!bg-[#303044] h-full text-f14 justify-center items-center w-[70px] flex">{children}</div>
+}
+
+export { InputFollower }

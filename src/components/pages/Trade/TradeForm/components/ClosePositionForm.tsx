@@ -21,6 +21,7 @@ import { useOnChangeHandlers, useStyles, useTradeFormCopy } from '../hooks'
 import { isFullClose } from '../utils'
 import AdjustPositionModal from './AdjustPositionModal'
 import { TradeReceipt } from './Receipt'
+import { InputFollower } from './TradeForm'
 import { FormOverlayHeader } from './styles'
 import { useCloseAmountValidator } from './validatorHooks'
 
@@ -165,7 +166,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
       )}
       <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
         <FormOverlayHeader title={copy.closePosition} onClose={() => setTradeFormState(FormState.trade)} />
-        <Flex flexDirection="column" px="16px" mb="12px" gap="12px">
+        <Flex flexDirection="column" px="16px" mt="15px" gap="12px">
           <Input
             name={FormNames.amount}
             label={copy.amount}
@@ -179,7 +180,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             }
             control={control}
             onChange={(e) => onChangeAmount(e.target.value)}
-            rightEl={<Pill text={assetMetadata.baseCurrency} />}
+            rightEl={<InputFollower>{assetMetadata.quoteCurrency}</InputFollower>}
             validate={amountValidator}
           />
           <Flex justifyContent="space-between">
@@ -187,8 +188,10 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
               <Button
                 variant="transparent"
                 fontSize="12px"
-                bg={percentBtnBg}
+                // bg={percentBtnBg}
                 key={value}
+                bg={'#282B39'}
+                border="none"
                 // eslint-disable-next-line formatjs/no-literal-string-in-jsx
                 label={`${value}%`}
                 mr={index === buttonPercentValues.length - 1 ? '0' : '8px'}
@@ -199,7 +202,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             ))}
           </Flex>
         </Flex>
-        <Divider mt="auto" />
+        {/* <Divider mt="auto" /> */}
         <Flex flexDirection="column" p="16px">
           <TradeReceipt
             mb="25px"

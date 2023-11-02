@@ -15,24 +15,23 @@ const mobileLayout = `
 const desktopLayout = `
   "header header"
   "marketBar marketBar"
-  "tradeForm chart"
-  "tradeForm positionManager"
+  "chart tradeForm"
+  "positionManager tradeForm"
 `
 
 const GridContainer = styled.div<{ isMaker?: boolean }>`
   display: grid;
-  grid-gap: 15px;
+  grid-gap: 0px;
   min-height: 100dvh;
   width: 100%;
   padding: 0rem;
-
   grid-template-areas: ${mobileLayout};
   grid-template-columns: 1fr;
   grid-template-rows: 54px 54px 350px 315px 79px;
-
+  background-color: #1c1c28;
   @media (min-width: ${breakpoints.md}) {
     grid-template-areas: ${desktopLayout};
-    grid-template-columns: 304px 1fr;
+    grid-template-columns: 1fr 304px;
     grid-template-rows: 54px 54px 1fr 230px;
   }
 
@@ -80,7 +79,11 @@ interface GridItemProps {
 
 export const FlexibleGridItem: React.FC<GridItemProps> = ({ children, gridArea, desktopOnly }) => {
   if (desktopOnly) {
-    return <DesktopOnlyGridItem gridArea={gridArea}>{children}</DesktopOnlyGridItem>
+    return (
+      <DesktopOnlyGridItem className="bg-transparent " gridArea={gridArea}>
+        {children}
+      </DesktopOnlyGridItem>
+    )
   }
   return <GridItem gridArea={gridArea}>{children}</GridItem>
 }

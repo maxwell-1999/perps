@@ -9,7 +9,7 @@ const Text = defineStyleConfig({
   },
   variants: {
     label: (props: StyleFunctionProps) => ({
-      color: mode(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])(props),
+      color: '#7F87A7',
       fontSize: '12px',
     }),
     tooltip: {

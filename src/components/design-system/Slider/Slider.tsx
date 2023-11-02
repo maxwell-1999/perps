@@ -3,6 +3,8 @@ import { Box, Flex, FlexProps, Text, useColorModeValue, useSlider } from '@chakr
 import React from 'react'
 import { Control, Validate, useController } from 'react-hook-form'
 
+import { BuyTradeHeader } from '@/components/shared/Toggle'
+
 import colors from '@ds/theme/colors'
 
 import { Button } from '../Button'
@@ -69,10 +71,8 @@ export const Slider: React.FC<Props> = ({
 
   return (
     <Flex flexDirection="column" {...containerProps}>
-      <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
-        <Text variant="label" color={labelColor}>
-          {label}
-        </Text>
+      <Flex justifyContent="space-between" px={1} alignItems="center">
+        <BuyTradeHeader>{label}</BuyTradeHeader>
         {rightLabel}
       </Flex>
       <Flex justifyContent="center">

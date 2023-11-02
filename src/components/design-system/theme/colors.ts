@@ -9,9 +9,9 @@ const colors = {
     darkGreen: '#49756A',
     red: '#ED6A5E',
     purple: {
-      240: '#EA5CF7',
-      250: '#dc5bea',
-      300: '#E254EF',
+      240: '#3772ff',
+      250: '#3772ff',
+      300: '#3772ff',
     },
     greenAlpha: { 10: 'rgba(62, 217, 164, 0.1)' },
     purpleAlpha: { 10: 'rgba(234, 92, 247, 0.1)', 30: 'rgba(234, 92, 247, 0.3)', 100: 'rgba(234, 92, 247, 1)' },

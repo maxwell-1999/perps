@@ -5,6 +5,7 @@ import Link from 'next/link'
 
 import { Container } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
+import { BuyTradeHeader } from '@/components/shared/Toggle'
 import { PositionSide2 } from '@/constants/markets'
 
 import { useStyles, useTradeFormCopy } from '../hooks'
@@ -17,12 +18,12 @@ export const FormOverlayHeader = ({ title, onClose }: { title: string; onClose: 
     <Flex
       justifyContent="space-between"
       px="16px"
-      py="14px"
-      mb="19px"
+      py="4px"
+      // mb="2px"
       alignItems="center"
       borderBottom={`1px dashed ${dashedBorderColor}`}
     >
-      <Text fontSize="17px">{title}</Text>
+      <BuyTradeHeader primary>{title}</BuyTradeHeader>
       <IconButton variant="text" icon={<CloseX />} aria-label={copy.closePosition} onClick={onClose} />
     </Flex>
   )
@@ -44,6 +45,7 @@ export const FormContainer = ({
     height={{ base: isMobile ? '100%' : '0px', xl: 'fit-content' }}
     minHeight={{ base: '100%', xl: 'initial' }}
     p="0"
+    background={'transparent'}
     variant={variant}
     overflowY="auto"
     {...props}

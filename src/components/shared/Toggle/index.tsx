@@ -1,4 +1,5 @@
 import { Button, ButtonGroup, Text, useColorModeValue } from '@chakra-ui/react'
+import { ReactNode } from 'react'
 
 import colors from '@/components/design-system/theme/colors'
 
@@ -35,25 +36,30 @@ function Toggle<T extends string>({
   const inactiveColor = useColorModeValue(colors.brand.blackAlpha[50], colors.brand.whiteAlpha[50])
 
   return (
-    <ButtonGroup isAttached display="flex" flex={1} height="35px">
+    <div className={'!w-full !p-[1.5px] !rounded-[5px]  relative  flex mx-auto  bg-[#282b39]'}>
       {labels.map((label, index) => (
-        <Button
-          key={label as string}
-          width="100%"
-          variant={label === activeLabel ? 'toggleActive' : 'toggleInactive'}
-          onClick={() => handleToggle(label)}
-          borderLeft={hideConnnectedBorder(index, 'left')}
-          borderRight={hideConnnectedBorder(index, 'right')}
-          // disable the button if the overrideValue prop is present and does not match this label
-          isDisabled={overrideValue !== undefined && label !== overrideValue}
+        <button
+          className={
+            '!w-full !py-[4px] !text-center !text-f14 !rounded-[5px] text-[#7F87A7]   px-[30px] sm:px-[20px]  pointer z-20 font-bold  ' +
+            (label === activeLabel ? 'bg-[#141823] text-1' : '')
+          }
+          disabled={overrideValue !== undefined && label !== overrideValue}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            handleToggle(label)
+          }}
         >
           <Text color={label === activeLabel ? activeColor : inactiveColor} textTransform="capitalize">
             {label}
           </Text>
-        </Button>
+        </button>
       ))}
-    </ButtonGroup>
+    </div>
   )
 }
 
 export default Toggle
+export const BuyTradeHeader: React.FC<{ children: ReactNode; primary?: boolean }> = ({ children, primary }) => {
+  return <div className={`text-[#7F87A7] text-[15px] mt-[2px] mb-[6px] ${!primary && 'text-[13px]'}`}>{children}</div>
+}

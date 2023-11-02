@@ -9,6 +9,7 @@ const tradeForm = definePartsStyle({
   container: {
     width: '22px',
   },
+  
   thumb: {
     height: '10px',
     width: '10px',

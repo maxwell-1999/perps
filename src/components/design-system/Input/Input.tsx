@@ -18,6 +18,8 @@ import {
 import { Property } from 'csstype'
 import { Control, Validate, useController } from 'react-hook-form'
 
+import { BuyTradeHeader } from '@/components/shared/Toggle'
+
 export interface InputProps extends ChakraInputProps {
   label?: string | React.ReactNode
   name: string
@@ -25,6 +27,7 @@ export interface InputProps extends ChakraInputProps {
   rightLabel?: React.ReactNode
   width?: FormControlProps['width']
   helperText?: string
+  max?: () => string | null
   isRequired?: boolean
   labelColor?: string
   pattern?: string
@@ -42,6 +45,7 @@ export const Input: React.FC<InputProps> = ({
   rightLabel,
   width,
   isRequired,
+  max,
   pattern,
   rightEl,
   validate,
@@ -61,16 +65,15 @@ export const Input: React.FC<InputProps> = ({
     control,
     rules: { required: isRequired, validate },
   })
+  console.log(`Input-inputHandlers: `, inputHandlers)
 
   return (
     <FormControl width={width} isInvalid={Boolean(error)}>
       {(label || rightLabel) && (
-        <Flex justifyContent="space-between" mb={2} px={1} alignItems="center">
+        <Flex justifyContent="space-between" px={1} alignItems="center">
           {typeof label === 'string' ? (
             <FormLabel m={0} htmlFor={id}>
-              <Text variant="label" color={labelColor}>
-                {label}
-              </Text>
+              <BuyTradeHeader>{label}</BuyTradeHeader>
             </FormLabel>
           ) : (
             label
@@ -78,7 +81,7 @@ export const Input: React.FC<InputProps> = ({
           {rightLabel && rightLabel}
         </Flex>
       )}
-      <InputGroup variant="trade" mb={0}>
+      <InputGroup variant="trade" overflow={'hidden'} mb={0} borderRadius={'md'}>
         {leftEl && <InputLeftElement pointerEvents="none">{leftEl}</InputLeftElement>}
         <ChakraInput
           id={id}
@@ -91,8 +94,27 @@ export const Input: React.FC<InputProps> = ({
           {...inputHandlers}
           ref={ref}
           {...inputProps}
+          background={'#282B39'}
+          className="!bg-[#282B39] !border-none"
         />
-        {rightEl && <InputRightElement pointerEvents="none">{rightEl}</InputRightElement>}
+        {rightEl && (
+          <InputRightElement>
+            {max && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  const returnedValue = max()
+                  if (returnedValue) inputHandlers.onChange(returnedValue)
+                }}
+                className="bg-[#141823] rounded-[6px] font-[500] px-3 py-2 text-f12 mr-3  transition-all -hover:translate-y-[2px] active:translate-y-[3px]"
+              >
+                Max
+              </button>
+            )}
+            {rightEl}
+          </InputRightElement>
+        )}
       </InputGroup>
       {error && !hideFieldError && <FormErrorMessage pl={1}>{error.message}</FormErrorMessage>}
     </FormControl>
