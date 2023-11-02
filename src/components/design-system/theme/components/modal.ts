@@ -14,7 +14,7 @@ const baseStyle = definePartsStyle({
 
 const confirmation = definePartsStyle((props) => ({
   dialog: {
-    bg: mode('white', colors.brand.blackSolid[10])(props),
+    bg: '#232334',
     border: `1px solid ${mode(colors.brand.blackAlpha[20], colors.brand.whiteAlpha[20])(props)}`,
     width: 'initial',
   },
