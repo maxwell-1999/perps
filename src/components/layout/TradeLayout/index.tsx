@@ -36,7 +36,7 @@ const GridContainer = styled.div<{ isMaker?: boolean }>`
   }
 
   @media (min-width: ${breakpoints.xl}) {
-    grid-template-columns: 350px 1fr;
+    grid-template-columns: 1fr 350px;
     grid-template-rows: auto auto 1fr 320px;
   }
 `
@@ -96,12 +96,23 @@ export const MarketBarGridItem: React.FC<GridItemProps> = ({ children }) => (
   <GridItem gridArea="marketBar">{children}</GridItem>
 )
 
-export const ChartGridItem: React.FC<GridItemProps> = ({ children }) => <GridItem gridArea="chart">{children}</GridItem>
+export const ChartGridItem: React.FC<GridItemProps> = ({ children }) => (
+  <GridItem gridArea="chart" className="!px-gapbw">
+    {children}
+  </GridItem>
+)
 
 export const PositionManagerGridItem: React.FC<GridItemProps> = ({ children }) => (
-  <GridItem gridArea="positionManager">{children}</GridItem>
+  <GridItem gridArea="positionManager" className="!bg-[#1c1c28] px-gapbw">
+    {children}
+  </GridItem>
 )
 
 export const MobileTradeButtonsGridItem: React.FC<GridItemProps> = ({ children }) => (
   <MobileFixedGridItem gridArea="mobileTradeButtons">{children}</MobileFixedGridItem>
 )
+
+// ctoaddtw
+// 141823j
+// 171722
+// 1c1c28

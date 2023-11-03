@@ -19,8 +19,9 @@ const line = definePartsStyle((props) => ({
     },
   },
   tablist: {
-    borderBottom: `1px solid`,
-    borderColor: 'inherit',
+    // borderBottom: `1px solid`,
+    // borderColor: 'inherit',
+    background: '#282B39',
   },
   tabpanel: {
     padding: '0px',
@@ -34,8 +35,8 @@ const line = definePartsStyle((props) => ({
     flexDirection: 'column',
     height: '100%',
     borderRadius: '6px',
-    background: mode(colors.brand.blackAlpha[5], colors.brand.whiteAlpha[5])(props),
-    border: `1px solid ${mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props)}`,
+    background: '#282B39',
+    // border: `1px solid ${mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props)}`,
   },
 }))
 

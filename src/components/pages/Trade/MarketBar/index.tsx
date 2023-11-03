@@ -34,7 +34,14 @@ export default function MarketBar() {
   const formattedValues = useFormattedMarketBarValues()
 
   return (
-    <Container display="flex" flexDirection="row" alignItems="center" height="100%">
+    <Container
+      display="flex"
+      flexDirection="row"
+      alignItems="center"
+      height="100%"
+      background={'#1c1c28'}
+      className="only-bottom-border"
+    >
       <ResponsiveFlex>
         <MarketContainer mr={{ base: 4, xs: 5, sm: 6 }} ml={0}>
           <MarketSelector />
@@ -105,17 +112,17 @@ export default function MarketBar() {
           <Stat
             label={
               <Flex gap={2} alignItems="center">
-                <Text whiteSpace="nowrap" fontSize="12px" color={colors.brand.whiteAlpha[50]}>
+                <Text whiteSpace="nowrap" fontSize="12px" color={'#82828F'}>
                   {copy.liquidity}
                 </Text>
                 <TooltipIcon
-                  color={colors.brand.whiteAlpha[50]}
+                  color={'#82828F'}
                   height="11px"
                   width="11px"
                   tooltipProps={{ placement: 'bottom' }}
                   tooltipText={
                     <Flex flexDirection="column" gap={2}>
-                      <Text fontSize="12px" color={colors.brand.whiteAlpha[50]}>
+                      <Text fontSize="12px" color={'#82828F'}>
                         {copy.totalLiquidity}
                       </Text>
                       <Text fontSize="14px">{formattedValues.totalLiquidity}</Text>

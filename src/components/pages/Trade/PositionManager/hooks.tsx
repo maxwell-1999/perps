@@ -38,7 +38,7 @@ export const useStyles = () => {
   const alpha20 = useColorModeValue(theme.colors.brand.blackAlpha[20], theme.colors.brand.whiteAlpha[20])
   const alpha10 = useColorModeValue(theme.colors.brand.blackAlpha[10], theme.colors.brand.whiteAlpha[10])
   // TODO: light color theme background
-  const background = useColorModeValue(theme.colors.brand.blackSolid[5], theme.colors.brand.blackSolid[5])
+  const background = '#141823'
   const green = theme.colors.brand.green
   const red = theme.colors.brand.red
   const purple = theme.colors.brand.purple[240]

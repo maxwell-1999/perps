@@ -28,12 +28,12 @@ function Chart() {
   }
 
   return (
-    <Tabs onChange={trackChartTab}>
-      <TabList>
+    <Tabs onChange={trackChartTab} className="!bg-[#1c1c28]">
+      <TabList className="!bg-[#1c1c28] !w-fit">
         <Tab>{priceChart}</Tab>
         <Tab>{marketInfo}</Tab>
       </TabList>
-      <TabPanels>
+      <TabPanels className="bg-[#171722]">
         <TabPanel display="flex" flexDirection="column" flex={1}>
           <Box height="100%" p={0}>
             <div id="tv-widget-container" style={{ height: '100%' }} ref={containerRef} />

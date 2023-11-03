@@ -24,7 +24,7 @@ function NavBar() {
   const copy = useNavCopy()
 
   return (
-    <Nav className="bg-[#232334] py-2 px-2 pr-3">
+    <Nav className="bg-[#232334] py-[4px] px-2 pr-3 pb-[1px] ">
       <Flex>
         <HiddenOnMobile>
           <LinkSwitcher links={links} />

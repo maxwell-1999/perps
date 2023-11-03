@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react'
 import CloseX from '@public/icons/close-x.svg'
 
+import DDArrow from '@/SVG/Elements/Arrow'
 import { AssetIconWithText } from '@/components/shared/components'
 import { AssetMetadata } from '@/constants/markets'
 import { useMarketContext } from '@/contexts/marketContext'
@@ -39,9 +40,11 @@ function MarketSelector() {
         <Button
           label={<AssetIconWithText market={isMaker ? AssetMetadata[selectedMakerMarket] : assetMetadata} />}
           variant="pairSelector"
-          rightIcon={<HamburgerIcon height="20px" width="20px" />}
+          rightIcon={<DDArrow className="scale-150" />}
           minWidth={{ base: '160px', xs: '179px' }}
+          className="!bg-transparent !border-none !min-w-[140px]"
         />
+        {/* <div>h</div> */}
       </PopoverTrigger>
       <PopoverContent width={{ base: '304px', xl: '400px' }}>
         <PopoverHeader>

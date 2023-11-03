@@ -4,10 +4,10 @@ const colors = {
     light: '#FFFFFF',
   },
   brand: {
-    green: '#68FAD7',
+    green: '#3fb68b',
     hoverGreen: '#50c9ab',
     darkGreen: '#49756A',
-    red: '#ED6A5E',
+    red: '#ff5353',
     purple: {
       240: '#3772ff',
       250: '#3772ff',

@@ -43,7 +43,7 @@ function TradeContainer({ isMobile }: { isMobile?: boolean }) {
 
   if (error === ErrorTypes.pyth) {
     return (
-      <FormContainer variant={containerVariant}>
+      <FormContainer className="!bg-[#1c1c28] !shadow-none !rounded-none only-left-border" variant={containerVariant}>
         <PythErrorMessage />
       </FormContainer>
     )
@@ -54,6 +54,7 @@ function TradeContainer({ isMobile }: { isMobile?: boolean }) {
       <Container
         height={{ base: '100%', xl: '650px' }}
         width="100%"
+        className="!bg-[#1c1c28] !shadow-none !rounded-none only-left-border"
         justifyContent="center"
         alignItems="center"
         variant={containerVariant}
@@ -64,7 +65,11 @@ function TradeContainer({ isMobile }: { isMobile?: boolean }) {
   }
 
   return (
-    <FormContainer variant={containerVariant} isMobile={isMobile}>
+    <FormContainer
+      variant={containerVariant}
+      isMobile={isMobile}
+      className="!shadow-none !rounded-none only-left-border"
+    >
       {[FormState.trade, FormState.modify].includes(formState) && (
         <TradeForm
           asset={isMaker ? (selectedMakerMarket as SupportedAsset) : selectedMarket}

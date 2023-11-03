@@ -95,10 +95,10 @@ export const Input: React.FC<InputProps> = ({
           ref={ref}
           {...inputProps}
           background={'#282B39'}
-          className="!bg-[#282B39] !border-none"
+          className="!bg-[#282B39] !border-none !h-[35px]"
         />
         {rightEl && (
-          <InputRightElement>
+          <InputRightElement className="!h-[35px]">
             {max && (
               <button
                 onClick={(e) => {
@@ -107,7 +107,7 @@ export const Input: React.FC<InputProps> = ({
                   const returnedValue = max()
                   if (returnedValue) inputHandlers.onChange(returnedValue)
                 }}
-                className="bg-[#141823] rounded-[6px] font-[500] px-3 py-2 text-f12 mr-3  transition-all -hover:translate-y-[2px] active:translate-y-[3px]"
+                className="bg-[#141823] rounded-[6px] font-[500] px-2 py-1 text-f12 mr-3  transition-all -hover:translate-y-[2px] active:translate-y-[3px]"
               >
                 Max
               </button>

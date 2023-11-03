@@ -59,7 +59,7 @@ module.exports = {
       shareModal: { max: '425px' },
     },
     colors: {
-      1: 'var(--text-1)',
+      1: '#fff',
       2: 'var(--text-2)',
       3: 'var(--text-3)',
       4: 'var(--text-4)',
@@ -147,6 +147,7 @@ module.exports = {
       6: '24px',
       7: '32px',
       8: '48px',
+      'gapbw': '7px'
     },
     borderRadius: {
       none: '0',

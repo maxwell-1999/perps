@@ -21,8 +21,8 @@ function PositionManager() {
   }
 
   return (
-    <Tabs isLazy index={activePositionTab} onChange={onChangePositionTab}>
-      <TabList>
+    <Tabs isLazy index={activePositionTab} onChange={onChangePositionTab} className="!bg-[#282b39]">
+      <TabList className="w-fit">
         <Tab>{copy.thisPosition}</Tab>
         <Tab>{copy.allPositions}</Tab>
         <Tab>{copy.orders}</Tab>

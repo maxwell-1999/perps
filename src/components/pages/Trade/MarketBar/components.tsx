@@ -24,7 +24,7 @@ export const Stat: React.FC<{
 }> = ({ label, value, valueColor }) => (
   <Flex flexDirection="column">
     {typeof label === 'string' ? (
-      <Text whiteSpace="nowrap" fontSize="12px" color={colors.brand.whiteAlpha[50]}>
+      <Text whiteSpace="nowrap" fontSize="12px" color={'#82828F'}>
         {label}
       </Text>
     ) : (
@@ -172,17 +172,19 @@ export const FundingRateStat = () => {
     <Stat
       label={
         <Flex gap={1}>
-          <Text variant="label">{copy.hourlyFunding}</Text>
+          <Text variant="label" className="!text-[#82828F]">
+            {copy.hourlyFunding}
+          </Text>
           <FundingRateDropdown options={options} selectedTimeFrame={selectedTimeFrame} onClick={setSelectedTimeFrame} />
         </Flex>
       }
       value={
         <Flex gap={1}>
-          <Text color={isLongNegative ? colors.brand.green : colors.brand.red}>
+          <Text color={isLongNegative ? '#3fb68b' : '#ff5353'}>
             {formatBig6Percent(longRate[selectedTimeFrame], { numDecimals: 4 })}
           </Text>
           <Text>{copy.slash}</Text>
-          <Text color={isShortNegative ? colors.brand.green : colors.brand.red}>
+          <Text color={isShortNegative ? '#3fb68b' : '#ff5353'}>
             {formatBig6Percent(shortRate[selectedTimeFrame], { numDecimals: 4 })}
           </Text>
         </Flex>

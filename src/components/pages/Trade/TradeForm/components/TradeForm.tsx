@@ -658,7 +658,7 @@ function TradeForm(props: TradeFormProps) {
 export default TradeForm
 
 const InputFollower: React.FC<any> = ({ children }) => {
-  return <div className="!bg-[#303044] h-full text-f14 justify-center items-center w-[70px] flex">{children}</div>
+  return <div className="!bg-[#303044] h-full text-f14 justify-center items-center w-[60px] flex">{children}</div>
 }
 
 export { InputFollower }

@@ -97,6 +97,7 @@ export const Slider: React.FC<Props> = ({
               _focusVisible={{
                 outline: `1px solid ${borderColor}`,
               }}
+              background={'#282B39'}
               {...thumbProps}
             >
               <Flex w="100%" h="100%" alignItems="center" justifyContent="center">

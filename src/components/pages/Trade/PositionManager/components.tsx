@@ -106,7 +106,14 @@ export const StatusCell = ({
 
 export const TableEmptyScreen = ({ message }: { message: string }) => {
   return (
-    <Flex alignItems="center" justifyContent="center" flexDirection="column" py={10} height="100%">
+    <Flex
+      alignItems="center"
+      className="!bg-[#171722]"
+      justifyContent="center"
+      flexDirection="column"
+      py={10}
+      height="100%"
+    >
       <Text mt={2} fontSize="15px" variant="label">
         {message}
       </Text>
