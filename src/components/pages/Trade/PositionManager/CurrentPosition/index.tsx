@@ -151,6 +151,7 @@ function CurrentPosition() {
                     size="sm"
                     leftIcon={<ClosePositionIcon />}
                     variant="transparent"
+                    className="grey-bg"
                     label={copy.close}
                     onClick={() => {
                       setTradeFormState(FormState.close)
@@ -318,6 +319,7 @@ function CurrentPosition() {
                   size="sm"
                   leftIcon={<ClosePositionIcon />}
                   variant="transparent"
+                  className="grey-bg"
                   label={copy.close}
                   onClick={() => setTradeFormState(FormState.close)}
                   isLoading={isClosing}

@@ -92,3 +92,7 @@ a {
   border-radius: 0px;
   border-bottom: 1px solid rgb(42, 42, 58) !important;
 }
+.grey-bg{
+  background: #2D2D3A !important;
+  border: none !important;
+}

@@ -214,7 +214,12 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             showLeverage
           />
           <ButtonGroup>
-            <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
+            <Button
+              label={copy.cancel}
+              variant="transparent"
+              className="grey-bg"
+              onClick={() => setTradeFormState(FormState.trade)}
+            />
             <TxButton
               formRef={formRef}
               flex={1}

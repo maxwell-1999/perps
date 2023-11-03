@@ -603,6 +603,7 @@ function TradeForm(props: TradeFormProps) {
               <ButtonGroup>
                 <Button
                   variant="transparent"
+                  className=" grey-bg"
                   label={copy.closePosition}
                   onClick={() => setTradeFormState(FormState.close)}
                 />

@@ -200,7 +200,12 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
             showLeverage
           />
           <ButtonGroup>
-            <Button label={copy.cancel} variant="transparent" onClick={() => setTradeFormState(FormState.trade)} />
+            <Button
+              label={copy.cancel}
+              className="grey-bg"
+              variant="transparent"
+              onClick={() => setTradeFormState(FormState.trade)}
+            />
             <TxButton
               formRef={formRef}
               flex={1}
