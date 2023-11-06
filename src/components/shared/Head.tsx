@@ -14,11 +14,11 @@ interface HeadProps {
 export default function Head({ title, children, description }: HeadProps) {
   const intl = useIntl()
   const defaultDescription = intl.formatMessage({
-    defaultMessage: 'Perennial is the defi-native derivatives platform for traders and developers.',
+    defaultMessage: 'Buffer Perpetual is your one-stop web app for Perpetual Trading ',
   })
   const perennialTitle = intl.formatMessage(
     {
-      defaultMessage: '{title} | Perennial',
+      defaultMessage: '{title} | Buffer Perpetual Trading',
     },
     { title },
   )
@@ -28,7 +28,7 @@ export default function Head({ title, children, description }: HeadProps) {
       <title>{perennialTitle}</title>
       <meta name="description" content={pageDescription} />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <link rel="icon" href="/logo.svg" />
+      {/* <link rel="icon" href="/logo.svg" /> */}
       {children}
     </NextHead>
   )
