@@ -43,11 +43,13 @@ export default function MarketBar() {
       className="only-bottom-border"
     >
       <ResponsiveFlex>
-        <MarketContainer ml={0}>
+        {/* <MarketContainer ml={0}> */}
+        <div className="mr-3">
           <MarketSelector />
-        </MarketContainer>
+        </div>
+        {/* </MarketContainer> */}
         <Flex>
-          <PriceContainer>
+          <PriceContainer width={'110px'}>
             <PriceText>{formattedValues.price}</PriceText>
           </PriceContainer>
           <DividerStyled orientation="vertical" />
