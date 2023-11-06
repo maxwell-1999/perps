@@ -24,7 +24,7 @@ function PositionManager() {
     const selectedTab = index === 0 ? copy.thisPosition : index === 1 ? copy.allPositions : copy.history
     track(TrackingEvents.changePositionManager, { selectedTab })
   }
-  const [hide, setHide] = useState(false)
+  const [hide, setHide] = useState(true)
   useEffect(() => {
     if (hide) {
       document.getElementById('root-layout-div')?.classList.add(hideClass)
@@ -32,17 +32,20 @@ function PositionManager() {
       document.getElementById('root-layout-div')?.classList.remove(hideClass)
     }
   }, [hide])
-  useEffect(() => {
+  // useEffect(() => {
+  //   if (hide) setHide(false)
+  // }, [activePositionTab, hide])
+  const tabClickHandler = () => {
     setHide(false)
-  }, [activePositionTab])
+  }
   return (
     <Tabs isLazy index={activePositionTab} onChange={onChangePositionTab} className="!bg-[#282b39]">
       <div className="flex justify-between w-full">
         <TabList className="w-fit">
-          <Tab>{copy.thisPosition}</Tab>
-          <Tab>{copy.allPositions}</Tab>
-          <Tab>{copy.orders}</Tab>
-          <Tab>{copy.history}</Tab>
+          <Tab onClick={tabClickHandler}>{copy.thisPosition}</Tab>
+          <Tab onClick={tabClickHandler}>{copy.allPositions}</Tab>
+          <Tab onClick={tabClickHandler}>{copy.orders}</Tab>
+          <Tab onClick={tabClickHandler}>{copy.history}</Tab>
         </TabList>
         <button
           className="flex items-center px-4 transition gap-x-2 text-f14 group"
