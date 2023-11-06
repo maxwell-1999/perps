@@ -103,6 +103,7 @@ export function TradeReceipt({
     positionDelta: positionDelta.positionDelta,
     side: isMaker ? PositionSide2.maker : orderDirection,
   })
+  console.log(`index-interfaceFee.interfaceFeeBps: `, interfaceFee.interfaceFeeBps)
 
   const nonImpactTradeFee = isMaker ? 0n : Big6Math.mul(product.parameter.positionFee, tradingFee.total)
 
@@ -191,6 +192,7 @@ export function TradeReceipt({
           />
         </>
       )}
+
       {isMaker && (
         <DataRow
           label={copy.tradingFee}

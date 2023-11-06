@@ -112,14 +112,22 @@ export const useMarketTransactions2 = (productAddress: Address) => {
 
     const oracleInfo = Object.values(marketOracles).find((o) => o.marketAddress === productAddress)
     if (!oracleInfo) return
+
     const asset = addressToAsset2(productAddress)
 
     // Interface fee
+    let chargeFeeAction;
     const interfaceFeeInfo = interfaceFeeBps[chainId]
-    let chargeFeeAction = buildInterfaceFee({
-      to: '0xfD43c3f8C22A63f3fA116EA5FaD4eF9b051D45aC',
-      amount: 20000000n,
-    })
+    if (interfaceFee && interfaceFeeInfo && interfaceFeeInfo.feeRecipientAddress !== zeroAddress) {
+      chargeFeeAction = buildInterfaceFee({
+        to: interfaceFeeInfo.feeRecipientAddress,
+        amount: interfaceFee,
+      })
+    }
+    // let chargeFeeAction = buildInterfaceFee({
+    //   to: '0xfD43c3f8C22A63f3fA116EA5FaD4eF9b051D45aC',
+    //   amount: 20000000n,
+    // })
 
     const updateAction = buildUpdateMarket({
       market: productAddress,

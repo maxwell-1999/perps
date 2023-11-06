@@ -50,7 +50,7 @@ export const VaultFactoryAddresses: AddressMapping = {
 
 export const OracleFactoryAddresses: AddressMapping = {
   [arbitrum.id]: getAddress('0x8CDa59615C993f925915D3eb4394BAdB3feEF413'),
-  [arbitrumGoerli.id]: getAddress('0xaf09499A04a9A7c6E1fD5320ebd86E1A817d6D80'),
+  [arbitrumGoerli.id]: getAddress('0xfD43c3f8C22A63f3fA116EA5FaD4eF9b051D45aC'),
   [baseGoerli.id]: zeroAddress,
 }
 

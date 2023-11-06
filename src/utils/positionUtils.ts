@@ -569,6 +569,7 @@ export function calcInterfaceFee({
   }
 
   const notional = calcNotional(positionDelta, latestPrice)
+  console.log(`notional: `, notional)
   const interfaceFee = Big6Math.mul(notional, feeInfo.feeAmount[side])
 
   return {
