@@ -30,7 +30,7 @@ export const isTestnet = (chainId?: number) =>
   chainId === goerli.id || chainId === arbitrumGoerli.id || chainId === baseGoerli.id
 
 export const { chains, publicClient } = configureChains(
-  [arbitrumGoerli],
+  [arbitrumGoerli,arbitrum],
   [alchemyProvider({ apiKey: AlchemyActiveKey }), publicProvider()],
   {
     batch: {
