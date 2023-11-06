@@ -54,8 +54,8 @@ export const AssetButton = (props: AssetButtonProps) => {
     <Button
       variant="pairDropdown"
       onClick={onClick}
-      bg={isSelected ? '#0E0E0E' : undefined}
-      _hover={isSelected ? {} : { bg: hoverColor }}
+      bg={isSelected ? '#191d2b' : undefined}
+      // _hover={isSelected ? {} : { bg: hoverColor }}
       label={<AssetButtonLabel {...assetMetaData} price={price} liquidity={liquidity} nameOverride={nameOverride} />}
     />
   )

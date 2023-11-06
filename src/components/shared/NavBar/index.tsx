@@ -24,11 +24,11 @@ function NavBar() {
   const copy = useNavCopy()
 
   return (
-    <Nav className="bg-[#232334] py-[4px] px-2 pr-3 pb-[1px] ">
+    <Nav className="bg-[#232334] py-[2px] pl-1 pr-3  ">
       <Flex>
         <HiddenOnMobile>
           <LinkSwitcher links={links} />
-          <V1Link />
+          {/* <V1Link /> */}
         </HiddenOnMobile>
         <HiddenOnDesktop>
           <IconButton aria-label={copy.menu} icon={<HamburgerIcon height="20px" width="20px" />} onClick={onOpen} />

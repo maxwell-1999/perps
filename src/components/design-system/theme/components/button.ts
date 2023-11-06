@@ -93,10 +93,8 @@ const Button: ComponentStyleConfig = {
       maxHeight: '57px',
       padding: '17px 21px',
       borderRadius: '0',
-      bg: mode(colors.brand.gray[300], colors.brand.gray[300])(props),
-      borderBottom: `1px solid ${mode(colors.brand.blackAlpha[10], colors.brand.whiteAlpha[10])(props)}`,
       _hover: {
-        bg: mode(colors.brand.gray[250], colors.brand.gray[250])(props),
+        bg: '#191d2b',
       },
       _last: {
         borderBottom: 'none',

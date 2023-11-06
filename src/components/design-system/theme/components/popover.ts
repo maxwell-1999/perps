@@ -9,7 +9,7 @@ const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpe
 const assetSelector = definePartsStyle((props) => ({
   content: {
     borderRadius: '6px',
-    background: mode(colors.brand.gray[300], colors.brand.gray[300])(props),
+    background: '#232334',
     border: `1px solid ${mode(colors.brand.blackAlpha[30], colors.brand.whiteAlpha[30])(props)}`,
     width: '304px',
   },

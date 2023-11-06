@@ -37,14 +37,14 @@ interface LinkSwitcherProps {
 const LinkSwitcher: React.FC<LinkSwitcherProps> = ({ links }) => {
   const { home } = useNavCopy()
   return (
-    <ButtonGroup alignItems={'center'}>
+    <div className="flex items-center gap-2">
       <Link href="/" passHref>
-        <IconButton variant="invisible" aria-label={home} icon={<Logo />} mr={2} />
+        <IconButton variant="invisible" className="scale-[1.1] !w-fit" aria-label={home} icon={<Logo />} />
       </Link>
       {links.map((link) => (
         <NavLink key={link.href} href={link.href} label={link.label} external={!!link.external} />
       ))}
-    </ButtonGroup>
+    </div>
   )
 }
 
