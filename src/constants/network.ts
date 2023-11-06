@@ -83,8 +83,8 @@ export const interfaceFeeBps: {
 } = {
   [arbitrumGoerli.id]: {
     feeAmount: {
-      [PositionSide2.short]: Big6Math.fromFloatString('0.05'), // 1bps
-      [PositionSide2.long]: Big6Math.fromFloatString('0.05'), // 1bps
+      [PositionSide2.short]: Big6Math.fromFloatString('0.005'), // 1bps
+      [PositionSide2.long]: Big6Math.fromFloatString('0.005'), // 1bps
       [PositionSide2.maker]: 0n,
       [PositionSide2.none]: 0n,
     },
@@ -92,8 +92,8 @@ export const interfaceFeeBps: {
   },
   [arbitrum.id]: {
     feeAmount: {
-      [PositionSide2.short]: 0n,
-      [PositionSide2.long]: 0n,
+      [PositionSide2.short]: Big6Math.fromFloatString('0.005'), // 1bps
+      [PositionSide2.long]: Big6Math.fromFloatString('0.005'),
       [PositionSide2.maker]: 0n,
       [PositionSide2.none]: 0n,
     },
