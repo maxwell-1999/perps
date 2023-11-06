@@ -43,7 +43,7 @@ export default function MarketBar() {
       className="only-bottom-border"
     >
       <ResponsiveFlex>
-        <MarketContainer ml={0} mr={3}>
+        <MarketContainer ml={0}>
           <MarketSelector />
         </MarketContainer>
         <Flex>

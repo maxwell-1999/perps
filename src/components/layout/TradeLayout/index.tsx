@@ -14,7 +14,7 @@ const mobileLayout = `
 
 const desktopLayout = `
   "header header"
-  "marketBar marketBar"
+  "marketBar tradeForm"
   "chart tradeForm"
   "positionManager tradeForm"
 `
