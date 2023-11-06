@@ -126,10 +126,11 @@ export const AccountDropdown: React.FC = () => {
                     direction="bottom"
                     position="initial"
                     align="end"
+                    className={'z-50'}
                     menuClassName={'!p-[0] !rounded-[10px] hover:!rounded-[10px] '}
                     offsetY={10}
                   >
-                    <div className={'!bg-[#232334] text-1 cursor-auto px-[5px] py-[3px]'}>
+                    <div className={'!bg-[#222233] rounded-[8px] text-1 cursor-auto px-[5px] py-[3px]'}>
                       <div className="mx-[10px] my-[10px] mb-[14px]">
                         <div className="flex items-center justify-between text-f14 mb-[20px]">
                           <div className="flex flex-col mr-4">

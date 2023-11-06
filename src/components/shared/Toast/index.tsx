@@ -20,8 +20,8 @@ export default function Toast({ title, body, onClose, error, titleColor }: Toast
   return (
     <Flex
       flexDirection="column"
-      bg={bg}
-      borderRadius="6px"
+      bg={'#232334'}
+      borderRadius="12px"
       p={3}
       border={error ? `1px solid ${colors.brand.red}` : 'none'}
       maxWidth="300px"

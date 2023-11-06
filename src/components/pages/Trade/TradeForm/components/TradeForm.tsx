@@ -1,11 +1,12 @@
 import { RepeatIcon } from '@chakra-ui/icons'
 import { QuestionOutlineIcon } from '@chakra-ui/icons'
-import { ButtonGroup, Divider, Flex, FormLabel, Text } from '@chakra-ui/react'
+import { ButtonGroup, Divider, Flex, FormLabel, Text, useToast } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { arbitrum } from 'viem/chains'
 
+import Toast, { ToastMessage } from '@/components/shared/Toast'
 import Toggle, { BuyTradeHeader } from '@/components/shared/Toggle'
 import { TxButton } from '@/components/shared/TxButton'
 import { FormattedBig6USDPrice, USDCETooltip } from '@/components/shared/components'
@@ -352,7 +353,12 @@ function TradeForm(props: TradeFormProps) {
     isLimit,
     limitPrice: Big6Math.fromFloatString(limitPrice),
   })
-
+  const toast = useToast()
+  const customHandler = () => {
+    toast({
+      render: ({ onClose }) => <Toast title={'herroe'} onClose={onClose} body={<ToastMessage message={'herello'} />} />,
+    })
+  }
   const notional = calcNotional(Big6Math.fromFloatString(amount), latestPrice)
   const userBalance = formatBig6USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
 
@@ -415,6 +421,7 @@ function TradeForm(props: TradeFormProps) {
           />
         )}
       </Flex>
+      <button onClick={customHandler}>Here</button>
       {/* <OrderTypeSelector
         onClick={setSelectedOrderType}
         selectedOrderType={selectedOrderType}
