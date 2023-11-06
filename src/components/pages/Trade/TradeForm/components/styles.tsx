@@ -21,6 +21,7 @@ export const FormOverlayHeader = ({ title, onClose }: { title: string; onClose: 
       py="4px"
       // mb="2px"
       alignItems="center"
+      fontWeight={'500'}
       borderBottom={`1px dashed ${dashedBorderColor}`}
     >
       <BuyTradeHeader primary>{title}</BuyTradeHeader>

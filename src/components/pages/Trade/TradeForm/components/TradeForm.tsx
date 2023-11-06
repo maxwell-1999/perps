@@ -465,6 +465,7 @@ function TradeForm(props: TradeFormProps) {
                 <>
                   <Input
                     key={FormNames.collateral}
+                    primary
                     // eslint-disable-next-line formatjs/no-literal-string-in-jsx
                     label={copy.collateral}
                     labelColor="white"

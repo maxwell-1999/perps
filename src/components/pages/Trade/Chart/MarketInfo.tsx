@@ -54,7 +54,7 @@ function MarketInfo() {
   const makerFeeMax = makerFee + makerImpactFee
 
   return (
-    <Flex flex={1} height="100%" alignItems="center" justifyContent="center">
+    <Flex flex={1} height="100%" alignItems="flex-start" justifyContent="center">
       <MarketInfoContent>
         <Flex
           flexDirection="column"

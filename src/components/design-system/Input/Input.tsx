@@ -31,6 +31,7 @@ export interface InputProps extends ChakraInputProps {
   isRequired?: boolean
   labelColor?: string
   pattern?: string
+  primary?:boolean;
   rightEl?: React.ReactNode
   leftEl?: React.ReactNode
   hideFieldError?: boolean
@@ -43,6 +44,7 @@ export const Input: React.FC<InputProps> = ({
   name,
   control,
   rightLabel,
+  primary,
   width,
   isRequired,
   max,
@@ -72,7 +74,7 @@ export const Input: React.FC<InputProps> = ({
         <Flex justifyContent="space-between" px={1} alignItems="center">
           {typeof label === 'string' ? (
             <FormLabel m={0} htmlFor={id}>
-              <BuyTradeHeader>{label}</BuyTradeHeader>
+              <BuyTradeHeader primary={primary}>{label}</BuyTradeHeader>
             </FormLabel>
           ) : (
             label
