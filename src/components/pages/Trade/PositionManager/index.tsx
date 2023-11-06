@@ -54,10 +54,8 @@ function PositionManager() {
           <DDArrow className={`transition scale group-hover:scale-150  ${!hide ? ' rotate-0' : 'rotate-180'}`} />
         </button>
       </div>
-      {/* // 141823j
-// 171722
-// 1c1c28 */}
-      <TabPanels className="bg-[#141823j]">
+
+      <TabPanels className="bg-[#1c1c28]">
         <TabPanel display="flex" flexDirection="column" flex={1}>
           <CurrentPosition />
         </TabPanel>
