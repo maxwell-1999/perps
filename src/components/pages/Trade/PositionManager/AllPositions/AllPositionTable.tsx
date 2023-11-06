@@ -150,8 +150,8 @@ const CurrentPositionsTableRow = ({
 
   if (isBase) {
     return (
-      <AccordionItem className="!bg-[#171722]">
-        <AccordionButton height="50px">
+      <AccordionItem className="!bg-[#171722] table-row-border">
+        <AccordionButton height="50px" className="">
           <Flex flexDirection="row" width="100%" justifyContent="space-between" alignItems="center">
             <Flex alignItems="center">
               <Link
@@ -237,7 +237,7 @@ const CurrentPositionsTableRow = ({
   }
 
   return (
-    <AccordionItem borderBottom="none" _hover={{ bg: hoverColor }} className="!bg-[#171722]">
+    <AccordionItem borderBottom="none" _hover={{ bg: hoverColor }} className="!bg-[#171722] table-row-border">
       <Box>
         <AccordionButton
           as="div"

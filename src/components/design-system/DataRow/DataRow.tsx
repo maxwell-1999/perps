@@ -30,7 +30,7 @@ export const DataRow: React.FC<DataRowProps & FlexProps> = ({
       {...props}
     >
       {typeof label === 'string' ? (
-        <Text variant="label" fontSize={labelSize}>
+        <Text variant="label" fontSize={labelSize} className="!font-[400]">
           {label}
         </Text>
       ) : (

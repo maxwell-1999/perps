@@ -36,7 +36,7 @@ const GridContainer = styled.div<{ isMaker?: boolean }>`
   }
 
   @media (min-width: ${breakpoints.xl}) {
-    grid-template-columns: 1fr 350px;
+    grid-template-columns: 1fr 275px;
     grid-template-rows: auto auto 1fr 320px;
   }
 `

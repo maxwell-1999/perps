@@ -153,7 +153,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
       )}
       <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
         <FormOverlayHeader title={copy.withdrawCollateral} onClose={() => setTradeFormState(FormState.trade)} />
-        <Flex flexDirection="column" px="16px" mt="15px" gap="12px">
+        <Flex flexDirection="column" className="px-gapbw" mb={4} mt="15px" gap="12px">
           <Input
             name={FormNames.collateral}
             label={copy.collateral}
@@ -189,7 +189,7 @@ function WithdrawCollateralForm({ position, product, asset }: WithdrawCollateral
           </Flex>
         </Flex>
         {/* <Divider mt="auto" /> */}
-        <Flex flexDirection="column" p="16px">
+        <Flex flexDirection="column" className="px-gapbw">
           <TradeReceipt
             mb="25px"
             px="3px"

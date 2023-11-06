@@ -130,7 +130,7 @@ const HistoricalPositionsTableRow = ({
 
   if (isBase) {
     return (
-      <AccordionItem className="!bg-[#171722]">
+      <AccordionItem className="!bg-[#171722] table-row-border">
         <AccordionButton height="50px">
           <Flex flexDirection="row" width="100%" justifyContent="space-between" alignItems="center">
             <Flex>
@@ -174,7 +174,7 @@ const HistoricalPositionsTableRow = ({
   }
 
   return (
-    <AccordionItem borderBottom="none" _hover={{ bg: hoverColor }} className="!bg-[#171722]">
+    <AccordionItem borderBottom="none" _hover={{ bg: hoverColor }} className="!bg-[#171722] table-row-borderu">
       <Box>
         <AccordionButton textAlign="left" _expanded={{ borderBottom: `1px solid ${borderColor}`, background: alpha5 }}>
           <Box flex="1">

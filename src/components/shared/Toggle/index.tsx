@@ -61,5 +61,9 @@ function Toggle<T extends string>({
 
 export default Toggle
 export const BuyTradeHeader: React.FC<{ children: ReactNode; primary?: boolean }> = ({ children, primary }) => {
-  return <div className={`text-[#7F87A7] text-[15px] mt-[2px] mb-[6px] ${!primary && 'text-[13px]'}`}>{children}</div>
+  return (
+    <div className={`text-[#7F87A7] text-[13px] mt-[2px] mb-[6px] font-[400] ${!primary && 'text-[13px]'}`}>
+      {children}
+    </div>
+  )
 }

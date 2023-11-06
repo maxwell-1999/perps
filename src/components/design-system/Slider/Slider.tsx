@@ -76,7 +76,7 @@ export const Slider: React.FC<Props> = ({
         {rightLabel}
       </Flex>
       <Flex justifyContent="center">
-        <Flex flexDirection="column" width="94%">
+        <Flex flexDirection="column" width="86%">
           <Flex {...getRootProps()} cursor={isDisabled ? 'not-allowed' : 'pointer'} w="100%" aria-label={ariaLabel}>
             <input {...inputProps} hidden />
             <Box

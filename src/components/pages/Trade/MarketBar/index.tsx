@@ -43,7 +43,7 @@ export default function MarketBar() {
       className="only-bottom-border"
     >
       <ResponsiveFlex>
-        <MarketContainer mr={{ base: 4, xs: 5, sm: 6 }} ml={0}>
+        <MarketContainer ml={0} mr={3}>
           <MarketSelector />
         </MarketContainer>
         <Flex>
@@ -98,9 +98,13 @@ export default function MarketBar() {
             label={copy.skew}
             value={
               <Flex gap={1}>
-                <Text color={colors.brand.green}>{formattedValues.longSkew}</Text>
-                <Text>{copy.slash}</Text>
-                <Text color={colors.brand.red}>{formattedValues.shortSkew}</Text>
+                <Text fontSize="12px" color={colors.brand.green}>
+                  {formattedValues.longSkew}
+                </Text>
+                <Text fontSize="12px"> {copy.slash}</Text>
+                <Text fontSize="12px" color={colors.brand.red}>
+                  {formattedValues.shortSkew}
+                </Text>
               </Flex>
             }
           />

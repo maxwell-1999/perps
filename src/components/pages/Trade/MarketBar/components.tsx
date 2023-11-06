@@ -12,7 +12,7 @@ import { breakpoints } from '@ds/theme/styles'
 import { useMarketBarCopy } from './hooks'
 
 export const MarketContainer: React.FC<FlexProps> = ({ children, ...props }) => (
-  <Flex height="100%" alignItems="center" mr={8} {...props}>
+  <Flex height="100%" alignItems="center" mr={5} {...props}>
     {children}
   </Flex>
 )
@@ -31,7 +31,7 @@ export const Stat: React.FC<{
       label
     )}
     {typeof value === 'string' ? (
-      <Text color={valueColor} whiteSpace="nowrap">
+      <Text color={valueColor} whiteSpace="nowrap" fontSize="12px">
         {value}
       </Text>
     ) : (
@@ -61,7 +61,7 @@ export const DesktopContainer = styled(Flex)`
 export const PriceContainer = styled(MarketContainer)`
   margin-right: 14px;
   @media (min-width: ${breakpoints.md}) {
-    margin-right: 32px;
+    margin-right: 20px;
   }
 `
 
@@ -84,9 +84,6 @@ export const PriceText = styled(Text)`
   font-size: 15px;
   @media (min-width: ${breakpoints.xs}) {
     font-size: 18px;
-  }
-  @media (min-width: ${breakpoints.md}) {
-    font-size: 20px;
   }
 `
 
@@ -172,7 +169,7 @@ export const FundingRateStat = () => {
     <Stat
       label={
         <Flex gap={1}>
-          <Text variant="label" className="!text-[#82828F]">
+          <Text variant="label" className="!text-[#82828F]" fontSize="12px">
             {copy.hourlyFunding}
           </Text>
           <FundingRateDropdown options={options} selectedTimeFrame={selectedTimeFrame} onClick={setSelectedTimeFrame} />
@@ -180,11 +177,11 @@ export const FundingRateStat = () => {
       }
       value={
         <Flex gap={1}>
-          <Text color={isLongNegative ? '#3fb68b' : '#ff5353'}>
+          <Text color={isLongNegative ? '#3fb68b' : '#ff5353'} fontSize="12px">
             {formatBig6Percent(longRate[selectedTimeFrame], { numDecimals: 4 })}
           </Text>
-          <Text>{copy.slash}</Text>
-          <Text color={isShortNegative ? '#3fb68b' : '#ff5353'}>
+          <Text fontSize="12px">{copy.slash}</Text>
+          <Text color={isShortNegative ? '#3fb68b' : '#ff5353'} fontSize="12px">
             {formatBig6Percent(shortRate[selectedTimeFrame], { numDecimals: 4 })}
           </Text>
         </Flex>

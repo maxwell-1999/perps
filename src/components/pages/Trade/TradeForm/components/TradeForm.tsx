@@ -391,7 +391,7 @@ function TradeForm(props: TradeFormProps) {
           {...modalProps}
         />
       )}
-      <Flex justifyContent="space-between" paddingX={3} marginTop={2}>
+      <Flex justifyContent="space-between" paddingX={2} marginTop={2}>
         <BuyTradeHeader primary>
           {hasPosition && positionStatus !== PositionStatus.closed
             ? copy.modifyPosition
@@ -430,7 +430,7 @@ function TradeForm(props: TradeFormProps) {
         />
       ) : (
         <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
-          <div className="px-4">
+          <div className=" px-gapbw">
             {geoblocked && !vpnDetected && <GeoBlockedMessage mb={4} />}
             {geoblocked && vpnDetected && <VpnDetectedMessage mb={4} />}
             {selectedOrderType !== OrderTypes.market && <TriggerBetaMessage mb={4} />}
@@ -588,7 +588,7 @@ function TradeForm(props: TradeFormProps) {
             </Flex>
           </div>
           {/* <Divider mt="auto" /> */}
-          <Flex flexDirection="column" px="16px" pb="10px">
+          <Flex flexDirection="column" className="px-gapbw" pb="10px">
             <TradeReceipt
               mb="12px"
               px="3px"

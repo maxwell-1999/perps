@@ -80,7 +80,7 @@ function CurrentPosition() {
   const displayDirection = hasPosition && direction !== PositionSide2.none ? direction : noValue
 
   return (
-    <ResponsiveContainer className="!bg-[#171722]">
+    <ResponsiveContainer className="!bg-[#171722] table-row-border">
       <LeftContainer borderColor={borderColor}>
         <Flex width="50%" flexDirection="column" borderRight={`1px solid ${borderColor}`}>
           <ActivePositionHeader borderColor={borderColor}>

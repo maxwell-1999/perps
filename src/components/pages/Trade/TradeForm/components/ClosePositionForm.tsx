@@ -166,7 +166,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
       )}
       <Form onSubmit={handleSubmit(onConfirm)} ref={formRef}>
         <FormOverlayHeader title={copy.closePosition} onClose={() => setTradeFormState(FormState.trade)} />
-        <Flex flexDirection="column" px="16px" mt="15px" gap="12px">
+        <Flex flexDirection="column" className="px-gapbw" mb={4} mt="15px" gap="12px">
           <Input
             name={FormNames.amount}
             label={copy.amount}
@@ -203,7 +203,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
           </Flex>
         </Flex>
         {/* <Divider mt="auto" /> */}
-        <Flex flexDirection="column" p="16px">
+        <Flex flexDirection="column" className="px-gapbw">
           <TradeReceipt
             mb="25px"
             px="3px"

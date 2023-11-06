@@ -147,7 +147,7 @@ module.exports = {
       6: '24px',
       7: '32px',
       8: '48px',
-      'gapbw': '7px'
+      'gapbw': '7px',
     },
     borderRadius: {
       none: '0',
