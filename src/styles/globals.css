@@ -85,7 +85,7 @@ a {
   }
 }
 .hide-position-custom-class{
-  grid-template-rows: 45px 52px auto 40px!important;
+  grid-template-rows: 44px 50px auto 40px !important;
 }
 .only-left-border{
   /* border: 0px !important; */
