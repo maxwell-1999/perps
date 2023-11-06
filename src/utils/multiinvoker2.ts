@@ -171,10 +171,14 @@ export const buildApproveTarget = ({ target }: { target: Address }): MultiInvoke
   ),
 })
 
-export const buildInterfaceFee = ({ to, amount }: { to: Address; amount: bigint }): MultiInvoker2Action => ({
-  action: 9,
-  args: encodeAbiParameters(
-    ['address', 'uint256'].map((type) => ({ type })),
-    [to, amount],
-  ),
-})
+export const buildInterfaceFee = ({ to, amount }: { to: Address; amount: bigint }): MultiInvoker2Action => {
+  console.log('buildInterfaceFee', to, amount)
+
+  return {
+    action: 9,
+    args: encodeAbiParameters(
+      ['address', 'uint256'].map((type) => ({ type })),
+      [to, amount],
+    ),
+  }
+}

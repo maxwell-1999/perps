@@ -68,7 +68,11 @@ interface LayoutProps {
 }
 
 export const TradeLayout: React.FC<LayoutProps> = ({ children, isMaker }) => {
-  return <GridContainer isMaker={isMaker}>{children}</GridContainer>
+  return (
+    <GridContainer isMaker={isMaker} id="root-layout-div">
+      {children}
+    </GridContainer>
+  )
 }
 
 interface GridItemProps {

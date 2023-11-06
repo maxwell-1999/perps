@@ -78,7 +78,9 @@ a {
     color-scheme: dark;
   }
 }
-
+.hide-position-custom-class{
+  grid-template-rows: 45px 52px auto 40px!important;
+}
 .only-left-border{
   /* border: 0px !important; */
   border-top:0px !important;

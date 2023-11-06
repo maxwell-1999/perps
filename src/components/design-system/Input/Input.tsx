@@ -65,7 +65,6 @@ export const Input: React.FC<InputProps> = ({
     control,
     rules: { required: isRequired, validate },
   })
-  console.log(`Input-inputHandlers: `, inputHandlers)
 
   return (
     <FormControl width={width} isInvalid={Boolean(error)}>
