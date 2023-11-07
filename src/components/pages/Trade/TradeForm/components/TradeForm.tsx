@@ -354,11 +354,11 @@ function TradeForm(props: TradeFormProps) {
     limitPrice: Big6Math.fromFloatString(limitPrice),
   })
   const toast = useToast()
-  const customHandler = () => {
-    toast({
-      render: ({ onClose }) => <Toast title={'herroe'} onClose={onClose} body={<ToastMessage message={'herello'} />} />,
-    })
-  }
+  // const customHandler = () => {
+  //   toast({
+  //     render: ({ onClose }) => <Toast title={'herroe'} onClose={onClose} body={<ToastMessage message={'herello'} />} />,
+  //   })
+  // }
   const notional = calcNotional(Big6Math.fromFloatString(amount), latestPrice)
   const userBalance = formatBig6USDPrice(balances?.usdc, { fromUsdc: true }) ?? copy.zeroUsd
 
@@ -421,7 +421,7 @@ function TradeForm(props: TradeFormProps) {
           />
         )}
       </Flex>
-      <button onClick={customHandler}>Here</button>
+      {/* <button onClick={customHandler}>Here</button> */}
       {/* <OrderTypeSelector
         onClick={setSelectedOrderType}
         selectedOrderType={selectedOrderType}
