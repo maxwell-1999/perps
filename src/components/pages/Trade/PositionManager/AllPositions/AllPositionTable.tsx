@@ -177,7 +177,7 @@ const CurrentPositionsTableRow = ({
             <AccordionIcon className={'bg-[#282B39] w-[24px] h-[24px] rounded-[5px] !text-[#94A3B8]'} />
           </Flex>
         </AccordionButton>
-        <AccordionPanel pb={4} borderTop={`1px solid ${alpha20}`} bg="black">
+        <AccordionPanel pb={4} borderTop={`1px solid ${alpha20}`} bg="#181b28">
           <MobileDataRow label={copy.market} value={<Text fontSize="13px">{market.symbol}</Text>} />
           <MobileDataRow
             label={copy.direction}

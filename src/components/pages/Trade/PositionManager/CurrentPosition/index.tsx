@@ -1,5 +1,6 @@
 import { ButtonGroup, Flex, Text, useBreakpointValue } from '@chakra-ui/react'
 import ClosePositionIcon from '@public/icons/closePositionIcon.svg'
+import Image from 'next/image'
 import React from 'react'
 
 import { TooltipIcon, TooltipText } from '@/components/design-system/Tooltip'
@@ -164,7 +165,22 @@ function CurrentPosition() {
               )}
             </Flex>
           )}
-          <DataRow label={copy.market} value={<Text fontSize="14px">{assetMetadata.symbol.toUpperCase()}</Text>} />
+          <DataRow
+            label={copy.market}
+            value={
+              <div className="flex items-center gap-2">
+                {' '}
+                <Image
+                  className="sm:!w-[18px] sm:!h-[18px]"
+                  src={assetMetadata.icon}
+                  height={16}
+                  width={16}
+                  // alt={market.name}
+                />
+                <Text fontSize="14px">{assetMetadata.symbol.toUpperCase()}</Text>
+              </div>
+            }
+          />
           <DataRow
             label={copy.direction}
             value={
