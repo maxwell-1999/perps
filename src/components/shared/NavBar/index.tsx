@@ -33,11 +33,14 @@ function NavBar() {
         </HiddenOnMobile>
         <HiddenOnDesktop className="flex items-center gap-4 mx-gapbw">
           <MemoHamburgerSVG onClick={onOpen} />
-          <MemoWalletSVG count={0} className={positionView ? 'text-1' : 'text-[#808191]'} onClick={openPositionView} />
+          <MemoWalletSVG
+            count={0}
+            className={positionView ? 'text-1' : 'text-[#808191]'}
+            onClick={positionView ? closePositonView : openPositionView}
+          />
           <MobileDrawer
             isOpen={isOpen}
             placement="left"
-            
             onClose={onClose}
             header={
               <Flex alignItems="center">

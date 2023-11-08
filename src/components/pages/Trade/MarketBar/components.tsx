@@ -75,6 +75,7 @@ export const MobileMarketContainer = styled(MarketContainer)`
 
 export const DividerStyled = styled(Divider)`
   margin-right: 14px;
+
   @media (min-width: ${breakpoints.md}) {
     display: none;
   }

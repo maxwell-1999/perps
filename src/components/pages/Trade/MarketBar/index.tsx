@@ -43,24 +43,18 @@ export default function MarketBar() {
       className="only-bottom-border"
     >
       <ResponsiveFlex>
-        {/* <MarketContainer ml={0}> */}
-        <div className="mr-3">
-          <MarketSelector />
+        <div className="flex items-center justify-between w-full bg-[#282B39] rounded-[6px]">
+          <div className="mr-3">
+            <MarketSelector />
+          </div>
+          <Flex className="!gap-[2px]">
+            <PriceContainer width={'110px'} className="!m-[0px]">
+              <PriceText className="text-[#c3c2d4]">{formattedValues.price}</PriceText>
+            </PriceContainer>
+            {/* <DividerStyled orientation="vertical" /> */}
+            <div className="bg-[#3772FF] px-[6px] py-[2px] rounded-[6px] font-[500] mx-2">{formattedValues.change}</div>
+          </Flex>
         </div>
-        {/* </MarketContainer> */}
-        <Flex>
-          <PriceContainer width={'110px'}>
-            <PriceText>{formattedValues.price}</PriceText>
-          </PriceContainer>
-          <DividerStyled orientation="vertical" />
-          <MobileMarketContainer mr={0} maxWidth="90px" overflowX="auto" overflowY="hidden">
-            <Stat
-              label={copy.dailyChange}
-              value={formattedValues.change}
-              valueColor={formattedValues.changeIsNegative ? colors.brand.red : colors.brand.green}
-            />
-          </MobileMarketContainer>
-        </Flex>
       </ResponsiveFlex>
       <DesktopContainer>
         <MarketContainer>

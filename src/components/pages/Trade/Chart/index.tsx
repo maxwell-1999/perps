@@ -28,8 +28,8 @@ function Chart() {
   }
 
   return (
-    <Tabs onChange={trackChartTab} className="!bg-[#1c1c28]">
-      <TabList className="!bg-[#1c1c28] !w-fit">
+    <Tabs onChange={trackChartTab} className="!bg-[#131722]">
+      <TabList className="!bg-[#131722] !w-fit">
         <Tab>{priceChart}</Tab>
         <Tab>{marketInfo}</Tab>
       </TabList>
