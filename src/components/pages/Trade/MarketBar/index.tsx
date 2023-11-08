@@ -47,12 +47,14 @@ export default function MarketBar() {
           <div className="mr-3">
             <MarketSelector />
           </div>
-          <Flex className="!gap-[2px]">
-            <PriceContainer width={'110px'} className="!m-[0px]">
-              <PriceText className="text-[#c3c2d4]">{formattedValues.price}</PriceText>
+          <Flex className="!gap-[2px] items-center">
+            <PriceContainer className="!m-[0px] w-fit !mr-2">
+              <PriceText className="text-[#c3c2d4] text-[14px]">{formattedValues.price}</PriceText>
             </PriceContainer>
             {/* <DividerStyled orientation="vertical" /> */}
-            <div className="bg-[#3772FF] px-[6px] py-[2px] rounded-[6px] font-[500] mx-2">{formattedValues.change}</div>
+            <div className="bg-[#3772FF] px-[6px] py-[2px] rounded-[6px] font-[500] mx-2 text-f13">
+              {formattedValues.change}
+            </div>
           </Flex>
         </div>
       </ResponsiveFlex>

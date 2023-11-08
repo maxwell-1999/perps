@@ -42,7 +42,7 @@ export const AssetIconWithText: React.FC<AssetIconWithTextProps> = ({
   return (
     <Flex alignItems="center" {...props}>
       <Image
-        className="sm:!w-[21px] sm:!h-[21px]"
+        className="sm:!w-[18px] sm:!h-[18px]"
         src={market.icon}
         height={imageSize[size]}
         width={imageSize[size]}
