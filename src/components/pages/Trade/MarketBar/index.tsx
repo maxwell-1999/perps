@@ -43,7 +43,7 @@ export default function MarketBar() {
       className="only-bottom-border"
     >
       <ResponsiveFlex>
-        <div className="flex items-center justify-between w-full bg-[#282B39] rounded-[6px]">
+        <div className="flex items-center nsm:mr-5 justify-between w-full sm:bg-[#282B39] rounded-[6px]">
           <div className="mr-3">
             <MarketSelector />
           </div>
@@ -52,7 +52,7 @@ export default function MarketBar() {
               <PriceText className="text-[#c3c2d4] text-[14px]">{formattedValues.price}</PriceText>
             </PriceContainer>
             {/* <DividerStyled orientation="vertical" /> */}
-            <div className="bg-[#3772FF] px-[6px] py-[2px] rounded-[6px] font-[500] mx-2 text-f13">
+            <div className="bg-[#3772FF] px-[6px] py-[2px] nsm:hidden rounded-[6px] font-[500] mx-2 text-f13">
               {formattedValues.change}
             </div>
           </Flex>

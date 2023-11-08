@@ -48,7 +48,7 @@ export const AssetIconWithText: React.FC<AssetIconWithTextProps> = ({
         width={imageSize[size]}
         alt={market.name}
       />
-      <Text ml={2} fontSize={fontSize[size]} {...textProps}>
+      <Text className="text-f18 sm:text-f14 sm:ml-2 nsm:ml-[9.7px] " {...textProps}>
         {text ? text : market.symbol}
       </Text>
     </Flex>
