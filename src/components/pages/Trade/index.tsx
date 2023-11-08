@@ -18,6 +18,7 @@ import { usePositionViewManager } from '@/pages/trade'
 
 import Chart from './Chart'
 import MarketBar from './MarketBar'
+import { DesktopContainer } from './MarketBar/components'
 import MobileTradeButtons from './MobileTradeButtons'
 import { MobileTradeView } from './MobileTradeView'
 import PositionManager from './PositionManager'
@@ -26,6 +27,7 @@ import MobileTradeForm from './TradeForm/MobileTradeForm'
 
 export default function Trade() {
   useRefreshKeysOnPriceUpdates2()
+
   const { positionView } = usePositionViewManager()
   return (
     <MarketProvider>
@@ -50,7 +52,14 @@ export default function Trade() {
                   <ChartGridItem>
                     <Chart />
                   </ChartGridItem>
-                  <MobileTradeButtons />
+                  <DesktopContainer>
+                    <PositionManagerGridItem>
+                      <PositionManager />
+                    </PositionManagerGridItem>
+                  </DesktopContainer>
+                  <MobileTradeButtonsGridItem>
+                    <MobileTradeButtons />
+                  </MobileTradeButtonsGridItem>
                 </>
               )}
               <MobileTradeForm />

@@ -1,5 +1,5 @@
 import { CloseIcon, EditIcon } from '@chakra-ui/icons'
-import { Box, Flex, IconButton, Link, Spinner, Text } from '@chakra-ui/react'
+import { Accordion, Box, Flex, IconButton, Link, Spinner, Text, useBreakpointValue } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { Address } from 'viem'
 
@@ -38,10 +38,11 @@ export const OrdersTable = ({
   const { background } = useStyles()
   const copy = usePositionManagerCopy()
   const onCancelOrder = useCancelOrder()
+  const isBase = useBreakpointValue({ base: true, tableBreak: false }, { ssr: false })
 
   return (
-    <>
-      <Box height="28px">
+    <Box>
+      {!isBase && (
         <Flex
           alignItems="center"
           justifyContent="center"
@@ -53,7 +54,7 @@ export const OrdersTable = ({
           borderBottom={`1px solid ${colors.brand.whiteAlpha[15]}`}
         >
           <Text variant="label" flex="3">
-            {copy.market}
+            {'heelo'}
           </Text>
           <Text variant="label" flex="2">
             {copy.type}
@@ -77,8 +78,10 @@ export const OrdersTable = ({
           </Text>
           <Box flex="1.5" />
         </Flex>
-        {Boolean(positions.length) ? (
-          positions.map((position, i) => {
+      )}
+      {Boolean(positions.length) ? (
+        <Accordion allowMultiple>
+          {positions.map((position, i) => {
             if ('transactionHash' in position) {
               return (
                 <OpenOrderTableRow
@@ -99,12 +102,12 @@ export const OrdersTable = ({
                 />
               )
             }
-          })
-        ) : (
-          <TableEmptyScreen message={emptyStateMessage} />
-        )}
-      </Box>
-    </>
+          })}
+        </Accordion>
+      ) : (
+        <TableEmptyScreen message={emptyStateMessage} />
+      )}
+    </Box>
   )
 }
 

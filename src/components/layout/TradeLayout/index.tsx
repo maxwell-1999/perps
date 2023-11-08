@@ -106,7 +106,7 @@ export const ChartGridItem: React.FC<GridItemProps> = ({ children }) => (
 )
 
 export const PositionManagerGridItem: React.FC<GridItemProps> = ({ children }) => (
-  <GridItem gridArea="positionManager" className="!bg-[#1c1c28] px-gapbw">
+  <GridItem gridArea="positionManager" className="!bg-[#1c1c28] px-gapbw !w-full">
     {children}
   </GridItem>
 )
