@@ -24,16 +24,7 @@ export default function MobileTradeButtons({ isMaker }: { isMaker?: boolean }) {
   })
 
   return (
-    <Flex
-      width="100%"
-      height="100%"
-      borderTop={`1px solid ${colors.brand.whiteAlpha[10]}`}
-      p={4}
-      px={2}
-      pb={5}
-      alignItems="center"
-      justifyContent="center"
-    >
+
       <ButtonGroup width="100%">
         <Button
           variant="primary"
@@ -43,6 +34,5 @@ export default function MobileTradeButtons({ isMaker }: { isMaker?: boolean }) {
           onClick={() => setMobileTradeFormOpen(true)}
         />
       </ButtonGroup>
-    </Flex>
   )
 }

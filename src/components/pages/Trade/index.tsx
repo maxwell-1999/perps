@@ -57,9 +57,9 @@ export default function Trade() {
                       <PositionManager />
                     </PositionManagerGridItem>
                   </DesktopContainer>
-                  <MobileTradeButtonsGridItem>
+                  <div className="px-3 pt-1 nsm:hidden">
                     <MobileTradeButtons />
-                  </MobileTradeButtonsGridItem>
+                  </div>
                 </>
               )}
               <MobileTradeForm />
