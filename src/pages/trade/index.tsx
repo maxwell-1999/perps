@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useState } from 'react'
 
 import Trade from '@/components/pages/Trade'
 
-const PositionContext = createContext(null)
+const PositionContext = createContext([false, () => {}])
 export default function TradePage() {
   const [postionView, setPostionView] = useState(false)
   return (
