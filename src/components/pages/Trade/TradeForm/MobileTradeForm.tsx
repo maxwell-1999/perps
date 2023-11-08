@@ -15,9 +15,9 @@ export default function MobileTradeForm() {
   if (!mobileTradeFormOpen) return null
   return (
     <Modal isOpen onClose={() => setMobileTradeFormOpen(false)} size="full">
-      <ModalOverlay />
-      <ModalContent>
-        <ModalBody display="flex" flexDirection="column" gap={2} bg="black">
+      <ModalOverlay className="bg-[#1c1c28]" />
+      <ModalContent className="bg-[#1c1c28]">
+        <ModalBody className="!bg-[#1c1c28]" display="flex" flexDirection="column" gap={2} bg="black">
           <Flex width="100%" justifyContent="flex-end">
             <IconButton
               icon={<CloseIcon color={colors.brand.whiteAlpha[70]} />}

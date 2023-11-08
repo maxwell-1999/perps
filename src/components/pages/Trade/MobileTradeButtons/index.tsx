@@ -28,7 +28,9 @@ export default function MobileTradeButtons({ isMaker }: { isMaker?: boolean }) {
       width="100%"
       height="100%"
       borderTop={`1px solid ${colors.brand.whiteAlpha[10]}`}
-      p={2}
+      p={4}
+      px={2}
+      pb={5}
       alignItems="center"
       justifyContent="center"
     >

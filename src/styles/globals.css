@@ -4,6 +4,19 @@
 @import url('src/styles/fonts.css');
 
 :root {
+  --bg-0: #1c1c28;
+  --bg-1:#232334;
+  --bg-2:#171722;
+  --bg-vertical-gradient:linear-gradient(180deg, #000000 43%,var(--bg-1) 93.44%);
+  --text-2:#808191;
+  --text-3:#6B728E;
+  --text-1:#ffffff;
+  --text-4: #808191;
+  --bg-signature:#3772ff;
+  --yellow-border: #e2ca18;
+  --white-border: #2bd67b26;
+  --mole-offset: 140%;
+  --mole-animation-duration: 0.4s;
   --max-width: 1100px;
   --border-radius: 12px;
   --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', 'Oxygen Mono',
@@ -84,8 +97,11 @@ a {
     color-scheme: dark;
   }
 }
-.hide-position-custom-class{
-  grid-template-rows: 44px 50px auto 40px !important;
+@media (min-width:600px) {
+  
+  .hide-position-custom-class{
+    grid-template-rows: 44px 50px auto 40px !important;
+  }
 }
 .only-left-border{
   /* border: 0px !important; */

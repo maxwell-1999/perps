@@ -20,7 +20,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({ footer, header, chil
   return (
     <Drawer {...props}>
       <DrawerOverlay />
-      <DrawerContent bg={bg}>
+      <DrawerContent bg={'#1c1c28'}>
         <DrawerCloseButton />
         <DrawerHeader>{header}</DrawerHeader>
         <DrawerBody>{children}</DrawerBody>

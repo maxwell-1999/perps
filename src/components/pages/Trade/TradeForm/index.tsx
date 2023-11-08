@@ -68,7 +68,7 @@ function TradeContainer({ isMobile }: { isMobile?: boolean }) {
     <FormContainer
       variant={containerVariant}
       isMobile={isMobile}
-      className="!shadow-none !rounded-none only-left-border"
+      className="!shadow-none !rounded-none only-left-border sm:!border-[0px] sm:flex-1"
     >
       {[FormState.trade, FormState.modify].includes(formState) && (
         <TradeForm

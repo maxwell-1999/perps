@@ -48,7 +48,7 @@ function PositionManager() {
           <Tab onClick={tabClickHandler}>{copy.history}</Tab>
         </TabList>
         <button
-          className="flex items-center px-4 transition gap-x-2 text-f14 group"
+          className="flex items-center px-4 transition sm:hidden gap-x-2 text-f14 group"
           onClick={() => {
             setHide(!hide)
           }}

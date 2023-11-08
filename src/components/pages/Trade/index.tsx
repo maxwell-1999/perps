@@ -14,16 +14,19 @@ import { MarketProvider } from '@/contexts/marketContext'
 import { SettlementToastProvider } from '@/contexts/settlementToastContext'
 import { TradeFormProvider } from '@/contexts/tradeFormContext'
 import { useRefreshKeysOnPriceUpdates2 } from '@/hooks/markets2'
+import { usePositionViewManager } from '@/pages/trade'
 
 import Chart from './Chart'
 import MarketBar from './MarketBar'
 import MobileTradeButtons from './MobileTradeButtons'
+import { MobileTradeView } from './MobileTradeView'
 import PositionManager from './PositionManager'
 import TradeForm from './TradeForm'
 import MobileTradeForm from './TradeForm/MobileTradeForm'
 
 export default function Trade() {
   useRefreshKeysOnPriceUpdates2()
+  const { positionView } = usePositionViewManager()
   return (
     <MarketProvider>
       <TradeFormProvider>
@@ -34,21 +37,22 @@ export default function Trade() {
               <HeaderGridItem>
                 <NavBar />
               </HeaderGridItem>
-              <MarketBarGridItem>
-                <MarketBar />
-              </MarketBarGridItem>
-              <FlexibleGridItem gridArea="tradeForm" desktopOnly>
-                <TradeForm />
-              </FlexibleGridItem>
-              <ChartGridItem>
-                <Chart />
-              </ChartGridItem>
-              <PositionManagerGridItem>
-                <PositionManager />
-              </PositionManagerGridItem>
-              <MobileTradeButtonsGridItem>
-                <MobileTradeButtons />
-              </MobileTradeButtonsGridItem>
+              {positionView ? (
+                <MobileTradeView />
+              ) : (
+                <>
+                  <MarketBarGridItem>
+                    <MarketBar />
+                  </MarketBarGridItem>
+                  <FlexibleGridItem gridArea="tradeForm" desktopOnly>
+                    <TradeForm />
+                  </FlexibleGridItem>
+                  <ChartGridItem>
+                    <Chart />
+                  </ChartGridItem>
+                  <MobileTradeButtons />
+                </>
+              )}
               <MobileTradeForm />
             </TradeLayout>
           </SettlementToastProvider>

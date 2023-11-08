@@ -8,7 +8,6 @@ const mobileLayout = `
   "header"
   "marketBar"
   "chart"
-  "positionManager"
   "mobileTradeButtons"
 `
 
@@ -27,7 +26,7 @@ const GridContainer = styled.div<{ isMaker?: boolean }>`
   padding: 0rem;
   grid-template-areas: ${mobileLayout};
   grid-template-columns: 1fr;
-  grid-template-rows: 54px 54px 350px 315px 79px;
+  grid-template-rows: 54px 54px 1fr 48px;
   background-color: #1c1c28;
   @media (min-width: ${breakpoints.md}) {
     grid-template-areas: ${desktopLayout};
@@ -113,7 +112,9 @@ export const PositionManagerGridItem: React.FC<GridItemProps> = ({ children }) =
 )
 
 export const MobileTradeButtonsGridItem: React.FC<GridItemProps> = ({ children }) => (
-  <MobileFixedGridItem gridArea="mobileTradeButtons">{children}</MobileFixedGridItem>
+  <MobileFixedGridItem gridArea="mobileTradeButtons" className="!bg-[#1c1c28] !p-1">
+    {children}
+  </MobileFixedGridItem>
 )
 
 // ctoaddtw
