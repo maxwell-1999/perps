@@ -126,7 +126,7 @@ const CurrentPositionsTableRow = ({
   const direction = closingOrFailed ? row.details.side : row.details.nextSide
   const directionColor = direction === PositionSide2.long ? colors.brand.green : colors.brand.red
 
-  const subPositionBg = useColorModeValue('white', 'black')
+  const subPositionBg = '#181b28'
   const hoverColor = useColorModeValue(colors.brand.whiteAlpha[10], colors.brand.blackAlpha[10])
 
   const NoValueText = (
@@ -174,7 +174,7 @@ const CurrentPositionsTableRow = ({
             <Flex justifyContent="flex-end" pr={2}>
               <Status userMarketSnapshot={row.details} liquidated={!!pnlData?.liquidation} isMaker={isMaker} />
             </Flex>
-            <AccordionIcon />
+            <AccordionIcon className={'bg-[#282B39] w-[24px] h-[24px] rounded-[5px] !text-[#94A3B8]'} />
           </Flex>
         </AccordionButton>
         <AccordionPanel pb={4} borderTop={`1px solid ${alpha20}`} bg="black">
@@ -326,7 +326,7 @@ const CurrentPositionsTableRow = ({
               />
             )}
           </Box>
-          <AccordionIcon />
+          <AccordionIcon className={'bg-[#282B39] w-[24px] h-[24px] rounded-[5px] !text-[#94A3B8]'} />
         </AccordionButton>
       </Box>
       {/* TODO make accordion body lazy */}

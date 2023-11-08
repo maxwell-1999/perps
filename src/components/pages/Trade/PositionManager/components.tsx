@@ -39,12 +39,17 @@ export const AssetDirectionLabel = ({
           <Image src={market.icon} height={25} width={25} alt={market.name} />
         </Box>
       )}
-      <Flex flexDirection="column">
+      <div className="flex flex-row items-center gap-[7px]">
         <Text fontSize="15px">{market.symbol}</Text>
-        <Text fontSize="13px" color={directionColor} textTransform="capitalize">
+        <Text
+          fontSize="13px"
+          color={directionColor}
+          textTransform="capitalize"
+          className="bg-[#232334] text-f12 px-2 py-1 rounded-[5px]"
+        >
           {direction}
         </Text>
-      </Flex>
+      </div>
     </Flex>
   )
 }

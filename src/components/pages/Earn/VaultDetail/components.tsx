@@ -123,7 +123,7 @@ export const RiskCard = ({
             <Text color={alpha60} mr={2}>
               {label}
             </Text>
-            <AccordionIcon />
+            <AccordionIcon className={'bg-[#282B39] w-[24px] h-[24px] rounded-[5px] !text-[#94A3B8]'} />
           </AccordionButton>
           <AccordionPanel paddingX={0}>
             <Flex flexDirection="column" gap={6}>

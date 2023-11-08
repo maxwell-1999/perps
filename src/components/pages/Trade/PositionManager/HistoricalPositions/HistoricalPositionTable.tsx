@@ -111,7 +111,9 @@ const HistoricalPositionsTableRow = ({
   const pnlPercentage = Big6Math.div(pnl, row.startCollateral + (row.netDeposits > 0n ? row.netDeposits : 0n))
   const openDate = formatDateRelative(row.startTime)
 
-  const subPositionBg = useColorModeValue('white', 'black')
+  const subPositionBg = '#181b28'
+  // 171722
+  // 1c1c28'
   const hoverColor = useColorModeValue(colors.brand.whiteAlpha[10], colors.brand.blackAlpha[10])
   // Adjust accumulated pnl to not include price impact fees
   const accumulated = {
@@ -140,7 +142,7 @@ const HistoricalPositionsTableRow = ({
               <AssetIconWithText market={AssetMetadata[row.asset]} size="sm" mr={2} />
             </Flex>
 
-            <AccordionIcon />
+            <AccordionIcon className={'bg-[#282B39] w-[24px] h-[24px] rounded-[5px] !text-[#94A3B8]'} />
           </Flex>
         </AccordionButton>
         <AccordionPanel pb={4} borderTop={`1px solid ${alpha20}`} bg="black">
@@ -174,7 +176,7 @@ const HistoricalPositionsTableRow = ({
   }
 
   return (
-    <AccordionItem borderBottom="none" _hover={{ bg: hoverColor }} className="!bg-[#171722] table-row-borderu">
+    <AccordionItem borderBottom="none" _hover={{ bg: hoverColor }} className="!bg-[#171722] table-row-border">
       <Box>
         <AccordionButton textAlign="left" _expanded={{ borderBottom: `1px solid ${borderColor}`, background: alpha5 }}>
           <Box flex="1">
@@ -226,7 +228,7 @@ const HistoricalPositionsTableRow = ({
               <Text fontSize="14px">{formatBig6USDPrice(displayedFees)}</Text>
             )}
           </Box>
-          <AccordionIcon />
+          <AccordionIcon className={'bg-[#282B39] w-[24px] h-[24px] rounded-[5px] !text-[#94A3B8]'} />
         </AccordionButton>
       </Box>
       {/* TODO make accordion body lazy */}
