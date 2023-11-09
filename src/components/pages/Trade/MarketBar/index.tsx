@@ -58,7 +58,7 @@ export default function MarketBar() {
           </Flex>
         </div>
       </ResponsiveFlex>
-      <DesktopContainer>
+      <DesktopContainer className=" scroll-auto max-w-[59vw]">
         <MarketContainer>
           <Stat
             label={copy.dailyChange}
