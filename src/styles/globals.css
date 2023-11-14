@@ -110,6 +110,15 @@ a {
   min-height: 100% !important;
   border-left: 1px solid rgb(42, 42, 58) !important;
 }
+.only-left-border-bold{
+  padding: 4px 0px;
+  padding-left: 4px;
+  /* border: 0px !important; */
+  border-top:0px !important;
+  border-bottom:0px !important;
+  min-height: 100% !important;
+  border-left: 1px solid #7F87A7 !important;
+}
 .only-bottom-border{
   /* border: 0px !important; */
   border-top:0px !important;

@@ -26,7 +26,7 @@ const GridContainer = styled.div<{ isMaker?: boolean }>`
   padding: 0rem;
   grid-template-areas: ${mobileLayout};
   grid-template-columns: 1fr;
-  grid-template-rows: 42px 42px 1fr 48px;
+  grid-template-rows: 42px 48px 1fr 48px;
   background-color: #1c1c28;
   @media (min-width: ${breakpoints.md}) {
     grid-template-areas: ${desktopLayout};

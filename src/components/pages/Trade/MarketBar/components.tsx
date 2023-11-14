@@ -110,6 +110,7 @@ const FundingRateDropdown = ({
       {({ isOpen }) => (
         <>
           <MenuButton
+            className="sm:!hidden"
             fontSize="11px"
             borderRadius="5px"
             borderBottomLeftRadius={isOpen ? '0' : '5px'}
@@ -170,7 +171,7 @@ export const FundingRateStat = () => {
     <Stat
       label={
         <Flex gap={1}>
-          <Text variant="label" className="!text-[#82828F]" fontSize="12px">
+          <Text variant="label" className="!text-[#82828F] text-f12 sm:text-f10">
             {copy.hourlyFunding}
           </Text>
           <FundingRateDropdown options={options} selectedTimeFrame={selectedTimeFrame} onClick={setSelectedTimeFrame} />
