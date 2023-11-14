@@ -49,21 +49,21 @@ export default function MarketBar() {
               <MarketSelector />
             </div>
             <PriceContainer className="!m-[0px] w-fit !mr-2 sm:!ml-[-14px]">
-              <PriceText className="text-[#c3c2d4] text-[14px]">{formattedValues.price}</PriceText>
+              <PriceText className="text-[#c3c2d4] text-[14px] sm:text-[12px]">{formattedValues.price}</PriceText>
             </PriceContainer>
           </div>
           {/* <DividerStyled orientation="vertical" /> */}
           {/* <div className="bg-[#3772FF] px-[6px] py-[2px] nsm:hidden rounded-[6px] font-[500] mx-2 text-f13">
               {formattedValues.change}
             </div> */}
-          <div className="w-[1px] h-[70%] bg-[#7F87A7] nsm:hidden"></div>
+          {/* <div className="w-[1px] h-[70%] bg-[#7F87A7] nsm:hidden"></div> */}
           <div className="flex pl-2 mr-3 nsm:hidden ">
             <FundingRateStat />
           </div>
         </div>
-        <div className="bg-[#141823] smobile:hidden a4  grid place-items-center px-2 nsm:hidden rounded-[6px] font-[500] mx-2 text-f13">
+        {/* <div className="bg-[#141823] smobile:hidden a4  grid place-items-center px-2 nsm:hidden rounded-[6px] font-[500] mx-2 text-f13">
           {formattedValues.change}
-        </div>
+        </div> */}
       </ResponsiveFlex>
       <DesktopContainer className=" !overflow-x-hidden max-w-[59vw]">
         <MarketContainer>

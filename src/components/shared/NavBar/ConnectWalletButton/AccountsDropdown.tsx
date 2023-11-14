@@ -8,7 +8,10 @@ import { useAccount, useBalance, useDisconnect } from 'wagmi'
 
 import WalletIcon from '@/SVG/Elements/Elements/WalletIcon'
 import { BlueBtn } from '@/components/design-system/Button'
+import { useTradeFormCopy } from '@/components/pages/Trade/TradeForm/hooks'
 import { useActiveChain } from '@/hooks/useActiveChain'
+import { useBalances } from '@/hooks/wallet'
+import { formatBig6USDPrice } from '@/utils/big6Utils'
 
 import copyToClipboard from '@utils/copyToClipboard'
 
@@ -277,9 +280,14 @@ export const PowerIcon = (props: SVGProps<SVGSVGElement>) => (
 )
 
 const TokenAccountBalance = () => {
+  const { data: balances } = useBalances()
+  const copy = useTradeFormCopy()
+
+  const userBalance = formatBig6USDPrice(balances?.usdc, { fromUsdc: true, compact: true }) ?? copy.zeroUsd
+
   return (
     <div className="flex items-center">
-      <div>11.11</div>
+      <div>{userBalance}</div>
       <img
         src={`https://res.cloudinary.com/dtuuhbeqt/image/upload/w_50,h_50,c_fill,r_max/Assets/USDC.png`}
         className="w-[16px] h-[16px] ml-2"
