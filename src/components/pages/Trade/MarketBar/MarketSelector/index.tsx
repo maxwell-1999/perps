@@ -40,7 +40,7 @@ function MarketSelector() {
         <Button
           label={<AssetIconWithText market={isMaker ? AssetMetadata[selectedMakerMarket] : assetMetadata} />}
           variant="pairSelector"
-          // rightIcon={<DDArrow className="scale-150 sm:hidden" />}
+          rightIcon={<DDArrow className="scale-150 sm:hidden" />}
           minWidth={{ base: '160px', xs: '179px' }}
           className="!bg-transparent !border-none nsm:!min-w-[140px] sm:!min-w-[100px] sm:!w-[100px] sm:text-[14px] sm:!p-2 sm:!ml-1 nsm:!pl-2 nsm:!ml-[0px] sm:!h-fit"
         />
