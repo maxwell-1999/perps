@@ -293,19 +293,8 @@ export const SubPositionRow = ({
       <Flex flex="1" alignItems="center" gap={1}>
         {delta !== null ? (
           <Text fontSize="13px">
-            {delta >= 0n ? (
-              // eslint-disable-next-line formatjs/no-literal-string-in-jsx
-              <Text as="span" color={green} verticalAlign="text-bottom">
-                +
-              </Text>
-            ) : (
-              // eslint-disable-next-line formatjs/no-literal-string-in-jsx
-              <Text as="span" color={red} verticalAlign="text-bottom">
-                –
-              </Text>
-            )}
             <Text as="span" marginLeft={1}>
-              {formatBig6(Big6Math.abs(delta))} {asset.toUpperCase()}
+              {formatDelta(delta) + formatBig6(Big6Math.abs(delta))} {asset.toUpperCase()}
             </Text>
           </Text>
         ) : (
@@ -318,19 +307,8 @@ export const SubPositionRow = ({
           <Text fontSize="13px">{settled ? formatBig6USDPrice(collateral) : copy.noValue}</Text>
           {collateralChange !== 0n && (
             <Text variant="label" fontSize="11px">
-              {collateralChange >= 0n ? (
-                // eslint-disable-next-line formatjs/no-literal-string-in-jsx
-                <Text as="span" color={green} verticalAlign="text-bottom">
-                  +
-                </Text>
-              ) : (
-                // eslint-disable-next-line formatjs/no-literal-string-in-jsx
-                <Text as="span" color={red} verticalAlign="text-bottom">
-                  –
-                </Text>
-              )}
               <Text as="span" marginLeft={1}>
-                {formatBig6USDPrice(Big6Math.abs(collateralChange))}
+                {formatDelta(collateralChange) + formatBig6USDPrice(Big6Math.abs(collateralChange))}
               </Text>
             </Text>
           )}
@@ -379,7 +357,7 @@ export const SubPositionRow = ({
               </Text>
             </>
           ) : (
-            <Text fontSize="13px">
+            <Text fontSize="13px " className="flex items-center gap-2">
               {copy.unsettled}
               <TooltipIcon
                 ml={1}
@@ -398,4 +376,13 @@ export const SubPositionRow = ({
 export const MobileDataRow = ({ label, value }: { label: string; value: React.ReactNode }) => {
   const rowBorder = `1px solid ${colors.brand.whiteAlpha[10]}`
   return <DataRow label={label} borderBottom={rowBorder} value={value} />
+}
+
+const formatDelta = (delta: bigint) => {
+  if (delta > 0n) {
+    return '+'
+  } else if (delta < 0n) {
+    return '-'
+  }
+  return ''
 }
