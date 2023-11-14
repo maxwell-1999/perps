@@ -180,7 +180,7 @@ export const RealizedAccumulationsTooltip = ({
       tooltipProps={{
         placement: 'top-start',
       }}
-      textDecorationThickness="0.05em"
+      textDecorationColor={'transparent'}
       tooltipText={
         <Flex flexDirection="column" alignItems="center" pt={2}>
           {unrealized ? (
