@@ -58,7 +58,7 @@ export default function MarketBar() {
           </Flex>
         </div>
       </ResponsiveFlex>
-      <DesktopContainer className=" scroll-auto max-w-[59vw]">
+      <DesktopContainer className=" !overflow-x-hidden max-w-[59vw]">
         <MarketContainer>
           <Stat
             label={copy.dailyChange}
@@ -68,12 +68,12 @@ export default function MarketBar() {
         </MarketContainer>
         {!isMaker ? (
           <>
-            <MarketContainer>
+            {/* <MarketContainer>
               <Stat label={copy.low} value={formattedValues.low} />
             </MarketContainer>
             <MarketContainer>
               <Stat label={copy.high} value={formattedValues.high} />
-            </MarketContainer>
+            </MarketContainer> */}
             <MarketContainer>
               <Stat label={copy.volume} value={formattedValues.volume} />
             </MarketContainer>

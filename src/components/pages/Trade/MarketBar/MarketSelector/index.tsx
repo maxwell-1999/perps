@@ -42,7 +42,7 @@ function MarketSelector() {
           variant="pairSelector"
           rightIcon={<DDArrow className="scale-150 sm:hidden" />}
           minWidth={{ base: '160px', xs: '179px' }}
-          className="!bg-transparent !border-none !min-w-[140px] sm:text-[14px] sm:!p-2 sm:!ml-3 sm:!h-fit"
+          className="!bg-transparent !border-none !min-w-[140px] sm:text-[14px] sm:!p-2 sm:!ml-3 nsm:!pl-2 nsm:!ml-[0px] sm:!h-fit"
         />
         {/* <div>h</div> */}
       </PopoverTrigger>

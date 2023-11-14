@@ -12,7 +12,7 @@ import { breakpoints } from '@ds/theme/styles'
 import { useMarketBarCopy } from './hooks'
 
 export const MarketContainer: React.FC<FlexProps> = ({ children, ...props }) => (
-  <Flex height="100%" alignItems="center" mr={7} {...props}>
+  <Flex height="100%" alignItems="center" mr={5} {...props}>
     {children}
   </Flex>
 )
