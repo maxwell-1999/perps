@@ -25,7 +25,7 @@ function NavBar() {
   const copy = useNavCopy()
 
   const { positionView, openPositionView, closePositonView } = usePositionViewManager()
-  const isTestnet = window.location.href.includes('testnet')
+  const isTestnet = typeof window !== 'undefined' && window.location.href.includes('testnet')
   const links = [
     { href: '/trade', label: 'Perps' },
     {
@@ -34,6 +34,7 @@ function NavBar() {
       external: true,
     },
   ]
+  console.log(`index-links: `, links)
 
   return (
     <Nav className="bg-[#232334] py-[2px] pl-1 pr-3 sm:py-2  ">
