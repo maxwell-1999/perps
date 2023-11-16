@@ -37,9 +37,11 @@ function NavBar() {
   return (
     <Nav className="bg-[#232334] py-[2px] pl-1 pr-3 sm:py-2  ">
       <Flex>
-        <HiddenOnMobile>
-          <LinkSwitcher links={links} />
-        </HiddenOnMobile>
+        {typeof window !== 'undefined' && (
+          <HiddenOnMobile>
+            <LinkSwitcher links={links} />
+          </HiddenOnMobile>
+        )}
         <HiddenOnDesktop className="flex items-center gap-4 mx-gapbw">
           <MemoHamburgerSVG onClick={onOpen} />
           <MemoWalletSVG

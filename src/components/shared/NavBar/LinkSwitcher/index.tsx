@@ -17,7 +17,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, label, external }) => {
   const isActive = pathname === href.toLowerCase()
 
   return (
-    <Link href={href} passHref target={external ? '_blank' : ''}>
+    <Link href={href} target={external ? '_blank' : ''}>
       <button
         className={`transition-all duration-300 text-4 text-f15  px-4 py-[4px] text-[#808191] rounded-[8px] ${
           isActive ? '!text-1 bg-3' : 'hover:bg-1 hover:text-1 hover:brightness-125'
