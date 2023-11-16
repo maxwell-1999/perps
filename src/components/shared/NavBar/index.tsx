@@ -33,7 +33,6 @@ function NavBar() {
       external: true,
     },
   ]
-  console.log(`index-links: `, links)
 
   return (
     <Nav className="bg-[#232334] py-[2px] pl-1 pr-3 sm:py-2  ">
