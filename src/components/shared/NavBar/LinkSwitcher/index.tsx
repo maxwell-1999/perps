@@ -36,6 +36,7 @@ interface LinkSwitcherProps {
 
 const LinkSwitcher: React.FC<LinkSwitcherProps> = ({ links }) => {
   const { home } = useNavCopy()
+  console.log(`web-index-links: `, links)
   return (
     <div className="flex items-center gap-2">
       <Link href="/" passHref>
