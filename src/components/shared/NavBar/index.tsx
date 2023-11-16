@@ -12,7 +12,6 @@ import { MobileDrawer } from '@ds/MobileDrawer'
 
 import ConnectWalletButton from './ConnectWalletButton'
 import LinkSwitcher from './LinkSwitcher'
-import SwitchNetworkButton from './SwitchNetworkButton'
 import MemoWalletSVG, { MemoHamburgerSVG } from './WalletIcon'
 import { useNavCopy } from './hooks'
 import { MobileButtonLabel, Nav, V1Link } from './styles'
