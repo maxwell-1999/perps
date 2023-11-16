@@ -14,7 +14,6 @@ import ConnectWalletButton from './ConnectWalletButton'
 import LinkSwitcher from './LinkSwitcher'
 import SwitchNetworkButton from './SwitchNetworkButton'
 import MemoWalletSVG, { MemoHamburgerSVG } from './WalletIcon'
-import { links } from './constants'
 import { useNavCopy } from './hooks'
 import { MobileButtonLabel, Nav, V1Link } from './styles'
 
@@ -24,7 +23,18 @@ function NavBar() {
   const linkUnderlineColor = useColorModeValue(theme.colors.brand.blackAlpha[10], theme.colors.brand.whiteAlpha[10])
   const { address, overriding } = useAddress()
   const copy = useNavCopy()
+
   const { positionView, openPositionView, closePositonView } = usePositionViewManager()
+  const isTestnet = window.location.href.includes('testnet')
+  const links = [
+    { href: '/trade', label: 'Perps' },
+    {
+      href: isTestnet ? 'https://testnet.buffer.finance' : 'https://app.buffer.finance',
+      label: 'Binary Options',
+      external: true,
+    },
+  ]
+
   return (
     <Nav className="bg-[#232334] py-[2px] pl-1 pr-3 sm:py-2  ">
       <Flex>
