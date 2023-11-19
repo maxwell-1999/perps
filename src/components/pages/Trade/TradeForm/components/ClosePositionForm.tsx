@@ -180,7 +180,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
             }
             control={control}
             onChange={(e) => onChangeAmount(e.target.value)}
-            rightEl={<InputFollower>{assetMetadata.quoteCurrency}</InputFollower>}
+            rightEl={<InputFollower>{position.asset.toUpperCase()}</InputFollower>}
             validate={amountValidator}
           />
           <Flex justifyContent="space-between">
