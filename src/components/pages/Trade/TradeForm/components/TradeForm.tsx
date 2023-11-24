@@ -165,7 +165,7 @@ function TradeForm(props: TradeFormProps) {
 
   const maxLeverage = useMemo(
     () => calcMaxLeverage({ margin, minMargin, collateral: Big6Math.fromFloatString(collateral) }),
-    [],
+    [margin, minMargin, collateral],
   )
 
   const resetInputs = useCallback(() => {
