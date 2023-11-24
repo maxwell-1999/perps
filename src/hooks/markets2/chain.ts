@@ -107,6 +107,7 @@ export type MarketSnapshot = ChainMarketSnapshot & {
   fundingRate: {
     long: bigint
     short: bigint
+    maker: bigint
   }
   socializationFactor: bigint
   isSocialized: boolean
@@ -177,6 +178,7 @@ export const useMarketSnapshots2 = (addressOverride?: Address) => {
           fundingRate: {
             long: fundingRates.long,
             short: fundingRates.short,
+            maker: fundingRates.maker,
           },
           socializationFactor,
           isSocialized: socializationFactor < Big6Math.ONE,

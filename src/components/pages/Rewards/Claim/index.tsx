@@ -63,10 +63,11 @@ export default function ClaimContainer() {
 
   const takerStats = useMemo(() => {
     const currentOI = marketSnapshots?.user
-      ? sum(
-          Object.values(marketSnapshots.user).map((ss) => (ss.nextSide === PositionSide2.maker ? 0n : ss.nextNotional)),
-        )
+    ? sum(
+      Object.values(marketSnapshots.user).map((ss) => (ss.nextSide === PositionSide2.maker ? 0n : ss.nextNotional)),
+      )
       : 0n
+      console.log(`index-currentOI: `,currentOI);
     const stats: { label: string; value: string; valueColor?: string; rank?: string; tooltip?: string }[] = [
       { label: 'Fees Paid', value: formatBig6USDPrice(rewards?.fees ?? 0n, { compact: true }) },
     ]
