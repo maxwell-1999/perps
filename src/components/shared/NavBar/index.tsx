@@ -3,6 +3,7 @@ import { Box, Flex, Stack, Text, useColorModeValue, useDisclosure, useTheme } fr
 import Logo from '@public/logoTransparent.svg'
 import Link from 'next/link'
 
+import { useRewardsActive } from '@/components/pages/Rewards/hooks'
 import { HiddenOnDesktop, HiddenOnMobile } from '@/components/shared/responsive'
 import { useAddress } from '@/hooks/network'
 import { usePositionViewManager } from '@/pages/trade'
@@ -14,7 +15,7 @@ import ConnectWalletButton from './ConnectWalletButton'
 import LinkSwitcher from './LinkSwitcher'
 import MemoWalletSVG, { MemoHamburgerSVG } from './WalletIcon'
 import { useNavCopy } from './hooks'
-import { MobileButtonLabel, Nav, V1Link } from './styles'
+import { MobileButtonLabel, Nav, RewardsLink, V1Link } from './styles'
 
 function NavBar() {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -32,7 +33,13 @@ function NavBar() {
       label: 'Binary Options',
       external: true,
     },
+    {
+      href: '/rewards',
+      label: 'Rewards',
+      // external: true,
+    },
   ]
+  const rewardsActive = useRewardsActive()
 
   return (
     <Nav className="bg-[#232334] py-[2px] pl-1 pr-3 sm:py-2  ">
@@ -75,6 +82,8 @@ function NavBar() {
         </HiddenOnDesktop>
       </Flex>
       <ButtonGroup>
+        {rewardsActive && <RewardsLink />}
+
         <ConnectWalletButton />
       </ButtonGroup>
     </Nav>

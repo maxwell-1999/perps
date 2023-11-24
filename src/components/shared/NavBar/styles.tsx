@@ -1,11 +1,13 @@
-import { Flex, Text } from '@chakra-ui/react'
+import { Box, Flex, Text } from '@chakra-ui/react'
 import styled from '@emotion/styled'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import { TrackingEvents, useMixpanel } from '@/analytics'
 import { Button } from '@/components/design-system'
 import colors from '@/components/design-system/theme/colors'
+import { AssetMetadata, SupportedAsset } from '@/constants/markets'
 import { useUserCurrentPositions } from '@/hooks/markets'
 
 import { useNavCopy } from './hooks'
@@ -51,5 +53,42 @@ export const V1Link = () => {
         label={<Text>{copy.closeV1Positions}</Text>}
       />
     </Link>
+  )
+}
+export const RewardsLink = () => {
+  const copy = useNavCopy()
+  const arbMetadata = AssetMetadata[SupportedAsset.arb]
+
+  return (
+    <Box display={{ base: 'none', lg: 'initial' }}>
+      <Link href="/rewards">
+        <Button
+          className="!py-[5px] !h-fit !px-3"
+          variant="secondary"
+          bg={colors.brand.blueAlpha[16]}
+          borderColor={colors.brand.blueAlpha[100]}
+          _hover={{
+            bg: colors.brand.blueAlpha[30],
+          }}
+          leftIcon={
+            <Image
+              className="!w-[18px] !h-[18px]"
+              src={arbMetadata.icon}
+              alt={'arbitrum logo'}
+              height={18}
+              width={18}
+            />
+          }
+          label={
+            <Text>
+              Earning
+              <Text ml={1} as="span" fontWeight="bold">
+                {arbMetadata.baseCurrency.toUpperCase()}
+              </Text>
+            </Text>
+          }
+        />
+      </Link>
+    </Box>
   )
 }

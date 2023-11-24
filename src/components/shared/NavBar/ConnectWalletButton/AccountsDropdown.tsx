@@ -1,5 +1,5 @@
 import DDArrow from '@SvG/Elements/Arrow'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { ConnectButton, useConnectModal } from '@rainbow-me/rainbowkit'
 import { ControlledMenu, useClick, useMenuState } from '@szhsin/react-menu'
 import React, { ReactNode, useRef } from 'react'
 import { SVGProps } from 'react'
@@ -28,7 +28,6 @@ export const AccountDropdown: React.FC = () => {
   }
   const isMobile = useMedia('(max-width:1200px)')
   const blockExplorer = activeChain?.blockExplorers?.default?.url
-
   return (
     <ConnectButton.Custom>
       {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {

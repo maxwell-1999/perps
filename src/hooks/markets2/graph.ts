@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQueries, useQuery } from '@tanstack/react-query'
 import { GraphQLClient } from 'graphql-request'
 import { Address, getAddress } from 'viem'
 
@@ -9,12 +9,13 @@ import {
   addressToAsset2,
   chainAssetsWithAddress,
 } from '@/constants/markets'
+import { STIPDropParams, STIPSeasonNumber } from '@/constants/stipDrop'
 import { AccumulatorTypes, RealizedAccumulations, accumulateRealized } from '@/utils/accumulatorUtils'
 import { notEmpty, sum } from '@/utils/arrayUtils'
 import { Big6Math, BigOrZero } from '@/utils/big6Utils'
 import { GraphDefaultPageSize, queryAll } from '@/utils/graphUtils'
-import { calcPriceImpactFromTradeFee, magnitude, side2 } from '@/utils/positionUtils'
-import { Day, Hour, last7dBounds, last24hrBounds, nowSeconds } from '@/utils/timeUtils'
+import { calcNotional, calcPriceImpactFromTradeFee, calcSTIPFeeRebate, magnitude, side2 } from '@/utils/positionUtils'
+import { Day, Hour, last7dBounds, last24hrBounds, nowSeconds, timeToSeconds } from '@/utils/timeUtils'
 
 import { gql } from '@t/gql'
 import { MarketsAccountCheckpointsQuery, PositionSide } from '@t/gql/graphql'
@@ -24,118 +25,95 @@ import { useMarketSnapshots2 } from './chain'
 
 export const useActivePositionMarketPnls = () => {
   const chainId = useChainId()
-  const { data: marketSnapshots, isLoading: marketSnapshotsLoading, dataUpdatedAt } = useMarketSnapshots2()
+  const { data: marketSnapshots, isLoading: marketSnapshotsLoading } = useMarketSnapshots2()
   const { address } = useAddress()
   const graphClient = useGraphClient()
+  const markets = chainAssetsWithAddress(chainId)
 
-  return useQuery({
-    queryKey: ['marketPnls2', chainId, address, dataUpdatedAt],
-    enabled: !!address && !!marketSnapshots && !!marketSnapshots.user && !marketSnapshotsLoading,
-    queryFn: async () => {
-      if (!address || !marketSnapshots || !marketSnapshots.user) return
+  // Query Checkpoints for each market - note that we don't query for a specific type because if we query for
+  // `open` we might get the position before the latest position
+  const queryAccountCheckpoints = gql(`
+    query AccountCheckpoints($account: Bytes!, $market: Bytes!) {
+      marketAccountCheckpoints(
+        where: { account: $account, market: $market }
+        orderBy: blockNumber, orderDirection: desc, first: 1
+      ) { market, account, type, blockNumber, version }
+    }
+  `)
 
-      const markets = chainAssetsWithAddress(chainId)
+  // Query the market accumulators for each market. These are used to get data between the latest account settlement
+  // and the latest global settlement
+  const queryMarketAccumulatorsAndFirstUpdate = gql(`
+    query MarketAccumulators($market: Bytes!, $account: Bytes!, $accountLatestVersion: BigInt!) {
+      start: marketAccumulators(
+        where: { market: $market, version: $accountLatestVersion, latest: false }
+      ) {
+        market, version
+        makerValue, longValue, shortValue,
+        pnlMaker, pnlLong, pnlShort,
+        fundingMaker, fundingLong, fundingShort,
+        interestMaker, interestLong, interestShort,
+        positionFeeMaker
+      }
+      latest: marketAccumulators(
+        where: { market: $market, latest: true }
+      ) {
+        market, version
+        makerValue, longValue, shortValue,
+        pnlMaker, pnlLong, pnlShort,
+        fundingMaker, fundingLong, fundingShort,
+        interestMaker, interestLong, interestShort,
+        positionFeeMaker
+      }
+      firstUpdate: updateds(
+        where: { market: $market, account: $account, version: $accountLatestVersion }
+      ) { interfaceFee, orderFee }
+    }
+  `)
 
-      // Query Checkpoints for each market - note that we don't query for a specific type because if we query for
-      // `open` we might get the position before the latest position
-      const queryAccountCheckpoints = gql(`
-        query AccountCheckpoints($account: Bytes!, $market: Bytes!) {
-          marketAccountCheckpoints(
-            where: { account: $account, market: $market }
-            orderBy: blockNumber, orderDirection: desc, first: 1
-          ) { market, account, type, blockNumber, version }
-        }
-      `)
+  const queryResults = useQueries({
+    queries: markets.map((market) => {
+      const { asset, marketAddress } = market
+      return {
+        queryKey: ['marketPnls2', chainId, address, asset],
+        enabled: !!address && !!marketSnapshots && !!marketSnapshots.user && !marketSnapshotsLoading,
+        queryFn: async () => {
+          if (!address || !marketSnapshots || !marketSnapshots.user) return
 
-      const marketCheckpoints = await Promise.all(
-        markets.map(async ({ asset, marketAddress }) => ({
-          asset,
-          data: await graphClient.request(queryAccountCheckpoints, {
+          const checkpointData = await graphClient.request(queryAccountCheckpoints, {
             account: address,
             market: marketAddress,
-          }),
-        })),
-      )
-
-      const accountPositions = await Promise.all(
-        marketCheckpoints.map(async ({ asset, data }) => {
-          // Only query if the checkpoint is "open". If unavailable or "close" just use the pending position as the
-          // starting point. Any update after the pending position will be reflected in the graph because it will settle
-          // the current
-          if (!data.marketAccountCheckpoints?.[0] || data.marketAccountCheckpoints?.[0].type !== 'open')
-            return { asset, data: null }
-
-          const positionData = await fetchPositionData({
-            graphClient,
-            address,
-            market: getAddress(data.marketAccountCheckpoints[0].market),
-            endVersion: null,
-            startVersion: BigInt(data.marketAccountCheckpoints[0].version),
           })
 
-          return { asset, data: positionData }
-        }),
-      )
+          const isFetchable =
+            checkpointData.marketAccountCheckpoints?.[0] && checkpointData.marketAccountCheckpoints?.[0].type === 'open'
 
-      const marketToLatestSettlement = Object.entries(marketSnapshots.user).map(([asset, snapshot]) => {
-        let lastSettlement = snapshot.pendingPositions[0].timestamp
-        const graphPosition = accountPositions.find((p) => p.asset === asset)?.data
-        if (graphPosition?.endVersion) lastSettlement = BigInt(graphPosition.endVersion)
-        return { asset, market: snapshot.market, lastSettlement }
-      })
+          const graphPosition = isFetchable
+            ? await fetchPositionData({
+                graphClient,
+                address,
+                market: getAddress(checkpointData.marketAccountCheckpoints[0].market),
+                endVersion: null,
+                startVersion: BigInt(checkpointData.marketAccountCheckpoints[0].version),
+              })
+            : null
 
-      // Query the market accumulators for each market. These are used to get data between the latest account settlement
-      // and the latest global settlement
-      const queryMarketAccumulatorsAndFirstUpdate = gql(`
-        query MarketAccumulators($market: Bytes!, $account: Bytes!, $accountLatestVersion: BigInt!) {
-          start: marketAccumulators(
-            where: { market: $market, version: $accountLatestVersion, latest: false }
-          ) {
-            market, version
-            makerValue, longValue, shortValue,
-            pnlMaker, pnlLong, pnlShort,
-            fundingMaker, fundingLong, fundingShort,
-            interestMaker, interestLong, interestShort,
-            positionFeeMaker
-          }
-          latest: marketAccumulators(
-            where: { market: $market, latest: true }
-          ) {
-            market, version
-            makerValue, longValue, shortValue,
-            pnlMaker, pnlLong, pnlShort,
-            fundingMaker, fundingLong, fundingShort,
-            interestMaker, interestLong, interestShort,
-            positionFeeMaker
-          }
-          firstUpdate: updateds(
-            where: { market: $market, account: $account, version: $accountLatestVersion }
-          ) { interfaceFee, orderFee }
-        }
-      `)
+          const lastSettlementSnapshot = marketSnapshots.user[asset].pendingPositions[0].timestamp
+          const lastSettlement = graphPosition?.endVersion ? BigInt(graphPosition.endVersion) : lastSettlementSnapshot
 
-      const marketAccumulators = await Promise.all(
-        marketToLatestSettlement.map(async ({ asset, market, lastSettlement }) => ({
-          asset,
-          market,
-          accumulators: await graphClient.request(queryMarketAccumulatorsAndFirstUpdate, {
-            market,
+          const marketAccumulators = await graphClient.request(queryMarketAccumulatorsAndFirstUpdate, {
+            market: marketAddress,
             account: address,
             accountLatestVersion: lastSettlement.toString(),
-          }),
-        })),
-      )
+          })
 
-      const totalPnl = Object.entries(marketSnapshots.user).reduce(
-        (acc, [asset, snapshot]) => {
+          const snapshot = marketSnapshots.user[asset]
           const [side, magnitude] = [
             snapshot.nextSide === 'none' ? snapshot.side : snapshot.nextSide,
             snapshot.nextMagnitude,
           ]
-          // If there is no graph position (no settlement after position open), use the values from the snapshot
-          const accumulators = marketAccumulators.find((a) => a.market === snapshot.market)?.accumulators
-          let interfaceFees = BigOrZero(accumulators?.firstUpdate.at(0)?.interfaceFee)
-          let orderFees = BigOrZero(accumulators?.firstUpdate.at(0)?.orderFee)
+          let interfaceFees = BigOrZero(marketAccumulators?.firstUpdate.at(0)?.interfaceFee)
+          let orderFees = BigOrZero(marketAccumulators?.firstUpdate.at(0)?.orderFee)
           let startCollateral = snapshot.pre.local.collateral
           let netDeposits = 0n
           let keeperFees = snapshot.pendingPositions[0].keeper
@@ -150,9 +128,6 @@ export const useActivePositionMarketPnls = () => {
           let averageEntryPrice = snapshot.prices[0]
           if (side === 'long') averageEntryPrice = averageEntryPrice + priceImpact
           if (side === 'short') averageEntryPrice = averageEntryPrice - priceImpact
-
-          // If the graph position exists, use the values from the graph to calculate pnl
-          const graphPosition = accountPositions.find((p) => p.asset === snapshot.asset)?.data
           if (graphPosition) {
             // Start collateral is netDeposits + accumulatedCollateral immediately before start, plus deposits that occurred
             // on the start block
@@ -180,7 +155,6 @@ export const useActivePositionMarketPnls = () => {
             interfaceFees = graphPosition.interfaceFees
             orderFees = graphPosition.orderFees
           }
-
           const accumulatedValues = AccumulatorTypes.map(({ type, unrealizedKey }) => {
             if (side === 'none') return { type, realized: 0n, unrealized: 0n, total: 0n }
 
@@ -189,11 +163,11 @@ export const useActivePositionMarketPnls = () => {
 
             // Pnl from latest account settlement to latest global settlement
             let unrealized = 0n
-            if (accumulators?.start[0] && accumulators?.latest[0]) {
+            if (marketAccumulators?.start[0] && marketAccumulators?.latest[0]) {
               if ((side === 'maker' && type === 'makerPositionFee') || type !== 'makerPositionFee') {
                 unrealized = Big6Math.mul(
-                  BigInt(accumulators.latest[0][unrealizedKey[side]]) -
-                    BigInt(accumulators.start[0][unrealizedKey[side]]),
+                  BigInt(marketAccumulators.latest[0][unrealizedKey[side]]) -
+                    BigInt(marketAccumulators.start[0][unrealizedKey[side]]),
                   magnitude,
                 )
               }
@@ -212,7 +186,7 @@ export const useActivePositionMarketPnls = () => {
             return { ...acc, [type]: pnl }
           }, {} as RealizedAccumulations)
 
-          acc[asset] = {
+          return {
             startCollateral,
             realtime: realtimePnl,
             realtimePercent: !Big6Math.isZero(percentDenominator)
@@ -229,31 +203,46 @@ export const useActivePositionMarketPnls = () => {
             liquidation: !!graphPosition?.liquidation,
             liquidationFee: graphPosition?.liquidationFee ?? 0n,
           }
-          return acc
         },
-        {} as Record<
-          string,
-          {
-            startCollateral: bigint
-            realtime: bigint
-            realtimePercent: bigint
-            realtimePercentDenominator: bigint
-            accumulatedPnl: RealizedAccumulations
-            keeperFees: bigint
-            positionFees: bigint
-            priceImpactFees: bigint
-            interfaceFees: bigint
-            orderFees: bigint
-            averageEntryPrice: bigint
-            liquidation: boolean
-            liquidationFee: bigint
-          }
-        >,
-      )
-
-      return totalPnl
-    },
+      }
+    }),
   })
+
+  const pnlData = queryResults.reduce(
+    (acc, queryResult, index) => {
+      const asset = markets[index].asset
+      if (!queryResult.data) return acc
+      acc[asset] = queryResult.data
+      return acc
+    },
+    {} as Record<
+      string,
+      {
+        startCollateral: bigint
+        realtime: bigint
+        realtimePercent: bigint
+        realtimePercentDenominator: bigint
+        accumulatedPnl: RealizedAccumulations
+        keeperFees: bigint
+        positionFees: bigint
+        priceImpactFees: bigint
+        interfaceFees: bigint
+        orderFees: bigint
+        averageEntryPrice: bigint
+        liquidation: boolean
+        liquidationFee: bigint
+      }
+    >,
+  )
+
+  const isFetching = queryResults.some((r) => r.isFetching)
+  const isLoading = queryResults.some((r) => r.isLoading)
+
+  return {
+    data: isLoading ? undefined : pnlData,
+    isLoading,
+    isFetching,
+  }
 }
 
 export type ActiveSubPositionHistory = NonNullable<
@@ -261,7 +250,7 @@ export type ActiveSubPositionHistory = NonNullable<
 >['changes']
 
 const ActivePositionHistoryPageSize = 100
-export const useActiveSubPositionHistory = (asset: SupportedAsset) => {
+export const useActiveSubPositionHistory = (asset: SupportedAsset, enabled: boolean = true) => {
   const chainId = useChainId()
   const { data: marketSnapshots, isLoading: marketSnapshotsLoading } = useMarketSnapshots2()
   const { address } = useAddress()
@@ -269,7 +258,7 @@ export const useActiveSubPositionHistory = (asset: SupportedAsset) => {
 
   return useInfiniteQuery({
     queryKey: ['activeSubPositionHistory', chainId, asset, address],
-    enabled: !!address && !marketSnapshotsLoading && !!marketSnapshots?.user?.[asset],
+    enabled: !!address && !marketSnapshotsLoading && !!marketSnapshots?.user?.[asset] && enabled,
     queryFn: async ({ pageParam = 0 }) => {
       if (!address || !marketSnapshots?.user?.[asset]) return
       const market = marketSnapshots.user[asset].market
@@ -543,10 +532,12 @@ export const useHistoricalSubPositions = ({
   market,
   startVersion,
   endVersion,
+  enabled,
 }: {
   market: Address
   startVersion: string
   endVersion: string
+  enabled?: boolean
 }) => {
   const chainId = useChainId()
   const graphClient = useGraphClient()
@@ -554,7 +545,7 @@ export const useHistoricalSubPositions = ({
 
   return useInfiniteQuery({
     queryKey: ['historicalSubPositions', chainId, market, startVersion, endVersion, address],
-    enabled: !!address,
+    enabled: !!address && enabled,
     queryFn: async ({ pageParam = 0 }) => {
       if (!address) return
       const { changes, hasMore } = await fetchSubPositions({
@@ -633,6 +624,17 @@ async function fetchSubPositions({
     skip,
   })
 
+  // Pull execution price for the most recent update
+  if (updateds[0] && !updateds[0].valid) {
+    const price = await getPriceAtVersion({ graphClient, market, version: BigInt(updateds[0].version) })
+    if (price)
+      updateds[0] = {
+        ...updateds[0],
+        price,
+        valid: BigInt(price) > 0n,
+      }
+  }
+
   const changes = updateds
     .filter((update, i) =>
       i === updateds.length - 1
@@ -660,10 +662,14 @@ async function fetchSubPositions({
       let priceWithImpact = BigInt(update.price)
 
       const realizedValues = accumulateRealized(accumulations)
+
+      // Handle price impact. This is the price plus/minus the price impact fee divided by the delta. This is
+      // directional - long opens and short closes increase the price, short opens and long closes decrease the price
       if (!!delta && (side === 'long' || prevSide === 'long'))
-        priceWithImpact = priceWithImpact + Big6Math.div(BigOrZero(update.priceImpactFee), Big6Math.abs(delta))
+        priceWithImpact = priceWithImpact + Big6Math.div(BigOrZero(update.priceImpactFee), delta)
       if (!!delta && (side === 'short' || prevSide === 'short'))
-        priceWithImpact = priceWithImpact - Big6Math.div(BigOrZero(update.priceImpactFee), Big6Math.abs(delta))
+        priceWithImpact = priceWithImpact - Big6Math.div(BigOrZero(update.priceImpactFee), delta)
+      // If taker, subtract the price impact fee from the realized pnl
       if (side !== 'maker') realizedValues.pnl = realizedValues.pnl - BigInt(update.priceImpactFee)
 
       return {
@@ -795,7 +801,7 @@ export const useMarket7dData = (asset: SupportedAsset) => {
     queryFn: async () => {
       if (!market) return
 
-      const { from, to } = last7dBounds()
+      const { to, from } = last7dBounds()
 
       const query = gql(`
         query Market7DayVolume($market: Bytes!, $from: BigInt!, $to: BigInt!) {
@@ -815,6 +821,8 @@ export const useMarket7dData = (asset: SupportedAsset) => {
             market
             weightedLongFunding
             weightedLongInterest
+            weightedMakerFunding
+            weightedMakerInterest
             totalWeight
             periodStartTimestamp
             periodEndTimestamp
@@ -835,6 +843,8 @@ export const useMarket7dData = (asset: SupportedAsset) => {
             market
             weightedLongFunding
             weightedLongInterest
+            weightedMakerFunding
+            weightedMakerInterest
             totalWeight
             periodStartTimestamp
             periodEndTimestamp
@@ -868,25 +878,32 @@ export const useMarket7dData = (asset: SupportedAsset) => {
 
       const fundingRates = hourlyFunding
         .map((f, i) => {
-          let total = BigOrZero(f?.weightedLongFunding) + BigOrZero(f?.weightedLongInterest)
-          let totalWeight = BigInt(f.totalWeight)
+          let [takerTotal, makerTotal, totalWeight] = [
+            BigOrZero(f?.weightedLongFunding) + BigOrZero(f?.weightedLongInterest),
+            BigOrZero(f?.weightedMakerFunding) + BigOrZero(f?.weightedMakerInterest),
+            BigOrZero(f?.totalWeight),
+          ]
 
           // Set the initial rate to the first non-zero funding rate if the first bucket is zero
-          if (i === 0 && total === 0n) {
-            total =
+          if (i === 0 && takerTotal === 0n) {
+            takerTotal =
               BigOrZero(firstNonZeroFunding.at(0)?.weightedLongFunding) +
               BigOrZero(firstNonZeroFunding.at(0)?.weightedLongInterest)
             totalWeight = BigOrZero(firstNonZeroFunding.at(0)?.totalWeight)
           }
-
-          if (total === 0n) {
-            return
+          if (i === 0 && makerTotal === 0n) {
+            makerTotal =
+              BigOrZero(firstNonZeroFunding.at(0)?.weightedMakerFunding) +
+              BigOrZero(firstNonZeroFunding.at(0)?.weightedMakerInterest)
           }
 
-          const scaleFactor = Big6Math.fromFloatString((Number(Hour) / Number(totalWeight)).toString())
-          const unscaledRate = Big6Math.div(total, totalWeight)
-          const hrRate = Big6Math.div(Big6Math.mul(unscaledRate, scaleFactor), Big6Math.ONE)
-          return { timestamp: BigInt(f.periodStartTimestamp), hrRate }
+          const scaleFactor =
+            totalWeight !== 0n ? Big6Math.fromFloatString((Number(Hour) / Number(totalWeight)).toString()) : 0n
+          const takerUnscaledRate = totalWeight !== 0n ? takerTotal / totalWeight : 0n
+          const makerUnscaledRate = totalWeight !== 0n ? makerTotal / totalWeight : 0n
+          const takerHrRate = takerUnscaledRate * scaleFactor
+          const makerHrRate = makerUnscaledRate * scaleFactor
+          return { timestamp: BigInt(f.periodStartTimestamp), takerHrRate, makerHrRate }
         })
         .filter(notEmpty)
 
@@ -915,4 +932,114 @@ export const useMarket7dData = (asset: SupportedAsset) => {
       }
     },
   })
+}
+
+export const useAccountARBSeasonData = (season: STIPSeasonNumber) => {
+  const chainId = useChainId()
+  const graphClient = useGraphClient()
+  const { address } = useAddress()
+
+  return useQuery({
+    queryKey: ['accountARBSeasonData', chainId, address, season],
+    enabled: !!address,
+    queryFn: async () => {
+      if (!address) return
+
+      const markets = chainAssetsWithAddress(chainId)
+      const { from, to, fromBlock } = STIPDropParams[season]
+      const query = gql(`
+        query AccountARBSeasonData($account: Bytes!, $from: BigInt!, $to: BigInt!, $fromBlock: Int!, $first: Int!, $skip: Int!) {
+          start: marketAccountPositions(
+            where: { account: $account }
+            block: { number: $fromBlock }
+          ) {
+            pendingLong, pendingShort, market
+          }
+
+          updates: updateds(
+            where: { account: $account, blockTimestamp_gte: $from, blockTimestamp_lt: $to }
+            first: $first, skip: $skip, orderBy: blockTimestamp, orderDirection: asc
+          ) {
+            newLong, newShort, market, price, latestPrice, positionFee, blockNumber, version
+          }
+
+          riskParameterUpdateds(orderBy: blockNumber, orderDirection: desc) {
+            market, newRiskParameter_takerFee, blockNumber
+          }
+        }
+      `)
+
+      const { start, updates, riskParameterUpdateds } = await queryAll(async (pageNumber: number) =>
+        graphClient.request(query, {
+          account: address,
+          from: timeToSeconds(from).toString(),
+          to: timeToSeconds(to).toString(),
+          fromBlock: fromBlock,
+          first: GraphDefaultPageSize,
+          skip: pageNumber * GraphDefaultPageSize,
+        }),
+      )
+
+      const currentPositions = markets.reduce((acc, { marketAddress }) => {
+        const pos = start.find((p) => getAddress(p.market) === marketAddress)
+        return { ...acc, [marketAddress]: Big6Math.max(BigOrZero(pos?.pendingLong), BigOrZero(pos?.pendingShort)) }
+      }, {} as Record<Address, bigint>)
+
+      return updates.reduce(
+        (acc, update) => {
+          const updateMarket = getAddress(update.market)
+
+          // Delta is the absolute value of the difference between the current position and the new position
+          const delta = Big6Math.abs(currentPositions[updateMarket] - magnitude(0n, update.newLong, update.newShort))
+          const feeNotional = calcNotional(delta, BigInt(update.latestPrice))
+          const volNotional = calcNotional(
+            delta,
+            BigInt(update.price) === 0n ? BigInt(update.latestPrice) : BigInt(update.price),
+          )
+
+          // Find risk parameter for this market that is earlier or on the same block as the update
+          const riskParameter = riskParameterUpdateds.find(
+            (rp) => getAddress(rp.market) === updateMarket && rp.blockNumber <= update.blockNumber,
+          )
+
+          // Rebate is min(notional * takerFee, positionFeePaid) * rebatePct
+          const feeRebate = calcSTIPFeeRebate({
+            takerNotional: feeNotional,
+            takerFeeBps: BigOrZero(riskParameter?.newRiskParameter_takerFee),
+            positionFee: BigInt(update.positionFee),
+            season,
+          })
+          currentPositions[updateMarket] = magnitude(0n, update.newLong, update.newShort)
+
+          return {
+            volume: acc.volume + volNotional,
+            fees: acc.fees + feeRebate,
+          }
+        },
+        { volume: 0n, fees: 0n },
+      )
+    },
+  })
+}
+
+export const getPriceAtVersion = async ({
+  graphClient,
+  market,
+  version,
+}: {
+  graphClient: GraphQLClient
+  market: Address
+  version: bigint
+}) => {
+  const query = gql(`
+    query PriceAtVersion($versionId: ID!) {
+      marketVersionPrice(id: $versionId) { price }
+    }
+  `)
+
+  const res = await graphClient.request(query, {
+    versionId: `${market}:${version.toString()}`.toLowerCase(),
+  })
+
+  return res.marketVersionPrice?.price ?? 0n
 }

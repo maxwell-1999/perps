@@ -1,3 +1,4 @@
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useState } from 'react'
 import { useRef } from 'react'
 import { useIntl } from 'react-intl'
@@ -39,7 +40,17 @@ export const TxButton = (props: Props) => {
 
   delete btnProps.overrideLabel
   delete btnProps.actionAllowedInGeoblock
-
+  const { openConnectModal } = useConnectModal()
+  if (!address)
+    return (
+      <Button
+        ref={btnRef}
+        onClick={() => {
+          openConnectModal?.()
+        }}
+        label={label}
+      />
+    )
   if (!skipMarketFactoryApproval && !operatorData?.marketFactoryApproved) {
     delete btnProps.type
     return (
@@ -47,8 +58,10 @@ export const TxButton = (props: Props) => {
         <Button
           ref={btnRef}
           {...btnProps}
-          isDisabled={geoblocked || overriding || !address || props.isDisabled}
-          onClick={() => setShowApproveOperatorModal(true)}
+          isDisabled={geoblocked || overriding || props.isDisabled}
+          onClick={() => {
+            setShowApproveOperatorModal(true)
+          }}
           label={label}
         />
         {showApproveOperatorModal && (
