@@ -551,7 +551,7 @@ function TradeForm(props: TradeFormProps) {
                   label={copy.leverage}
                   labelColor="white"
                   min={0}
-                  max={maxLeverage}
+                  max={100}
                   step={0.1}
                   control={control}
                   name={FormNames.leverage}
