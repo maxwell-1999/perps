@@ -120,7 +120,7 @@ function ClosePositionForm({ position, product, asset }: ClosePositionFormProps)
       fullClose: isFullClose(amount, magnitudeForForm ?? 0n),
     }
   }, [collateral, amount, magnitudeForForm])
-
+  // dd
   const onConfirm = (orderData: { collateral: string; amount: string }) => {
     const fullClose = isFullClose(orderData.amount, magnitudeForForm ?? 0n)
 
