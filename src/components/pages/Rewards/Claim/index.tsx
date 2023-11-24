@@ -49,6 +49,7 @@ export default function ClaimContainer() {
   const sybilDetected = address && STIPDropParams[season].sybils.includes(address)
 
   const takerRewards = rewardClaimData?.userRewards.taker ?? 0n
+  console.log(`index-rewardClaimData: `, rewardClaimData)
   const feesRewards = rewardClaimData?.userRewards.fee ?? 0n
   const makerRewards = rewardClaimData?.userRewards.maker ?? 0n
   const vaultRewards = rewardClaimData?.userRewards.vault ?? 0n
@@ -63,11 +64,11 @@ export default function ClaimContainer() {
 
   const takerStats = useMemo(() => {
     const currentOI = marketSnapshots?.user
-    ? sum(
-      Object.values(marketSnapshots.user).map((ss) => (ss.nextSide === PositionSide2.maker ? 0n : ss.nextNotional)),
-      )
+      ? sum(
+          Object.values(marketSnapshots.user).map((ss) => (ss.nextSide === PositionSide2.maker ? 0n : ss.nextNotional)),
+        )
       : 0n
-      console.log(`index-currentOI: `,currentOI);
+    console.log(`index-currentOI: `, currentOI)
     const stats: { label: string; value: string; valueColor?: string; rank?: string; tooltip?: string }[] = [
       { label: 'Fees Paid', value: formatBig6USDPrice(rewards?.fees ?? 0n, { compact: true }) },
     ]
@@ -169,7 +170,7 @@ export default function ClaimContainer() {
         rewardBreakdown={takerRewardBreakdown}
         season={season}
       />
-      <StatsSection
+      {/* <StatsSection
         title={<StatSectionTitle title={copy.maker} />}
         sectionHeader={copy.aboutRewards}
         description={<RewardDescription isMaker season={season} />}
@@ -181,7 +182,7 @@ export default function ClaimContainer() {
           { label: 'Pro Maker', value: makerRewards },
         ]}
         season={season}
-      />
+      /> */}
     </ColumnPageContainer>
   )
 }

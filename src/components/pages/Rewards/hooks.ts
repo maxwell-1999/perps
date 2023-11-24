@@ -17,17 +17,17 @@ export const useRewardsCopy = () => {
     yourRewards: intl.formatMessage({ defaultMessage: 'Your Rewards' }),
     maker: intl.formatMessage({ defaultMessage: 'Maker' }),
     aboutRewards: intl.formatMessage({ defaultMessage: 'About Rewards' }),
-    claimYourRewards: intl.formatMessage({ defaultMessage: 'Claim Your Rewards for trading on Perennial.' }),
+    claimYourRewards: intl.formatMessage({ defaultMessage: 'Claim Your Rewards for trading on Buffer.' }),
     tradeMore: intl.formatMessage({
-      defaultMessage: 'Trade more volume on Perennial in order to unlock this reward.',
+      defaultMessage: 'Trade more volume on Buffer in order to unlock this reward.',
     }),
     takerRewardsMetrics: intl.formatMessage({
       defaultMessage:
-        'Takers can earn a share of ARB rewards by actively trading & maintaining positions on any Perennial markets throughout the week.',
+        'Takers can earn a share of ARB rewards by actively trading & maintaining positions on any Buffer markets throughout the week.',
     }),
     makerRewardsMetrics: intl.formatMessage({
       defaultMessage:
-        'Makers can earn a share of ARB rewards by providing liquidity to Perennial vaults and/or directly to the protocol as a pro maker. For Maker rewards, vaults/markets will have uneven levels of rewards.',
+        'Makers can earn a share of ARB rewards by providing liquidity to Buffer vaults and/or directly to the protocol as a pro maker. For Maker rewards, vaults/markets will have uneven levels of rewards.',
     }),
     yourVolume: intl.formatMessage({ defaultMessage: 'Volume' }),
     yourFeesPaid: intl.formatMessage({ defaultMessage: 'Fees Paid' }),
@@ -46,7 +46,7 @@ export const useRewardsCopy = () => {
     ariaClose: intl.formatMessage({ defaultMessage: 'Close' }),
     introModalBody: intl.formatMessage({
       defaultMessage:
-        'Start placing trades now to earn Arbitrum rewards on Perennial. These rewards are available for a limited time.',
+        'Start placing trades now to earn Arbitrum rewards on Buffer. These rewards are available for a limited time.',
     }),
     startTrading: intl.formatMessage({ defaultMessage: 'Start Trading' }),
     viewRewards: intl.formatMessage({ defaultMessage: 'View Rewards' }),

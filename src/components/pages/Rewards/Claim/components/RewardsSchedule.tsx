@@ -53,7 +53,7 @@ export const RewardSchedule = ({
         </Text>
         <Flex gap={8} flexDirection={{ base: 'column', lg: 'row' }}>
           <ClaimCard rewards={rewards} onClaim={onClaim} selectedSeason={season} currentSeason={currentSeason} />
-          <GuildCard />
+          {/* <GuildCard /> */}
         </Flex>
       </Flex>
       <Flex flexDirection="column" gap={{ base: 8, lg: 2 }} order={{ base: 1, lg: 2 }} minWidth="300px">
