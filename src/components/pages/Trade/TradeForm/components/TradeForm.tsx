@@ -163,10 +163,7 @@ function TradeForm(props: TradeFormProps) {
   const leverage = watch(FormNames.leverage)
   const limitPrice = watch(FormNames.limitPrice)
 
-  const maxLeverage = useMemo(
-    () => calcMaxLeverage({ margin, minMargin, collateral: Big6Math.fromFloatString(collateral) }),
-    [margin, minMargin, collateral],
-  )
+  const maxLeverage = 100
 
   const resetInputs = useCallback(() => {
     reset({ ...initialFormState })
