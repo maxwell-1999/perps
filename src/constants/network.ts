@@ -22,7 +22,7 @@ if (!WalletConnectProjectId) throw new Error('Missing walletconnect project id')
 
 // Random select a key from available keys
 export const AlchemyActiveKey = AlchemyProdKeys[Math.floor(Math.random() * AlchemyProdKeys.length)]
-export const SupportedChainIds = [arbitrum.id, arbitrumGoerli.id, baseGoerli.id] as const
+export const SupportedChainIds = [arbitrum.id, arbitrumGoerli.id] as const
 export type SupportedChainId = (typeof SupportedChainIds)[number]
 export const isSupportedChain = (chainId?: number) =>
   chainId !== undefined && SupportedChainIds.includes(chainId as SupportedChainId)
@@ -57,25 +57,21 @@ export const DefaultChain = chains[0]
 export const GraphUrls: { [chainId in SupportedChainId]: string } = {
   [arbitrum.id]: process.env.NEXT_PUBLIC_GRAPH_URL_ARBITRUM_2 ?? '',
   [arbitrumGoerli.id]: process.env.NEXT_PUBLIC_GRAPH_URL_ARBITRUM_GOERLI_2 ?? '',
-  [baseGoerli.id]: process.env.NEXT_PUBLIC_GRAPH_URL_BASE_GOERLI_2 ?? '',
 }
 
 export const ExplorerURLs: { [chainId in SupportedChainId]: string } = {
   [arbitrum.id]: arbitrum.blockExplorers.default.url,
   [arbitrumGoerli.id]: arbitrumGoerli.blockExplorers.default.url,
-  [baseGoerli.id]: baseGoerli.blockExplorers.default.url,
 }
 
 export const ExplorerNames: { [chainId in SupportedChainId]: string } = {
   [arbitrum.id]: arbitrum.blockExplorers.default.name,
   [arbitrumGoerli.id]: arbitrumGoerli.blockExplorers.default.name,
-  [baseGoerli.id]: baseGoerli.blockExplorers.default.name,
 }
 
 export const networkToIcon: { [chainId in SupportedChainId]: string } = {
   [arbitrum.id]: arbLogo,
   [arbitrumGoerli.id]: arbLogo,
-  [baseGoerli.id]: baseLogo,
 }
 
 export const interfaceFeeBps: {

@@ -1,33 +1,33 @@
 import arbLogo from '@public/icons/arb.png'
+import bnbLogo from '@public/icons/bnb.png'
 import btcLogo from '@public/icons/btc.png'
-import linkLogo from '@public/icons/chainlink.png'
+import celestiaLogo from '@public/icons/celestia.png'
+import chainlinkLogo from '@public/icons/chainlink.png'
 import ethLogo from '@public/icons/eth.png'
 import polygonLogo from '@public/icons/polygon.png'
+import rollbitLogo from '@public/icons/rollbit.png'
 import solanaLogo from '@public/icons/solana.png'
 import { Address, getAddress } from 'viem'
-import { arbitrum, arbitrumGoerli, baseGoerli } from 'wagmi/chains'
+import { arbitrum, arbitrumGoerli, base } from 'wagmi/chains'
 
 import { SupportedChainId } from '@/constants/network'
 import { notEmpty } from '@/utils/arrayUtils'
-import { linearTransform, milliPowerTwoTransform } from '@/utils/payoffUtils'
+import { linearTransform } from '@/utils/payoffUtils'
 
 export enum SupportedAsset {
   btc = 'btc',
   eth = 'eth',
   arb = 'arb',
-  link = 'link',
-  msqth = 'msqth',
   sol = 'sol',
   matic = 'matic',
+  tia = 'tia',
+  rlb = 'rlb',
+  link = 'link',
+  bnb = 'bnb',
 }
 
 export enum QuoteCurrency {
   usd = 'USDC.e',
-}
-
-export enum Currency {
-  USDC = 'USDC',
-  DSU = 'DSU',
 }
 
 export enum PositionSide2 {
@@ -57,8 +57,8 @@ export type AssetMetadata = {
     icon: string
     baseCurrency: SupportedAsset
     quoteCurrency: QuoteCurrency
-    pythFeedId?: string
-    pythFeedIdTestnet?: string
+    pythFeedId: string
+    pythFeedIdTestnet: string
     transform: (value: bigint) => bigint
   }
 }
@@ -100,30 +100,6 @@ export const AssetMetadata: AssetMetadata = {
     pythFeedIdTestnet: '0x37f40d2898159e8f2e52b93cb78f47cc3829a31e525ab975c49cc5c5d9176378',
     transform: linearTransform,
   },
-  link: {
-    symbol: 'LINK-USD',
-    name: 'Chainlink',
-    displayDecimals: 4,
-    tvTicker: 'Crypto.LINK/USD',
-    icon: linkLogo,
-    baseCurrency: SupportedAsset.link,
-    quoteCurrency: QuoteCurrency.usd,
-    pythFeedId: '0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221',
-    pythFeedIdTestnet: '0x83be4ed61dd8a3518d198098ce37240c494710a7b9d85e35d9fceac21df08994',
-    transform: linearTransform,
-  },
-  msqth: {
-    symbol: 'MSQTH-USD',
-    name: 'milli-Squeeth',
-    displayDecimals: 4,
-    tvTicker: 'Crypto.ETH/USD',
-    icon: ethLogo,
-    baseCurrency: SupportedAsset.msqth,
-    quoteCurrency: QuoteCurrency.usd,
-    pythFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace',
-    pythFeedIdTestnet: '0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6',
-    transform: milliPowerTwoTransform,
-  },
   sol: {
     symbol: 'SOL-USD',
     name: 'Solana',
@@ -148,6 +124,57 @@ export const AssetMetadata: AssetMetadata = {
     pythFeedIdTestnet: '0xd2c2c1f2bba8e0964f9589e060c2ee97f5e19057267ac3284caef3bd50bd2cb5',
     transform: linearTransform,
   },
+  tia: {
+    symbol: 'TIA-USD',
+    name: 'Celestia',
+    displayDecimals: 6,
+    tvTicker: 'Crypto.TIA/USD',
+    icon: celestiaLogo,
+    baseCurrency: SupportedAsset.tia,
+    quoteCurrency: QuoteCurrency.usd,
+    pythFeedId: '0x09f7c1d7dfbb7df2b8fe3d3d87ee94a2259d212da4f30c1f0540d066dfa44723',
+    pythFeedIdTestnet: '0x30998099c161c4f04b48569485cfab66256f36006810fe787f40fbc96e263438',
+    transform: linearTransform,
+  },
+
+  rlb: {
+    symbol: 'RLB-USD',
+    name: 'Rollbit',
+    displayDecimals: 6,
+    tvTicker: 'Crypto.RLB/USD',
+    icon: rollbitLogo,
+    baseCurrency: SupportedAsset.rlb,
+    quoteCurrency: QuoteCurrency.usd,
+    pythFeedId: '0x2f2d17abbc1e781bd87b4a5d52c8b2856886f5c482fa3593cebf6795040ab0b6',
+    pythFeedIdTestnet: '0x4d0c5744a741196b5c2ff74b8f3bde242407f2ffb40104347dcff3421eaea07f',
+    transform: linearTransform,
+  },
+
+  link: {
+    symbol: 'LINK-USD',
+    name: 'Chainlink',
+    displayDecimals: 6,
+    tvTicker: 'Crypto.LINK/USD',
+    icon: chainlinkLogo,
+    baseCurrency: SupportedAsset.link,
+    quoteCurrency: QuoteCurrency.usd,
+    pythFeedId: '0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221',
+    pythFeedIdTestnet: '0x83be4ed61dd8a3518d198098ce37240c494710a7b9d85e35d9fceac21df08994',
+    transform: linearTransform,
+  },
+
+  bnb: {
+    symbol: 'BNB-USD',
+    name: 'BNB',
+    displayDecimals: 6,
+    tvTicker: 'Crypto.BNB/USD',
+    icon: bnbLogo,
+    baseCurrency: SupportedAsset.bnb,
+    quoteCurrency: QuoteCurrency.usd,
+    pythFeedId: '0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f',
+    pythFeedIdTestnet: '0xecf553770d9b10965f8fb64771e93f5690a182edc32be4a3236e0caaa6e0581a',
+    transform: linearTransform,
+  },
 }
 
 export const ChainMarkets: {
@@ -164,10 +191,6 @@ export const ChainMarkets: {
       [PositionSide2.long]: getAddress('0x798B31664ec791258E78FE66CFFDE5855A6f3dCf'),
       [PositionSide2.short]: getAddress('0x3354d131ec11511023d29b75cc6717b099220cff'),
     },
-    link: {
-      [PositionSide2.long]: getAddress('0x995d27c9a558dc3f9575df58933ab07effd2cf11'),
-      [PositionSide2.short]: getAddress('0x6cf77dada031c5eb8fb31fc9bccf9319c1e218ef'),
-    },
   },
   [arbitrum.id]: {
     eth: {
@@ -177,12 +200,6 @@ export const ChainMarkets: {
     arb: {
       [PositionSide2.long]: getAddress('0x5E660B7B8357059241EAEc143e1e68A5A108D035'),
       [PositionSide2.short]: getAddress('0x4e67a8a428206Af5a6AC00Ba08a67Ce827182985'),
-    },
-  },
-  [baseGoerli.id]: {
-    eth: {
-      [PositionSide2.long]: getAddress('0xace78035e5C3348BbB31c6dbF90B0Ef4CbEE9bAE'),
-      [PositionSide2.short]: getAddress('0x3C1FC9E9a9b5b014B53c571f422E32D02ff5BF13'),
     },
   },
 }
@@ -197,33 +214,24 @@ export const ChainMarkets2: {
     btc: getAddress('0x55Dc0A47Eb29D8dbeADECf864c7dD64196eFF2a2'),
     sol: getAddress('0x4443Ec03A347394D2CA331638B809A17617497af'),
     matic: getAddress('0x40a4b331E95D409cC9CEdDcA9eFDf5ff58da4344'),
+    tia: getAddress('0xCF5cc9DC79F5172594E84f9d034D9d74d5F51007'),
   },
   [arbitrum.id]: {
     eth: getAddress('0x90A664846960AaFA2c164605Aebb8e9Ac338f9a0'),
     btc: getAddress('0xcC83e3cDA48547e3c250a88C8D5E97089Fd28F60'),
     sol: getAddress('0x02258bE4ac91982dc1AF7a3D2C4F05bE6079C253'),
     matic: getAddress('0x7e34B5cBc6427Bd53ECFAeFc9AC2Cad04e982f78'),
+    tia: getAddress('0x2CD8651b0dB6bE605267fdd737C840442A96fAFE'),
+    rlb: getAddress('0x708B750f9f5bD23E074a5a0A64EF542585906e85'),
+    link: getAddress('0xD9c296A7Bee1c201B9f3531c7AC9c9310ef3b738'),
+    bnb: getAddress('0x362c6bC2A4EA2033063bf20409A4c5E8C5754056'),
   },
-  [baseGoerli.id]: {},
 }
 
 export const chainAssetsWithAddress = (chainId: SupportedChainId) => {
   return Object.entries(ChainMarkets2[chainId])
     .map(([asset, marketAddress]) => (!!marketAddress ? { asset, marketAddress } : null))
     .filter(notEmpty)
-}
-
-export const addressToAsset = (address: Address) => {
-  for (const chainId of Object.keys(ChainMarkets)) {
-    for (const asset of Object.keys(ChainMarkets[Number(chainId) as SupportedChainId])) {
-      if (ChainMarkets[Number(chainId) as SupportedChainId][asset as SupportedAsset]?.long === address) {
-        return { asset: asset as SupportedAsset, direction: PositionSide2.long }
-      }
-      if (ChainMarkets[Number(chainId) as SupportedChainId][asset as SupportedAsset]?.short === address) {
-        return { asset: asset as SupportedAsset, direction: PositionSide2.short }
-      }
-    }
-  }
 }
 
 export const addressToAsset2 = (address: Address) => {
